@@ -40,119 +40,119 @@ export const Home = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-background">
-        <div className="container mx-auto px-4 py-20">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Left Side - Rotating Plate */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="relative flex items-center justify-center"
-            >
-              <div className="relative w-[400px] h-[400px]">
-                {/* Rotating Plate */}
-                <div className="absolute inset-0 animate-rotate-slow">
-                  <img
-                    src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800"
-                    alt="Delicious Pakistani Food"
-                    className="rounded-full w-full h-full object-cover border-8 border-golden/20"
-                  />
+      <section className="relative overflow-hidden bg-background min-h-screen flex items-center">
+        {/* Left Side - Half Hidden Rotating Plate */}
+        <motion.div
+          initial={{ opacity: 0, x: -200 }}
+          animate={{ opacity: 1, x: -200 }}
+          transition={{ duration: 0.6 }}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10"
+        >
+          <div className="relative w-[500px] h-[500px]">
+            <div className="absolute inset-0 animate-rotate-slow">
+              <img
+                src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800"
+                alt="Delicious Pakistani Food"
+                className="rounded-full w-full h-full object-cover border-8 border-golden/30 shadow-2xl"
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Right Side - Half Hidden Phone Mockup */}
+        <motion.div
+          initial={{ opacity: 0, x: 200 }}
+          animate={{ opacity: 1, x: 150 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden lg:block"
+        >
+          <div className="relative">
+            <div className="w-[350px] h-[700px] bg-gradient-to-b from-card to-muted rounded-[3rem] border-8 border-foreground/20 shadow-2xl overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-8 bg-background/50 rounded-t-[2.5rem]"></div>
+              <div className="p-6 pt-12">
+                <div className="text-center mb-4">
+                  <h3 className="text-2xl font-bold text-primary">SUPERMEAL</h3>
+                  <p className="text-xs text-muted-foreground">up to 30% cashback on all orders</p>
+                </div>
+                <div className="bg-background/80 rounded-lg p-4 mb-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    <span className="text-foreground">Hancock Road, Birmingham</span>
+                  </div>
+                </div>
+                <Button className="w-full bg-secondary text-secondary-foreground mb-4">
+                  Redeem a voucher
+                </Button>
+                <div className="mt-8">
+                  <div className="relative">
+                    <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-primary rounded-full flex items-center justify-center transform rotate-12">
+                      <span className="text-3xl font-bold">💰</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
+          </div>
+        </motion.div>
 
-            {/* Center - Text Content */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-center"
-            >
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                <span className="text-foreground">SUPER</span>
-                <span className="text-primary animate-pulse">CASHBACK</span>
-              </h1>
-              <p className="text-lg text-muted-foreground mb-8">
-                up to 30% cashback on all orders
-              </p>
-              
-              <div className="flex flex-col gap-4 items-center mb-8">
-                <div className="flex gap-4">
+        {/* Center - Main Content */}
+        <div className="container mx-auto px-4 py-20 relative z-20">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-center max-w-3xl mx-auto"
+          >
+            <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
+              <span className="text-foreground">SUPER</span>
+              <span className="text-primary block animate-pulse">CASHBACK</span>
+            </h1>
+            <p className="text-xl text-muted-foreground mb-12">
+              up to 30% cashback on all orders
+            </p>
+            
+            <div className="flex flex-col gap-6 items-center mb-12">
+              <div className="flex gap-4 w-full max-w-2xl">
+                <div className="flex-1 relative">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
                   <input
                     type="text"
                     placeholder="Your Town or Area"
-                    className="px-6 py-3 rounded-lg bg-card border border-border text-foreground w-80"
+                    className="w-full px-12 py-4 rounded-lg bg-card border border-border text-foreground text-lg"
                   />
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    SEARCH
-                  </Button>
                 </div>
-                
-                <div className="flex gap-4 items-center">
-                  <Button variant="secondary" size="lg" className="bg-secondary text-secondary-foreground">
-                    Redeem a voucher
-                  </Button>
-                  <div className="w-12 h-12 bg-card border border-border rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">📱</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-4 items-center justify-center">
-                <Button variant="outline" size="lg" className="bg-background text-foreground border-border">
-                  GET THE APP
+                <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-4 text-lg">
+                  SEARCH
                 </Button>
-                <div className="flex gap-2">
-                  <div className="w-10 h-10 bg-card border border-border rounded-lg flex items-center justify-center">
-                    <span className="text-xl">🍎</span>
-                  </div>
-                  <div className="w-10 h-10 bg-card border border-border rounded-lg flex items-center justify-center">
-                    <span className="text-xl">▶️</span>
-                  </div>
-                  <div className="w-10 h-10 bg-card border border-border rounded-lg flex items-center justify-center">
-                    <span className="text-xl">📱</span>
-                  </div>
+              </div>
+              
+              <div className="flex gap-4 items-center">
+                <Button variant="secondary" size="lg" className="bg-secondary text-secondary-foreground px-8">
+                  Redeem a voucher
+                </Button>
+                <div className="w-14 h-14 bg-card border-2 border-border rounded-lg flex items-center justify-center">
+                  <span className="text-2xl">📱</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            {/* Right Side - Phone Mockup */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="relative hidden lg:block"
-            >
-              <div className="relative">
-                <div className="w-[300px] h-[600px] bg-gradient-to-b from-card to-muted rounded-[3rem] border-8 border-foreground/20 shadow-2xl overflow-hidden">
-                  <div className="absolute top-0 left-0 right-0 h-8 bg-background/50 rounded-t-[2.5rem]"></div>
-                  <div className="p-6 pt-12">
-                    <div className="text-center mb-4">
-                      <h3 className="text-2xl font-bold text-primary">SUPERMEAL</h3>
-                      <p className="text-xs text-muted-foreground">up to 30% cashback on all orders</p>
-                    </div>
-                    <div className="bg-background/80 rounded-lg p-4 mb-4">
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="h-4 w-4 text-primary" />
-                        <span className="text-foreground">Hancock Road, Birmingham</span>
-                      </div>
-                    </div>
-                    <Button className="w-full bg-secondary text-secondary-foreground mb-4">
-                      Redeem a voucher
-                    </Button>
-                    <div className="mt-8">
-                      <div className="relative">
-                        <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-secondary rounded-full flex items-center justify-center transform rotate-12">
-                          <span className="text-3xl font-bold text-secondary-foreground">💰</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+            <div className="flex gap-6 items-center justify-center flex-wrap">
+              <Button size="lg" className="bg-background text-foreground border-2 border-border hover:bg-card px-8">
+                GET THE APP
+              </Button>
+              <div className="flex gap-3">
+                <div className="w-12 h-12 bg-card border-2 border-border rounded-lg flex items-center justify-center hover:border-primary transition-colors cursor-pointer">
+                  <span className="text-2xl">🍎</span>
+                </div>
+                <div className="w-12 h-12 bg-card border-2 border-border rounded-lg flex items-center justify-center hover:border-primary transition-colors cursor-pointer">
+                  <span className="text-2xl">▶️</span>
+                </div>
+                <div className="w-12 h-12 bg-card border-2 border-border rounded-lg flex items-center justify-center hover:border-primary transition-colors cursor-pointer">
+                  <span className="text-2xl">📱</span>
                 </div>
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
