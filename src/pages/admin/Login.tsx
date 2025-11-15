@@ -32,27 +32,30 @@ export const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/10"></div>
+      
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         {/* Logo */}
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-2xl">
+          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-background font-bold text-2xl">
             AM
           </div>
           <div>
-            <h1 className="font-bold text-2xl">AM Foods</h1>
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <h1 className="font-bold text-2xl text-foreground">AM Foods</h1>
+            <p className="text-xs text-primary flex items-center gap-1">
               <Shield className="h-3 w-3" />
               Admin Portal
             </p>
           </div>
         </Link>
 
-        <div className="bg-card rounded-2xl shadow-warm p-8 border">
+        <div className="bg-card rounded-2xl shadow-warm p-8 border border-primary/20">
           <div className="mb-6 text-center">
             <h2 className="text-2xl font-bold mb-2">Admin Login</h2>
             <p className="text-sm text-muted-foreground">

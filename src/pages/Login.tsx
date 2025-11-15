@@ -55,24 +55,27 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/10"></div>
+      
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         {/* Logo */}
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-2xl">
+          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-background font-bold text-2xl">
             AM
           </div>
           <div>
-            <h1 className="font-bold text-2xl">AM Foods</h1>
-            <p className="text-xs text-muted-foreground">User Portal</p>
+            <h1 className="font-bold text-2xl text-foreground">AM Foods</h1>
+            <p className="text-xs text-primary">User Portal</p>
           </div>
         </Link>
 
-        <div className="bg-card rounded-2xl shadow-warm p-8 border">
+        <div className="bg-card rounded-2xl shadow-warm p-8 border border-primary/20">
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-8">
               <TabsTrigger value="login">Login</TabsTrigger>
