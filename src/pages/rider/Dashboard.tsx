@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Package, MapPin, Phone, DollarSign, Clock, User, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,15 +16,37 @@ const RiderDashboard = () => {
   const riderOrders = mockOrders.filter((order) => {
     // In a real app, this would check order.riderId === currentUser?.id
     // For demo, showing some orders
-    return ["order1", "order2", "order3"].includes(order.id);
+    return ["order1", "order2", "order3", "ORD-001", "ORD-002"].includes(order.id);
   });
 
   const activeOrders = riderOrders.filter(o => o.status === "preparing" || o.status === "out-for-delivery");
   const completedOrders = riderOrders.filter(o => o.status === "delivered");
 
+  // Real-time order notifications
+  useEffect(() => {
+    const handleNewOrder = () => {
+      toast.success("New order assigned!", {
+        description: "You have a new delivery ready to pick up",
+        duration: 5000,
+      });
+    };
+
+    // Simulate real-time notifications (in production, this would use WebSocket/Supabase Realtime)
+    const interval = setInterval(() => {
+      const hasNewOrders = Math.random() > 0.95; // 5% chance every 10 seconds
+      if (hasNewOrders && activeOrders.length > 0) {
+        handleNewOrder();
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [activeOrders.length]);
+
   const handleStatusUpdate = (orderId: string, status: Order["status"]) => {
     updateOrderStatus(orderId, status);
-    toast.success(`Order status updated to ${status}`);
+    toast.success(`Order status updated!`, {
+      description: `Order ${orderId} is now ${status}`,
+    });
   };
 
   const getStatusColor = (status: Order["status"]) => {

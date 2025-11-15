@@ -48,6 +48,12 @@ export const Header = () => {
             <Link to="/contact" className="text-sm font-medium hover:text-primary transition-colors">
               Contact
             </Link>
+            <Link to="/admin/login" className="text-sm font-medium hover:text-primary transition-colors">
+              Admin
+            </Link>
+            <Link to="/rider/login" className="text-sm font-medium hover:text-primary transition-colors">
+              Rider
+            </Link>
           </nav>
 
           {/* Right Actions */}
@@ -146,6 +152,20 @@ export const Header = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact
+              </Link>
+              <Link
+                to="/admin/login"
+                className="text-sm font-medium hover:text-primary transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Admin Portal
+              </Link>
+              <Link
+                to="/rider/login"
+                className="text-sm font-medium hover:text-primary transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Rider Portal
               </Link>
               {currentUser ? (
                 <>

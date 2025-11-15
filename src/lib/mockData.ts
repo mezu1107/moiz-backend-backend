@@ -243,6 +243,22 @@ export const mockUsers: User[] = [
     address: "456 Park Avenue, Karachi",
     role: "user",
   },
+  {
+    id: "admin1",
+    name: "Admin User",
+    email: "admin@amfoods.com",
+    phone: "+92 300 0000000",
+    address: "AM Foods HQ, Lahore",
+    role: "admin",
+  },
+  {
+    id: "rider1",
+    name: "Ali Hassan",
+    email: "ali@example.com",
+    phone: "+92 310 9876543",
+    address: "Lahore",
+    role: "rider",
+  },
 ];
 
 export const mockRiders: Rider[] = [

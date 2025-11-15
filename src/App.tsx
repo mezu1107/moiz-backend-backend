@@ -24,6 +24,7 @@ import AdminLogin from "./pages/admin/Login";
 import RiderLayout from "./components/rider/RiderLayout";
 import RiderDashboard from "./pages/rider/Dashboard";
 import RiderLogin from "./pages/rider/Login";
+import RiderDeliveries from "./pages/rider/Deliveries";
 
 const queryClient = new QueryClient();
 
@@ -59,7 +60,7 @@ const App = () => (
           <Route path="/rider/login" element={<RiderLogin />} />
           <Route path="/rider" element={<RiderLayout />}>
             <Route index element={<RiderDashboard />} />
-            <Route path="deliveries" element={<RiderDashboard />} />
+            <Route path="deliveries" element={<RiderDeliveries />} />
           </Route>
           
           <Route path="*" element={<NotFound />} />
