@@ -1,37 +1,45 @@
 // src/controllers/upload/uploadController.js
-const multer = require('multer');
-const path = require('path');
+const axios = require('axios');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+const uploadImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No image file uploaded'
+      });
+    }
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|gif|webp/;
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (allowed.test(ext)) cb(null, true);
-    else cb(new Error('Only images are allowed'));
-  }
-}).single('image');
+    const formData = new FormData();
+    const blob = new Blob([req.file.buffer], { type: req.file.mimetype });
+    formData.append('file', blob, req.file.originalname);
+    formData.append('upload_preset', 'foodapp_menu');
+    formData.append('folder', 'foodapp/menu');
 
-const uploadImage = (req, res) => {
-  upload(req, res, (err) => {
-    if (err) return res.status(400).json({ success: false, message: err.message });
-    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+    const response = await axios.post(
+      `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload`,
+      formData
+    );
+
+    const result = response.data;
 
     res.json({
       success: true,
-      message: 'Image uploaded',
-      url: `/uploads/${req.file.filename}`
+      message: 'Image uploaded successfully!',
+      url: result.secure_url,
+      public_id: result.public_id,
+      width: result.width,
+      height: result.height,
+      format: result.format
     });
-  });
+  } catch (error) {
+      console.error('Cloudinary upload error:', error.response?.data || error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Upload failed',
+      error: error.response?.data?.error?.message || error.message
+    });
+  }
 };
 
 module.exports = { uploadImage };

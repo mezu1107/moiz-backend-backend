@@ -1,22 +1,31 @@
-// src/validation/schemas/orderSchemas.js
+// CORRECT WAY — named exports
 const { body } = require('express-validator');
 
-exports.createOrder = [
-  body('items').isArray({ min: 1 }),
-  body('items.*.menuItem').isMongoId(),
-  body('items.*.quantity').isInt({ min: 1, max: 50 }),
-  body('addressId').isMongoId()
+const createOrder = [
+  body('addressId').isMongoId().withMessage('Valid address ID required'),
+  body('items').isArray({ min: 1 }).withMessage('At least one item required'),
+  body('items.*.menuItem').isMongoId().withMessage('Valid menu item ID required'),
+  body('items.*.quantity').isInt({ min: 1, max: 50 }).withMessage('Quantity 1-50'),
+  body('paymentMethod').optional().isIn(['cash', 'card'])
 ];
 
-exports.updateStatus = [
+const updateStatus = [
   body('status').isIn(['confirmed', 'preparing', 'out_for_delivery', 'delivered', 'rejected'])
 ];
 
-exports.assignRider = [
+const assignRider = [
   body('riderId').isMongoId().withMessage('Valid rider ID required')
 ];
 
-exports.rejectOrder = [
-  body('reason').optional().isString(),
-  body('note').optional().isString().isLength({ max: 200 })
+const rejectOrder = [
+  body('reason').optional().trim(),
+  body('note').optional().trim().isLength({ max: 200 })
 ];
+
+// EXPORT AS NAMED
+module.exports = {
+  createOrder,
+  updateStatus,
+  assignRider,
+  rejectOrder
+};

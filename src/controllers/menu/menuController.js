@@ -2,110 +2,142 @@
 const MenuItem = require('../../models/menuItem/MenuItem');
 const Area = require('../../models/area/Area');
 const cloudinary = require('../../config/cloudinary');
-const { validationResult } = require('express-validator');
+const axios = require('axios');
+// Inside src/controllers/menu/menuController.js  ← REPLACE THIS ONE ONLY
+const uploadToCloudinary = async (buffer, originalname) => {
+  const formData = new FormData();
+  
+  // Convert buffer to Blob (Node.js 18+)
+  const blob = new Blob([buffer], { type: originalname.endsWith('.png') ? 'image/png' : 'image/jpeg' });
+  formData.append('file', blob);
+  formData.append('upload_preset', 'foodapp_menu');
+  formData.append('folder', 'foodapp/menu');
+
+  const res = await axios.post(
+    `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload`,
+    formData,
+    {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }
+  );
+
+  return res.data; // { secure_url, public_id }
+};
+
+const addMenuItem = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Image is required' });
+    }
+
+    const result = await uploadToCloudinary(req.file.buffer, req.file.originalname);
+
+    const item = await MenuItem.create({
+      name: req.body.name?.trim(),
+      description: req.body.description?.trim(),
+      price: Number(req.body.price),
+      category: req.body.category,
+      image: result.secure_url,
+      cloudinaryId: result.public_id,
+      availableInAreas: req.body.availableInAreas ? JSON.parse(req.body.availableInAreas) : [],
+      isVeg: req.body.isVeg === 'true',
+      isSpicy: req.body.isSpicy === 'true',
+      isAvailable: true
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Menu item added!',
+      item
+    });
+  } catch (err) {
+    console.error('Upload failed:', err.response?.data || err.message);
+    res.status(500).json({
+      success: false,
+      message: 'Upload failed',
+      error: err.response?.data || err.message
+    });
+  }
+};
 
 const getMenuByLocation = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
-
-  const { lat, lng } = req.query;
-
   try {
+    const { lat, lng } = req.query;
     const point = { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] };
+
     const area = await Area.findOne({
       polygon: { $geoIntersects: { $geometry: point } },
       isActive: true
     });
 
-    if (!area) return res.status(400).json({ success: false, message: 'No delivery in this area' });
+    if (!area) {
+      return res.status(400).json({
+        success: false,
+        message: 'Sorry, we do not deliver to this location yet.'
+      });
+    }
 
     const menu = await MenuItem.find({
       isAvailable: true,
       $or: [
-        { availableInAreas: { $exists: true, $eq: [] } },
+        { availableInAreas: { $size: 0 } },
         { availableInAreas: area._id }
       ]
     }).sort({ category: 1, name: 1 });
 
-    res.json({ success: true, area: area.name, menu });
+    res.json({ success: true, area: area.name, city: area.city, menu });
   } catch (err) {
-    console.error('getMenuByLocation error:', err);
+    console.error(err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-const addMenuItem = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
-
-  try {
-    const { name, description, price, category, availableInAreas, isVeg, isSpicy } = req.body;
-    const image = req.file?.path || null;
-    const cloudinaryId = req.file?.filename || null;
-
-    const item = new MenuItem({
-      name, description, price, category, image, cloudinaryId,
-      availableInAreas: availableInAreas || [],
-      isVeg: isVeg ?? false,
-      isSpicy: isSpicy ?? false
-    });
-
-    await item.save();
-    res.status(201).json({ success: true, item });
-  } catch (err) {
-    console.error('addMenuItem error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
 
 const updateMenuItem = async (req, res) => {
-  const { id } = req.params;
-  const updates = req.body;
-
   try {
-    const item = await MenuItem.findById(id);
-    if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
+    const item = await MenuItem.findById(req.params.id);
+    if (!item) return res.status(404).json({ success: false, message: 'Not found' });
 
     if (req.file) {
       if (item.cloudinaryId) await cloudinary.uploader.destroy(item.cloudinaryId);
-      updates.image = req.file.path;
-      updates.cloudinaryId = req.file.filename;
+      const result = await uploadToCloudinary(req.file.buffer);
+      item.image = result.secure_url;
+      item.cloudinaryId = result.public_id;
     }
 
-    Object.assign(item, updates);
-    await item.save();
+    item.set({
+      name: req.body.name?.trim() || item.name,
+      description: req.body.description?.trim() || item.description,
+      price: req.body.price ? Number(req.body.price) : item.price,
+      category: req.body.category || item.category,
+      availableInAreas: req.body.availableInAreas ? JSON.parse(req.body.availableInAreas) : item.availableInAreas,
+      isVeg: req.body.isVeg !== undefined ? req.body.isVeg === 'true' : item.isVeg,
+      isSpicy: req.body.isSpicy !== undefined ? req.body.isSpicy === 'true' : item.isSpicy,
+      isAvailable: req.body.isAvailable !== 'false'
+    });
 
-    res.json({ success: true, item });
+    await item.save();
+    res.json({ success: true, message: 'Updated!', item });
   } catch (err) {
-    console.error('updateMenuItem error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Update failed' });
   }
 };
 
 const deleteMenuItem = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    const item = await MenuItem.findByIdAndDelete(id);
-    if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
-
+    const item = await MenuItem.findByIdAndDelete(req.params.id);
+    if (!item) return res.status(404).json({ success: false, message: 'Not found' });
     if (item.cloudinaryId) await cloudinary.uploader.destroy(item.cloudinaryId);
-
-    res.json({ success: true, message: 'Item deleted' });
+    res.json({ success: true, message: 'Deleted!' });
   } catch (err) {
-    console.error('deleteMenuItem error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Delete failed' });
   }
 };
 
 const getAllMenuItems = async (req, res) => {
-  try {
-    const items = await MenuItem.find().sort({ category: 1, name: 1 });
-    res.json({ success: true, items });
-  } catch (err) {
-    console.error('getAllMenuItems error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
+  const items = await MenuItem.find().sort({ category: 1, name: 1 });
+  res.json({ success: true, items });
 };
 
 module.exports = {
