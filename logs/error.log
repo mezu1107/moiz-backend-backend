@@ -1,0 +1,25 @@
+{"level":"error","timestamp":"2025-11-17T13:14:52.491Z"}
+{"level":"error","timestamp":"2025-11-17T13:18:56.942Z"}
+{"level":"error","timestamp":"2025-11-17T13:21:04.157Z"}
+{"level":"error","timestamp":"2025-11-17T13:21:06.945Z"}
+{"level":"error","timestamp":"2025-11-17T13:21:15.151Z"}
+{"level":"error","timestamp":"2025-11-17T13:21:27.506Z"}
+{"level":"error","timestamp":"2025-11-17T13:21:53.894Z"}
+{"level":"error","timestamp":"2025-11-17T13:23:13.617Z"}
+{"level":"error","timestamp":"2025-11-17T13:24:41.706Z"}
+{"level":"error","timestamp":"2025-11-17T13:25:25.526Z"}
+{"level":"error","timestamp":"2025-11-17T13:25:49.531Z"}
+{"level":"error","timestamp":"2025-11-17T13:25:58.050Z"}
+{"level":"error","timestamp":"2025-11-17T13:26:02.705Z"}
+{"level":"error","timestamp":"2025-11-17T13:26:32.575Z"}
+{"level":"error","timestamp":"2025-11-17T13:26:45.184Z"}
+{"level":"error","timestamp":"2025-11-17T13:27:57.898Z"}
+{"level":"error","timestamp":"2025-11-17T13:33:27.058Z"}
+{"level":"error","timestamp":"2025-11-17T13:34:05.381Z"}
+{"level":"error","timestamp":"2025-11-17T13:34:14.757Z"}
+{"http_code":401,"level":"error","message":"Invalid Signature c19331bc6930ee3a045818c43b29540ef7f37969. String to sign - 'allowed_formats=jpg,jpeg,png,webp&folder=foodapp/menu&public_id=item-1763387837419-686911500&timestamp=1763387837&transformation=c_limit,h_1000,w_1000/f_auto,q_auto'.","name":"Error","storageErrors":[],"timestamp":"2025-11-17T13:57:19.344Z"}
+{"http_code":401,"level":"error","message":"Invalid Signature 6008c00c96266546599d126a2eb9dcf272a3da29. String to sign - 'allowed_formats=jpg,jpeg,png,webp&folder=foodapp/menu&public_id=item-1763388105252-875353693&timestamp=1763388105&transformation=c_limit,h_1000,w_1000/f_auto,q_auto'.","name":"Error","storageErrors":[],"timestamp":"2025-11-17T14:01:46.523Z"}
+{"http_code":401,"level":"error","message":"Invalid Signature 3b70c3787975d53b09302277cfbf885d6edba64f. String to sign - 'allowed_formats=jpg,jpeg,png,webp&folder=foodapp/menu&public_id=item-1763388285417-760363096&timestamp=1763388285&transformation=c_limit,h_1000,w_1000/f_auto,q_auto'.","name":"Error","storageErrors":[],"timestamp":"2025-11-17T14:04:46.891Z"}
+{"http_code":401,"level":"error","message":"Invalid Signature 55a5a06c2500bac2ef3eac9b7082a1260ad10154. String to sign - 'allowed_formats=jpg,jpeg,png,webp&folder=foodapp/menu&public_id=item-1763388327514-658093709&timestamp=1763388327&transformation=c_limit,h_1000,w_1000'.","name":"Error","storageErrors":[],"timestamp":"2025-11-17T14:05:28.819Z"}
+{"http_code":401,"level":"error","message":"Invalid Signature d7b926ba8f042b69ba29bf586ef4f2b815761dc6. String to sign - 'allowed_formats=jpg,jpeg,png,webp&folder=foodapp/menu&public_id=item-1763388351013-641321907&timestamp=1763388351&transformation=c_limit,h_1000,w_1000'.","name":"Error","storageErrors":[],"timestamp":"2025-11-17T14:05:52.599Z"}
+{"http_code":401,"level":"error","message":"Invalid Signature 4672732ae188ad197d1fc9cb2ec39a46fad14b8f. String to sign - 'allowed_formats=jpg,jpeg,png,webp&folder=foodapp/menu&public_id=item-1763388410692-497896702&timestamp=1763388410&transformation=c_limit,h_1000,w_1000'.","name":"Error","storageErrors":[],"timestamp":"2025-11-17T14:06:51.952Z"}
