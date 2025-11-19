@@ -1,24 +1,16 @@
 // src/routes/address/addressRoutes.js
 const express = require('express');
 const router = express.Router();
-
-const {
-  createAddress,
-  getUserAddresses,
-  updateAddress,
-  deleteAddress,
-  setDefaultAddress
-} = require('../../controllers/address/addressController');
-
 const { auth } = require('../../middleware/auth/auth');
 const validate = require('../../middleware/validate/validate');
-const { addressSchemas } = require('../../validation/schemas');
+const { createAddress, getUserAddresses, updateAddress, deleteAddress, setDefaultAddress } = require('../../controllers/address/addressController');
+const { createAddress: createAddressSchema, updateAddress: updateAddressSchema } = require('../../validation/schemas/addressSchemas');
 
-router.use(auth); // All address routes require login
+router.use(auth);
 
-router.post('/', addressSchemas.createAddress, validate, createAddress);
+router.post('/', createAddressSchema, validate, createAddress);
 router.get('/', getUserAddresses);
-router.put('/:id', addressSchemas.updateAddress, validate, updateAddress);
+router.put('/:id', updateAddressSchema, validate, updateAddress);
 router.delete('/:id', deleteAddress);
 router.patch('/:id/default', setDefaultAddress);
 

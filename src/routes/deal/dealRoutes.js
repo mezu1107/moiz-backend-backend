@@ -1,25 +1,49 @@
 // src/routes/deal/dealRoutes.js
 const express = require('express');
 const router = express.Router();
-
 const { auth } = require('../../middleware/auth/auth');
 const { role } = require('../../middleware/role/role');
 const validate = require('../../middleware/validate/validate');
-const { dealSchemas } = require('../../validation/schemas');
+
 const {
+  getAllDeals,
   getActiveDeals,
+  getDealById,
   createDeal,
   updateDeal,
-  deleteDeal
+  deleteDeal,
+  toggleDealStatus,
+  applyDeal,
+  getDealAnalytics,
+  getSingleDealStats,
+  getDealUsageChart,
+  getTopDealsChart,
+  getDiscountImpactChart
 } = require('../../controllers/deal/dealController');
 
-// Public
-router.get('/', getActiveDeals);
+const {
+  createDeal: createDealSchema,
+  updateDeal: updateDealSchema,
+  applyDeal: applyDealSchema,
+  toggleDealStatus: toggleDealStatusSchema
+} = require('../../validation/schemas/dealSchemas');
 
-// Admin only
+router.get('/', getAllDeals);
+router.get('/active', getActiveDeals);
+router.get('/:id', getDealById);
+router.post('/apply', auth, applyDealSchema, validate, applyDeal);
+
 router.use(auth, role(['admin']));
-router.post('/', dealSchemas.createDeal, validate, createDeal);
-router.put('/:id', dealSchemas.updateDeal || [], validate, updateDeal);
+
+router.post('/', createDealSchema, validate, createDeal);
+router.put('/:id', updateDealSchema, validate, updateDeal);
 router.delete('/:id', deleteDeal);
+router.patch('/:id/toggle', toggleDealStatusSchema, validate, toggleDealStatus);
+
+router.get('/analytics', getDealAnalytics);
+router.get('/stats/:id', getSingleDealStats);
+router.get('/chart/usage', getDealUsageChart);
+router.get('/chart/top', getTopDealsChart);
+router.get('/chart/impact', getDiscountImpactChart);
 
 module.exports = router;

@@ -6,8 +6,8 @@ if (!admin.apps.length) {
     credential: admin.credential.cert({
       projectId: process.env.FCM_PROJECT_ID,
       privateKey: process.env.FCM_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      clientEmail: process.env.FCM_CLIENT_EMAIL
-    })
+      clientEmail: process.env.FCM_CLIENT_EMAIL,
+    }),
   });
 }
 
@@ -19,7 +19,7 @@ const sendNotification = async (token, title, body, data = {}) => {
       notification: { title, body },
       data: { ...data, click_action: 'FLUTTER_NOTIFICATION_CLICK' },
       android: { priority: 'high' },
-      apns: { payload: { aps: { sound: 'default' } } }
+      apns: { payload: { aps: { sound: 'default' } } },
     });
   } catch (err) {
     console.log('FCM Error:', err.message);

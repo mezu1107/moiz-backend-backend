@@ -2,13 +2,7 @@
 const mongoose = require('mongoose');
 
 const riderSchema = new mongoose.Schema({
-  user: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    required: true, 
-    unique: true 
-    // REMOVED any extra index → unique already creates it
-  },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
   licenseNumber: { type: String, required: true, trim: true },
   vehicleType: { type: String, enum: ['bike', 'car'], default: 'bike' },
   isOnline: { type: Boolean, default: false },
@@ -21,9 +15,7 @@ const riderSchema = new mongoose.Schema({
   totalDeliveries: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// Indexes — defined once only
 riderSchema.index({ currentLocation: '2dsphere' });
 riderSchema.index({ isOnline: 1, isAvailable: 1 });
-// user index already created by "unique: true" → do NOT redeclare
 
 module.exports = mongoose.model('Rider', riderSchema);

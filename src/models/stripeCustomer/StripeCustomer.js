@@ -1,3 +1,4 @@
+// src/models/stripeCustomer/StripeCustomer.js
 const mongoose = require('mongoose');
 
 const stripeCustomerSchema = new mongoose.Schema({
@@ -6,5 +7,4 @@ const stripeCustomerSchema = new mongoose.Schema({
   defaultPaymentMethod: String
 }, { timestamps: true });
 
-// unique: true already creates indexes — no manual index needed
 module.exports = mongoose.model('StripeCustomer', stripeCustomerSchema);

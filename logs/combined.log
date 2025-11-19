@@ -29,3 +29,32 @@
 {"level":"error","timestamp":"2025-11-18T08:58:52.700Z"}
 {"level":"error","message":"ReferenceError: res is not defined\n    at auth (C:\\amfood\\FoodWebsite-backend\\src\\middleware\\auth\\auth.js:26:5)\n    at Layer.handleRequest (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at trimPrefix (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:342:13)\n    at C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:297:9\n    at processParams (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:582:12)\n    at next (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:291:5)\n    at Function.handle (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:186:3)\n    at router (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:60:12)\n    at Layer.handleRequest (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at trimPrefix (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:342:13)","timestamp":"2025-11-18T10:00:57.519Z"}
 {"level":"error","message":"SyntaxError: Unexpected token 'c', \"\nconst expr\"... is not valid JSON\n    at JSON.parse (<anonymous>)\n    at createStrictSyntaxError (C:\\amfood\\FoodWebsite-backend\\node_modules\\body-parser\\lib\\types\\json.js:156:10)\n    at parse (C:\\amfood\\FoodWebsite-backend\\node_modules\\body-parser\\lib\\types\\json.js:71:15)\n    at C:\\amfood\\FoodWebsite-backend\\node_modules\\body-parser\\lib\\read.js:123:18\n    at AsyncResource.runInAsyncScope (node:async_hooks:211:14)\n    at invokeCallback (C:\\amfood\\FoodWebsite-backend\\node_modules\\raw-body\\index.js:238:16)\n    at done (C:\\amfood\\FoodWebsite-backend\\node_modules\\raw-body\\index.js:227:7)\n    at IncomingMessage.onEnd (C:\\amfood\\FoodWebsite-backend\\node_modules\\raw-body\\index.js:287:7)\n    at IncomingMessage.emit (node:events:524:28)\n    at endReadableNT (node:internal/streams/readable:1698:12)","timestamp":"2025-11-18T10:35:22.824Z"}
+{"level":"info","message":"Server started on port 5000","timestamp":"2025-11-18T16:58:05.078Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-18T16:58:05.126Z"}
+{"level":"info","message":"Server started on port 5000","timestamp":"2025-11-18T16:59:16.841Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-18T16:59:16.910Z"}
+{"level":"info","message":"Server started on port 5000","timestamp":"2025-11-19T11:49:00.463Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-19T11:49:00.504Z"}
+{"level":"info","message":"SIGINT received. Shutting down...","timestamp":"2025-11-19T11:49:35.321Z"}
+{"level":"info","message":"Server started on port 5000 | PID: 38856","timestamp":"2025-11-19T17:29:31.404Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-19T17:29:31.426Z"}
+{"level":"info","message":"Server started on port 5000 | PID: 53316","timestamp":"2025-11-19T17:34:40.671Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-19T17:34:40.789Z"}
+{"level":"info","message":"Server started on port 5000 | PID: 47208","timestamp":"2025-11-19T17:35:09.043Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-19T17:35:09.084Z"}
+{"level":"info","message":"Server started on port 5000 | PID: 75820","timestamp":"2025-11-19T17:35:39.039Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-19T17:35:39.059Z"}
+{"level":"info","message":"Server started on port 5000 | PID: 32072","timestamp":"2025-11-19T17:36:02.209Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-19T17:36:02.275Z"}
+{"level":"info","message":"Server started on port 5000 | PID: 82428","timestamp":"2025-11-19T17:37:54.433Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-19T17:37:54.456Z"}
+{"level":"info","message":"Server started on port 5000 | PID: 3196","timestamp":"2025-11-19T17:38:25.280Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-19T17:38:25.316Z"}
+{"level":"info","message":"Server started on port 5000 | PID: 19788","timestamp":"2025-11-19T17:39:32.754Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-19T17:39:32.786Z"}
+{"level":"info","message":"Server started on port 5000 | PID: 72716","timestamp":"2025-11-19T17:40:25.292Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-19T17:40:25.316Z"}
+{"level":"info","message":"Shutting down gracefully...","timestamp":"2025-11-19T17:40:38.495Z"}
+{"level":"info","message":"Server started on port 5000 | PID: 30848","timestamp":"2025-11-19T17:40:45.674Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-19T17:40:45.706Z"}
+{"level":"info","message":"Shutting down gracefully...","timestamp":"2025-11-19T17:44:40.037Z"}

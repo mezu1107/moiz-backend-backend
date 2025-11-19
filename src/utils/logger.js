@@ -1,3 +1,4 @@
+// src/utils/logger.js
 const winston = require('winston');
 
 const logger = winston.createLogger({
@@ -9,8 +10,8 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
     new winston.transports.File({ filename: 'logs/combined.log' }),
-    new winston.transports.File({ filename: 'logs/socket.log' })
-  ]
+    new winston.transports.File({ filename: 'logs/socket.log' }),
+  ],
 });
 
 if (process.env.NODE_ENV !== 'production') {
@@ -18,8 +19,10 @@ if (process.env.NODE_ENV !== 'production') {
     format: winston.format.combine(
       winston.format.colorize(),
       winston.format.simple()
-    )
+    ),
   }));
 }
+
+logger.socket = logger.child({ context: 'socket' });
 
 module.exports = logger;

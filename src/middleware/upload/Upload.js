@@ -1,9 +1,9 @@
-// src/middleware/upload.js
+// src/middleware/upload/Upload.js
 const multer = require('multer');
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = /jpeg|jpg|png|webp/;
     if (allowed.test(file.mimetype)) cb(null, true);
@@ -11,4 +11,4 @@ const upload = multer({
   }
 });
 
-module.exports = upload; // ← Export the multer instance
+module.exports = upload;

@@ -6,8 +6,7 @@ const getCart = async (req, res) => {
   try {
     let cart = await Cart.findOne({ user: req.user.id }).populate('items.menuItem');
     if (!cart) {
-      cart = new Cart({ user: req.user.id, items: [] });
-      await cart.save();
+      cart = await Cart.create({ user: req.user.id, items: [] });
     }
     res.json({ success: true, cart });
   } catch (err) {
@@ -25,11 +24,12 @@ const addToCart = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Item not available' });
     }
 
-    let cart = await Cart.findOne({ user: req.user.id }) || new Cart({ user: req.user.id, items: [] });
-    const index = cart.items.findIndex(i => i.menuItem.toString() === menuItemId);
+    let cart = await Cart.findOne({ user: req.user.id });
+    if (!cart) cart = new Cart({ user: req.user.id, items: [] });
 
-    if (index > -1) {
-      cart.items[index].quantity += quantity;
+    const itemIndex = cart.items.findIndex(i => i.menuItem.toString() === menuItemId);
+    if (itemIndex > -1) {
+      cart.items[itemIndex].quantity += quantity;
     } else {
       cart.items.push({ menuItem: menuItemId, quantity, priceAtAdd: menuItem.price });
     }

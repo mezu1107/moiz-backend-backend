@@ -23,7 +23,7 @@ const checkArea = async (req, res) => {
     const area = await Area.findOne({
       polygon: { $geoIntersects: { $geometry: point } },
       isActive: true
-    }).select('name city center');
+    }).select('_id name city center');
 
     if (!area) return res.json({ success: true, inService: false });
 
@@ -32,12 +32,21 @@ const checkArea = async (req, res) => {
     res.json({
       success: true,
       inService: true,
-      area: { _id: area._id, name: area.name, city: area.city, center: area.center },
+      area: {
+        _id: area._id,
+        name: area.name,
+        city: area.city,
+        center: area.center
+      },
       delivery: zone ? {
         fee: zone.deliveryFee,
         minOrder: zone.minOrderAmount,
         estimatedTime: zone.estimatedTime
-      } : { fee: 149, minOrder: 0, estimatedTime: '35-50 min' }
+      } : {
+        fee: 149,
+        minOrder: 0,
+        estimatedTime: '35-50 min'
+      }
     });
   } catch (err) {
     console.error('checkArea error:', err);
@@ -46,10 +55,15 @@ const checkArea = async (req, res) => {
 };
 
 const addArea = async (req, res) => {
-  const { name, city = 'Lahore', polygon, center } = req.body;
   try {
-    const area = new Area({ name, city, polygon, center, isActive: true });
-    await area.save();
+    const { name, city = 'Lahore', polygon, center } = req.body;
+    const area = await Area.create({
+      name: name.trim(),
+      city: city.trim(),
+      polygon,
+      center,
+      isActive: true
+    });
     res.status(201).json({ success: true, area });
   } catch (err) {
     console.error('addArea error:', err);
@@ -59,16 +73,16 @@ const addArea = async (req, res) => {
 
 const setDeliveryZone = async (req, res) => {
   const { areaId, deliveryFee = 149, minOrderAmount = 0, estimatedTime = '35-50 min' } = req.body;
-  if (!areaId) return res.status(400).json({ success: false, message: 'areaId is required' });
+  if (!areaId) return res.status(400).json({ success: false, message: 'areaId required' });
 
   try {
     const zone = await DeliveryZone.findOneAndUpdate(
       { area: areaId },
       { deliveryFee, minOrderAmount, estimatedTime, isActive: true },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    ).populate('area', 'name city');
+      { upsert: true, new: true }
+    ).populate('area', 'name');
 
-    res.json({ success: true, message: 'Delivery zone updated', zone });
+    res.json({ success: true, zone });
   } catch (err) {
     console.error('setDeliveryZone error:', err);
     res.status(500).json({ success: false, message: 'Server error' });

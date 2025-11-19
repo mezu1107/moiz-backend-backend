@@ -1,3 +1,4 @@
+// src/models/cart/Cart.js
 const mongoose = require('mongoose');
 
 const cartItemSchema = new mongoose.Schema({
@@ -12,5 +13,4 @@ const cartSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-// Only one user index needed (unique already creates it)
 module.exports = mongoose.model('Cart', cartSchema);

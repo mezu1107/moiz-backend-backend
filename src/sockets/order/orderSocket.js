@@ -1,13 +1,11 @@
 // src/sockets/order/orderSocket.js
 const Order = require('../../models/order/Order');
 const Rider = require('../../models/rider/Rider');
-const logger = require('../../utils/logger');
+const logger = require('../../utils/logger').socket;
 const { authenticateSocket } = require('../../middleware/auth/auth');
 const { roleSocket } = require('../../middleware/role/role');
 
-const orderSocket = (io) => {
-  // Remove global.io = io; → already set in server.js
-
+const setupOrderSocket = (io) => {
   io.use(authenticateSocket);
   io.use(roleSocket(['customer', 'rider', 'admin']));
 
@@ -18,11 +16,11 @@ const orderSocket = (io) => {
         .populate('rider', 'user name phone')
         .populate('address', 'label fullAddress')
         .populate('area', 'name city')
-        .populate('items.menuItem', 'name image price');
+        .populate({ path: 'items.menuItem', select: 'name image price' });
 
       if (order) {
         io.to(`order:${orderId}`).emit('orderUpdate', order);
-        io.to('admin').emit('orderUpdate', { orderId, order });
+        io.to('admin').emit('orderUpdate', order); // ← Unified room name
       }
     } catch (err) {
       logger.error('emitOrderUpdate failed:', err);
@@ -31,13 +29,15 @@ const orderSocket = (io) => {
 
   io.on('connection', (socket) => {
     const { id: userId, role } = socket.user;
-    logger.info(`[SOCKET] ${role.toUpperCase()} connected → ${userId}`);
+    logger.info(`${role.toUpperCase()} connected → ${userId}`);
 
-    socket.join(role === 'customer' ? `customer:${userId}` : role === 'rider' ? `rider:${userId}` : 'admin');
+    // Unified room naming
+    socket.join(role === 'customer' ? `user:${userId}` : role === 'rider' ? `rider:${userId}` : 'admin');
 
-    if (role === 'rider') io.to('admin').emit('riderOnline', { riderId: userId });
+    if (role === 'rider') {
+      io.to('admin').emit('riderOnline', { riderId: userId });
+    }
 
-    // Customer tracking
     socket.on('trackOrder', async ({ orderId }) => {
       if (role !== 'customer') return;
       const order = await Order.findOne({ _id: orderId, customer: userId });
@@ -46,11 +46,11 @@ const orderSocket = (io) => {
       socket.emit('orderInit', { orderId, status: order.status });
     });
 
-    // Rider location update + LIMITED status change
     socket.on('riderUpdate', async ({ orderId, lat, lng, status }) => {
       if (role !== 'rider') return;
+      const order = await Order.findOne({ _id: orderId, rider: socket.user.id });
+      if (!order) return;
 
-      // Update rider location
       await Rider.findOneAndUpdate(
         { user: userId },
         { currentLocation: { type: 'Point', coordinates: [lng, lat] } }
@@ -58,46 +58,24 @@ const orderSocket = (io) => {
 
       const payload = { riderLocation: { lat, lng } };
 
-      // Only allow specific statuses from rider
-      const allowedStatuses = ['picked_up', 'on_the_way'];
-      if (status && allowedStatuses.includes(status)) {
-        await Order.findByIdAndUpdate(orderId, { status });
+      if (status && ['picked_up', 'on_the_way'].includes(status)) {
+        order.status = status;
+        await order.save();
         payload.status = status;
-        await global.emitOrderUpdate(orderId); // Trigger full update
+        await global.emitOrderUpdate(orderId);
       }
 
       io.to(`order:${orderId}`).emit('riderLocation', payload);
       io.to('admin').emit('riderLiveUpdate', { riderId: userId, orderId, ...payload });
     });
 
-    // Admin full control
-    socket.on('adminOrderUpdate', async ({ orderId, status, riderId }) => {
-      if (role !== 'admin') return;
-
-      const update = {};
-      if (status) update.status = status;
-      if (riderId) update.rider = riderId;
-
-      const order = await Order.findByIdAndUpdate(orderId, update, { new: true })
-        .populate('customer rider address area items.menuItem');
-
-      if (order) {
-        await global.emitOrderUpdate(orderId);
-        if (riderId) {
-          io.to(`rider:${riderId}`).emit('newAssignment', { orderId, order });
-        }
-      }
-    });
-
     socket.on('disconnect', () => {
-      logger.info(`[SOCKET] ${role.toUpperCase()} disconnected → ${userId}`);
+      logger.info(`${role.toUpperCase()} disconnected → ${userId}`);
       if (role === 'rider') {
         io.to('admin').emit('riderOffline', { riderId: userId });
       }
     });
   });
-
-  return io;
 };
 
-module.exports = orderSocket;
+module.exports = setupOrderSocket;
