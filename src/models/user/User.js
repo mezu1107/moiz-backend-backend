@@ -18,8 +18,41 @@ const userSchema = new mongoose.Schema({
     trim: true 
   },
   password: { type: String, required: true, minlength: 6, select: false },
-  role: { type: String, enum: ['customer', 'rider', 'admin'], default: 'customer' },
+
+  // Role System — Only Admin can change to 'rider'
+  role: { 
+    type: String, 
+    enum: ['customer', 'rider', 'admin'], 
+    default: 'customer' 
+  },
   isActive: { type: Boolean, default: true },
+  
+  // Rider Verification Status
+  riderStatus: {
+    type: String,
+    enum: ['none', 'pending', 'approved', 'rejected'],
+    default: 'none'
+  },
+
+  // Optional Profile Fields
+  profile: {
+    age: Number,
+    gender: { type: String, enum: ['male', 'female', 'other'] },
+    profileImage: String,
+    interests: [String]
+  },
+
+  // Rider Documents (uploaded when applying)
+  riderDocuments: {
+    cnicNumber: String,
+    cnicFront: String,
+    cnicBack: String,
+    drivingLicense: String,
+    riderPhoto: String,
+    vehicleNumber: String,
+    vehicleType: { type: String, enum: ['bike', 'car', 'bicycle'] }
+  },
+
   fcmToken: { type: String, select: false },
   lastActiveAt: { type: Date, default: Date.now },
 
@@ -28,15 +61,13 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpires: { type: Date, select: false }
 }, { timestamps: true });
 
-// REMOVED ALL .index() calls — unique: true already creates indexes
-// Mongoose automatically creates indexes for `unique` fields
-
-// Only keep performance indexes that are NOT covered by unique/sparse
+// Indexes — Clean & No Duplicates
 userSchema.index({ role: 1 });
+userSchema.index({ riderStatus: 1 });
 userSchema.index({ lastActiveAt: -1 });
 userSchema.index({ isActive: 1 });
 
-// Password hashing
+// Password Hashing
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);

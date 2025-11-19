@@ -18,22 +18,19 @@ const io = new Server(server, {
   cors: {
     origin: process.env.CLIENT_URL?.split(',').map(url => url.trim()) || [
       'http://localhost:3000',
-      'https://yourapp.com'
+      'http://localhost:3001'
     ],
     methods: ['GET', 'POST'],
     credentials: true
   },
   pingTimeout: 60000,
   pingInterval: 25000,
-  maxHttpBufferSize: 1e8 // 100MB max payload
+  maxHttpBufferSize: 1e8
 });
 
 global.io = io;
 
-// DO NOT define emitOrderUpdate here — it's now cleanly defined in orderSocket.js
-// Removed duplicate global.emitOrderUpdate → now only one source of truth
-
-// Load socket handlers (this file defines global.emitOrderUpdate)
+// ONLY ONE SOCKET FILE — CLEAN & PERFECT
 require('./src/sockets/order/orderSocket')(io);
 
 // ==================== DATABASE ====================
@@ -44,7 +41,7 @@ connectDB()
     process.exit(1);
   });
 
-// ==================== SECURITY & MIDDLEWARES ====================
+// ==================== MIDDLEWARES ====================
 const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000')
   .split(',')
   .map(url => url.trim());
@@ -54,40 +51,25 @@ app.use(cors({
     if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
       callback(null, true);
     } else {
+      logger.warn(`CORS blocked: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true
 }));
 
-app.use(helmet({
-  contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false
-}));
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === 'production' ? 500 : 10000,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Too many requests. Please try again later.'
-  }
-});
-app.use(limiter);
-
-// Serve uploaded images
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-  maxAge: '30d',
-  etag: true
+  message: { success: false, message: 'Too many requests' }
 }));
 
-// ==================== STRIPE WEBHOOK – RAW BODY FIRST ====================
+app.use('/uploads', express.static('uploads', { maxAge: '30d' }));
+
+// Stripe webhook first
 app.use('/webhook/stripe', express.raw({ type: 'application/json' }));
 
-// ==================== BODY PARSERS – AFTER WEBHOOK ====================
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -103,68 +85,29 @@ app.use('/api/deals', require('./src/routes/deal/dealRoutes'));
 app.use('/api/admin', require('./src/routes/admin/adminRoutes'));
 app.use('/api/admin/dashboard', require('./src/routes/admin/dashboardRoutes'));
 app.use('/api/upload', require('./src/routes/upload/uploadRoutes'));
-app.use('/api/users', require('./src/routes/auth/userRoutes')); // Fixed duplicate /api/auth
+app.use('/api/auth/user', require('./src/routes/auth/userRoutes'));
 
-// Stripe Webhook (after raw parser)
+// Webhook
 app.use('/webhook/stripe', require('./src/routes/webhook/stripeRoutes'));
 
-// ==================== HEALTH CHECK ====================
+// ==================== HEALTH & 404 ====================
 app.get('/health', (req, res) => {
-  res.status(200).json({
+  res.json({
     status: 'OK',
-    message: 'Grok-powered backend is running',
-    timestamp: new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' }),
-    uptime: `${Math.floor(process.uptime())} seconds`,
-    environment: process.env.NODE_ENV || 'development',
-    socketConnections: io.engine.clientsCount
+    message: 'Backend is live — ready to take over Pakistan',
+    time: new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' }),
+    sockets: io.engine.clientsCount,
+    env: process.env.NODE_ENV
   });
 });
 
-// ==================== 404 HANDLER ====================
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found',
-    path: req.originalUrl,
-    method: req.method
-  });
-});
 
-// ==================== GLOBAL ERROR HANDLER ====================
+
+// ==================== ERROR HANDLER ====================
 app.use((err, req, res, next) => {
-  logger.error('Unhandled Error:', {
-    message: err.message,
-    stack: err.stack,
-    url: req.originalUrl,
-    method: req.method,
-    ip: req.ip,
-    user: req.user?._id || 'guest'
-  });
-
-  res.status(err.statusCode || 500).json({
-    success: false,
-    message: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
+  logger.error('Error:', err);
+  res.status(500).json({ success: false, message: 'Server error' });
 });
-
-// ==================== GRACEFUL SHUTDOWN ====================
-const gracefulShutdown = () => {
-  logger.info('Shutting down gracefully...');
-  server.close(() => {
-    logger.info('HTTP server closed.');
-    process.exit(0);
-  });
-
-  // Force close after 10s
-  setTimeout(() => {
-    logger.error('Forcing shutdown...');
-    process.exit(1);
-  }, 10000);
-};
-
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
 
 // ==================== START SERVER ====================
 const PORT = process.env.PORT || 5000;
@@ -173,7 +116,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log('\n SERVER IS LIVE');
   console.log(` Port: http://localhost:${PORT}`);
   console.log(` Health: http://localhost:${PORT}/health`);
-  console.log(` Env: ${process.env.NODE_ENV || 'development'}`);
+  console.log(` Env: ${process.env.NODE_ENV}`);
   console.log(` Time: ${new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' })}\n`);
-  logger.info(`Server started on port ${PORT} | PID: ${process.pid}`);
+  logger.info(`Server running on port ${PORT}`);
 });
