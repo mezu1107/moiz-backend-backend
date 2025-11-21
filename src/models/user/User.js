@@ -4,45 +4,19 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
-  email: { 
-    type: String, 
-    unique: true, 
-    sparse: true, 
-    lowercase: true, 
-    trim: true 
-  },
-  phone: { 
-    type: String, 
-    required: true, 
-    unique: true, 
-    trim: true 
-  },
+  email: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
+  phone: { type: String, required: true, unique: true, trim: true },
   password: { type: String, required: true, minlength: 6, select: false },
-
-  // Role System — Only Admin can change to 'rider'
-  role: { 
-    type: String, 
-    enum: ['customer', 'rider', 'admin'], 
-    default: 'customer' 
-  },
+  role: { type: String, enum: ['customer', 'rider', 'admin'], default: 'customer' },
   isActive: { type: Boolean, default: true },
-  
-  // Rider Verification Status
+
+  // Rider-specific fields
   riderStatus: {
     type: String,
     enum: ['none', 'pending', 'approved', 'rejected'],
     default: 'none'
   },
 
-  // Optional Profile Fields
-  profile: {
-    age: Number,
-    gender: { type: String, enum: ['male', 'female', 'other'] },
-    profileImage: String,
-    interests: [String]
-  },
-
-  // Rider Documents (uploaded when applying)
   riderDocuments: {
     cnicNumber: String,
     cnicFront: String,
@@ -50,24 +24,36 @@ const userSchema = new mongoose.Schema({
     drivingLicense: String,
     riderPhoto: String,
     vehicleNumber: String,
-    vehicleType: { type: String, enum: ['bike', 'car', 'bicycle'] }
+    vehicleType: { type: String, enum: ['bike', 'car', 'bicycle'], default: 'bike' }
   },
+
+  // Live location (only for riders)
+  currentLocation: {
+    type: { type: String, enum: ['Point'], default: 'Point' },
+    coordinates: { type: [Number], default: [74.3587, 31.5204] } // [lng, lat]
+  },
+  isOnline: { type: Boolean, default: false },
+  isAvailable: { type: Boolean, default: false },
+  locationUpdatedAt: { type: Date },
+
+  // Stats
+  rating: { type: Number, default: 5.0, min: 0, max: 5 },
+  totalDeliveries: { type: Number, default: 0 },
+  earnings: { type: Number, default: 0 },
 
   fcmToken: { type: String, select: false },
   lastActiveAt: { type: Date, default: Date.now },
-
-  // Password Reset
   resetPasswordToken: { type: String, select: false },
   resetPasswordExpires: { type: Date, select: false }
 }, { timestamps: true });
 
-// Indexes — Clean & No Duplicates
-userSchema.index({ role: 1 });
+// Indexes
+userSchema.index({ currentLocation: '2dsphere' });
+userSchema.index({ role: 1, riderStatus: 1 });
+userSchema.index({ isOnline: 1, isAvailable: 1 });
 userSchema.index({ riderStatus: 1 });
-userSchema.index({ lastActiveAt: -1 });
-userSchema.index({ isActive: 1 });
 
-// Password Hashing
+// Methods
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);

@@ -3,29 +3,57 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
-const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+// Generate JWT
+const generateToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET || 'fallback-secret-dev-2025', {
+    expiresIn: '7d',
+  });
 
-// Nodemailer Transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// Email Transporter (Production + Dev Safe)
+let transporter;
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+  transporter.verify().then(() => console.log('Email ready')).catch(() => console.warn('Email not configured'));
+} else {
+  nodemailer.createTestAccount((err, account) => {
+    if (err) return console.error('Test email failed');
+    transporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: { user: account.user, pass: account.pass },
+    });
+    console.log('TEST EMAIL MODE → https://ethereal.email');
+  });
+}
 
 // Register
 const register = async (req, res) => {
-  const { name, phone, password, email } = req.body;
+  const { name, phone, email, password } = req.body;
 
   try {
-    const existing = await User.findOne({ $or: [{ email }, { phone }] });
-    if (existing) {
-      const field = existing.email === email ? 'Email' : 'Phone';
-      return res.status(400).json({ success: false, message: `${field} already exists` });
+    const existingUser = await User.findOne({
+      $or: [{ email: email?.toLowerCase() }, { phone }]
+    });
+
+    if (existingUser) {
+      const field = existingUser.email === email?.toLowerCase() ? 'Email' : 'Phone';
+      return res.status(400).json({ success: false, message: `${field} already in use` });
     }
 
-    const user = await User.create({ name, phone, password, email, role: 'customer' });
+    const user = await User.create({
+      name: name.trim(),
+      phone,
+      email: email ? email.toLowerCase().trim() : undefined,
+      password,
+    });
+
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -37,27 +65,26 @@ const register = async (req, res) => {
         name: user.name,
         phone: user.phone,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (err) {
-    console.error('register error:', err);
-    if (err.code === 11000) {
-      const field = Object.keys(err.keyValue)[0];
-      return res.status(400).json({ success: false, message: `${field} already exists` });
-    }
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Register error:', err);
+    res.status(500).json({ success: false, message: 'Registration failed' });
   }
 };
 
 // Login
 const login = async (req, res) => {
-  const { phone, password } = req.body;
+  const { email, phone, password } = req.body;
 
   try {
-    const user = await User.findOne({ phone }).select('+password');
+    const user = await User.findOne({
+      $or: [{ email: email?.toLowerCase() }, { phone }]
+    }).select('+password');
+
     if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ success: false, message: 'Invalid phone or password' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
     if (!user.isActive) {
@@ -65,8 +92,8 @@ const login = async (req, res) => {
     }
 
     const token = generateToken(user._id);
-    user.lastActiveAt = new Date();
-    await user.save();
+    user.lastActiveAt = Date.now();
+    await user.save({ validateBeforeSave: false });
 
     res.json({
       success: true,
@@ -77,21 +104,18 @@ const login = async (req, res) => {
         name: user.name,
         phone: user.phone,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (err) {
-    console.error('login error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, message: 'Login failed' });
   }
 };
 
-// Logout
-const logout = async (req, res) => {
-  res.json({ success: true, message: 'Logged out successfully' });
-};
+// Other Auth Routes
+const logout = (req, res) => res.json({ success: true, message: 'Logged out successfully' });
 
-// Get Current User
 const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -103,83 +127,69 @@ const getMe = async (req, res) => {
         phone: user.phone,
         email: user.email,
         role: user.role,
-        isActive: user.isActive
-      }
+        isActive: user.isActive,
+        riderStatus: user.riderStatus,
+      },
     });
   } catch (err) {
-    console.error('getMe error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Failed to fetch user' });
   }
 };
 
-// Forgot Password
 const forgotPassword = async (req, res) => {
   const { phone } = req.body;
+  if (!phone) return res.status(400).json({ success: false, message: 'Phone number required' });
 
   try {
     const user = await User.findOne({ phone });
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'No account found with that phone number' });
-    }
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
     const resetToken = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
     user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-    await user.save();
+    user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+    await user.save({ validateBeforeSave: false });
 
-    const resetURL = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    const resetURL = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
 
-    const message = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-        <h2 style="color: #10b981;">Password Reset Request</h2>
-        <p>You requested a password reset for your account.</p>
-        <p>Click the button below to reset your password:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${resetURL}" style="background:#10b981; color:white; padding:14px 28px; text-decoration:none; border-radius:8px; font-weight:bold;">
-            Reset Password
-          </a>
-        </div>
-        <p style="font-size: 12px; color: #666;">
-          Link expires in 10 minutes. If you didn't request this, please ignore.
-        </p>
-      </div>
-    `;
-
-    await transporter.sendMail({
-      to: user.email || `${user.phone}@example.com`,
-      from: `"FoodApp" <${process.env.EMAIL_USER}>`,
+    const mailOptions = {
+      to: user.email || `${phone}@temp-mail.com`,
+      from: `"FoodApp" <${process.env.EMAIL_USER || 'no-reply@foodapp.com'}>`,
       subject: 'Password Reset Request',
-      html: message
-    });
+      html: `
+        <h3>Password Reset</h3>
+        <p>Click the link below to reset your password (valid for 10 minutes):</p>
+        <a href="${resetURL}" style="padding:10px 20px; background:#007bff; color:white; text-decoration:none;">Reset Password</a>
+        <p>Or copy: ${resetURL}</p>
+      `,
+    };
 
-    res.json({ success: true, message: 'Password reset link sent to your email' });
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true, message: 'Reset link sent to email (check spam)' });
   } catch (err) {
-    console.error('forgotPassword error:', err);
-    res.status(500).json({ success: false, message: 'Failed to send reset email' });
+    console.error('Forgot password error:', err);
+    res.status(500).json({ success: false, message: 'Failed to send reset link' });
   }
 };
 
-// Reset Password
 const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
   if (!password || password.length < 8) {
-    return res.status(400).json({ success: false, message: 'Password must be at least 8 characters' });
+    return res.status(400).json({ success: false, message: 'Password must be 8+ characters' });
   }
 
   try {
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: Date.now() }
+      resetPasswordExpires: { $gt: Date.now() },
     });
 
     if (!user) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+      return res.status(400).json({ success: false, message: 'Invalid or expired token' });
     }
 
     user.password = password;
@@ -193,17 +203,10 @@ const resetPassword = async (req, res) => {
       success: true,
       message: 'Password reset successful',
       token: newToken,
-      user: {
-        id: user._id,
-        name: user.name,
-        phone: user.phone,
-        email: user.email,
-        role: user.role
-      }
     });
   } catch (err) {
-    console.error('resetPassword error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Password reset failed' });
   }
 };
 
@@ -213,5 +216,6 @@ module.exports = {
   logout,
   getMe,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  generateToken,
 };

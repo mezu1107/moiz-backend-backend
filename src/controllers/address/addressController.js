@@ -1,37 +1,26 @@
 // src/controllers/address/addressController.js
-
 const Address = require('../../models/address/Address');
 const Area = require('../../models/area/Area');
 
-// Validate if a point lies inside the polygon of a specific area
-const validatePointInArea = async (point, areaId) => {
+const validatePointInArea = async (point) => {
   return await Area.findOne({
-    _id: areaId,
     isActive: true,
     polygon: { $geoIntersects: { $geometry: point } }
   });
 };
 
-// ====================== CREATE ADDRESS ======================
 const createAddress = async (req, res) => {
   const { label, fullAddress, areaId, lat, lng, instructions, isDefault } = req.body;
   const userId = req.user.id;
 
-  if (!areaId || !lat || !lng) {
-    return res.status(400).json({
-      success: false,
-      message: 'areaId, lat, and lng are required'
-    });
-  }
-
   try {
-    const point = { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] };
+    const point = { type: 'Point', coordinates: [lng, lat] };
 
-    const area = await validatePointInArea(point, areaId);
-    if (!area) {
+    const area = await validatePointInArea(point);
+    if (!area || area._id.toString() !== areaId) {
       return res.status(400).json({
         success: false,
-        message: 'This location is not in any serviceable area'
+        message: 'This location is outside our service area'
       });
     }
 
@@ -41,25 +30,23 @@ const createAddress = async (req, res) => {
 
     const address = await Address.create({
       user: userId,
-      label: label.trim(),
-      fullAddress: fullAddress.trim(),
+      label,
+      fullAddress,
       area: areaId,
       location: point,
-      instructions: instructions?.trim(),
+      instructions: instructions || '',
       isDefault: !!isDefault
     });
 
     await address.populate('area', 'name city');
 
     res.status(201).json({ success: true, address });
-
   } catch (err) {
-    console.error('createAddress error:', err);
+    console.error('createAddress:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-// ====================== GET USER ADDRESSES ======================
 const getUserAddresses = async (req, res) => {
   try {
     const addresses = await Address.find({ user: req.user.id })
@@ -67,118 +54,90 @@ const getUserAddresses = async (req, res) => {
       .sort({ isDefault: -1, createdAt: -1 });
 
     res.json({ success: true, addresses });
-
   } catch (err) {
-    console.error('getUserAddresses error:', err);
+    console.error('getUserAddresses:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-// ====================== UPDATE ADDRESS ======================
 const updateAddress = async (req, res) => {
   const { id } = req.params;
-  const { label, fullAddress, areaId, lat, lng, instructions, isDefault } = req.body;
+  const updates = req.body;
 
   try {
     const address = await Address.findOne({ _id: id, user: req.user.id });
-    if (!address) {
-      return res.status(404).json({ success: false, message: 'Address not found' });
-    }
+    if (!address) return res.status(404).json({ success: false, message: 'Address not found' });
 
-    // If coordinates changed → validate new point
-    if (lat && lng &&
-      (parseFloat(lat) !== address.location.coordinates[1] ||
-       parseFloat(lng) !== address.location.coordinates[0])
-    ) {
-      const point = { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] };
-      const newAreaId = areaId || address.area;
-
-      const area = await validatePointInArea(point, newAreaId);
-      if (!area) {
+    if (updates.lat && updates.lng) {
+      const newPoint = { type: 'Point', coordinates: [updates.lng, updates.lat] };
+      const validArea = await validatePointInArea(newPoint);
+      if (!validArea || (updates.areaId && validArea._id.toString() !== updates.areaId)) {
         return res.status(400).json({ success: false, message: 'New location not serviceable' });
       }
-
-      address.location = point;
-      address.area = newAreaId;
+      address.location = newPoint;
+      if (updates.areaId) address.area = updates.areaId;
     }
 
-    if (isDefault) {
+    if (updates.isDefault) {
       await Address.updateMany({ user: req.user.id }, { isDefault: false });
       address.isDefault = true;
     }
 
-    address.label = label?.trim() || address.label;
-    address.fullAddress = fullAddress?.trim() || address.fullAddress;
-    address.instructions = instructions?.trim();
+    Object.keys(updates).forEach(key => {
+      if (['label', 'fullAddress', 'instructions'].includes(key)) {
+        address[key] = updates[key]?.trim() || address[key];
+      }
+    });
 
     await address.save();
     await address.populate('area', 'name city');
 
     res.json({ success: true, address });
-
   } catch (err) {
-    console.error('updateAddress error:', err);
+    console.error('updateAddress:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-// ====================== DELETE ADDRESS ======================
 const deleteAddress = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const address = await Address.findOneAndDelete({
-      _id: id,
-      user: req.user.id
-    });
+    const address = await Address.findOneAndDelete({ _id: id, user: req.user.id });
+    if (!address) return res.status(404).json({ success: false, message: 'Address not found' });
 
-    if (!address) {
-      return res.status(404).json({ success: false, message: 'Address not found' });
-    }
-
-    // If default address deleted → set next available as default
     if (address.isDefault) {
       const next = await Address.findOne({ user: req.user.id }).sort({ createdAt: -1 });
-      if (next) {
-        next.isDefault = true;
-        await next.save();
-      }
+      if (next) { next.isDefault = true; await next.save(); }
     }
 
     res.json({ success: true, message: 'Address deleted' });
-
   } catch (err) {
-    console.error('deleteAddress error:', err);
+    console.error('deleteAddress:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-// ====================== SET DEFAULT ADDRESS ======================
 const setDefaultAddress = async (req, res) => {
   const { id } = req.params;
 
   try {
     await Address.updateMany({ user: req.user.id }, { isDefault: false });
-
     const address = await Address.findOneAndUpdate(
       { _id: id, user: req.user.id },
       { isDefault: true },
       { new: true }
     ).populate('area', 'name city');
 
-    if (!address) {
-      return res.status(404).json({ success: false, message: 'Address not found' });
-    }
+    if (!address) return res.status(404).json({ success: false, message: 'Address not found' });
 
     res.json({ success: true, address });
-
   } catch (err) {
-    console.error('setDefaultAddress error:', err);
+    console.error('setDefaultAddress:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-// ====================== EXPORTS ======================
 module.exports = {
   createAddress,
   getUserAddresses,

@@ -1,5 +1,5 @@
 // src/validation/schemas/addressSchemas.js
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 
 exports.createAddress = [
   body('label')
@@ -14,25 +14,24 @@ exports.createAddress = [
     .withMessage('Full address must be 10–200 characters'),
 
   body('areaId')
-    .trim()
     .isMongoId()
-    .withMessage('Valid areaId is required'),
+    .withMessage('Valid area ID required'),
 
   body('lat')
     .isFloat({ min: 23.5, max: 37.5 })
-    .withMessage('Latitude must be between 23.5 and 37.5')
+    .withMessage('Latitude must be in Pakistan range (23.5–37.5)')
     .toFloat(),
 
   body('lng')
     .isFloat({ min: 60.0, max: 78.0 })
-    .withMessage('Longitude must be between 60 and 78')
+    .withMessage('Longitude must be in Pakistan range (60–78)')
     .toFloat(),
 
   body('instructions')
     .optional({ nullable: true })
     .trim()
     .isLength({ max: 150 })
-    .withMessage('Instructions must be under 150 characters'),
+    .withMessage('Instructions too long (max 150 chars)'),
 
   body('isDefault')
     .optional()
@@ -41,44 +40,43 @@ exports.createAddress = [
 ];
 
 exports.updateAddress = [
+  param('id').isMongoId().withMessage('Invalid address ID'),
+
   body('label')
     .optional()
     .trim()
-    .isIn(['Home', 'Work', 'Other'])
-    .withMessage('Label must be Home, Work, or Other'),
+    .isIn(['Home', 'Work', 'Other']),
 
   body('fullAddress')
     .optional()
     .trim()
-    .isLength({ min: 10, max: 200 })
-    .withMessage('Full address must be 10–200 characters'),
+    .isLength({ min: 10, max: 200 }),
 
   body('areaId')
     .optional()
-    .trim()
-    .isMongoId()
-    .withMessage('Invalid areaId'),
+    .isMongoId(),
 
   body('lat')
     .optional()
     .isFloat({ min: 23.5, max: 37.5 })
-    .withMessage('Latitude must be between 23.5 and 37.5')
     .toFloat(),
 
   body('lng')
     .optional()
     .isFloat({ min: 60.0, max: 78.0 })
-    .withMessage('Longitude must be between 60 and 78')
     .toFloat(),
 
   body('instructions')
     .optional({ nullable: true })
     .trim()
-    .isLength({ max: 150 })
-    .withMessage('Instructions must be under 150 characters'),
+    .isLength({ max: 150 }),
 
   body('isDefault')
     .optional()
     .isBoolean()
     .toBoolean()
+];
+
+exports.addressIdParam = [
+  param('id').isMongoId().withMessage('Invalid address ID')
 ];

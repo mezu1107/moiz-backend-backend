@@ -1,67 +1,93 @@
 // src/validation/schemas/menuSchemas.js
-const { body, query } = require('express-validator');
+const { body, query, param } = require('express-validator');
 
-const getMenuByLocation = [
-  query('lat').exists({ checkFalsy: true }).withMessage('Latitude is required')
-    .isFloat({ min: 24, max: 37 }).withMessage('Latitude must be between 24 and 37'),
-  query('lng').exists({ checkFalsy: true }).withMessage('Longitude is required')
-    .isFloat({ min: 60, max: 78 }).withMessage('Longitude must be between 60 and 78')
+exports.getMenuByLocation = [
+  query('lat')
+    .exists({ checkFalsy: true })
+    .withMessage('Latitude is required')
+    .isFloat({ min: 23.5, max: 37.5 })
+    .withMessage('Latitude must be in Pakistan (23.5–37.5)')
+    .toFloat(),
+
+  query('lng')
+    .exists({ checkFalsy: true })
+    .withMessage('Longitude is required')
+    .isFloat({ min: 60, max: 78 })
+    .withMessage('Longitude must be in Pakistan (60–78)')
+    .toFloat()
 ];
 
-const getAllMenuItemsWithFilters = [
-  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer').toInt(),
-  query('limit').optional().isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50').toInt(),
+exports.menuItemIdParam = [
+  param('id').isMongoId().withMessage('Invalid menu item ID')
+];
+
+exports.getAllMenuItemsWithFilters = [
+  query('page').optional().isInt({ min: 1 }).toInt(),
+  query('limit').optional().isInt({ min: 1, max: 50 }).toInt(),
   query('category').optional().isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']),
-  query('isVeg').optional().isIn(['true', 'false']).withMessage('isVeg must be true or false'),
-  query('isSpicy').optional().isIn(['true', 'false']).withMessage('isSpicy must be true or false'),
-  query('minPrice').optional().isFloat({ min: 0 }).withMessage('minPrice must be a positive number').toFloat(),
-  query('maxPrice').optional().isFloat({ min: 0 }).withMessage('maxPrice must be a positive number').toFloat(),
-  query('search').optional().trim().isLength({ min: 1, max: 100 }).withMessage('Search term must be 1-100 characters'),
-  query('availableOnly').optional().isIn(['true', 'false']).withMessage('availableOnly must be true or false'),
+  query('isVeg').optional().isIn(['true', 'false']),
+  query('isSpicy').optional().isIn(['true', 'false']),
+  query('minPrice').optional().isFloat({ min: 0 }).toFloat(),
+  query('maxPrice').optional().isFloat({ min: 0 }).toFloat(),
+  query('search').optional().trim().isLength({ max: 100 }),
+  query('availableOnly').optional().isIn(['true', 'false']),
   query('sort').optional().isIn([
-    'category_asc',
-    'name_asc',
-    'name_desc',
-    'price_asc',
-    'price_desc',
-    'newest',
-    'oldest'
-  ]).withMessage('Invalid sort option')
+    'name_asc', 'name_desc',
+    'price_asc', 'price_desc',
+    'newest', 'oldest',
+    'category_asc'
+  ])
 ];
 
-const addMenuItem = [
-  body('name').trim().notEmpty().withMessage('Name is required')
-    .isLength({ min: 2, max: 100 }).withMessage('Name must be 2-100 characters'),
-  body('price').notEmpty().withMessage('Price is required')
-    .isFloat({ min: 50 }).withMessage('Price must be at least 50'),
-  body('category').notEmpty().withMessage('Category is required')
-    .isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']).withMessage('Invalid category'),
-  body('isVeg').optional().isBoolean().withMessage('isVeg must be true/false').toBoolean(),
-  body('isSpicy').optional().isBoolean().withMessage('isSpicy must be true/false').toBoolean(),
-  body('availableInAreas').optional().isArray().withMessage('availableInAreas must be an array'),
-  body('description').optional().trim().isLength({ max: 500 }).withMessage('Description too long (max 500)')
+exports.addMenuItem = [
+  body('name')
+    .trim()
+    .notEmpty().withMessage('Name is required')
+    .isLength({ min: 2, max: 100 }).withMessage('Name must be 2–100 characters'),
+
+  body('price')
+    .notEmpty().withMessage('Price is required')
+    .isFloat({ min: 50 }).withMessage('Price must be at least 50 PKR')
+    .toFloat(),
+
+  body('category')
+    .notEmpty().withMessage('Category is required')
+    .isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']),
+
+  body('isVeg').optional().isBoolean().toBoolean(),
+  body('isSpicy').optional().isBoolean().toBoolean(),
+
+  body('availableInAreas')
+    .optional()
+    .isArray()
+    .custom((arr) => arr.every(id => mongoose.Types.ObjectId.isValid(id)))
+    .withMessage('Invalid area ID in availableInAreas'),
+
+  body('description')
+    .optional()
+    .trim()
+    .isLength({ max: 500 }).withMessage('Description too long')
 ];
 
-const updateMenuItem = [
-  body('name').optional().trim().isLength({ min: 2, max: 100 }).withMessage('Name must be 2-100 characters'),
-  body('price').optional().isFloat({ min: 50 }).withMessage('Price must be at least 50'),
-  body('category').optional().isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']).withMessage('Invalid category'),
-  body('isVeg').optional().isBoolean().withMessage('isVeg must be true/false').toBoolean(),
-  body('isSpicy').optional().isBoolean().withMessage('isSpicy must be true/false').toBoolean(),
-  body('isAvailable').optional().isBoolean().withMessage('isAvailable must be true/false').toBoolean(),
-  body('availableInAreas').optional().isArray(),
-  body('description').optional().trim().isLength({ max: 500 }).withMessage('Description too long (max 500)')
+exports.updateMenuItem = [
+  param('id').isMongoId().withMessage('Invalid menu item ID'),
+
+  body('name').optional().trim().isLength({ min: 2, max: 100 }),
+  body('price').optional().isFloat({ min: 50 }).toFloat(),
+  body('category').optional().isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']),
+  body('isVeg').optional().isBoolean().toBoolean(),
+  body('isSpicy').optional().isBoolean().toBoolean(),
+  body('isAvailable').optional().isBoolean().toBoolean(),
+
+  body('availableInAreas')
+    .optional()
+    .isArray()
+    .custom((arr) => !arr || arr.every(id => mongoose.Types.ObjectId.isValid(id))),
+
+  body('description').optional().trim().isLength({ max: 500 })
 ];
 
-const toggleAvailability = [
-  body('isAvailable').exists({ checkFalsy: true }).withMessage('isAvailable is required')
-    .isBoolean().withMessage('isAvailable must be true/false').toBoolean()
+exports.toggleAvailability = [
+  param('id').isMongoId().withMessage('Invalid menu item ID'),
+  body('isAvailable').notEmpty().isBoolean().toBoolean()
 ];
-
-module.exports = {
-  getMenuByLocation,
-  getAllMenuItemsWithFilters,
-  addMenuItem,
-  updateMenuItem,
-  toggleAvailability
-};

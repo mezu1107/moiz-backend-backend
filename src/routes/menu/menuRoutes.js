@@ -1,8 +1,7 @@
 // src/routes/menu/menuRoutes.js
-
-
 const express = require('express');
 const router = express.Router();
+
 const upload = require('../../middleware/upload/Upload');
 const { auth } = require('../../middleware/auth/auth');
 const { role } = require('../../middleware/role/role');
@@ -24,21 +23,22 @@ const {
   getAllMenuItemsWithFilters: menuFiltersSchema,
   addMenuItem: addMenuSchema,
   updateMenuItem: updateMenuSchema,
-  toggleAvailability: toggleSchema
+  toggleAvailability: toggleSchema,
+  menuItemIdParam
 } = require('../../validation/schemas/menuSchemas');
 
-// Public Routes - Anyone can view menu
-router.get('/menu', menuFiltersSchema, validate, getAllMenuItemsWithFilters);
-router.get('/menu/:id', getSingleMenuItem);
-router.get('/', menuLocationSchema, validate, getMenuByLocation);
+// PUBLIC ROUTES
+router.get('/location', menuLocationSchema, validate, getMenuByLocation);
+router.get('/filters', menuFiltersSchema, validate, getAllMenuItemsWithFilters);
+router.get('/:id', menuItemIdParam, validate, getSingleMenuItem);
 
-// Admin Only - Protected
+// ADMIN ROUTES
 router.use(auth, role(['admin']));
 
 router.post('/', upload.single('image'), addMenuSchema, validate, addMenuItem);
-router.put('/:id', upload.single('image'), updateMenuSchema, validate, updateMenuItem);
-router.delete('/:id', deleteMenuItem);
-router.get('/all', getAllMenuItems);
+router.put('/:id', menuItemIdParam, upload.single('image'), updateMenuSchema, validate, updateMenuItem);
+router.delete('/:id', menuItemIdParam, validate, deleteMenuItem);
 router.patch('/:id/toggle', toggleSchema, validate, toggleAvailability);
+router.get('/admin/all', getAllMenuItems);
 
 module.exports = router;

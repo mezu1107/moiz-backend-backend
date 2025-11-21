@@ -3,29 +3,29 @@ const User = require('../../models/user/User');
 const getAllUsers = async (req, res) => {
   try {
     const { role, search, page = 1, limit = 50 } = req.query;
-    const query = {};
+    const query = { isActive: true };
 
     if (role) query.role = role;
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { phone: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } }
+        { email: { $regex: search, $options: 'i' } },
       ];
     }
 
     const users = await User.find(query)
-      .select('-password -fcmToken')
+      .select('-password -fcmToken -resetPasswordToken -resetPasswordExpires')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit * 1);
+      .limit(parseInt(limit));
 
     const total = await User.countDocuments(query);
 
-    res.json({ success: true, total, page: Number(page), users });
+    res.json({ success: true, total, page: Number(page), limit: Number(limit), users });
   } catch (err) {
-    console.error('getAllUsers error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to fetch users' });
   }
 };
 
@@ -35,32 +35,29 @@ const getUserById = async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true, user });
   } catch (err) {
-    console.error('getUserById error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
 const updateUser = async (req, res) => {
-  const { name, email, phone, role, isActive } = req.body;
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    if (name) user.name = name;
-    if (email) user.email = email;
-    if (phone && phone !== user.phone) {
-      const exists = await User.findOne({ phone });
+    const updates = req.body;
+    if (updates.phone && updates.phone !== user.phone) {
+      const exists = await User.findOne({ phone: updates.phone });
       if (exists) return res.status(400).json({ success: false, message: 'Phone already in use' });
-      user.phone = phone;
     }
-    if (role) user.role = role;
-    if (isActive !== undefined) user.isActive = isActive;
+
+    Object.keys(updates).forEach(key => {
+      if (updates[key] !== undefined) user[key] = updates[key];
+    });
 
     await user.save();
     res.json({ success: true, message: 'User updated', user });
   } catch (err) {
-    console.error('updateUser error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Update failed' });
   }
 };
 
@@ -68,16 +65,10 @@ const deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    res.json({ success: true, message: 'User deleted successfully' });
+    res.json({ success: true, message: 'User deleted' });
   } catch (err) {
-    console.error('deleteUser error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Delete failed' });
   }
 };
 
-module.exports = {
-  getAllUsers,
-  getUserById,
-  updateUser,
-  deleteUser
-};
+module.exports = { getAllUsers, getUserById, updateUser, deleteUser };
