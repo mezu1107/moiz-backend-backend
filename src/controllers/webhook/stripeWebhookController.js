@@ -7,16 +7,15 @@ const handleWebhook = async (req, res) => {
 
   try {
     switch (type) {
-
       case 'payment_intent.succeeded': {
         const orderId = object.metadata?.orderId;
-        if (!orderId) return res.json({ received: true });
+        if (!orderId) break;
 
         const order = await Order.findByIdAndUpdate(
           orderId,
           {
             paymentStatus: 'paid',
-            status: 'confirmed',
+            status: 'pending', // → Better: stay pending until admin confirms
             paidAt: new Date(),
             paymentIntentId: object.id,
             receiptUrl: object.charges?.data[0]?.receipt_url || null
@@ -25,34 +24,25 @@ const handleWebhook = async (req, res) => {
         );
 
         if (order) {
-          console.log(`ORDER ${orderId} → PAID & AUTO-CONFIRMED`);
-          global.emitOrderUpdate?.(orderId);
+          console.log(`Payment succeeded → Order ${orderId} marked as paid`);
+          // Notify admin & customer
+          if (global.io) {
+            global.io.to('admin').emit('orderUpdate', { event: 'payment_received', order });
+            if (order.customer) global.io.to(`user:${order.customer}`).emit('orderUpdate', { event: 'payment_success', order });
+          }
         }
         break;
       }
 
-      case 'payment_intent.payment_failed': {
-        const orderId = object.metadata?.orderId;
-        if (orderId) {
-          await Order.findByIdAndUpdate(orderId, {
-            paymentStatus: 'failed',
-            status: 'cancelled'
-          });
-          console.log(`ORDER ${orderId} → PAYMENT FAILED`);
-          global.emitOrderUpdate?.(orderId);
-        }
-        break;
-      }
-
+      case 'payment_intent.payment_failed':
       case 'payment_intent.canceled': {
         const orderId = object.metadata?.orderId;
         if (orderId) {
           await Order.findByIdAndUpdate(orderId, {
-            paymentStatus: 'canceled',
+            paymentStatus: type.includes('failed') ? 'failed' : 'canceled',
             status: 'cancelled'
           });
-          console.log(`ORDER ${orderId} → CANCELED (15 min timeout)`);
-          global.emitOrderUpdate?.(orderId);
+          console.log(`Order ${orderId} → Payment ${type.split('.')[2]}`);
         }
         break;
       }
@@ -65,24 +55,20 @@ const handleWebhook = async (req, res) => {
             status: 'cancelled',
             refundedAt: new Date()
           });
-          console.log(`ORDER ${orderId} → REFUNDED`);
-          global.emitOrderUpdate?.(orderId);
+          console.log(`Order ${orderId} → Refunded`);
         }
         break;
       }
 
       default:
-        console.log(`Ignored Stripe event: ${type}`);
+        console.log(`Unhandled event: ${type}`);
     }
 
-    // ALWAYS respond 200 OK — Stripe requires this
     res.json({ received: true });
-
   } catch (err) {
-    console.error('STRIPE WEBHOOK CRASHED:', err.message);
+    console.error('Stripe webhook error:', err);
     res.status(500).json({ error: 'Webhook handler failed' });
   }
 };
 
 module.exports = { handleWebhook };
-

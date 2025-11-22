@@ -7,6 +7,7 @@ const validate = require('../../middleware/validate/validate');
 
 const {
   createOrder,
+  createGuestOrder,
   getCustomerOrders,
   getOrderById,
   cancelOrder,
@@ -15,48 +16,45 @@ const {
   assignRider,
   adminRejectOrder,
   getAllOrders,
-  verifyMobilePaymentOtp,
-  generateReceipt
+  generateReceipt,
+  trackOrderById,
+  trackOrdersByPhone
 } = require('../../controllers/order/orderController');
 
 const {
   createOrder: createOrderSchema,
+  createGuestOrder: createGuestOrderSchema,
+  trackByPhone: trackByPhoneSchema,
   updateStatus: updateStatusSchema,
   assignRider: assignRiderSchema,
   rejectOrder: rejectOrderSchema
 } = require('../../validation/schemas/orderSchemas');
 
-// Validation for OTP
-const verifyOtpSchema = [
-  require('express-validator').body('otp')
-    .isLength({ min: 6, max: 6 })
-    .isNumeric()
-    .withMessage('OTP must be 6 digits')
-];
+// ====================== PUBLIC TRACKING ROUTES ======================
+router.get('/track/:orderId', trackOrderById);
+router.post('/track/by-phone', trackByPhoneSchema, validate, trackOrdersByPhone); // ← Fixed: added validation
 
+// ====================== GUEST ORDER ======================
+router.post('/guest', createGuestOrderSchema, validate, createGuestOrder);
+
+// ====================== AUTH REQUIRED ======================
 router.use(auth);
 
-// Customer Routes
 router.post('/', createOrderSchema, validate, createOrder);
 router.get('/my', getCustomerOrders);
 router.get('/:id', getOrderById);
 router.patch('/:id/cancel', cancelOrder);
 router.patch('/:id/reject', rejectOrderSchema, validate, customerRejectOrder);
-
-// Mobile Payment OTP Verification
-router.post('/:id/verify-mobile-payment', verifyOtpSchema, validate, verifyMobilePaymentOtp);
-
-// Download Receipt
 router.get('/:id/receipt', generateReceipt);
 
-// Admin + Rider
+// ====================== ADMIN & RIDER ======================
 router.use(role(['admin', 'rider']));
 router.patch('/:id/status', updateStatusSchema, validate, updateOrderStatus);
 
-// Admin Only
+// ====================== ADMIN ONLY ======================
 router.use(role(['admin']));
+router.patch('/:id/admin-reject', rejectOrderSchema, validate, adminRejectOrder);
 router.patch('/:id/assign', assignRiderSchema, validate, assignRider);
-router.patch('/:id/reject', rejectOrderSchema, validate, adminRejectOrder);
 router.get('/', getAllOrders);
 
 module.exports = router;

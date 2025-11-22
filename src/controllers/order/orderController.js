@@ -5,15 +5,14 @@ const DeliveryZone = require('../../models/deliveryZone/DeliveryZone');
 const MenuItem = require('../../models/menuItem/MenuItem');
 const Cart = require('../../models/cart/Cart');
 const User = require('../../models/user/User');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Area = require('../../models/area/Area');
+const stripe = require('../../config/stripe');
 const { applyAndTrackDeal } = require('../deal/dealController');
 const PDFDocument = require('pdfkit');
-const otpGenerator = require('otp-generator');
 
-// Global io & timeouts
+// Global Socket & Timeouts
 const io = global.io;
 global.pendingOrderTimeouts = global.pendingOrderTimeouts || {};
-global.mobilePaymentOtps = global.mobilePaymentOtps || {};
 const AUTO_CANCEL_DELAY = 15 * 60 * 1000; // 15 minutes
 
 // ====================== CONFIG ======================
@@ -48,54 +47,25 @@ const sendNotification = async (order, event, extra = {}) => {
     ...extra
   };
 
-  io.to(`user:${order.customer}`).emit('orderUpdate', payload);
+  if (order.customer) io.to(`user:${order.customer}`).emit('orderUpdate', payload);
   if (order.rider) io.to(`rider:${order.rider}`).emit('orderUpdate', payload);
   io.to('admin').emit('orderUpdate', payload);
 
+  // FCM Push Notification (only for registered users)
   try {
-    const customer = await User.findById(order.customer).select('fcmToken name');
-    if (customer?.fcmToken) {
-      const titleMap = {
-        new_order: 'Order Placed!',
-        status_updated: 'Order Update',
-        rider_assigned: 'Rider Assigned',
-        order_cancelled: 'Order Cancelled',
-        order_rejected: 'Order Rejected',
-        payment_pending: 'Payment Required',
-        otp_sent: 'OTP Sent for Payment'
-      };
-      const bodyMap = {
-        pending: 'Your order has been received',
-        pending_payment: 'Complete payment to confirm your order',
-        pending_otp: 'Enter OTP to complete payment',
-        confirmed: 'Your order has been confirmed!',
-        preparing: 'Your food is being prepared',
-        out_for_delivery: 'Your order is out for delivery!',
-        delivered: 'Order delivered successfully!',
-        cancelled: 'Your order has been cancelled',
-        rejected: 'Your order was rejected'
-      };
+    if (order.customer) {
+      const customer = await User.findById(order.customer).select('fcmToken name');
+      if (customer?.fcmToken) {
+        const titleMap = { new_order: 'Order Placed!', status_updated: 'Order Update', rider_assigned: 'Rider Assigned' };
+        const bodyMap = { pending: 'Received', confirmed: 'Confirmed!', preparing: 'Being prepared', out_for_delivery: 'On the way!' };
 
-      await require('firebase-admin').messaging().send({
-        token: customer.fcmToken,
-        notification: {
-          title: titleMap[event] || 'Order Update',
-          body: bodyMap[order.status] || `Your order is now: ${order.status.replace('_', ' ')}`
-        },
-        data: { type: 'order_update', orderId: order._id.toString(), event }
-      });
-    }
-
-    if (order.rider && event === 'rider_assigned') {
-      const rider = await User.findById(order.rider).select('fcmToken');
-      if (rider?.fcmToken) {
         await require('firebase-admin').messaging().send({
-          token: rider.fcmToken,
+          token: customer.fcmToken,
           notification: {
-            title: 'New Delivery Assigned',
-            body: `Order #${order._id} – Pickup from restaurant`
+            title: titleMap[event] || 'Order Update',
+            body: bodyMap[order.status] || `Your order is now: ${order.status.replace('_', ' ')}`
           },
-          data: { type: 'new_assignment', orderId: order._id.toString() }
+          data: { type: 'order_update', orderId: order._id.toString() }
         });
       }
     }
@@ -104,15 +74,15 @@ const sendNotification = async (order, event, extra = {}) => {
   }
 };
 
-// ====================== CREATE ORDER (FULLY UPGRADED) ======================
+// ====================== CREATE REGISTERED USER ORDER ======================
 const createOrder = async (req, res) => {
-  let { items, addressId, paymentMethod = 'cod', promoCode } = req.body;
+  const { items, addressId, paymentMethod = 'cod', promoCode } = req.body;
   const customerId = req.user.id;
 
   const paymentMap = { cod: 'cash', easypaisa: 'easypaisa', jazzcash: 'jazzcash', bank: 'bank', card: 'card' };
-  const normalizedMethod = paymentMap[paymentMethod] || 'cash';
+  const method = paymentMap[paymentMethod] || 'cash';
 
-  if (!['cash', 'card', 'easypaisa', 'jazzcash', 'bank'].includes(normalizedMethod)) {
+  if (!['cash', 'card', 'easypaisa', 'jazzcash', 'bank'].includes(method)) {
     return res.status(400).json({ success: false, message: 'Invalid payment method' });
   }
 
@@ -129,25 +99,19 @@ const createOrder = async (req, res) => {
     for (const item of items) {
       const menuItem = await MenuItem.findById(item.menuItem);
       if (!menuItem?.isAvailable) continue;
-      const quantity = Math.max(1, Number(item.quantity) || 1);
+      const qty = Math.max(1, Number(item.quantity) || 1);
       orderItems.push({
         menuItem: menuItem._id,
         name: menuItem.name,
         priceAtOrder: menuItem.price,
-        quantity
+        quantity: qty
       });
-      subtotal += menuItem.price * quantity;
+      subtotal += menuItem.price * qty;
     }
 
-    if (orderItems.length === 0) {
-      return res.status(400).json({ success: false, message: 'No available items in cart' });
-    }
-
+    if (orderItems.length === 0) return res.status(400).json({ success: false, message: 'No items available' });
     if (subtotal < deliveryZone.minOrderAmount) {
-      return res.status(400).json({
-        success: false,
-        message: `Minimum order amount is PKR ${deliveryZone.minOrderAmount}`
-      });
+      return res.status(400).json({ success: false, message: `Minimum order amount is PKR ${deliveryZone.minOrderAmount}` });
     }
 
     let discount = 0;
@@ -162,7 +126,7 @@ const createOrder = async (req, res) => {
 
     const finalAmount = Math.max(0, subtotal + deliveryZone.deliveryFee - discount);
 
-    const baseOrderData = {
+    const baseData = {
       customer: customerId,
       items: orderItems,
       totalAmount: subtotal,
@@ -178,13 +142,18 @@ const createOrder = async (req, res) => {
 
     let order;
 
-    // === CASH ON DELIVERY ===
-    if (normalizedMethod === 'cash') {
-      order = await Order.create({ ...baseOrderData, paymentMethod: 'cash', status: 'pending', paymentStatus: 'pending' });
+    // Cash, Easypaisa, Jazzcash → Instant pending order
+    if (['cash', 'easypaisa', 'jazzcash'].includes(method)) {
+      order = await Order.create({
+        ...baseData,
+        paymentMethod: method,
+        status: 'pending',
+        paymentStatus: method === 'cash' ? 'pending' : 'paid',
+        paidAt: method !== 'cash' ? new Date() : null
+      });
     }
-
-    // === CARD PAYMENT (Stripe) ===
-    else if (normalizedMethod === 'card') {
+    // Card via Stripe
+    else if (method === 'card') {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(finalAmount * 100),
         currency: 'pkr',
@@ -193,26 +162,26 @@ const createOrder = async (req, res) => {
       });
 
       order = await Order.create({
-        ...baseOrderData,
+        ...baseData,
         paymentMethod: 'card',
         paymentIntentId: paymentIntent.id,
         status: 'pending_payment',
         paymentStatus: 'pending'
       });
 
-      await stripe.paymentIntents.update(paymentIntent.id, { metadata: { orderId: order._id.toString() } });
+      await stripe.paymentIntents.update(paymentIntent.id, {
+        metadata: { orderId: order._id.toString() }
+      });
 
-      const timeoutId = setTimeout(async () => {
-        const current = await Order.findById(order._id);
-        if (current?.status === 'pending_payment' && current?.paymentStatus === 'pending') {
-          await Order.findByIdAndUpdate(order._id, { status: 'cancelled', paymentStatus: 'canceled' });
+      // Auto-cancel after 15 mins if not paid
+      global.pendingOrderTimeouts[order._id.toString()] = setTimeout(async () => {
+        const o = await Order.findById(order._id);
+        if (o?.status === 'pending_payment') {
+          await Order.findByIdAndUpdate(o._id, { status: 'cancelled', paymentStatus: 'canceled' });
           await stripe.paymentIntents.cancel(paymentIntent.id).catch(() => {});
-          await sendNotification(current, 'order_cancelled');
-          delete global.pendingOrderTimeouts[order._id.toString()];
+          await sendNotification(o, 'order_cancelled');
         }
       }, AUTO_CANCEL_DELAY);
-
-      global.pendingOrderTimeouts[order._id.toString()] = timeoutId;
 
       await Cart.deleteOne({ user: customerId });
       await order.populate('address area items.menuItem customer');
@@ -220,85 +189,180 @@ const createOrder = async (req, res) => {
 
       return res.status(201).json({
         success: true,
-        message: 'Payment required',
+        message: 'Complete payment with card',
         order,
-        clientSecret: paymentIntent.client_secret,
-        paymentIntentId: paymentIntent.id
+        clientSecret: paymentIntent.client_secret
       });
     }
-
-    // === BANK TRANSFER ===
-    else if (normalizedMethod === 'bank') {
-      const tempRef = `FOOD-${Date.now().toString().slice(-6)}`;
+    // Bank Transfer
+    else if (method === 'bank') {
       order = await Order.create({
-        ...baseOrderData,
+        ...baseData,
         paymentMethod: 'bank',
         status: 'pending_payment',
-        paymentStatus: 'pending',
-        bankTransferReference: tempRef
-      });
-
-      const finalRef = `FOOD-${orderIdShort(order._id)}-${Date.now().toString().slice(-4)}`;
-      await Order.findByIdAndUpdate(order._id, { bankTransferReference: finalRef });
-      order.bankTransferReference = finalRef;
-    }
-
-    // === EASYPaisa / JAZZCASH (OTP Flow) ===
-    else if (['easypaisa', 'jazzcash'].includes(normalizedMethod)) {
-      const otp = otpGenerator.generate(6, { digits: true, upperCase: false, specialChars: false });
-      const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins
-
-      order = await Order.create({
-        ...baseOrderData,
-        paymentMethod: normalizedMethod,
-        status: 'pending_otp',
         paymentStatus: 'pending'
       });
+      const ref = `FOOD-${orderIdShort(order._id)}`;
+      await Order.findById
 
-      global.mobilePaymentOtps[order._id.toString()] = { otp, expiresAt, method: normalizedMethod };
+      order.bankTransferReference = ref;
     }
 
-    // Common post-creation
+    // Common cleanup & notifications
     await Cart.deleteOne({ user: customerId });
     await order.populate('address area items.menuItem customer');
-
     await sendNotification(order, 'new_order');
     if (io) io.to('admin').emit('orderUpdate', { event: 'new_order', order });
 
-    // === RETURN RESPONSES ===
-    if (normalizedMethod === 'bank') {
-      return res.status(201).json({
+    if (method === 'bank') {
+      return res.json({
         success: true,
-        message: 'Transfer money to complete order',
+        message: 'Please transfer money to confirm order',
         order,
-        bankDetails: {
-          ...BANK_DETAILS,
-          amount: finalAmount,
-          reference: order.bankTransferReference,
-          instructions: `Please transfer PKR ${finalAmount} with reference: ${order.bankTransferReference}`
-        }
+        bankDetails: { ...BANK_DETAILS, amount: finalAmount, reference: order.bankTransferReference }
       });
     }
 
-    if (['easypaisa', 'jazzcash'].includes(normalizedMethod)) {
-      return res.status(201).json({
-        success: true,
-        message: 'Enter OTP to complete payment',
-        order,
-        verifyOtpEndpoint: `/api/orders/${order._id}/verify-mobile-payment`,
-        expiresIn: 600
-      });
-    }
-
-    return res.status(201).json({ success: true, message: 'Order placed successfully!', order });
+    return res.json({
+      success: true,
+      message: 'Order placed successfully!',
+      order
+    });
 
   } catch (err) {
     console.error('createOrder error:', err);
-    res.status(500).json({ success: false, message: 'Failed to place order' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-// ====================== OTHER CONTROLLERS ======================
+// ====================== CREATE GUEST ORDER ======================
+const createGuestOrder = async (req, res) => {
+  const { name, phone, items, address, paymentMethod = 'cash', promoCode } = req.body;
+
+  if (!name || !phone || !items?.length || !address?.fullAddress || !address?.area) {
+    return res.status(400).json({ success: false, message: 'All guest fields required' });
+  }
+
+  const method = paymentMethod === 'cod' ? 'cash' : paymentMethod;
+  if (!['cash', 'easypaisa', 'jazzcash', 'bank'].includes(method)) {
+    return res.status(400).json({ success: false, message: 'Invalid payment method' });
+  }
+
+  try {
+    const area = await Area.findOne({ name: { $regex: new RegExp(address.area, 'i') } });
+    if (!area) return res.status(400).json({ success: false, message: 'Area not supported' });
+
+    const deliveryZone = await DeliveryZone.findOne({ area: area._id, isActive: true });
+    if (!deliveryZone) return res.status(400).json({ success: false, message: 'Delivery not available' });
+
+    const orderItems = [];
+    let subtotal = 0;
+
+    for (const item of items) {
+      const menuItem = await MenuItem.findById(item.menuItem);
+      if (!menuItem?.isAvailable) continue;
+      const qty = Math.max(1, item.quantity || 1);
+      orderItems.push({
+        menuItem: menuItem._id,
+        name: menuItem.name,
+        priceAtOrder: menuItem.price,
+        quantity: qty
+      });
+      subtotal += menuItem.price * qty;
+    }
+
+    if (orderItems.length === 0) return res.status(400).json({ success: false, message: 'No items available' });
+    if (subtotal < deliveryZone.minOrderAmount) {
+      return res.status(400).json({ success: false, message: `Minimum order: PKR ${deliveryZone.minOrderAmount}` });
+    }
+
+    let discount = 0;
+    let appliedDeal = null;
+    if (promoCode) {
+      const result = await applyAndTrackDeal(promoCode.trim().toUpperCase(), subtotal, null);
+      if (result?.discount > 0) {
+        discount = result.discount;
+        appliedDeal = { dealId: result.dealId, code: result.code };
+      }
+    }
+
+    const finalAmount = Math.max(0, subtotal + deliveryZone.deliveryFee - discount);
+
+    const baseData = {
+      guestInfo: { name: name.trim(), phone, isGuest: true },
+      items: orderItems,
+      totalAmount: subtotal,
+      deliveryFee: deliveryZone.deliveryFee,
+      discountApplied: discount,
+      finalAmount,
+      area: area._id,
+      deliveryZone: deliveryZone._id,
+      estimatedDelivery: deliveryZone.estimatedTime || '40-55 min',
+      appliedDeal,
+      addressDetails: {
+        fullAddress: address.fullAddress,
+        label: address.label || "Home",
+        floor: address.floor || "",
+        instructions: address.instructions || ""
+      }
+    };
+
+    let order;
+
+    if (['cash', 'easypaisa', 'jazzcash'].includes(method)) {
+      order = await Order.create({
+        ...baseData,
+        paymentMethod: method,
+        status: 'pending',
+        paymentStatus: method === 'cash' ? 'pending' : 'paid',
+        paidAt: method !== 'cash' ? new Date() : null
+      });
+    } else if (method === 'bank') {
+      order = await Order.create({
+        ...baseData,
+        paymentMethod: 'bank',
+        status: 'pending_payment',
+        paymentStatus: 'pending'
+      });
+      const ref = `GUEST-${orderIdShort(order._id)}`;
+      await Order.findByIdAndUpdate(order._id, { bankTransferReference: ref });
+      order.bankTransferReference = ref;
+
+      // Auto-cancel bank transfer after 15 mins
+      global.pendingOrderTimeouts[order._id.toString()] = setTimeout(async () => {
+        const o = await Order.findById(order._id);
+        if (o?.status === 'pending_payment') {
+          await Order.findByIdAndUpdate(o._id, { status: 'cancelled', paymentStatus: 'canceled' });
+          if (io) io.to('admin').emit('orderUpdate', { event: 'order_cancelled', order: o });
+        }
+      }, AUTO_CANCEL_DELAY);
+    }
+
+    await order.populate('area items.menuItem');
+    if (io) io.to('admin').emit('orderUpdate', { event: 'new_order', order, guest: true });
+
+    if (method === 'bank') {
+      return res.json({
+        success: true,
+        message: 'Please transfer money to confirm',
+        order,
+        bankDetails: { ...BANK_DETAILS, amount: finalAmount, reference: order.bankTransferReference }
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Order placed successfully!',
+      order
+    });
+
+  } catch (err) {
+    console.error('createGuestOrder error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// ====================== CUSTOMER ORDERS ======================
 const getCustomerOrders = async (req, res) => {
   try {
     const orders = await Order.find({ customer: req.user.id })
@@ -309,125 +373,63 @@ const getCustomerOrders = async (req, res) => {
       .sort({ placedAt: -1 });
     res.json({ success: true, orders });
   } catch (err) {
-    console.error('getCustomerOrders error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Error' });
   }
 };
 
 const getOrderById = async (req, res) => {
   try {
     const order = await Order.findOne({ _id: req.params.id, customer: req.user.id })
-      .populate('items.menuItem')
-      .populate('address')
-      .populate('area')
-      .populate('deliveryZone')
-      .populate('rider', 'name phone currentLocation');
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+      .populate('items.menuItem address area deliveryZone rider');
+    if (!order) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, order });
   } catch (err) {
-    console.error('getOrderById error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Error' });
   }
 };
 
 const cancelOrder = async (req, res) => {
   try {
     const order = await Order.findOne({ _id: req.params.id, customer: req.user.id });
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
-    if (!['pending', 'confirmed', 'pending_payment', 'pending_otp'].includes(order.status)) {
+    if (!order) return res.status(404).json({ success: false, message: 'Not found' });
+
+    if (!['pending', 'confirmed', 'pending_payment'].includes(order.status)) {
       return res.status(400).json({ success: false, message: 'Cannot cancel order at this stage' });
     }
+
     order.status = 'cancelled';
     await order.save();
     await sendNotification(order, 'order_cancelled');
-    if (io) io.to('admin').emit('orderUpdate', { event: 'order_cancelled', order });
-    res.json({ success: true, message: 'Order cancelled successfully', order });
+    res.json({ success: true, message: 'Order cancelled', order });
   } catch (err) {
-    console.error('cancelOrder error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Error' });
   }
 };
 
-const customerRejectOrder = async (req, res) => {
-  const { reason, note } = req.body;
-  try {
-    const order = await Order.findOne({ _id: req.params.id, customer: req.user.id });
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
-    if (!['pending', 'confirmed'].includes(order.status)) {
-      return res.status(400).json({ success: false, message: 'Cannot reject order at this stage' });
-    }
-    order.status = 'rejected';
-    order.rejectedBy = req.user.id;
-    order.rejectionReason = reason || 'Customer rejected';
-    order.rejectionNote = note;
-    await order.save();
-    await sendNotification(order, 'order_rejected');
-    if (io) io.to('admin').emit('orderUpdate', { event: 'order_rejected', order });
-    res.json({ success: true, message: 'Order rejected', order });
-  } catch (err) {
-    console.error('customerRejectOrder error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-const adminRejectOrder = async (req, res) => {
-  const { reason, note } = req.body;
-  try {
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
-    if (order.status === 'delivered') {
-      return res.status(400).json({ success: false, message: 'Cannot reject delivered order' });
-    }
-    order.status = 'rejected';
-    order.rejectedBy = req.user.id;
-    order.rejectionReason = reason || 'Admin rejected';
-    order.rejectionNote = note;
-    await order.save();
-    await sendNotification(order, 'order_rejected');
-    if (io) io.to('admin').emit('orderUpdate', { event: 'order_rejected', order });
-    res.json({ success: true, message: 'Order rejected by admin', order });
-  } catch (err) {
-    console.error('adminRejectOrder error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
+// ====================== ADMIN CONTROLS ======================
 const updateOrderStatus = async (req, res) => {
   const { status } = req.body;
-  const allowed = ['confirmed', 'preparing', 'out_for_delivery', 'delivered', 'rejected'];
-  if (!allowed.includes(status)) {
+  if (!['confirmed', 'preparing', 'out_for_delivery', 'delivered', 'rejected'].includes(status)) {
     return res.status(400).json({ success: false, message: 'Invalid status' });
   }
   try {
-    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true }).populate('rider', 'name phone');
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
     await sendNotification(order, 'status_updated');
-    if (io) io.to('admin').emit('orderUpdate', { event: 'status_updated', order });
     res.json({ success: true, order });
   } catch (err) {
-    console.error('updateOrderStatus error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Error' });
   }
 };
 
 const assignRider = async (req, res) => {
   const { riderId } = req.body;
   try {
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { rider: riderId, status: 'confirmed' },
-      { new: true }
-    ).populate('rider', 'name phone');
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    const order = await Order.findByIdAndUpdate(req.params.id, { rider: riderId, status: 'confirmed' }, { new: true });
     await sendNotification(order, 'rider_assigned');
-    if (io) {
-      io.to(`rider:${riderId}`).emit('newAssignment', { orderId: order._id, order });
-      io.to('admin').emit('orderUpdate', { event: 'rider_assigned', order });
-    }
-    res.json({ success: true, message: 'Rider assigned', order });
+    if (io) io.to(`rider:${riderId}`).emit('newAssignment', { order });
+    res.json({ success: true, order });
   } catch (err) {
-    console.error('assignRider error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Error' });
   }
 };
 
@@ -440,51 +442,23 @@ const getAllOrders = async (req, res) => {
       .populate('rider', 'name phone')
       .populate('area', 'name')
       .sort({ placedAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .skip((page - 1) * limit)
+      .limit(+limit);
     const total = await Order.countDocuments(query);
     res.json({ success: true, orders, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    console.error('getAllOrders error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Error' });
   }
 };
 
-// ====================== VERIFY MOBILE PAYMENT OTP ======================
-const verifyMobilePaymentOtp = async (req, res) => {
-  const { otp } = req.body;
-  const orderId = req.params.id;
-  const stored = global.mobilePaymentOtps[orderId];
-
-  if (!stored || Date.now() > stored.expiresAt) {
-    return res.status(400).json({ success: false, message: 'OTP expired or invalid' });
-  }
-  if (stored.otp !== otp.trim()) {
-    return res.status(400).json({ success: false, message: 'Incorrect OTP' });
-  }
-
-  const order = await Order.findByIdAndUpdate(
-    orderId,
-    { status: 'pending', paymentStatus: 'paid', paidAt: new Date() },
-    { new: true }
-  ).populate('address area items.menuItem customer');
-
-  delete global.mobilePaymentOtps[orderId];
-  await sendNotification(order, 'new_order');
-  if (io) io.to('admin').emit('orderUpdate', { event: 'new_order', order });
-
-  res.json({ success: true, message: 'Payment confirmed! Order placed.', order });
-};
-
-// ====================== GENERATE PDF RECEIPT ======================
 const generateReceipt = async (req, res) => {
   const order = await Order.findById(req.params.id)
     .populate('customer', 'name phone')
-    .populate('address', 'label fullAddress')
+    .populate('address', 'fullAddress')
     .populate('items.menuItem', 'name');
 
-  if (!order || order.customer._id.toString() !== req.user.id) {
-    return res.status(404).json({ success: false, message: 'Order not found' });
+  if (!order || (order.customer && order.customer._id.toString() !== req.user.id)) {
+    return res.status(404).json({ success: false, message: 'Not found' });
   }
 
   const doc = new PDFDocument({ margin: 50 });
@@ -492,38 +466,146 @@ const generateReceipt = async (req, res) => {
   res.setHeader('Content-Disposition', `attachment; filename="Receipt-${order._id}.pdf"`);
   doc.pipe(res);
 
-  doc.fontSize(20).text('FoodExpress - Order Receipt', { align: 'center' });
+  doc.fontSize(20).text('FoodExpress Receipt', { align: 'center' });
   doc.moveDown();
   doc.fontSize(12).text(`Order ID: ${order._id}`);
-  doc.text(`Date: ${new Date(order.placedAt).toLocaleString('en-PK')}`);
-  doc.text(`Status: ${order.status.toUpperCase()}`);
-  doc.text(`Payment: ${order.paymentMethod.toUpperCase()} - ${order.paymentStatus.toUpperCase()}`);
+  doc.text(`Date: ${new Date(order.placedAt).toLocaleString()}`);
+  doc.text(`Name: ${order.guestInfo?.name || order.customer?.name || 'Guest'}`);
+  doc.text(`Phone: ${order.guestInfo?.phone || order.customer?.phone || ''}`);
   doc.moveDown();
   doc.text('Items:', { underline: true });
-  order.items.forEach(item => {
-    doc.text(`${item.quantity}x ${item.menuItem.name}  } - PKR ${item.priceAtOrder * item.quantity}`);
-  });
+  order.items.forEach(i => doc.text(`${i.quantity}x ${i.menuItem.name} - PKR ${i.priceAtOrder * i.quantity}`));
   doc.moveDown();
   doc.text(`Subtotal: PKR ${order.totalAmount}`);
-  doc.text(`Delivery Fee: PKR ${order.deliveryFee}`);
-  if (order.discountApplied > 0) doc.text(`Discount: -PKR ${order.discountApplied}`);
-  doc.fontSize(14).text(`Total Paid: PKR ${order.finalAmount}`, { bold: true });
+  doc.text(`Delivery: PKR ${order.deliveryFee}`);
+  if (order.discountApplied) doc.text(`Discount: -PKR ${order.discountApplied}`);
+  doc.fontSize(14).text(`Total: PKR ${order.finalAmount}`, { bold: true });
   doc.moveDown(2);
-  doc.fontSize(10).text('Thank you for your order!', { align: 'center' });
+  doc.fontSize(10).text('Thank you!', { align: 'center' });
   doc.end();
+};
+
+const adminRejectOrder = async (req, res) => {
+  const { reason, note } = req.body;
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    if (order.status === 'delivered') {
+      return res.status(400).json({ success: false, message: 'Cannot reject delivered order' });
+    }
+
+    order.status = 'rejected';
+    order.rejectedBy = req.user.id;
+    order.rejectionReason = reason || 'Admin rejected';
+    order.rejectionNote = note || '';
+    await order.save();
+
+    await sendNotification(order, 'order_rejected');
+    if (io) io.to('admin').emit('orderUpdate', { event: 'order_rejected', order });
+
+    res.json({ success: true, message: 'Order rejected', order });
+  } catch (err) {
+    console.error('adminRejectOrder error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+const customerRejectOrder = async (req, res) => {
+  const { reason, note } = req.body;
+  try {
+    const order = await Order.findOne({ _id: req.params.id, customer: req.user.id });
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    if (!['pending', 'confirmed'].includes(order.status)) {
+      return res.status(400).json({ success: false, message: 'Cannot reject order at this stage' });
+    }
+
+    order.status = 'rejected';
+    order.rejectedBy = req.user.id;
+    order.rejectionReason = reason || 'Customer rejected';
+    order.rejectionNote = note || '';
+    await order.save();
+
+    await sendNotification(order, 'order_rejected');
+    if (io) io.to('admin').emit('orderUpdate', { event: 'order_rejected', order });
+
+    res.json({ success: true, message: 'Order rejected', order });
+  } catch (err) {
+    console.error('customerRejectOrder error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// ====================== PUBLIC TRACKING ======================
+const trackOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId)
+      .select('_id status placedAt finalAmount estimatedDelivery paymentMethod paymentStatus guestInfo addressDetails items totalAmount deliveryFee discountApplied rider bankTransferReference')
+      .populate('items.menuItem', 'name image')
+      .populate('rider', 'name phone');
+
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    const isGuestOrder = order.guestInfo?.isGuest === true;
+    const isOwner = req.user && order.customer && order.customer.toString() === req.user.id;
+
+    if (!isGuestOrder && !isOwner) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+
+    const shortId = order._id.toString().slice(-6).toUpperCase();
+
+    res.json({
+      success: true,
+      order: {
+        ...order.toObject(),
+        shortId,
+        trackUrl: `${process.env.APP_URL || 'https://yourapp.com'}/track/${order._id}`
+      }
+    });
+  } catch (err) {
+    console.error('trackOrderById error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+const trackOrdersByPhone = async (req, res) => {
+  const { phone } = req.body;
+  try {
+    const orders = await Order.find({
+      'guestInfo.phone': phone.trim(),
+      'guestInfo.isGuest': true
+    })
+      .select('_id status placedAt finalAmount estimatedDelivery paymentMethod paymentStatus')
+      .sort({ placedAt: -1 })
+      .limit(10);
+
+    res.json({
+      success: true,
+      orders: orders.map(o => ({
+        ...o.toObject(),
+        shortId: o._id.toString().slice(-6).toUpperCase(),
+        trackUrl: `${process.env.APP_URL || 'https://yourapp.com'}/track/${o._id}`
+      }))
+    });
+  } catch (err) {
+    console.error('trackOrdersByPhone error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 };
 
 // ====================== EXPORTS ======================
 module.exports = {
   createOrder,
+  createGuestOrder,
   getCustomerOrders,
   getOrderById,
   cancelOrder,
-  customerRejectOrder,
-  adminRejectOrder,
   updateOrderStatus,
   assignRider,
   getAllOrders,
-  verifyMobilePaymentOtp,
-  generateReceipt
+  generateReceipt,
+  adminRejectOrder,
+  customerRejectOrder,
+  trackOrderById,
+  trackOrdersByPhone
 };

@@ -10,21 +10,32 @@ const orderItemSchema = new mongoose.Schema({
 });
 
 const orderSchema = new mongoose.Schema({
-  customer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  customer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+  guestInfo: {
+    name: { type: String },
+    phone: { type: String },
+    isGuest: { type: Boolean, default: false }
+  },
+
   items: [orderItemSchema],
 
-  // Pricing
-  totalAmount: { type: Number, required: true }, // subtotal (items only)
+  totalAmount: { type: Number, required: true },
   deliveryFee: { type: Number, required: true, default: 0 },
   discountApplied: { type: Number, default: 0 },
   finalAmount: { type: Number, required: true },
 
-  // Address & Zone
-  address: { type: mongoose.Schema.Types.ObjectId, ref: 'Address', required: true },
+  address: { type: mongoose.Schema.Types.ObjectId, ref: 'Address' },
+  addressDetails: {
+    fullAddress: String,
+    label: String,
+    floor: String,
+    instructions: String
+  },
+
   area: { type: mongoose.Schema.Types.ObjectId, ref: 'Area', required: true },
   deliveryZone: { type: mongoose.Schema.Types.ObjectId, ref: 'DeliveryZone' },
 
-  // Status
   status: {
     type: String,
     enum: [
@@ -45,7 +56,6 @@ const orderSchema = new mongoose.Schema({
   rejectionReason: String,
   rejectionNote: String,
 
-  // Payment - NOW SUPPORTS ALL METHODS
   paymentMethod: {
     type: String,
     enum: ['cash', 'card', 'easypaisa', 'jazzcash', 'bank'],
@@ -56,14 +66,13 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'paid', 'failed', 'canceled', 'refunded'],
     default: 'pending'
   },
-  paymentIntentId: { type: String }, // Stripe only
+  paymentIntentId: { type: String },
+  bankTransferReference: { type: String },
   paidAt: Date,
   refundedAt: Date,
-  receiptUrl: String,
 
   estimatedDelivery: { type: String, default: '40-55 min' },
 
-  // Deal snapshot
   appliedDeal: {
     dealId: { type: mongoose.Schema.Types.ObjectId, ref: 'Deal' },
     code: String,
@@ -79,10 +88,11 @@ const orderSchema = new mongoose.Schema({
 
 // Indexes
 orderSchema.index({ customer: 1, placedAt: -1 });
+orderSchema.index({ 'guestInfo.phone': 1, placedAt: -1 });
 orderSchema.index({ rider: 1, status: 1 });
 orderSchema.index({ status: 1, placedAt: -1 });
 orderSchema.index({ area: 1, placedAt: -1 });
 orderSchema.index({ paymentIntentId: 1 }, { unique: true, sparse: true });
-orderSchema.index({ 'appliedDeal.dealId': 1 });
+orderSchema.index({ bankTransferReference: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Order', orderSchema);
