@@ -12,10 +12,13 @@ const areaSchema = new mongoose.Schema({
     lat: { type: Number, required: true },
     lng: { type: Number, required: true }
   },
-  isActive: { type: Boolean, default: true }
+  isActive: { type: Boolean, default: false } // Start inactive until zone is set
 }, { timestamps: true });
 
+// Geo index
 areaSchema.index({ polygon: '2dsphere' });
+
+// Query helpers
 areaSchema.index({ city: 1, isActive: 1 });
 areaSchema.index({ name: 1, city: 1 });
 
