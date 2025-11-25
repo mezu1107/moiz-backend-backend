@@ -22,6 +22,11 @@ const {
 } = require('../../controllers/order/orderController');
 
 const {
+  getOrderAnalytics,
+  getRealtimeStats
+} = require('../../controllers/order/orderAnalyticsController');
+
+const {
   createOrder: createOrderSchema,
   createGuestOrder: createGuestOrderSchema,
   trackByPhone: trackByPhoneSchema,
@@ -30,16 +35,17 @@ const {
   rejectOrder: rejectOrderSchema
 } = require('../../validation/schemas/orderSchemas');
 
-// ====================== PUBLIC TRACKING ROUTES ======================
+// PUBLIC TRACKING
 router.get('/track/:orderId', trackOrderById);
-router.post('/track/by-phone', trackByPhoneSchema, validate, trackOrdersByPhone); // ← Fixed: added validation
+router.post('/track/by-phone', trackByPhoneSchema, validate, trackOrdersByPhone);
 
-// ====================== GUEST ORDER ======================
+// GUEST ORDER
 router.post('/guest', createGuestOrderSchema, validate, createGuestOrder);
 
-// ====================== AUTH REQUIRED ======================
+// AUTH REQUIRED
 router.use(auth);
 
+// Customer Routes
 router.post('/', createOrderSchema, validate, createOrder);
 router.get('/my', getCustomerOrders);
 router.get('/:id', getOrderById);
@@ -47,14 +53,18 @@ router.patch('/:id/cancel', cancelOrder);
 router.patch('/:id/reject', rejectOrderSchema, validate, customerRejectOrder);
 router.get('/:id/receipt', generateReceipt);
 
-// ====================== ADMIN & RIDER ======================
+// Admin & Rider
 router.use(role(['admin', 'rider']));
 router.patch('/:id/status', updateStatusSchema, validate, updateOrderStatus);
 
-// ====================== ADMIN ONLY ======================
+// Admin Only
 router.use(role(['admin']));
 router.patch('/:id/admin-reject', rejectOrderSchema, validate, adminRejectOrder);
 router.patch('/:id/assign', assignRiderSchema, validate, assignRider);
 router.get('/', getAllOrders);
+
+// Analytics (Admin Only)
+router.get('/analytics', getOrderAnalytics);
+router.get('/realtime', getRealtimeStats);
 
 module.exports = router;

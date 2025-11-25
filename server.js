@@ -1,166 +1,174 @@
-// server.js  ← FINAL VERSION (WORKS 100% – NOV 2025)
+// server.js — FINAL PAKISTAN EDITION — NOVEMBER 2025 → 2030 TAK CHALEGA
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const connectDB = require('./src/config/db');
 const logger = require('./src/utils/logger');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 
 const app = express();
 const server = http.createServer(app);
 
-// ==================== SOCKET.IO SETUP ====================
+// Socket.IO with proper cleanup
 const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL?.split(',').map(url => url.trim()) || [
-      'http://localhost:3000',
-      'http://localhost:3001'
-    ],
-    methods: ['GET', 'POST'],
-    credentials: true
-  },
+  cors: { origin: process.env.CLIENT_URL || "*", credentials: true },
+  maxHttpBufferSize: 1e8, // 100MB for large payloads if needed
   pingTimeout: 60000,
-  pingInterval: 25000,
-  maxHttpBufferSize: 1e8
+  pingInterval: 25000
 });
-
 global.io = io;
 require('./src/sockets/order/orderSocket')(io);
 
-// ==================== DATABASE ====================
-connectDB()
-  .then(() => logger.info('MongoDB Connected Successfully'))
-  .catch(err => {
-    logger.error('MongoDB Connection Failed:', err);
-    process.exit(1);
+// Graceful shutdown helper
+const gracefulShutdown = (signal) => {
+  logger.info(`Received ${signal}. Shutting down gracefully...`);
+  server.close(() => {
+    logger.info('HTTP server closed.');
+    if (global.io) global.io.close();
+    process.exit(0);
   });
+};
 
-// ==================== MIDDLEWARES ====================
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000')
-  .split(',')
-  .map(url => url.trim());
+// STRIPE WEBHOOK — SABSE GENIUS DUAL MODE (TESTING + PRODUCTION)
+const stripeWebhookRoutes = require('./src/routes/webhook/stripeWebhookRoutes');
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
-      callback(null, true);
-    } else {
-      logger.warn(`CORS blocked: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
+if (process.env.TESTING_MODE === 'true' || process.env.NODE_ENV !== 'production') {
+  console.log("STRIPE WEBHOOK → TESTING MODE ACTIVE (Postman 100% chalega)");
+  app.use('/api/webhook/stripe', express.raw({ type: 'application/json' }), (req, res, next) => {
+    // Auto-parse JSON body (Postman sends JSON)
+    let payload = req.body;
+    if (Buffer.isBuffer(payload)) {
+      try { payload = JSON.parse(payload.toString()); } catch (e) { payload = req.body; }
     }
-  },
-  credentials: true
-}));
 
-app.use(helmet({ contentSecurityPolicy: false }));
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === 'production' ? 500 : 10000,
-  message: { success: false, message: 'Too many requests from this IP' }
-}));
+    // Simulate real Stripe event structure
+    req.stripeEvent = {
+      id: `evt_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      type: payload.type || 'payment_intent.succeeded',
+      data: { object: payload.data?.object || payload },
+      created: Math.floor(Date.now() / 1000)
+    };
 
+    // Add fake signature header for consistency (optional)
+    req.headers['stripe-signature'] = 'testing_mode_bypass';
+    next();
+  }, stripeWebhookRoutes);
+} else {
+  const verifyStripeWebhook = require('./src/middleware/stripe/verifyStripeWebhook');
+  app.use('/api/webhook/stripe', express.raw({ type: 'application/json' }), verifyStripeWebhook, stripeWebhookRoutes);
+  console.log("STRIPE WEBHOOK → PRODUCTION MODE (Signature Verified)");
+}
+
+// Middlewares
+app.use(require('cors')({ 
+  origin: process.env.CLIENT_URL || "*", 
+  credentials: true 
+}));
+app.use(require('helmet')({ 
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false 
+}));
+app.use(require('compression')());
 app.use('/uploads', express.static('uploads', { maxAge: '30d' }));
-
-// Stripe webhook needs raw body
-app.use('/webhook/stripe', express.raw({ type: 'application/json' }));
-
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// ==================== ALL YOUR API ROUTES ====================
-app.use('/api/auth', require('./src/routes/auth/authRoutes'));
-app.use('/api/address', require('./src/routes/address/addressRoutes'));
-app.use('/api/area', require('./src/routes/area/areaRoutes'));
-app.use('/api/cart', require('./src/routes/cart/cartRoutes'));
-app.use('/api/menu', require('./src/routes/menu/menuRoutes'));
-app.use('/api/orders', require('./src/routes/order/orderRoutes'));
-app.use('/api/rider', require('./src/routes/rider/riderRoutes'));
-app.use('/api/deals', require('./src/routes/deal/dealRoutes'));
-app.use('/api/admin', require('./src/routes/admin/adminRoutes'));
-app.use('/api/admin/dashboard', require('./src/routes/admin/dashboardRoutes'));
-app.use('/api/upload', require('./src/routes/upload/uploadRoutes'));
-app.use('/api/auth/user', require('./src/routes/auth/userRoutes'));
-app.use('/webhook/stripe', require('./src/routes/webhook/stripeRoutes'));
+// Health Check with Real DB Status
+app.get('/health', async (req, res) => {
+  let dbStatus = 'Disconnected';
+  try {
+    await require('mongoose').connection.db.admin().ping();
+    dbStatus = 'Connected';
+  } catch (err) { dbStatus = 'Error'; }
 
-// ==================== HEALTH CHECK ====================
-app.get('/health', (req, res) => {
   res.json({
-    status: 'OK',
-    message: 'Backend is live — ready to take over Pakistan',
+    status: 'LIVE',
+    message: 'FoodApp Pakistan — 1000% Power Mein',
+    environment: process.env.NODE_ENV,
+    testingMode: process.env.TESTING_MODE === 'true',
+    stripeWebhook: process.env.TESTING_MODE === 'true' ? 'TESTING (Bypassed)' : 'PRODUCTION (Verified)',
+    dbStatus,
+    uptime: process.uptime(),
     time: new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' }),
-    sockets: io.engine.clientsCount,
-    env: process.env.NODE_ENV
+    version: 'v2.5 — November 2025 — Pakistan #1 Food App'
   });
 });
 
-// ==================== 404 CATCH-ALL (THIS IS THE CORRECT WAY – NO MORE CRASH) ====================
-app.use((req, res, next) => {
-  logger.warn(`404 → ${req.method} ${req.originalUrl}`);
-  res.status(404).json({
-    success: false,
-    message: 'Invalid API route or method',
-    tip: `Use POST for /api/auth/register, not ${req.method}`,
-    path: req.originalUrl,
-    method: req.method,
-    hint: 'Register & Login → POST only'
-  });
+// Load Routes Safely
+const routes = [
+  ['/api/auth', './src/routes/auth/authRoutes'],
+  ['/api/upload', './src/routes/upload/uploadRoutes'],
+  ['/api/address', './src/routes/address/addressRoutes'],
+  ['/api/area', './src/routes/area/areaRoutes'],
+  ['/api/cart', './src/routes/cart/cartRoutes'],
+  ['/api/menu', './src/routes/menu/menuRoutes'],
+  ['/api/order', './src/routes/order/orderRoutes'],
+  ['/api/deal', './src/routes/deal/dealRoutes'],
+  ['/api/rider', './src/routes/rider/riderRoutes'],
+  ['/api/rider/dashboard', './src/routes/rider/riderDashboardRoutes'],
+  ['/api/admin/customers', './src/routes/admin/userRoutes'],
+  ['/api/admin/riders', './src/routes/admin/riderAdminRoutes'],
+  ['/api/admin', './src/routes/admin/adminRoutes'],
+];
+
+routes.forEach(([path, file]) => {
+  try {
+    app.use(path, require(file));
+    logger.info(`Route loaded: ${path}`);
+  } catch (err) {
+    logger.error(`Route load failed: ${path} → ${err.message}`);
+  }
 });
 
-// ==================== GLOBAL ERROR HANDLER (MUST BE LAST) ====================
+// 404 & Global Error Handler
+// app.use('*', (req, res) => {
+//   res.status(404).json({ success: false, message: 'API Route not found' });
+// });
+
 app.use((err, req, res, next) => {
-  // JWT / Auth errors
-  if (err.name === 'UnauthorizedError' || err.message?.includes('token')) {
-    return res.status(401).json({
-      success: false,
-      message: 'Access denied. Token missing or invalid'
-    });
-  }
-
-  // Mongoose validation
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({
-      success: false,
-      message: 'Validation failed',
-      errors: Object.values(err.errors).map(e => e.message)
-    });
-  }
-
-  // Duplicate key
-  if (err.code === 11000) {
-    return res.status(400).json({
-      success: false,
-      message: 'This value already exists'
-    });
-  }
-
-  // Log everything else
-  logger.error('Server Error:', {
+  logger.error('UNHANDLED ERROR:', {
     message: err.message,
     stack: err.stack,
     url: req.originalUrl,
     method: req.method,
-    ip: req.ip
+    body: req.body
   });
-
-  res.status(500).json({
+  res.status(err.status || 500).json({
     success: false,
-    message: process.env.NODE_ENV === 'production'
-      ? 'Something went wrong'
-      : err.message
+    message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message
   });
 });
 
-// ==================== START SERVER ====================
-const PORT = process.env.PORT || 5000;
-
-server.listen(PORT, '0.0.0.0', () => {
-  console.log('\n SERVER IS LIVE');
-  console.log(` Port: http://localhost:${PORT}`);
-  console.log(` Health: http://localhost:${PORT}/health`);
-  console.log(` Env: ${process.env.NODE_ENV}`);
-  console.log(` Time: ${new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' })}\n`);
-  logger.info(`Server started on port ${PORT}`);
+// Graceful Shutdown
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('uncaughtException', (err) => {
+  logger.error('UNCAUGHT EXCEPTION:', err);
+  gracefulShutdown('uncaughtException');
 });
+process.on('unhandledRejection', (err) => {
+  logger.error('UNHANDLED REJECTION:', err);
+});
+
+// DB + Server Start
+const startServer = async () => {
+  try {
+    await connectDB();
+    logger.info('MongoDB Connected Successfully');
+
+    const PORT = process.env.PORT || 5000;
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log('\n FOODAPP PAKISTAN — SERVER LIVE!');
+      console.log(` Server   → http://localhost:${PORT}`);
+      console.log(` Webhook  → http://localhost:${PORT}/api/webhook/stripe`);
+      console.log(` Mode     → ${process.env.TESTING_MODE === 'true' ? 'TESTING (Postman Ready)' : 'PRODUCTION (Live)'}`);
+      console.log(` Time     → ${new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' })}\n`);
+    });
+
+  } catch (err) {
+    logger.error('DB Connection Failed:', err);
+    setTimeout(startServer, 5000);
+  }
+};
+
+startServer();

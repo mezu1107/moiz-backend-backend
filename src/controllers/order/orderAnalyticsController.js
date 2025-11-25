@@ -1,394 +1,287 @@
 // src/controllers/order/orderAnalyticsController.js
-const Order = require('../../models/order/Order');
-const User = require('../../models/user/User');
-const moment = require('moment-timezone');
+// FINAL PRODUCTION VERSION — NOVEMBER 2025 — PAKISTAN'S BEST FOOD APP ANALYTICS
 
-// Set timezone to Pakistan
+const Order = require('../../models/order/Order');
+const Area = require('../../models/area/Area');
+const moment = require('moment-timezone');
 moment.tz.setDefault('Asia/Karachi');
 
 /**
- * GET /api/orders/analytics
- * Full business analytics dashboard
+ * GET /api/order/analytics
+ * Full Business Intelligence Dashboard
  */
 const getOrderAnalytics = async (req, res) => {
   try {
     const { period = '7d', startDate, endDate } = req.query;
-    const now = new Date();
-    let start, end;
+
+    let start, end = moment().endOf('day').toDate();
 
     if (startDate && endDate) {
-      start = new Date(startDate);
-      end = new Date(endDate);
+      start = moment(startDate).startOf('day').toDate();
+      end = moment(endDate).endOf('day').toDate();
     } else {
-      switch (period) {
-        case '24h':
-          start = moment(now).subtract(24, 'hours').toDate();
-          break;
-        case '7d':
-          start = moment(now).subtract(7, 'days').toDate();
-          break;
-        case '30d':
-          start = moment(now).subtract(30, 'days').toDate();
-          break;
-        case '90d':
-          start = moment(now).subtract(90, 'days').toDate();
-          break;
-        default:
-          start = moment(now).subtract(7, 'days').toDate();
-      }
-      end = now;
+      const periods = { '24h': 1, '7d': 7, '30d': 30, '90d': 90, 'today': 0 };
+      const days = periods[period] ?? 7;
+      start = days === 0 
+        ? moment().startOf('day').toDate()
+        : moment().subtract(days, 'days').startOf('day').toDate();
     }
 
-    const match = {
+    // Only count successful/in-progress orders (exclude cancelled/rejected)
+    const successMatch = {
       placedAt: { $gte: start, $lte: end },
       status: { $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery'] }
     };
 
-    const totalOrders = await Order.countDocuments(match);
-    const totalRevenue = await Order.aggregate([
-      { $match: match },
-      { $group: { _id: null, revenue: { $sum: '$finalAmount' } } }
-    ]);
-
-    const avgOrderValue =
-      totalOrders > 0
-        ? (totalRevenue[0]?.revenue || 0) / totalOrders
-        : 0;
-
-    const dailyData = await Order.aggregate([
-      { $match: { ...match, placedAt: { $exists: true } } },
-      {
-        $group: {
-          _id: {
-            $dateToString: {
-              format: '%Y-%m-%d',
-              date: '$placedAt',
-              timezone: 'Asia/Karachi'
-            }
-          },
-          orders: { $sum: 1 },
-          revenue: { $sum: '$finalAmount' },
-          discount: { $sum: '$discountApplied' }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
-
-    const paymentMethodStats = await Order.aggregate([
-      { $match: match },
-      {
-        $group: {
-          _id: '$paymentMethod',
-          count: { $sum: 1 },
-          amount: { $sum: '$finalAmount' }
-        }
-      }
-    ]);
-
-    // ✅ FIXED: Missing bracket
-    const topAreas = await Order.aggregate([
-      { $match: match },
-      {
-        $lookup: {
-          from: 'areas',
-          localField: 'area',
-          foreignField: '_id',
-          as: 'areaInfo'
-        }
-      },
-      { $unwind: '$areaInfo' },
-      {
-        $group: {
-          _id: '$areaInfo.name',
-          orders: { $sum: 1 },
-          revenue: { $sum: '$finalAmount' }
-        }
-      },
-      { $sort: { orders: -1 } },
-      { $limit: 10 }
-    ]);
-
-    const peakHours = await Order.aggregate([
-      { $match: match },
-      {
-        $group: {
-          _id: {
-            $hour: { date: '$placedAt', timezone: 'Asia/Karachi' }
-          },
-          orders: { $sum: 1 }
-        }
-      },
-      { $sort: { orders: -1 } },
-      { $limit: 6 }
-    ]);
-
-    const dealPerformance = await Order.aggregate([
-      { $match: { ...match, 'appliedDeal.dealId': { $exists: true } } },
-      {
-        $group: {
-          _id: '$appliedDeal.dealId',
-          code: { $first: '$appliedDeal.code' },
-          uses: { $sum: 1 },
-          discountGiven: { $sum: '$discountApplied' },
-          revenue: { $sum: '$finalAmount' }
-        }
-      },
-      {
-        $lookup: {
-          from: 'deals',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'deal'
-        }
-      },
-      { $unwind: { path: '$deal', preserveNullAndEmptyArrays: true } },
-      {
-        $project: {
-          code: { $ifNull: ['$code', '$deal.code'] },
-          title: { $ifNull: ['$deal.title', 'Deleted Deal'] },
-          uses: 1,
-          discountGiven: 1,
-          revenue: 1
-        }
-      },
-      { $sort: { uses: -1 } },
-      { $limit: 10 }
-    ]);
-
-    const summary = {
-      period: { start: start.toISOString(), end: end.toISOString() },
-      totalOrders,
-      totalRevenue: Number((totalRevenue[0]?.revenue || 0).toFixed(2)),
-      avgOrderValue: Number(avgOrderValue.toFixed(2)),
-      totalDiscountGiven: Number(
-        dailyData.reduce((sum, d) => sum + (d.discount || 0), 0).toFixed(2)
-      )
+    const allMatch = {
+      placedAt: { $gte: start, $lte: end }
     };
 
-    res.json({
-      success: true,
-      summary,
-      charts: {
-        dailyTrend: dailyData,
-        paymentMethods: paymentMethodStats,
-        topAreas,
-        peakHours,
-        dealPerformance
-      }
-    });
-  } catch (err) {
-    console.error('getOrderAnalytics error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
+    const [
+      revenueResult,
+      totalOrders,
+      cancelledCount,
+      dailyTrend,
+      paymentBreakdown,
+      topAreas,
+      peakHours,
+      topDeals,
+      guestVsRegistered
+    ] = await Promise.all([
 
-/**
- * GET /api/orders/realtime
- * Live dashboard stats
- */
-const getRealtimeStats = async (req, res) => {
-  try {
-    const today = moment().startOf('day');
-    const yesterday = moment().subtract(1, 'day').startOf('day');
-
-    const [todayStats, yesterdayStats] = await Promise.all([
+      // 1. Total Revenue
       Order.aggregate([
-        {
-          $match: {
-            placedAt: { $gte: today.toDate() },
-            status: {
-              $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery']
-            }
-          }
-        },
+        { $match: successMatch },
+        { $group: { _id: null, revenue: { $sum: '$finalAmount' } } }
+      ]),
+
+      // 2. Total Successful Orders
+      Order.countDocuments(successMatch),
+
+      // 3. Cancelled + Rejected
+      Order.countDocuments({ ...allMatch, status: { $in: ['cancelled', 'rejected'] } }),
+
+      // 4. Daily Trend (Date-wise)
+      Order.aggregate([
+        { $match: { ...successMatch } },
         {
           $group: {
-            _id: null,
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$placedAt', timezone: 'Asia/Karachi' } },
             orders: { $sum: 1 },
-            revenue: { $sum: '$finalAmount' }
+            revenue: { $sum: '$finalAmount' },
+            avgOrderValue: { $avg: '$finalAmount' },
+            discount: { $sum: '$discountApplied' }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]),
+
+      // 5. Payment Method Breakdown
+      Order.aggregate([
+        { $match: successMatch },
+        {
+          $group: {
+            _id: '$paymentMethod',
+            count: { $sum: 1 },
+            revenue: { $sum: '$finalAmount' },
+            percentage: { $sum: { $divide: [100, totalOrders || 1] } } // Will fix in JS
           }
         }
       ]),
 
+      // 6. Top 10 Areas
       Order.aggregate([
+        { $match: successMatch },
+        { $lookup: { from: 'areas', localField: 'area', foreignField: '_id', as: 'areaInfo' } },
+        { $unwind: { path: '$areaInfo', preserveNullAndEmptyArrays: true } },
         {
-          $match: {
-            placedAt: { $gte: yesterday.toDate(), $lt: today.toDate() },
-            status: {
-              $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery']
-            }
+          $group: {
+            _id: '$areaInfo.name',
+            areaId: { $first: '$area._id' },
+            orders: { $sum: 1 },
+            revenue: { $sum: '$finalAmount' }
           }
         },
-        { $group: { _id: null, orders: { $sum: 1 } } }
+        { $sort: { orders: -1 } },
+        { $limit: 10 }
+      ]),
+
+      // 7. Peak Hours (24-hour format)
+      Order.aggregate([
+        { $match: successMatch },
+        {
+          $group: {
+            _id: { $hour: { date: '$placedAt', timezone: 'Asia/Karachi' } },
+            orders: { $sum: 1 }
+          }
+        },
+        { $sort: { orders: -1 } }
+      ]),
+
+      // 8. Top Performing Deals
+      Order.aggregate([
+        { $match: { ...successMatch, 'appliedDeal.dealId': { $exists: true, $ne: null } } },
+        {
+          $group: {
+            _id: '$appliedDeal.code',
+            dealId: { $first: '$appliedDeal.dealId' },
+            title: { $first: '$appliedDeal.title' },
+            uses: { $sum: 1 },
+            discountGiven: { $sum: '$discountApplied' },
+            revenueGenerated: { $sum: '$finalAmount' }
+          }
+        },
+        { $sort: { uses: -1 } },
+        { $limit: 10 }
+      ]),
+
+      // 9. Guest vs Registered Users
+      Order.aggregate([
+        { $match: allMatch },
+        {
+          $group: {
+            _id: null,
+            registered: { $sum: { $cond: [{ $ifNull: ['$customer', false] }, 1, 0] } },
+            guest: { $sum: { $cond: ['$guestInfo.isGuest', 1, 0] } }
+          }
+        }
       ])
     ]);
 
-    const todayOrders = todayStats[0]?.orders || 0;
-    const todayRevenue = todayStats[0]?.revenue || 0;
-    const yesterdayOrders = yesterdayStats[0]?.orders || 0;
+    const totalRevenue = revenueResult[0]?.revenue || 0;
+    const totalDiscount = dailyTrend.reduce((sum, d) => sum + (d.discount || 0), 0);
+    const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+    const cancellationRate = totalOrders + cancelledCount > 0 
+      ? (cancelledCount / (totalOrders + cancelledCount) * 100).toFixed(1) 
+      : 0;
 
-    const ordersGrowth =
-      yesterdayOrders > 0
-        ? ((todayOrders - yesterdayOrders) / yesterdayOrders * 100).toFixed(1)
-        : todayOrders > 0
-        ? '100'
-        : '0';
-
-    const liveOrders = await Order.countDocuments({
-      status: ['pending', 'confirmed', 'preparing', 'out_for_delivery']
-    });
-
-    const pendingPayments = await Order.countDocuments({
-      status: 'pending_payment',
-      paymentStatus: 'pending'
-    });
+    const userSplit = guestVsRegistered[0] || { registered: 0, guest: 0 };
+    const totalUsers = userSplit.registered + userSplit.guest;
 
     res.json({
       success: true,
-      live: {
-        activeOrders: liveOrders,
-        pendingPayments,
-        todayOrders,
-        todayRevenue: Number(todayRevenue.toFixed(2)),
-        ordersGrowth: `${ordersGrowth}%`
+      analytics: {
+        summary: {
+          period: { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] },
+          totalOrders,
+          totalRevenue: Number(totalRevenue.toFixed(0)),
+          avgOrderValue: Number(avgOrderValue.toFixed(0)),
+          totalDiscountGiven: Number(totalDiscount.toFixed(0)),
+          cancelledOrders: cancelledCount,
+          cancellationRate: `${cancellationRate}%`,
+          conversionRate: totalOrders > 0 ? ((totalOrders / (totalOrders + cancelledCount)) * 100).toFixed(1) + '%' : '0%'
+        },
+        userInsights: {
+          registeredUsers: userSplit.registered,
+          guestUsers: userSplit.guest,
+          registeredPercentage: totalUsers > 0 ? ((userSplit.registered / totalUsers) * 100).toFixed(1) + '%' : '0%'
+        },
+        charts: {
+          dailyTrend: dailyTrend.map(d => ({
+            date: d._id,
+            orders: d.orders,
+            revenue: Number(d.revenue.toFixed(0)),
+            aov: Number(d.avgOrderValue.toFixed(0))
+          })),
+          paymentMethods: paymentBreakdown.map(p => ({
+            method: p._id === 'cash' ? 'Cash on Delivery' :
+                    p._id === 'card' ? 'Card' :
+                    p._id === 'bank' ? 'Bank Transfer' : p._id.charAt(0).toUpperCase() + p._id.slice(1),
+            orders: p.count,
+            revenue: Number(p.revenue.toFixed(0)),
+            percentage: totalOrders > 0 ? ((p.count / totalOrders) * 100).toFixed(1) + '%' : '0%'
+          })),
+          topAreas: topAreas.map(a => ({
+            area: a._id || 'Unknown',
+            orders: a.orders,
+            revenue: Number(a.revenue.toFixed(0))
+          })),
+          peakHours: peakHours.map(h => ({
+            hour: h._id,
+            label: `${h._id}:00 - ${h._id + 1}:00`,
+            orders: h.orders
+          })),
+          topDeals: topDeals.map(d => ({
+            code: d._id,
+            title: d.title || d._id,
+            uses: d.uses,
+            discountGiven: Number(d.discountGiven.toFixed(0)),
+            revenueGenerated: Number(d.revenueGenerated.toFixed(0))
+          }))
+        }
       }
     });
+
   } catch (err) {
-    console.error('getRealtimeStats error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('getOrderAnalytics error:', err.message);
+    res.status(500).json({ success: false, message: 'Analytics temporarily unavailable' });
   }
 };
 
 /**
- * Live Order Tracking for Customer & Admin
- * GET /api/orders/track/:orderId
+ * GET /api/order/realtime
+ * Live Dashboard Stats (Updates every 10 seconds)
  */
-const trackOrder = async (req, res) => {
+const getRealtimeStats = async (req, res) => {
   try {
-    const { orderId } = req.params;
+    const now = new Date();
+    const todayStart = moment().startOf('day').toDate();
+    const yesterdayStart = moment().subtract(1, 'day').startOf('day').toDate();
 
-    const order = await Order.findById(orderId)
-      .populate('customer', 'name phone')
-      .populate('rider', 'name phone currentLocation locationUpdatedAt')
-      .populate('address', 'label fullAddress location')
-      .populate('area', 'name');
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
-    }
-
-    // Access control
-    const isOwner = order.customer?._id?.toString() === req.user?.id;
-    const isRider =
-      req.user?.role === 'rider' &&
-      order.rider?._id?.toString() === req.user.id;
-    const isAdmin = req.user?.role === 'admin';
-
-    if (!isOwner && !isRider && !isAdmin) {
-      return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-
-    // Rider live location
-    let riderLocation = null;
-    if (order.rider?.currentLocation?.coordinates) {
-      riderLocation = {
-        lat: order.rider.currentLocation.coordinates[1],
-        lng: order.rider.currentLocation.coordinates[0],
-        updatedAt: order.rider.locationUpdatedAt || order.rider.updatedAt
-      };
-    }
-
-    const getETA = () => {
-      const placed = moment(order.placedAt);
-      const now = moment();
-
-      switch (order.status) {
-        case 'pending':
-        case 'confirmed':
-          return '10–15 min';
-        case 'preparing':
-          return '20–30 min';
-        case 'out_for_delivery':
-          return '5–15 min';
-        case 'delivered':
-          return 'Delivered';
-        default:
-          const mins = now.diff(placed, 'minutes');
-          return mins < 30 ? '30–45 min' : '45–60 min';
-      }
-    };
-
-    const trackingData = {
-      orderId: order._id,
-      status: order.status,
-      statusText:
-        order.status.charAt(0).toUpperCase() +
-        order.status.slice(1).replace('_', ' '),
-
-      placedAt: order.placedAt,
-      estimatedDelivery: order.estimatedDelivery,
-      currentETA: getETA(),
-      paymentMethod: order.paymentMethod,
-      totalAmount: order.finalAmount,
-      canCancel: ['pending', 'confirmed', 'pending_payment'].includes(
-        order.status
-      ),
-
-      customer: {
-        name: order.customer.name,
-        phone: order.customer.phone
-      },
-
-      address: order.address,
-
-      rider: order.rider
-        ? {
-            name: order.rider.name,
-            phone: order.rider.phone,
-            location: riderLocation
+    const [todayStats, yesterdayOrders, liveStatus] = await Promise.all([
+      Order.aggregate([
+        { $match: { placedAt: { $gte: todayStart }, status: { $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery'] } } },
+        { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
+      ]),
+      Order.countDocuments({ placedAt: { $gte: yesterdayStart, $lt: todayStart }, status: { $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery'] } }),
+      Order.aggregate([
+        {
+          $facet: {
+            pending: [{ $match: { status: 'pending' } }, { $count: 'count' }],
+            confirmed: [{ $match: { status: 'confirmed' } }, { $count: 'count' }],
+            preparing: [{ $match: { status: 'preparing' } }, { $count: 'count' }],
+            outForDelivery: [{ $match: { status: 'out_for_delivery' } }, { $count: 'count' }],
+            pendingPayment: [{ $match: { status: 'pending_payment' } }, { $count: 'count' }],
+            cancelledToday: [{ $match: { placedAt: { $gte: todayStart }, status: { $in: ['cancelled', 'rejected'] } } }, { $count: 'count' }]
           }
-        : null,
-
-      timeline: [
-        { status: 'Order Placed', time: order.placedAt, completed: true },
-        {
-          status: 'Confirmed',
-          time: order.confirmedAt || null,
-          completed: ['confirmed', 'preparing', 'out_for_delivery', 'delivered'].includes(order.status)
-        },
-        {
-          status: 'Preparing',
-          time: order.preparingAt || order.updatedAt,
-          completed: ['preparing', 'out_for_delivery', 'delivered'].includes(order.status)
-        },
-        {
-          status: 'Out for Delivery',
-          time: order.outForDeliveryAt || order.updatedAt,
-          completed: ['out_for_delivery', 'delivered'].includes(order.status)
-        },
-        {
-          status: 'Delivered',
-          time: order.deliveredAt || null,
-          completed: order.status === 'delivered'
         }
-      ]
-    };
+      ])
+    ]);
+
+    const today = todayStats[0] || { orders: 0, revenue: 0 };
+    const live = liveStatus[0];
+
+    const growth = yesterdayOrders > 0
+      ? ((today.orders - yesterdayOrders) / yesterdayOrders * 100)
+      : today.orders > 0 ? 100 : 0;
 
     res.json({
       success: true,
-      tracking: trackingData
+      realtime: {
+        updatedAt: now.toISOString(),
+        today: {
+          orders: today.orders,
+          revenue: Number(today.revenue.toFixed(0)),
+          growth: growth > 0 ? `+${growth.toFixed(1)}%` : `${growth.toFixed(1)}%`
+        },
+        live: {
+          pending: live.pending[0]?.count || 0,
+          confirmed: live.confirmed[0]?.count || 0,
+          preparing: live.preparing[0]?.count || 0,
+          outForDelivery: live.outForDelivery[0]?.count || 0,
+          pendingPayment: live.pendingPayment[0]?.count || 0,
+          cancelledToday: live.cancelledToday[0]?.count || 0
+        },
+        activeOrders: (live.confirmed[0]?.count || 0) + (live.preparing[0]?.count || 0) + (live.outForDelivery[0]?.count || 0)
+      }
     });
   } catch (err) {
-    console.error('trackOrder error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('getRealtimeStats error:', err.message);
+    res.status(500).json({ success: false, message: 'Live stats unavailable' });
   }
 };
 
 module.exports = {
   getOrderAnalytics,
-  getRealtimeStats,
-  trackOrder
+  getRealtimeStats
 };

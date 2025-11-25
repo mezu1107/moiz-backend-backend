@@ -27,13 +27,26 @@ const uploadToCloudinary = (buffer) => {
 
 // ADD NEW MENU ITEM
 const addMenuItem = async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ success: false, message: 'Image is required' });
-  }
-
   try {
+    // Image is required
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Image is required' });
+    }
+
+    // Upload image to Cloudinary
     const image = await uploadToCloudinary(req.file.buffer);
 
+    // availableInAreas is already validated & cleaned by express-validator
+    // It is guaranteed to be a clean array of valid ObjectIds (or empty)
+    const areaIds = Array.isArray(req.body.availableInAreas)
+      ? req.body.availableInAreas
+      : [];
+
+    // Parse booleans safely
+    const isVeg = req.body.isVeg === true || req.body.isVeg === 'true';
+    const isSpicy = req.body.isSpicy === true || req.body.isSpicy === 'true';
+
+    // Create menu item
     const item = await MenuItem.create({
       name: req.body.name.trim(),
       description: req.body.description?.trim() || '',
@@ -41,45 +54,67 @@ const addMenuItem = async (req, res) => {
       category: req.body.category,
       image: image.secure_url,
       cloudinaryId: image.public_id,
-      availableInAreas: req.body.availableInAreas || [],
-      isVeg: req.body.isVeg === true || req.body.isVeg === 'true',
-      isSpicy: req.body.isSpicy === true || req.body.isSpicy === 'true',
+      availableInAreas: areaIds, // Clean & safe
+      isVeg,
+      isSpicy,
       isAvailable: true
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'Menu item added successfully!',
       item
     });
+
   } catch (err) {
     console.error('addMenuItem error:', err);
-    res.status(500).json({ success: false, message: 'Failed to add item' });
+
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map(e => e.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: messages
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to add item',
+      error: err.message
+    });
   }
 };
 
-// GET MENU BASED ON USER LOCATION (MAIN CUSTOMER ENDPOINT)
+// GET MENU BASED ON USER LOCATION
 const getMenuByLocation = async (req, res) => {
   try {
     const { lat, lng } = req.query;
-    const point = { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] };
+    if (!lat || !lng) {
+      return res.status(400).json({ success: false, message: 'lat and lng are required' });
+    }
+
+    const point = {
+      type: 'Point',
+      coordinates: [parseFloat(lng), parseFloat(lat)]
+    };
 
     const area = await Area.findOne({
       isActive: true,
       polygon: { $geoIntersects: { $geometry: point } }
-    }).select('name city');
+    }).select('name city _id');
 
     if (!area) {
       return res.status(400).json({
         success: false,
-        message: 'Sorry, we don\'t deliver to this location yet'
+        message: "Sorry, we don't deliver to this location yet"
       });
     }
 
     const menu = await MenuItem.find({
       isAvailable: true,
       $or: [
-        { availableInAreas: { $size: 0 } }, // Available everywhere
+        { availableInAreas: { $size: 0 } }, // Global items
         { availableInAreas: area._id }
       ]
     })
@@ -117,21 +152,36 @@ const updateMenuItem = async (req, res) => {
       item.cloudinaryId = result.public_id;
     }
 
-    // Update fields only if provided
-    if (req.body.name) item.name = req.body.name.trim();
+    // Update text fields
+    if (req.body.name !== undefined) item.name = req.body.name.trim();
     if (req.body.description !== undefined) item.description = req.body.description.trim();
-    if (req.body.price) item.price = Number(req.body.price);
-    if (req.body.category) item.category = req.body.category;
-    if (req.body.isVeg !== undefined) item.isVeg = req.body.isVeg === true || req.body.isVeg === 'true';
-    if (req.body.isSpicy !== undefined) item.isSpicy = req.body.isSpicy === true || req.body.isSpicy === 'true';
-    if (req.body.isAvailable !== undefined) item.isAvailable = req.body.isAvailable === true || req.body.isAvailable === 'true';
-    if (req.body.availableInAreas) item.availableInAreas = req.body.availableInAreas;
+    if (req.body.price !== undefined) item.price = Number(req.body.price);
+    if (req.body.category !== undefined) item.category = req.body.category;
+
+    // Booleans
+    if (req.body.isVeg !== undefined) {
+      item.isVeg = req.body.isVeg === true || req.body.isVeg === 'true';
+    }
+    if (req.body.isSpicy !== undefined) {
+      item.isSpicy = req.body.isSpicy === true || req.body.isSpicy === 'true';
+    }
+    if (req.body.isAvailable !== undefined) {
+      item.isAvailable = req.body.isAvailable === true || req.body.isAvailable === 'true';
+    }
+
+    // availableInAreas – already validated and cleaned
+    if (req.body.availableInAreas !== undefined) {
+      const areas = Array.isArray(req.body.availableInAreas)
+        ? req.body.availableInAreas
+        : [];
+      item.availableInAreas = areas;
+    }
 
     await item.save();
 
     res.json({
       success: true,
-      message: 'Menu item updated!',
+      message: 'Menu item updated successfully!',
       item
     });
   } catch (err) {
@@ -159,12 +209,12 @@ const deleteMenuItem = async (req, res) => {
   }
 };
 
-// ADMIN: GET ALL ITEMS (NO FILTERS)
+// ADMIN: GET ALL ITEMS
 const getAllMenuItems = async (req, res) => {
   try {
     const items = await MenuItem.find()
       .sort({ category: 1, name: 1 })
-      .select('-cloudinaryId');
+      .select('-cloudinaryId -__v');
 
     res.json({ success: true, items });
   } catch (err) {
@@ -173,7 +223,7 @@ const getAllMenuItems = async (req, res) => {
   }
 };
 
-// TOGGLE ITEM AVAILABILITY
+// TOGGLE AVAILABILITY
 const toggleAvailability = async (req, res) => {
   try {
     const item = await MenuItem.findById(req.params.id);
@@ -191,11 +241,11 @@ const toggleAvailability = async (req, res) => {
     });
   } catch (err) {
     console.error('toggleAvailability error:', err);
-    res.status(500).json({ success: false, message: 'Failed to toggle' });
+    res.status(500).json({ success: false, message: 'Failed to toggle availability' });
   }
 };
 
-// PUBLIC FILTERED MENU (with pagination, search, sort)
+// PUBLIC: FILTERED MENU WITH PAGINATION
 const getAllMenuItemsWithFilters = async (req, res) => {
   try {
     const {

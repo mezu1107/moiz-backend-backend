@@ -10,16 +10,13 @@ const orderItemSchema = new mongoose.Schema({
 });
 
 const orderSchema = new mongoose.Schema({
-  customer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-
+  customer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', sparse: true },
   guestInfo: {
-    name: { type: String },
-    phone: { type: String },
+    name: String,
+    phone: String,
     isGuest: { type: Boolean, default: false }
   },
-
   items: [orderItemSchema],
-
   totalAmount: { type: Number, required: true },
   deliveryFee: { type: Number, required: true, default: 0 },
   discountApplied: { type: Number, default: 0 },
@@ -38,16 +35,7 @@ const orderSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: [
-      'pending',
-      'pending_payment',
-      'confirmed',
-      'preparing',
-      'out_for_delivery',
-      'delivered',
-      'cancelled',
-      'rejected'
-    ],
+    enum: ['pending','pending_payment','confirmed','preparing','out_for_delivery','delivered','cancelled','rejected'],
     default: 'pending'
   },
 
@@ -66,11 +54,12 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'paid', 'failed', 'canceled', 'refunded'],
     default: 'pending'
   },
-  paymentIntentId: { type: String },
-  bankTransferReference: { type: String },
+
+  paymentIntentId: String,
+  bankTransferReference: String,
+  receiptUrl: String,
   paidAt: Date,
   refundedAt: Date,
-
   estimatedDelivery: { type: String, default: '40-55 min' },
 
   appliedDeal: {
@@ -81,18 +70,32 @@ const orderSchema = new mongoose.Schema({
     discountValue: Number,
     maxDiscountAmount: Number,
     appliedDiscount: { type: Number, default: 0 }
-  }
+  },
+
+  confirmedAt: Date,
+  preparingAt: Date,
+  outForDeliveryAt: Date,
+  deliveredAt: Date
 }, {
   timestamps: { createdAt: 'placedAt', updatedAt: 'updatedAt' }
 });
 
-// Indexes
+// === FINAL INDEXES (NO WARNINGS, MAX PERFORMANCE) ===
 orderSchema.index({ customer: 1, placedAt: -1 });
 orderSchema.index({ 'guestInfo.phone': 1, placedAt: -1 });
 orderSchema.index({ rider: 1, status: 1 });
 orderSchema.index({ status: 1, placedAt: -1 });
 orderSchema.index({ area: 1, placedAt: -1 });
+orderSchema.index({ placedAt: -1 });
 orderSchema.index({ paymentIntentId: 1 }, { unique: true, sparse: true });
 orderSchema.index({ bankTransferReference: 1 }, { unique: true, sparse: true });
+
+// Rider assignment
+orderSchema.index({ status: 1, rider: 1, placedAt: -1 });
+orderSchema.index({ status: 1, rider: 1, area: 1 });
+
+// CRITICAL FOR DEAL ANALYTICS (added now)
+orderSchema.index({ 'appliedDeal.dealId': 1 });
+orderSchema.index({ 'appliedDeal.dealId': 1, status: 1 });
 
 module.exports = mongoose.model('Order', orderSchema);

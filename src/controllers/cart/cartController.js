@@ -1,14 +1,13 @@
 // src/controllers/cart/cartController.js
 const Cart = require('../../models/cart/Cart');
 const MenuItem = require('../../models/menuItem/MenuItem');
-const Area = require('../../models/area/Area');
+const Address = require('../../models/address/Address');
 
-const getUserArea = async (lat, lng) => {
-  const point = { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] };
-  return await Area.findOne({
-    isActive: true,
-    polygon: { $geoIntersects: { $geometry: point } }
-  });
+const getUserAreaFromDefaultAddress = async (userId) => {
+  const defaultAddress = await Address.findOne({ user: userId, isDefault: true })
+    .select('location area')
+    .populate('area', '_id');
+  return defaultAddress?.area || null;
 };
 
 // GET CART
@@ -21,68 +20,50 @@ const getCart = async (req, res) => {
       return res.json({ success: true, cart: { items: [], total: 0 } });
     }
 
-    res.json({ success: true, cart });
+    const total = cart.items.reduce((sum, i) => sum + (i.priceAtAdd * i.quantity), 0);
+    res.json({ success: true, cart: { ...cart.toObject(), total } });
   } catch (err) {
     console.error('getCart error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-// ADD TO CART (WITH AREA CHECK!)
+// ADD TO CART — NOW USING DEFAULT ADDRESS (MOST ACCURATE)
 const addToCart = async (req, res) => {
   const { menuItemId, quantity = 1 } = req.body;
   const userId = req.user.id;
 
   try {
-    const menuItem = await MenuItem.findById(menuItemId);
-    if (!menuItem) {
-      return res.status(404).json({ success: false, message: 'Item not found' });
-    }
-    if (!menuItem.isAvailable) {
-      return res.status(400).json({ success: false, message: 'This item is currently unavailable' });
-    }
+    const menuItem = await MenuItem.findById(menuItemId).select('price isAvailable availableInAreas');
+    if (!menuItem) return res.status(404).json({ success: false, message: 'Item not found' });
+    if (!menuItem.isAvailable) return res.status(400).json({ success: false, message: 'Item unavailable' });
 
-    // AREA CHECK: Only allow if item is available in user's current area
-    const userLocation = req.headers['user-location']; // You'll set this from frontend
-    if (userLocation) {
-      const [lat, lng] = userLocation.split(',');
-      const area = await getUserArea(lat, lng);
-      
-      const isEverywhere = menuItem.availableInAreas.length === 0;
-      const isInArea = area && menuItem.availableInAreas.includes(area._id);
+    // Get user's default address area
+    const userArea = await getUserAreaFromDefaultAddress(userId);
+    const isEverywhere = menuItem.availableInAreas.length === 0;
+    const isInArea = userArea && menuItem.availableInAreas.some(id => id.toString() === userArea._id.toString());
 
-      if (!isEverywhere && !isInArea) {
-        return res.status(400).json({
-          success: false,
-          message: 'This item is not available in your area'
-        });
-      }
-    }
-
-    let cart = await Cart.findOne({ user: userId });
-    if (!cart) {
-      cart = new Cart({ user: userId, items: [] });
-    }
-
-    const existingItemIndex = cart.items.findIndex(
-      item => item.menuItem.toString() === menuItemId
-    );
-
-    if (existingItemIndex > -1) {
-      cart.items[existingItemIndex].quantity += quantity;
-    } else {
-      cart.items.push({
-        menuItem: menuItemId,
-        quantity,
-        priceAtAdd: menuItem.price
+    if (!isEverywhere && !isInArea) {
+      return res.status(400).json({
+        success: false,
+        message: 'This item is not available in your delivery area'
       });
+    }
+
+    let cart = await Cart.findOne({ user: userId }) || new Cart({ user: userId, items: [] });
+
+    const existingIndex = cart.items.findIndex(i => i.menuItem.toString() === menuItemId);
+    if (existingIndex > -1) {
+      cart.items[existingIndex].quantity += quantity;
+    } else {
+      cart.items.push({ menuItem: menuItemId, quantity, priceAtAdd: menuItem.price });
     }
 
     cart.updatedAt = Date.now();
     await cart.save();
-    await cart.populate('items.menuItem', 'name price image');
 
-    const total = cart.items.reduce((sum, i) => sum + (i.priceAtAdd * i.quantity), 0);
+    await cart.populate('items.menuItem', 'name price image isAvailable');
+    const total = cart.items.reduce((sum, i) => sum + i.priceAtAdd * i.quantity, 0);
 
     res.json({ success: true, cart: { ...cart.toObject(), total } });
   } catch (err) {
@@ -91,20 +72,18 @@ const addToCart = async (req, res) => {
   }
 };
 
-// REMOVE ITEM
+// REMOVE ITEM — updatedAt fixed
 const removeItem = async (req, res) => {
-  const { itemId } = req.params;
-
   try {
     const cart = await Cart.findOne({ user: req.user.id });
     if (!cart) return res.status(404).json({ success: false, message: 'Cart not found' });
 
-    cart.items = cart.items.filter(item => item._id.toString() !== itemId);
+    cart.items = cart.items.filter(item => item._id.toString() !== req.params.itemId);
     cart.updatedAt = Date.now();
     await cart.save();
-    await cart.populate('items.menuItem');
 
-    const total = cart.items.reduce((sum, i) => sum + (i.priceAtAdd * i.quantity), 0);
+    await cart.populate('items.menuItem');
+    const total = cart.items.reduce((sum, i) => sum + i.priceAtAdd * i.quantity, 0);
 
     res.json({ success: true, cart: { ...cart.toObject(), total } });
   } catch (err) {
@@ -113,13 +92,11 @@ const removeItem = async (req, res) => {
   }
 };
 
-// CLEAR CART
 const clearCart = async (req, res) => {
   try {
     await Cart.deleteOne({ user: req.user.id });
-    res.json({ success: true, message: 'Cart cleared successfully' });
+    res.json({ success: true, message: 'Cart cleared' });
   } catch (err) {
-    console.error('clearCart error:', err);
     res.status(500).json({ success: false, message: 'Failed to clear cart' });
   }
 };

@@ -1,6 +1,8 @@
-// src/routes/rider/riderRoutes.js
+
+// CORRECT (Ab yeh kar do)
 const express = require('express');
 const router = express.Router();
+
 
 const { auth } = require('../../middleware/auth/auth');
 const { role } = require('../../middleware/role/role');
@@ -14,35 +16,23 @@ const {
   getRiderProfile
 } = require('../../controllers/rider/riderController');
 
-const riderSchemas = require('../../validation/schemas/riderSchemas');
+const { 
+  updateLocation: locSchema, 
+  updateOrderLocation: orderLocSchema 
+} = require('../../validation/schemas/riderSchemas');
 
-// Protect all routes
-router.use(auth, role(['rider']));
-
-// Block non-approved riders
+router.use(auth, role('rider'));
 router.use((req, res, next) => {
   if (req.user.riderStatus !== 'approved') {
-    return res.status(403).json({
-      success: false,
-      message: 'Your rider account is not approved yet'
-    });
+    return res.status(403).json({ success: false, message: 'Not approved' });
   }
   next();
 });
 
-// RIDER ENDPOINTS — FULLY VALIDATED
-router.patch('/location', riderSchemas.updateLocation, validate, updateLocation);
-
-router.patch('/availability', toggleAvailability); // No body needed
-
-router.patch(
-  '/order/:id/location',
-  riderSchemas.updateOrderLocation,
-  validate,
-  updateOrderLocation
-);
-
+router.patch('/location', locSchema, validate, updateLocation);
+router.patch('/availability', toggleAvailability);
+router.patch('/order/:id/location', orderLocSchema, validate, updateOrderLocation);
 router.get('/orders', getMyOrders);
 router.get('/profile', getRiderProfile);
 
-module.exports = router;
+module.exports = router; // YE BHI HAI

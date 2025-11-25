@@ -1,93 +1,76 @@
 // src/validation/schemas/menuSchemas.js
-const { body, query, param } = require('express-validator');
+const { body, param, query } = require('express-validator'); // ← YE LINE ADD KARNA ZAROORI THA!
+const mongoose = require('mongoose');
 
-exports.getMenuByLocation = [
-  query('lat')
-    .exists({ checkFalsy: true })
-    .withMessage('Latitude is required')
-    .isFloat({ min: 23.5, max: 37.5 })
-    .withMessage('Latitude must be in Pakistan (23.5–37.5)')
-    .toFloat(),
-
-  query('lng')
-    .exists({ checkFalsy: true })
-    .withMessage('Longitude is required')
-    .isFloat({ min: 60, max: 78 })
-    .withMessage('Longitude must be in Pakistan (60–78)')
-    .toFloat()
-];
-
-exports.menuItemIdParam = [
-  param('id').isMongoId().withMessage('Invalid menu item ID')
-];
-
-exports.getAllMenuItemsWithFilters = [
-  query('page').optional().isInt({ min: 1 }).toInt(),
-  query('limit').optional().isInt({ min: 1, max: 50 }).toInt(),
-  query('category').optional().isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']),
-  query('isVeg').optional().isIn(['true', 'false']),
-  query('isSpicy').optional().isIn(['true', 'false']),
-  query('minPrice').optional().isFloat({ min: 0 }).toFloat(),
-  query('maxPrice').optional().isFloat({ min: 0 }).toFloat(),
-  query('search').optional().trim().isLength({ max: 100 }),
-  query('availableOnly').optional().isIn(['true', 'false']),
-  query('sort').optional().isIn([
-    'name_asc', 'name_desc',
-    'price_asc', 'price_desc',
-    'newest', 'oldest',
-    'category_asc'
-  ])
-];
-
-exports.addMenuItem = [
-  body('name')
-    .trim()
-    .notEmpty().withMessage('Name is required')
-    .isLength({ min: 2, max: 100 }).withMessage('Name must be 2–100 characters'),
-
-  body('price')
-    .notEmpty().withMessage('Price is required')
-    .isFloat({ min: 50 }).withMessage('Price must be at least 50 PKR')
-    .toFloat(),
-
-  body('category')
-    .notEmpty().withMessage('Category is required')
-    .isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']),
-
-  body('isVeg').optional().isBoolean().toBoolean(),
-  body('isSpicy').optional().isBoolean().toBoolean(),
-
-  body('availableInAreas')
+const validateAvailableInAreas = () => {
+  return body('availableInAreas')
     .optional()
-    .isArray()
-    .custom((arr) => arr.every(id => mongoose.Types.ObjectId.isValid(id)))
-    .withMessage('Invalid area ID in availableInAreas'),
+    .custom((value, { req }) => {
+      const raw = req.body.availableInAreas || [];
+      let ids = [];
 
-  body('description')
-    .optional()
-    .trim()
-    .isLength({ max: 500 }).withMessage('Description too long')
-];
+      if (typeof raw === 'string' && raw.trim().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) ids = parsed.map(id => id.toString().trim()).filter(Boolean);
+        } catch (e) {
+          throw new Error('Invalid JSON in availableInAreas');
+        }
+      } else if (Array.isArray(raw)) {
+        ids = raw.map(id => id.toString().trim()).filter(Boolean);
+      } else if (typeof raw === 'string' && raw.trim()) {
+        ids = [raw.trim()];
+      }
 
-exports.updateMenuItem = [
-  param('id').isMongoId().withMessage('Invalid menu item ID'),
+      const invalid = ids.filter(id => !mongoose.Types.ObjectId.isValid(id));
+      if (invalid.length > 0) throw new Error(`Invalid area ID: ${invalid[0]}`);
 
-  body('name').optional().trim().isLength({ min: 2, max: 100 }),
-  body('price').optional().isFloat({ min: 50 }).toFloat(),
-  body('category').optional().isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']),
-  body('isVeg').optional().isBoolean().toBoolean(),
-  body('isSpicy').optional().isBoolean().toBoolean(),
-  body('isAvailable').optional().isBoolean().toBoolean(),
+      req.body.availableInAreas = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+      return true;
+    });
+};
 
-  body('availableInAreas')
-    .optional()
-    .isArray()
-    .custom((arr) => !arr || arr.every(id => mongoose.Types.ObjectId.isValid(id))),
+module.exports = {
+  getMenuByLocation: [
+    query('lat').isFloat({ min: -90, max: 90 }).withMessage('Valid latitude required'),
+    query('lng').isFloat({ min: -180, max: 180 }).withMessage('Valid longitude required')
+  ],
 
-  body('description').optional().trim().isLength({ max: 500 })
-];
+  getAllMenuItemsWithFilters: [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('limit').optional().isInt({ min: 1, max: 50 }).toInt(),
+    query('category').optional().isString(),
+    query('isVeg').optional().isIn(['true', 'false']),
+    query('isSpicy').optional().isIn(['true', 'false']),
+    query('search').optional().trim()
+  ],
 
-exports.toggleAvailability = [
-  param('id').isMongoId().withMessage('Invalid menu item ID'),
-  body('isAvailable').notEmpty().isBoolean().toBoolean()
-];
+  menuItemIdParam: [param('id').isMongoId().withMessage('Invalid menu item ID')],
+
+  toggleAvailability: [
+    param('id').isMongoId(),
+    body('isAvailable').isBoolean().withMessage('isAvailable must be true/false')
+  ],
+
+  addMenuItem: [
+    body('name').trim().notEmpty().isLength({ min: 2, max: 100 }),
+    body('description').optional().trim().isLength({ max: 500 }),
+    body('price').notEmpty().isFloat({ min: 50 }).toFloat(),
+    body('category').notEmpty().isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']),
+    body('isVeg').optional().isBoolean().toBoolean(),
+    body('isSpicy').optional().isBoolean().toBoolean(),
+    validateAvailableInAreas()
+  ],
+
+  updateMenuItem: [
+    param('id').isMongoId(),
+    body('name').optional().trim().isLength({ min: 2, max: 100 }),
+    body('description').optional().trim().isLength({ max: 500 }),
+    body('price').optional().isFloat({ min: 50 }).toFloat(),
+    body('category').optional().isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']),
+    body('isVeg').optional().isBoolean().toBoolean(),
+    body('isSpicy').optional().isBoolean().toBoolean(),
+    body('isAvailable').optional().isBoolean().toBoolean(),
+    validateAvailableInAreas()
+  ]
+};

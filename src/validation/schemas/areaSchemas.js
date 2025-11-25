@@ -1,5 +1,4 @@
-// src/validation/schemas/areaSchemas.js
-const { body, query } = require('express-validator'); // ← YOU WERE MISSING "query" HERE!
+const { body, query } = require('express-validator');
 
 exports.addArea = [
   body('name')
@@ -30,18 +29,24 @@ exports.addArea = [
 
   body('polygon.coordinates')
     .isArray({ min: 1 })
-    .withMessage('coordinates must be array'),
+    .withMessage('Coordinates must contain at least one linear ring'),
 
-  body('polygon.coordinates.*.*')
+  // Each ring must have at least 4 points
+  body('polygon.coordinates.*')
     .isArray({ min: 4 })
-    .withMessage('Polygon must have at least 4 points'),
+    .withMessage('Polygon must have at least 4 points in each ring'),
 
+  // Each point must be an array of two numbers
+  body('polygon.coordinates.*.*')
+    .isArray({ min: 2, max: 2 })
+    .withMessage('Each point must be [lng, lat]'),
+
+  // Each coordinate must be a float
   body('polygon.coordinates.*.*.*')
     .isFloat()
     .withMessage('Coordinates must be numbers')
 ];
 
-// THIS WAS BROKEN — NOW FIXED
 exports.checkAreaQuery = [
   query('lat')
     .notEmpty()

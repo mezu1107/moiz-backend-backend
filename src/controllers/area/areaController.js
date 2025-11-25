@@ -80,52 +80,5 @@ res.json({
   }
 };
 
-const addArea = async (req, res) => {
-  try {
-    const area = await Area.create({
-      ...req.body,
-      isActive: false // Force admin to set delivery zone before going live
-    });
 
-    res.status(201).json({ success: true, area });
-  } catch (err) {
-    console.error('addArea error:', err);
-    res.status(400).json({ success: false, message: err.message || 'Invalid area data' });
-  }
-};
-
-const setDeliveryZone = async (req, res) => {
-  const { areaId, deliveryFee, minOrderAmount = 0, estimatedTime } = req.body;
-
-  if (!areaId || !deliveryFee || !estimatedTime) {
-    return res.status(400).json({
-      success: false,
-      message: 'areaId, deliveryFee, and estimatedTime are required'
-    });
-  }
-
-  try {
-    const zone = await DeliveryZone.findOneAndUpdate(
-      { area: areaId },
-      {
-        deliveryFee,
-        minOrderAmount,
-        estimatedTime,
-        isActive: true
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
-
-    // Auto-activate the area when delivery zone is set
-    await Area.findByIdAndUpdate(areaId, { isActive: true });
-
-    await zone.populate('area', 'name city');
-
-    res.json({ success: true, zone });
-  } catch (err) {
-    console.error('setDeliveryZone error:', err);
-    res.status(500).json({ success: false, message: 'Failed to set delivery zone' });
-  }
-};
-
-module.exports = { getAreas, checkArea, addArea, setDeliveryZone };
+module.exports = { getAreas, checkArea,};

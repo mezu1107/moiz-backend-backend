@@ -29,16 +29,18 @@ const cartSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User', 
     required: true, 
-    unique: true 
+    unique: true     // This ALONE is enough → creates unique index automatically
   },
   items: [cartItemSchema],
   updatedAt: { 
     type: Date, 
     default: Date.now 
   }
-}, { timestamps: true });
+}, { 
+  timestamps: true 
+});
 
-// Index for performance
-cartSchema.index({ user: 1 });
+// REMOVED THIS LINE COMPLETELY:
+// cartSchema.index({ user: 1 });   ← THIS WAS THE DUPLICATE!
 
 module.exports = mongoose.model('Cart', cartSchema);

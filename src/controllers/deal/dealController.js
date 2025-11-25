@@ -129,9 +129,11 @@ const getDealById = async (req, res) => {
 
 const applyDeal = async (req, res) => {
   const { code, orderTotal } = req.body;
-  const userId = req.user?._id;
+  if (!code || !orderTotal || orderTotal < 0) {
+    return res.status(400).json({ success: false, message: 'Invalid request' });
+  }
 
-  const result = await validateAndApplyDeal(code, orderTotal, userId);
+  const result = await validateAndApplyDeal(code, parseFloat(orderTotal), req.user?._id);
 
   if (!result) {
     return res.status(400).json({

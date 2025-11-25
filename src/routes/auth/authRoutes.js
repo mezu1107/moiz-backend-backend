@@ -1,43 +1,35 @@
-const express = require('express');
-const router = express.Router();
+// src/routes/auth/authRoutes.js
+const router = require('express').Router();
 const { auth } = require('../../middleware/auth/auth');
 const validate = require('../../middleware/validate/validate');
-const User = require('../../models/user/User');
-const jwt = require('jsonwebtoken');
 
 const {
-  register, login, logout, getMe, forgotPassword, resetPassword
+  register, login, logout, getMe,
+  updateMyProfile, changePassword,   // ← ADD THIS
+  forgotPassword, verifyOtp, resetPassword
 } = require('../../controllers/auth/authController');
 
-const { register: registerSchema, login: loginSchema } = require('../../validation/schemas/authSchemas');
+const {
+  register: registerSchema,
+  login: loginSchema,
+  forgotPassword: forgotPasswordSchema,
+  verifyOtp: verifyOtpSchema,
+  resetPassword: resetPasswordSchema,
+  changePassword: changePasswordSchema 
+} = require('../../validation/schemas/authSchemas');
 
-// Public Routes
+// Public
 router.post('/register', registerSchema, validate, register);
 router.post('/login', loginSchema, validate, login);
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password/:token', resetPassword);
+router.post('/forgot-password', forgotPasswordSchema, validate, forgotPassword);
+router.post('/verify-otp', verifyOtpSchema, validate, verifyOtp);
 
-// One-time Admin Creation (Remove after first use!)
-router.post('/create-admin', async (req, res) => {
-  const { secret, name, phone, email, password } = req.body;
-  if (secret !== 'MAKE_ME_ADMIN_2025') {
-    return res.status(403).json({ success: false, message: 'Forbidden' });
-  }
-
-  const adminExists = await User.findOne({ role: 'admin' });
-  if (adminExists) {
-    return res.status(400).json({ success: false, message: 'Admin already exists' });
-  }
-
-  const admin = await User.create({ name, phone, email, password, role: 'admin' });
-  const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-  res.status(201).json({ success: true, message: 'Admin created!', token, user: admin.toJSON() });
-});
-
-// Protected Routes
+// Protected
 router.use(auth);
 router.post('/logout', logout);
 router.get('/me', getMe);
-
+router.put('/me', updateMyProfile);
+router.post('/reset-password', resetPasswordSchema, validate, resetPassword);
+// src/routes/auth/authRoutes.js (add this line)
+router.patch('/change-password', changePasswordSchema, validate, changePassword);
 module.exports = router;
