@@ -40,8 +40,8 @@ router.get('/track/:orderId', trackOrderById);
 router.post('/track/by-phone', trackByPhoneSchema, validate, trackOrdersByPhone);
 
 // GUEST ORDER
+// Replace or add alongside current guest route
 router.post('/guest', createGuestOrderSchema, validate, createGuestOrder);
-
 // AUTH REQUIRED
 router.use(auth);
 

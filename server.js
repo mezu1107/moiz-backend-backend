@@ -8,6 +8,8 @@ const logger = require('./src/utils/logger');
 
 const app = express();
 const server = http.createServer(app);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Socket.IO with proper cleanup
 const io = new Server(server, {

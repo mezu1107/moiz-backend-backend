@@ -12,7 +12,7 @@ const stripe = require('../../config/stripe');
 const { applyAndTrackDeal } = require('../deal/dealController');
 const PDFDocument = require('pdfkit');
 const admin = require('firebase-admin');
-
+const mongoose = require('mongoose');
 const io = global.io;
 global.pendingOrderTimeouts = global.pendingOrderTimeouts || {};
 const AUTO_CANCEL_DELAY = 15 * 60 * 1000; // 15 minutes
@@ -259,34 +259,38 @@ const createOrder = async (req, res) => {
   }
 };
 
-// ====================== CREATE GUEST ORDER ======================
+// ====================== CREATE GUEST ORDER – FULLY FIXED & WORKING ======================
 const createGuestOrder = async (req, res) => {
-  const { name, phone, items, address, paymentMethod = 'cash', promoCode } = req.body;
+  const { name, phone, items, address, areaId, paymentMethod = 'cash', promoCode } = req.body;
 
-  if (!name?.trim() || !phone?.trim() || !items?.length || !address?.fullAddress?.trim() || !address?.area?.trim()) {
-    return res.status(400).json({ success: false, message: 'All fields are required' });
+  // Validation
+  if (!name?.trim() || !phone?.trim() || !items?.length || !address?.fullAddress?.trim() || !areaId) {
+    return res.status(400).json({ success: false, message: 'All required fields are missing' });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(areaId)) {
+    return res.status(400).json({ success: false, message: 'Valid areaId is required' });
   }
 
   const method = paymentMethod === 'cod' ? 'cash' : paymentMethod;
-  if (!['cash', 'easypaisa', 'jazzcash', 'bank'].includes(method)) {
+  if (!['cash', 'card', 'easypaisa', 'jazzcash', 'bank'].includes(method)) {
     return res.status(400).json({ success: false, message: 'Invalid payment method' });
   }
 
   try {
-    const area = await Area.findOne({ name: { $regex: new RegExp(`^${address.area.trim()}$`, 'i') } });
-    if (!area) return res.status(400).json({ success: false, message: 'Delivery not available in this area' });
+    const area = await Area.findById(areaId);
+    if (!area) return res.status(400).json({ success: false, message: 'Area not found' });
 
     const deliveryZone = await DeliveryZone.findOne({ area: area._id, isActive: true });
-    if (!deliveryZone) return res.status(400).json({ success: false, message: 'Delivery not available' });
+    if (!deliveryZone) return res.status(400).json({ success: false, message: 'Delivery not available in this area' });
 
+    // Process items
     const orderItems = [];
     let subtotal = 0;
-
     for (const item of items) {
       const menuItem = await MenuItem.findById(item.menuItem);
       if (!menuItem || !menuItem.isAvailable) continue;
-
-      const qty = Math.max(1, Number(item.quantity) || 1);
+      const qty = Math.max(1, parseInt(item.quantity) || 1);
       orderItems.push({
         menuItem: menuItem._id,
         name: menuItem.name,
@@ -302,6 +306,7 @@ const createGuestOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: `Minimum order: PKR ${deliveryZone.minOrderAmount}` });
     }
 
+    // Promo code
     let discount = 0;
     let appliedDeal = null;
     if (promoCode) {
@@ -327,14 +332,16 @@ const createGuestOrder = async (req, res) => {
       appliedDeal,
       addressDetails: {
         fullAddress: address.fullAddress.trim(),
-        label: address.label || "Home",
-        floor: address.floor || "",
-        instructions: address.instructions || ""
+        label: address.label || 'Home',
+        floor: address.floor || '',
+        instructions: address.instructions || ''
       }
     };
 
     let order;
+    let clientSecret = null;  // ← This will hold the secret if card payment
 
+    // CASH / EASYPAISA / JAZZCASH
     if (['cash', 'easypaisa', 'jazzcash'].includes(method)) {
       order = await Order.create({
         ...baseData,
@@ -343,14 +350,51 @@ const createGuestOrder = async (req, res) => {
         paymentStatus: method === 'cash' ? 'pending' : 'paid',
         paidAt: method !== 'cash' ? new Date() : null
       });
-    } else if (method === 'bank') {
+    }
+
+    // CARD PAYMENT – FIXED: paymentIntent stays in scope
+    else if (method === 'card') {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(finalAmount * 100),
+        currency: 'pkr',
+        metadata: { orderId: 'pending', guestPhone: phone.trim() },
+        automatic_payment_methods: { enabled: true }
+      });
+
+      order = await Order.create({
+        ...baseData,
+        paymentMethod: 'card',
+        paymentIntentId: paymentIntent.id,
+        status: 'pending_payment',
+        paymentStatus: 'pending'
+      });
+
+      await stripe.paymentIntents.update(paymentIntent.id, {
+        metadata: { orderId: order._id.toString() }
+      });
+
+      clientSecret = paymentIntent.client_secret;  // ← Save it here
+
+      // Auto-cancel timeout
+      global.pendingOrderTimeouts[order._id.toString()] = setTimeout(async () => {
+        const o = await Order.findById(order._id);
+        if (o && o.status === 'pending_payment') {
+          await Order.findByIdAndUpdate(o._id, { status: 'cancelled', paymentStatus: 'canceled' });
+          await stripe.paymentIntents.cancel(paymentIntent.id).catch(() => {});
+          await sendNotification(o, 'order_cancelled');
+          delete global.pendingOrderTimeouts[o._id.toString()];
+        }
+      }, AUTO_CANCEL_DELAY);
+    }
+
+    // BANK TRANSFER
+    else if (method === 'bank') {
       order = await Order.create({
         ...baseData,
         paymentMethod: 'bank',
         status: 'pending_payment',
         paymentStatus: 'pending'
       });
-
       order.bankTransferReference = `GUEST-${orderIdShort(order._id)}`;
       await order.save();
 
@@ -363,17 +407,30 @@ const createGuestOrder = async (req, res) => {
       }, AUTO_CANCEL_DELAY);
     }
 
+    // Common final steps
     await order.populate('area items.menuItem');
     await sendNotification(order, 'new_order');
+
+    // RETURN CORRECT RESPONSE BASED ON METHOD
+    if (method === 'card') {
+      return res.status(201).json({
+        success: true,
+        message: 'Complete payment with card',
+        order,
+        clientSecret  // ← Now it's always defined
+      });
+    }
 
     if (method === 'bank') {
       return res.json({
         success: true,
+        message: 'Please transfer money to confirm order',
         order,
         bankDetails: { ...BANK_DETAILS, amount: finalAmount, reference: order.bankTransferReference }
       });
     }
 
+    // Default: cash/easypaisa/jazzcash
     res.json({ success: true, message: 'Order placed successfully!', order });
 
   } catch (err) {
@@ -381,7 +438,6 @@ const createGuestOrder = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
 // ====================== CUSTOMER ROUTES ======================
 const getCustomerOrders = async (req, res) => {
   try {

@@ -10,13 +10,13 @@ const validate = require('../../middleware/validate/validate');
 const {
   getAllDeals,
   getActiveDeals,
-  getDealById,
+  getDealById,           // ← Keep this
   createDeal,
   updateDeal,
   deleteDeal,
   toggleDealStatus,
   applyDeal,
-  getDealAnalytics,
+  getDealAnalytics,      // ← These come FIRST now
   getSingleDealStats,
   getDealUsageChart,
   getTopDealsChart,
@@ -30,38 +30,42 @@ const {
   toggleDealStatus: toggleDealStatusSchema
 } = require('../../validation/schemas/dealSchemas');
 
-// Rate limit: 20 attempts per 15 mins per IP (prevents brute force)
 const applyDealLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Too many attempts. Please try again later.'
-  }
+  message: { success: false, message: 'Too many attempts. Try again later.' }
 });
 
-// Public routes
+// ========================
+// PUBLIC ROUTES
+// ========================
 router.get('/active', getActiveDeals);
-router.get('/:id', getDealById);
 
-// Authenticated + rate-limited
+// ========================
+// AUTHENTICATED ROUTES
+// ========================
 router.post('/apply', auth, applyDealLimiter, applyDealSchema, validate, applyDeal);
 
-// Admin-only routes (protected after this point)
+// ========================
+// ADMIN ROUTES (Protected)
+// ========================
 router.use(auth, role(['admin']));
 
+// ADMIN: Analytics & Charts FIRST (so they don't get caught by :id)
+router.get('/analytics', getDealAnalytics);
+router.get('/stats/:id', getSingleDealStats);
+router.get('/chart/usage', getDealUsageChart);
+router.get('/chart/top', getTopDealsChart);
+router.get('/chart/impact', getDiscountImpactChart);
+
+// ADMIN: CRUD
 router.get('/', getAllDeals);
 router.post('/', createDealSchema, validate, createDeal);
 router.put('/:id', updateDealSchema, validate, updateDeal);
 router.delete('/:id', deleteDeal);
 router.patch('/:id/toggle', toggleDealStatusSchema, validate, toggleDealStatus);
 
-router.get('/analytics', getDealAnalytics);
-router.get('/stats/:id', getSingleDealStats);
-router.get('/chart/usage', getDealUsageChart);
-router.get('/chart/top', getTopDealsChart);
-router.get('/chart/impact', getDiscountImpactChart);
+// GET SINGLE DEAL — MUST BE LAST!
+router.get('/:id', getDealById);  // ← Now safe — won't catch /analytics
 
 module.exports = router;

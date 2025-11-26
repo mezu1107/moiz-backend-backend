@@ -26,28 +26,26 @@ const createOrder = [
 ];
 
 // ====================== GUEST ORDER ======================
+// GUEST ORDER – FULLY UPDATED (supports areaId + card payment)
 const createGuestOrder = [
   body('name').trim().notEmpty().withMessage('Name is required'),
-  body('phone').isMobilePhone('any').withMessage('Valid phone number required'),
-  body('address.fullAddress').notEmpty().withMessage('Delivery address is required'),
-  body('address.area').notEmpty().withMessage('Area name is required'),
-  body('items')
-    .isArray({ min: 1 })
-    .withMessage('At least one item required'),
-  body('items.*.menuItem')
-    .isMongoId()
-    .withMessage('Valid menu item ID'),
-  body('items.*.quantity')
-    .notEmpty()
-    .withMessage('Quantity is required')
-    .isInt({ min: 1 })
-    .withMessage('Quantity must be at least 1')
-    .toInt(),
+  body('phone').isMobilePhone('any', { strictMode: false }).withMessage('Valid phone number required'),
+  body('areaId').isMongoId().withMessage('Valid areaId is required'),
+  body('address.fullAddress').trim().notEmpty().withMessage('Full address is required'),
+  body('address.label').optional().trim(),
+  body('address.floor').optional().trim(),
+  body('address.instructions').optional().trim(),
+  body('items').isArray({ min: 1 }).withMessage('At least one item is required'),
+  body('items.*.menuItem').isMongoId().withMessage('Valid menu item ID required'),
+  body('items.*.quantity').isInt({ min: 1, max: 50 }).toInt().withMessage('Quantity must be 1–50'),
   body('paymentMethod')
     .optional()
-    .isIn(['cod', 'cash', 'easypaisa', 'jazzcash', 'bank'])
-    .withMessage('Invalid payment method')
+    .isIn(['cash', 'cod', 'card', 'easypaisa', 'jazzcash', 'bank'])
+    .withMessage('Invalid payment method'),
+  body('promoCode').optional().trim()
 ];
+
+
 
 // ====================== TRACK BY PHONE ======================
 const trackByPhone = [
@@ -78,7 +76,7 @@ const rejectOrder = [
 
 module.exports = {
   createOrder,
-  createGuestOrder,
+  createGuestOrder,        // this one was outdated before
   trackByPhone,
   updateStatus,
   assignRider,
