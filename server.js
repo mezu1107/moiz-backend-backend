@@ -111,6 +111,7 @@ const routes = [
   ['/api/admin/customers', './src/routes/admin/userRoutes'],
   ['/api/admin/riders', './src/routes/admin/riderAdminRoutes'],
   ['/api/admin', './src/routes/admin/adminRoutes'],
+  ['/api/order/analytics', './src/routes/order/analyticsRoutes']
 ];
 
 routes.forEach(([path, file]) => {
@@ -122,10 +123,14 @@ routes.forEach(([path, file]) => {
   }
 });
 
-// 404 & Global Error Handler
-// app.use('*', (req, res) => {
-//   res.status(404).json({ success: false, message: 'API Route not found' });
-// });
+// 404 Handler (Route Not Found)
+// 404 - Route Not Found
+app.use((req, res, next) => {
+  const error = new Error(`Route not found: ${req.originalUrl}`);
+  error.statusCode = 404;
+  next(error);
+});
+
 
 app.use((err, req, res, next) => {
   logger.error('UNHANDLED ERROR:', {

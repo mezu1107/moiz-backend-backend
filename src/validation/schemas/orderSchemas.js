@@ -76,7 +76,7 @@ const rejectOrder = [
 
 module.exports = {
   createOrder,
-  createGuestOrder,        // this one was outdated before
+  createGuestOrder,      
   trackByPhone,
   updateStatus,
   assignRider,

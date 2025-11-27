@@ -1,6 +1,7 @@
 // src/controllers/deal/dealController.js
 const Deal = require('../../models/deal/Deal');
 const mongoose = require('mongoose');
+const Order = require('../../models/order/Order'); // Required for discount impact
 
 // ========================
 // CORE: DEAL APPLICATION LOGIC
@@ -21,11 +22,10 @@ const validateAndApplyDeal = async (code, orderTotal, userId = null) => {
 
   if (!deal) return null;
   if (orderTotal < deal.minOrderAmount) return null;
-
   if (deal.totalUsageLimit && deal.usedBy.length >= deal.totalUsageLimit) return null;
 
   if (userId && deal.usageLimitPerUser > 0) {
-    const usedCount = deal.usedBy.filter(u => u.user.toString() === userId.toString()).length;
+    const usedCount = deal.usedBy.filter(u => u.user?.toString() === userId.toString()).length;
     if (usedCount >= deal.usageLimitPerUser) return null;
   }
 
@@ -138,7 +138,6 @@ const applyDeal = async (req, res) => {
       validUntil: { $gte: now }
     });
 
-    // Invalid or expired
     if (!deal) {
       return res.status(400).json({
         success: false,
@@ -147,7 +146,6 @@ const applyDeal = async (req, res) => {
       });
     }
 
-    // Min order not met
     if (orderTotalFloat < deal.minOrderAmount) {
       const shortfall = (deal.minOrderAmount - orderTotalFloat).toFixed(2);
       return res.status(400).json({
@@ -157,7 +155,6 @@ const applyDeal = async (req, res) => {
       });
     }
 
-    // Usage limit reached
     if (deal.totalUsageLimit && deal.usedBy.length >= deal.totalUsageLimit) {
       return res.status(400).json({
         success: false,
@@ -166,12 +163,8 @@ const applyDeal = async (req, res) => {
       });
     }
 
-    // Per-user limit
     if (userId && deal.usageLimitPerUser > 0) {
-      const userUsageCount = deal.usedBy.filter(
-        u => u.user && u.user.toString() === userId
-      ).length;
-
+      const userUsageCount = deal.usedBy.filter(u => u.user?.toString() === userId).length;
       if (userUsageCount >= deal.usageLimitPerUser) {
         return res.status(400).json({
           success: false,
@@ -181,34 +174,22 @@ const applyDeal = async (req, res) => {
       }
     }
 
-    // Calculate discount
     let discount = deal.discountType === 'percentage'
       ? (orderTotalFloat * deal.discountValue) / 100
       : deal.discountValue;
 
-    if (deal.maxDiscountAmount) {
-      discount = Math.min(discount, deal.maxDiscountAmount);
-    }
-
+    if (deal.maxDiscountAmount) discount = Math.min(discount, deal.maxDiscountAmount);
     discount = Number(discount.toFixed(2));
     const finalAmount = Math.max(0, Number((orderTotalFloat - discount).toFixed(2)));
 
-    // Track usage if logged in
     if (userId) {
-      await Deal.findByIdAndUpdate(
-        deal._id,
-        {
-          $push: {
-            usedBy: {
-              user: new mongoose.Types.ObjectId(userId),
-              usedAt: new Date()
-            }
-          }
+      await Deal.findByIdAndUpdate(deal._id, {
+        $push: {
+          usedBy: { user: new mongoose.Types.ObjectId(userId), usedAt: new Date() }
         }
-      );
+      });
     }
 
-    // SUCCESS — SWIGGY-STYLE CELEBRATION MESSAGE
     const savingsText = discount >= 100 
       ? `WHOA! You just saved a massive ₹${discount}!` 
       : `Yay! You saved ₹${discount} instantly!`;
@@ -244,7 +225,7 @@ const applyDeal = async (req, res) => {
 };
 
 // ========================
-// ADMIN ENDPOINTS — PROFESSIONAL SUCCESS MESSAGES
+// ADMIN ENDPOINTS
 // ========================
 
 const getAllDeals = async (req, res) => {
@@ -361,94 +342,226 @@ const toggleDealStatus = async (req, res) => {
   }
 };
 
-// Analytics remain professional & clean
+// ========================
+// ADMIN ANALYTICS — FULLY IMPLEMENTED
+// ========================
+
 const getDealAnalytics = async (req, res) => {
   try {
-    const Order = require('../../models/order/Order');
+    const totalDeals = await Deal.countDocuments();
+    const activeDeals = await Deal.countDocuments({ isActive: true });
+    const totalUses = await Deal.aggregate([{ $unwind: '$usedBy' }, { $count: 'total' }]);
 
-    const analytics = await Deal.aggregate([
-      // ... (unchanged aggregation)
-    ]);
+    const summary = {
+      totalDeals,
+      activeDeals,
+      inactiveDeals: totalDeals - activeDeals,
+      totalRedemptions: totalUses[0]?.total || 0,
+      avgUsesPerDeal: totalUses[0]?.total ? (totalUses[0].total / totalDeals).toFixed(1) : 0
+    };
 
-    const summary = { /* unchanged */ };
+    const analytics = await Deal.find()
+      .select('title code isActive usedBy totalUsageLimit createdAt')
+      .sort({ 'usedBy.length': -1 });
 
-    res.json({ 
+    res.json({
       success: true,
       message: 'Deal performance analytics loaded',
-      summary, 
-      analytics 
+      summary,
+      analytics
     });
   } catch (err) {
+    console.error('getDealAnalytics error:', err);
     res.status(500).json({ success: false, message: 'Failed to load analytics' });
   }
 };
 
-// Keep other analytics endpoints clean too...
-// (getSingleDealStats, getDealUsageChart, etc. — unchanged but with better success messages)
-
 const getSingleDealStats = async (req, res) => {
   try {
-    // ... logic
-    res.json({ 
-      success: true, 
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid deal ID' });
+    }
+
+    const deal = await Deal.findById(id);
+    if (!deal) return res.status(404).json({ success: false, message: 'Deal not found' });
+
+    const totalUses = deal.usedBy.length;
+    const uniqueUsers = new Set(deal.usedBy.map(u => u.user?.toString())).size;
+
+    const stats = {
+      dealTitle: deal.title,
+      code: deal.code,
+      totalUses,
+      uniqueUsers,
+      totalUsageLimit: deal.totalUsageLimit || 'Unlimited',
+      usageLimitPerUser: deal.usageLimitPerUser,
+      isActive: deal.isActive,
+      validity: {
+        from: deal.validFrom,
+        to: deal.validUntil,
+        isValidNow: deal.isActive && new Date() >= deal.validFrom && new Date() <= deal.validUntil
+      },
+      remainingUses: deal.totalUsageLimit ? deal.totalUsageLimit - totalUses : null
+    };
+
+    res.json({
+      success: true,
       message: 'Deal statistics loaded successfully',
-      stats 
+      stats
     });
   } catch (err) {
+    console.error('getSingleDealStats error:', err);
     res.status(500).json({ success: false, message: 'Error loading stats' });
   }
 };
 
 const getDealUsageChart = async (req, res) => {
   try {
-    // ... logic
+    const days = 30;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const usageByDate = await Deal.aggregate([
+      { $unwind: '$usedBy' },
+      { $match: { 'usedBy.usedAt': { $gte: startDate } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$usedBy.usedAt' } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    const labels = [];
+    const data = [];
+    for (let i = days; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      labels.push(dateStr);
+      const found = usageByDate.find(d => d._id === dateStr);
+      data.push(found ? found.count : 0);
+    }
+
     res.json({
       success: true,
-      message: 'Chart data ready!',
+      message: 'Usage trend chart generated',
       chartType: 'line',
-      title: dealId ? 'Deal Usage Trend' : 'All Deals Trend',
-      data
+      title: 'Deal Usage Trend (Last 30 Days)',
+      labels,
+      datasets: [{
+        label: 'Daily Redemptions',
+        data,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
     });
   } catch (err) {
+    console.error('getDealUsageChart error:', err);
     res.status(500).json({ success: false, message: 'Failed to generate chart' });
   }
 };
 
 const getTopDealsChart = async (req, res) => {
   try {
-    // ... logic
+    const limit = 10;
+
+    const topDeals = await Deal.aggregate([
+      {
+        $project: {
+          title: 1,
+          code: 1,
+          totalUses: { $size: { $ifNull: ['$usedBy', []] } }
+        }
+      },
+      { $sort: { totalUses: -1 } },
+      { $limit: limit }
+    ]);
+
+    const labels = topDeals.map(d => d.code);
+    const data = topDeals.map(d => d.totalUses);
+
     res.json({
       success: true,
       message: 'Top performing deals loaded',
       chartType: 'bar',
-      title: `Top ${limitNum} Deals by Usage`,
-      data
+      title: `Top ${limit} Deals by Usage`,
+      labels,
+      datasets: [{
+        label: 'Total Redemptions',
+        data,
+        backgroundColor: [
+          '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
+          '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9'
+        ]
+      }]
     });
   } catch (err) {
+    console.error('getTopDealsChart error:', err);
     res.status(500).json({ success: false, message: 'Chart error' });
   }
 };
 
 const getDiscountImpactChart = async (req, res) => {
   try {
-    // ... logic
+    const impactData = await Order.aggregate([
+      {
+        $match: {
+          'appliedDeal.code': { $exists: true, $ne: null },
+          status: { $in: ['delivered', 'completed'] }
+        }
+      },
+      {
+        $lookup: {
+          from: 'deals',
+          localField: 'appliedDeal.dealId',
+          foreignField: '_id',
+          as: 'dealInfo'
+        }
+      },
+      { $unwind: { path: '$dealInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: '$appliedDeal.code',
+          dealTitle: { $first: '$dealInfo.title' },
+          avgDiscount: { $avg: '$appliedDeal.discountAmount' },
+          avgOrderValue: { $avg: '$totalAmount' },
+          orderCount: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          label: '$_id',
+          title: { $ifNull: ['$dealTitle', 'Unknown Deal'] },
+          x: { $round: ['$avgDiscount', 2] },
+          y: { $round: ['$avgOrderValue', 2] },
+          size: '$orderCount'
+        }
+      }
+    ]);
+
     res.json({
       success: true,
       message: 'Discount impact analysis ready',
-      chartType: 'scatter',
+      chartType: 'bubble',
       title: 'Discount Impact Analysis',
-      xAxis: 'Average Discount (₹)',
+      xAxis: 'Average Discount Given (₹)',
       yAxis: 'Average Order Value (₹)',
       sizeBy: 'Number of Orders',
-      data
+      data: impactData
     });
   } catch (err) {
+    console.error('getDiscountImpactChart error:', err);
     res.status(500).json({ success: false, message: 'Failed to load chart' });
   }
 };
 
 // ========================
-// EXPORT
+// EXPORT ALL
 // ========================
 
 module.exports = {

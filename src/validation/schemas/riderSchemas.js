@@ -17,11 +17,11 @@ module.exports = {
     body('riderStatus').isIn(['pending', 'approved', 'rejected']).withMessage('riderStatus must be pending, approved, or rejected')
   ],
 
-  promoteUserToRider: [
-    param('userId').isMongoId().withMessage('Valid user ID is required'),
-    body('vehicleType').optional().isIn(['bike', 'car', 'bicycle']),
-    body('vehicleNumber').optional().isLength({ min: 3, max: 15 }).matches(/^[A-Z0-9-]+$/i)
-  ],
+promoteUserToRider: [
+  param('id').isMongoId().withMessage('Valid user ID is required'),
+  body('vehicleType').optional().isIn(['bike', 'car', 'bicycle']),
+  body('vehicleNumber').optional().isLength({ min: 3, max: 15 }).matches(/^[A-Z0-9-]+$/i)
+],
 
   permanentlyBanRider: [
     param('id').isMongoId(),
@@ -38,5 +38,3 @@ module.exports = {
     body('riderPhoto').isURL()
   ]
 };
-
-// KUCH BHI ISKE BAAD NAI HONA CHAHIYE — KOI EXTRA CODE NAI!
