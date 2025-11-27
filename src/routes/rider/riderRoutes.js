@@ -1,38 +1,33 @@
+// src/routes/rider/riderRoutes.js
 
-// CORRECT (Ab yeh kar do)
 const express = require('express');
 const router = express.Router();
-
-
 const { auth } = require('../../middleware/auth/auth');
 const { role } = require('../../middleware/role/role');
 const validate = require('../../middleware/validate/validate');
 
-const {
-  updateLocation,
-  toggleAvailability,
-  updateOrderLocation,
-  getMyOrders,
-  getRiderProfile
-} = require('../../controllers/rider/riderController');
+const controller = require('../../controllers/rider/riderController');
+const schema = require('../../validation/schemas/riderSchemas');
 
-const { 
-  updateLocation: locSchema, 
-  updateOrderLocation: orderLocSchema 
-} = require('../../validation/schemas/riderSchemas');
-
-router.use(auth, role('rider'));
-router.use((req, res, next) => {
+const requireApprovedRider = (req, res, next) => {
   if (req.user.riderStatus !== 'approved') {
-    return res.status(403).json({ success: false, message: 'Not approved' });
+    return res.status(403).json({
+      success: false,
+      message: 'Rider account not approved yet'
+    });
   }
   next();
-});
+};
 
-router.patch('/location', locSchema, validate, updateLocation);
-router.patch('/availability', toggleAvailability);
-router.patch('/order/:id/location', orderLocSchema, validate, updateOrderLocation);
-router.get('/orders', getMyOrders);
-router.get('/profile', getRiderProfile);
+// APPROVED RIDER ROUTES
+router.patch('/location', auth, role('rider'), requireApprovedRider, schema.updateLocation, validate, controller.updateLocation);
+router.patch('/availability', auth, role('rider'), requireApprovedRider, controller.toggleAvailability);
+router.patch('/order/:id/location', auth, role('rider'), requireApprovedRider, schema.updateOrderLocation, validate, controller.updateOrderLocation);
+router.get('/orders', auth, role('rider'), requireApprovedRider, controller.getMyOrders);
+router.get('/profile', auth, role('rider'), requireApprovedRider, controller.getRiderProfile);
 
-module.exports = router; // YE BHI HAI
+// PUBLIC (ANY LOGGED-IN USER) ROUTES
+router.post('/apply', auth, schema.applyAsRider, validate, controller.applyAsRider);
+router.get('/application-status', auth, controller.getApplicationStatus);
+
+module.exports = router;

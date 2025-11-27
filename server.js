@@ -109,7 +109,7 @@ const routes = [
   ['/api/rider', './src/routes/rider/riderRoutes'],
   ['/api/rider/dashboard', './src/routes/rider/riderDashboardRoutes'],
   ['/api/admin/customers', './src/routes/admin/userRoutes'],
-  ['/api/admin/riders', './src/routes/admin/riderAdminRoutes'],
+  ['/api/admin/rider', './src/routes/admin/riderAdminRoutes'],
   ['/api/admin', './src/routes/admin/adminRoutes'],
   ['/api/order/analytics', './src/routes/order/analyticsRoutes']
 ];
