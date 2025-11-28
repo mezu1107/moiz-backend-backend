@@ -20,44 +20,83 @@ const {
   restoreRider,
   permanentlyBanRider,
   getBlockedRiders,
-  getPermanentlyBannedRiders
+  getPermanentlyBannedRiders,
+  assignOrderToRider
 } = require('../../controllers/admin/riderAdminController');
 
-const {
-  updateRiderStatus: statusSchema,
-  promoteUserToRider: promoteSchema,
-  permanentlyBanRider: banSchema,
-  rejectRider: rejectSchema
-} = require('../../validation/schemas/riderSchemas');
+const schema = require('../../validation/schemas/riderSchemas');
 
-// ========== ALL ROUTES PROTECTED: ADMIN ONLY ==========
+// Admin only
 router.use(auth, role('admin'));
 
-// Dashboard & Stats
+// Dashboard Stats
 router.get('/stats', getRiderStats);
 router.get('/blocked', getBlockedRiders);
 router.get('/permanently-banned', getPermanentlyBannedRiders);
 
 // List & Details
 router.get('/', getAllRiders);
-router.get('/:id', getRiderById);
+router.get('/:id', schema.validateRiderId, validate, getRiderById);
 
-// ========== RIDER APPLICATION ACTIONS (PATCH is Standard) ==========
-router.patch('/:id/approve', approveRider);                    // APPROVE
-router.patch('/:id/reject', rejectSchema, validate, rejectRider); // REJECT
+// Application Flow
+router.patch('/:id/approve', schema.validateRiderId, validate, approveRider);
+router.patch(
+  '/:id/reject',
+  schema.validateRiderId,
+  validate,
+  schema.rejectRider,
+  validate,
+  rejectRider
+);
 
-// Force promote any user (VIP / internal)
-router.post('/:id/promote-to-rider', promoteSchema, validate, promoteUserToRider);
+// VIP Promotion
+router.post(
+  '/:id/promote-to-rider',
+  schema.validateRiderId,
+  validate,
+  schema.promoteUserToRider,
+  validate,
+  promoteUserToRider
+);
 
-// ========== RIDER ACCOUNT MANAGEMENT ==========
-router.patch('/:id/status', statusSchema, validate, updateRiderStatus);
+// Rider Management
+router.patch(
+  '/:id/status',
+  schema.validateRiderId,
+  validate,
+  schema.updateRiderStatus,
+  validate,
+  updateRiderStatus
+);
 
-router.patch('/:id/block', blockRider);
-router.patch('/:id/unblock', unblockRider);
+router.patch(
+  '/:id/block',
+  schema.validateRiderId,
+  validate,
+  schema.blockRider,
+  validate,
+  blockRider
+);
 
-router.delete('/:id', softDeleteRider);
-router.patch('/:id/restore', restoreRider);
+router.patch('/:id/unblock', schema.validateRiderId, validate, unblockRider);
+router.delete('/:id/soft-delete', schema.validateRiderId, validate, softDeleteRider);
+router.patch('/:id/restore', schema.validateRiderId, validate, restoreRider);
 
-router.post('/:id/permanent-ban', banSchema, validate, permanentlyBanRider);
+router.post(
+  '/:id/permanent-ban',
+  schema.validateRiderId,
+  validate,
+  schema.permanentlyBanRider,
+  validate,
+  permanentlyBanRider
+);
+
+// Manual Order Assignment
+router.patch(
+  '/:orderId/assign-rider',
+  schema.assignOrderToRider,
+  validate,
+  assignOrderToRider
+);
 
 module.exports = router;

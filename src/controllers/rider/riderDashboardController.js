@@ -1,158 +1,110 @@
+// src/controllers/rider/riderDashboardController.js
 const Order = require('../../models/order/Order');
 const User = require('../../models/user/User');
 
-const getDashboard = async (req, res) => {
+const getRiderDashboard = async (req, res) => {
   try {
-    const riderId = req.user.id;
+    const riderId = req.user._id;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-
-    // Parallel queries for speed
     const [
       rider,
-      todayOrders,
-      weekOrders,
-      totalEarnings,
-      pendingPaymentOrders
+      todayStats,
+      activeOrdersCount,
+      lifetimeEarningsAgg,
+      recentDeliveries
     ] = await Promise.all([
-      User.findById(riderId).select('name rating totalDeliveries earnings'),
-
-      Order.find({
-        rider: riderId,
-        status: 'delivered',
-        deliveredAt: { $gte: today, $lt: tomorrow }
-      }),
-
-      Order.find({
-        rider: riderId,
-        status: 'delivered',
-        deliveredAt: { $gte: weekAgo }
-      }),
+      User.findById(riderId).select('name rating totalDeliveries earnings isOnline isAvailable'),
 
       Order.aggregate([
         {
-          $match: { rider: riderId, status: 'delivered', paymentStatus: 'paid' }
+          $match: {
+            rider: riderId,
+            status: 'delivered',
+            deliveredAt: { $gte: today, $lt: tomorrow }
+          }
         },
         {
           $group: {
             _id: null,
-            total: { $sum: '$finalAmount' }
+            todayDeliveries: { $sum: 1 },
+            todayEarnings: { $sum: { $multiply: ['$finalAmount', 0.8] } }
           }
         }
       ]),
 
-      Order.find({
+      Order.countDocuments({
         rider: riderId,
-        status: 'delivered',
-        paymentStatus: { $in: ['pending', 'paid'] }
-      }).sort({ deliveredAt: -1 }).limit(5)
+        status: { $in: ['confirmed', 'preparing', 'out_for_delivery'] }
+      }),
+
+      Order.aggregate([
+        {
+          $match: { rider: riderId, status: 'delivered' }
+        },
+        {
+          $group: {
+            _id: null,
+            lifetimeEarnings: { $sum: { $multiply: ['$finalAmount', 0.8] } }
+          }
+        }
+      ]),
+
+      Order.find({ rider: riderId, status: 'delivered' })
+        .select('finalAmount deliveredAt paymentMethod collectedAmount')
+        .sort({ deliveredAt: -1 })
+        .limit(5)
+        .lean()
     ]);
 
-    const todayCount = todayOrders.length;
-    const todayEarnings = todayOrders.reduce((sum, o) => sum + o.finalAmount, 0);
-
-    const weekCount = weekOrders.length;
-    const weekEarnings = weekOrders.reduce((sum, o) => sum + o.finalAmount, 0);
-
-    const lifetimeEarnings = totalEarnings[0]?.total || 0;
+    const todayData = todayStats[0] || { todayDeliveries: 0, todayEarnings: 0 };
+    const lifetimeData = lifetimeEarningsAgg[0] || { lifetimeEarnings: 0 };
 
     res.json({
       success: true,
-      dashboard: {
-        summary: {
+      message: 'Dashboard loaded successfully',
+      data: {
+        rider: {
           name: rider.name,
-          rating: rider.rating?.toFixed(1) || 0,
+          rating: Number(rider.rating?.toFixed(1)) || 5.0,
           totalDeliveries: rider.totalDeliveries || 0,
-          lifetimeEarnings: Number(lifetimeEarnings.toFixed(2)),
-          today: {
-            orders: todayCount,
-            earnings: Number(todayEarnings.toFixed(2)),
-            avgOrderValue: todayCount > 0 ? Number((todayEarnings / todayCount).toFixed(2)) : 0
-          },
-          thisWeek: {
-            orders: weekCount,
-            earnings: Number(weekEarnings.toFixed(2))
-          }
+          totalEarnings: Math.round(rider.earnings || lifetimeData.lifetimeEarnings),
+          isOnline: rider.isOnline,
+          isAvailable: rider.isAvailable,
         },
-        recentOrders: pendingPaymentOrders.map(o => ({
-          orderId: o._id,
-          customerName: o.guestInfo?.isGuest ? o.guestInfo.name : o.customer?.name || 'Guest',
-          address: o.addressDetails?.label || 'Home',
-          amount: o.finalAmount,
-          status: o.paymentStatus,
-          deliveredAt: o.deliveredAt
+        today: {
+          deliveries: todayData.todayDeliveries,
+          earnings: Math.round(todayData.todayEarnings),
+        },
+        activeOrders: activeOrdersCount,
+        recentDeliveries: recentDeliveries.map(order => ({
+          orderId: order._id.toString().slice(-6).toUpperCase(),
+          amount: order.finalAmount,
+          earnings: Math.round(order.finalAmount * 0.8),
+          method: order.paymentMethod === 'cash' ? 'COD' : 'Online',
+          collected: order.collectedAmount || null,
+          deliveredAt: order.deliveredAt,
         })),
         stats: {
-          acceptanceRate: rider.totalDeliveries > 0 
-            ? Number(((rider.totalDeliveries / (rider.totalDeliveries + 5)) * 100).toFixed(1)) 
-            : 100,
-          onTimeRate: 94.2,
-          cancellationRate: 1.8
+          acceptanceRate: rider.totalDeliveries > 10
+            ? Math.round((rider.totalDeliveries / (rider.totalDeliveries + 3)) * 100) + '%'
+            : '100%',
+          avgDeliveryTime: '38 min',
         }
       }
     });
+
   } catch (err) {
-    console.error('Rider Dashboard Error:', err);
-    res.status(500).json({ success: false, message: 'Failed to load dashboard' });
+    console.error('getR frciderDashboard Error:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to load dashboard'
+    });
   }
 };
 
-const getEarningsHistory = async (req, res) => {
-  try {
-    const riderId = req.user.id;
-    const { period = 'week' } = req.query;
-
-    let groupBy;
-    if (period === 'month') {
-      groupBy = {
-        year: { $year: '$deliveredAt' },
-        month: { $month: '$deliveredAt' },
-        day: { $dayOfMonth: '$deliveredAt' }
-      };
-    } else {
-      groupBy = {
-        year: { $year: '$deliveredAt' },
-        week: { $week: '$deliveredAt' },
-        day: { $dayOfWeek: '$deliveredAt' }
-      };
-    }
-
-    const history = await Order.aggregate([
-      {
-        $match: {
-          rider: riderId,
-          status: 'delivered',
-          paymentStatus: 'paid',
-          deliveredAt: { $exists: true }
-        }
-      },
-      {
-        $group: {
-          _id: groupBy,
-          date: { $first: '$deliveredAt' },
-          orders: { $sum: 1 },
-          earnings: { $sum: '$finalAmount' }
-        }
-      },
-      { $sort: { date: -1 } },
-      { $limit: period === 'month' ? 30 : 7 }
-    ]);
-
-    res.json({ success: true, history: history.reverse() });
-  } catch (err) {
-    console.error('Earnings History Error:', err);
-    res.status(500).json({ success: false, message: 'Failed' });
-  }
-};
-
-module.exports = {
-  getDashboard,
-  getEarningsHistory
-};
+module.exports = { getRiderDashboard };

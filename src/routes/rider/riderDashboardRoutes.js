@@ -1,23 +1,27 @@
 // src/routes/rider/riderDashboardRoutes.js
-const router = require('express').Router();
+const express = require('express');
+const router = express.Router();
+
 const { auth } = require('../../middleware/auth/auth');
 const { role } = require('../../middleware/role/role');
-const { getDashboard, getEarningsHistory } = require('../../controllers/rider/riderDashboardController');
+const { getRiderDashboard } = require('../../controllers/rider/riderDashboardController');
 
-router.use(auth, role('rider'));
+// Protect all routes
+router.use(auth);
+router.use(role('rider'));
 
-// Only approved riders can access dashboard
+// Only approved riders
 router.use((req, res, next) => {
   if (req.user.riderStatus !== 'approved') {
     return res.status(403).json({
       success: false,
-      message: 'Account not approved yet'
+      message: 'Rider account not approved yet. Please wait for admin approval.'
     });
   }
   next();
 });
 
-router.get('/dashboard', getDashboard);
-router.get('/earnings', getEarningsHistory);
+// GET /api/rider/dashboard
+router.get('/dashboard', getRiderDashboard);
 
 module.exports = router;

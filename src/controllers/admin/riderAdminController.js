@@ -1,5 +1,6 @@
 // src/controllers/admin/riderAdminController.js
 const User = require('../../models/user/User');
+const Order = require('../../models/order/Order'); 
 const { sendNotification } = require('../../utils/fcm');
 const io = global.io;
 
@@ -334,6 +335,11 @@ const promoteUserToRider = async (req, res) => {
 // =============================
 // 8. Block Rider (Temporary)
 // =============================
+// =============================
+// 8. Block Rider (FIXED VERSION)
+// =============================
+const { ObjectId } = require('mongoose').Types;
+
 const blockRider = async (req, res) => {
   const { reason } = req.body;
 
@@ -344,24 +350,40 @@ const blockRider = async (req, res) => {
     });
   }
 
+  const riderId = req.params.id;
+
+  // Critical Fix: Validate ObjectId format
+  if (!ObjectId.isValid(riderId)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid Rider ID format'
+    });
+  }
+
   try {
     const rider = await User.findOneAndUpdate(
-      { _id: req.params.id, role: 'rider' },
+      { _id: riderId, role: 'rider' }, // _id is now guaranteed valid
       {
-        isBlocked: true,
-        isActive: false,
-        isOnline: false,
-        isAvailable: false,
-        blockReason: reason.trim(),
-        blockedAt: new Date()
+        $set: {
+          isBlocked: true,
+          isActive: false,
+          isOnline: false,
+          isAvailable: false,
+          blockReason: reason.trim(),
+          blockedAt: new Date()
+        }
       },
       { new: true }
     );
 
     if (!rider) {
-      return res.status(404).json({ success: false, message: 'Rider not found' });
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Rider not found or not a rider' 
+      });
     }
 
+    // Force logout via socket
     if (io) {
       io.to(`rider:${rider._id}`).emit('forceLogout', {
         message: 'Your account has been suspended',
@@ -369,14 +391,22 @@ const blockRider = async (req, res) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Rider blocked successfully',
-      rider: { id: rider._id, name: rider.name }
+      rider: { 
+        id: rider._id, 
+        name: rider.name,
+        phone: rider.phone 
+      }
     });
+
   } catch (err) {
     console.error('Block Rider Error:', err);
-    res.status(500).json({ success: false, message: 'Failed to block rider' });
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Failed to block rider' 
+    });
   }
 };
 
@@ -588,9 +618,147 @@ const getPermanentlyBannedRiders = async (req, res) => {
   }
 };
 
-// =============================
-// EXPORT ALL
-// =============================
+
+
+const assignOrderToRider = async (req, res) => {
+  const { riderId } = req.body;
+  const { orderId } = req.params;
+
+  try {
+    // 1. Find eligible order
+    const order = await Order.findOne({
+      _id: orderId,
+      rider: null,
+      status: { $in: ['pending', 'confirmed', 'preparing'] }
+    }).populate('customer', 'name fcmToken');
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found, already assigned, or not eligible'
+      });
+    }
+
+    // 2. Get rider (already validated in schema, but re-fetch for fresh data)
+    const rider = await User.findById(riderId)
+      .select('name phone fcmToken riderDocuments isOnline isAvailable');
+
+    if (!rider) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rider not found'
+      });
+    }
+
+    // 3. Prevent double assignment
+    const activeOrder = await Order.findOne({
+      rider: riderId,
+      status: { $in: ['confirmed', 'preparing', 'out_for_delivery'] }
+    });
+
+    if (activeOrder) {
+      const shortId = activeOrder._id.toString().slice(-6).toUpperCase();
+      return res.status(400).json({
+        success: false,
+        message: `Rider is already assigned to order #${shortId}`
+      });
+    }
+
+    // 4. Force rider online (even if offline)
+    const wasOffline = !rider.isOnline || !rider.isAvailable;
+
+    if (wasOffline) {
+      await User.updateOne(
+        { _id: riderId },
+        {
+          $set: {
+            isOnline: true,
+            isAvailable: true,
+            lastActiveAt: new Date(),
+            locationUpdatedAt: new Date()
+          }
+        }
+      );
+
+      if (io) {
+        io.to(`rider:${riderId}`).emit('forceOnline', {
+          message: 'Admin assigned you a new order — you are now online!'
+        });
+      }
+    }
+
+    // 5. Assign order
+    order.rider = riderId;
+    order.status = 'confirmed';
+    order.confirmedAt = new Date();
+    await order.save();
+
+    const shortOrderId = order._id.toString().slice(-6).toUpperCase();
+
+    // 6. Real-time + Push Notifications
+    if (io) {
+      io.to(`rider:${riderId}`).emit('newOrderAssigned', {
+        orderId: order._id,
+        shortId: shortOrderId,
+        customerName: order.customer?.name || 'Guest',
+        totalAmount: order.finalAmount,
+        deliveryAddress: order.addressDetails?.fullAddress || 'N/A',
+        pickupAddress: order.restaurant?.address || 'Restaurant',
+        assignedAt: new Date()
+      });
+
+      io.to('admin_room').emit('orderAssigned', {
+        orderId: order._id,
+        shortId: shortOrderId,
+        riderName: rider.name,
+        riderPhone: rider.phone
+      });
+    }
+
+    // FCM Push
+    if (rider.fcmToken) {
+      await sendNotification(
+        rider.fcmToken,
+        'New Order Assigned!',
+        `Order #${shortOrderId} • PKR ${order.finalAmount} • Pick up now!`
+      );
+    }
+
+    if (order.customer?.fcmToken) {
+      await sendNotification(
+        order.customer.fcmToken,
+        'Rider Assigned!',
+        `${rider.name} is on the way to pick up your order`
+      );
+    }
+
+    // 7. Success
+    return res.json({
+      success: true,
+      message: 'Order assigned successfully',
+      data: {
+        orderId: order._id,
+        shortId: shortOrderId,
+        status: 'confirmed',
+        rider: {
+          id: rider._id,
+          name: rider.name,
+          phone: rider.phone,
+          vehicleNumber: rider.riderDocuments?.vehicleNumber || 'N/A'
+        },
+        forcedOnline: wasOffline
+      }
+    });
+
+  } catch (err) {
+    console.error('Assign Order Error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to assign order'
+    });
+  }
+};
+
 module.exports = {
   getAllRiders,
   getRiderById,
@@ -605,5 +773,6 @@ module.exports = {
   restoreRider,
   permanentlyBanRider,
   getBlockedRiders,
-  getPermanentlyBannedRiders
+  getPermanentlyBannedRiders,
+  assignOrderToRider
 };
