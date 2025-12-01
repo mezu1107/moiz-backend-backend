@@ -4529,3 +4529,37 @@
 {"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-11-28T09:39:03.101Z"}
 {"level":"info","message":"Route loaded: /api/order/analytics","timestamp":"2025-11-28T09:39:03.109Z"}
 {"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-28T09:39:03.229Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-11-30T09:50:08.383Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-11-30T09:50:08.598Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-11-30T09:50:08.604Z"}
+{"level":"info","message":"Route loaded: /api/area","timestamp":"2025-11-30T09:50:08.610Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-11-30T09:50:08.618Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-11-30T09:50:08.626Z"}
+{"level":"info","message":"Route loaded: /api/order","timestamp":"2025-11-30T09:50:08.653Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-11-30T09:50:08.689Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-11-30T09:50:08.698Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-11-30T09:50:08.701Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-11-30T09:50:08.704Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-11-30T09:50:08.773Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-11-30T09:50:08.784Z"}
+{"level":"info","message":"Route loaded: /api/order/analytics","timestamp":"2025-11-30T09:50:08.786Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-30T09:50:08.844Z"}
+{"level":"info","message":"Received SIGINT. Shutting down gracefully...","timestamp":"2025-11-30T09:50:15.398Z"}
+{"level":"info","message":"Route loaded: /api/auth → ./src/routes/auth/authRoutes","timestamp":"2025-11-30T10:14:35.072Z"}
+{"level":"info","message":"Route loaded: /api/upload → ./src/routes/upload/uploadRoutes","timestamp":"2025-11-30T10:14:35.244Z"}
+{"level":"info","message":"Route loaded: /api/address → ./src/routes/address/addressRoutes","timestamp":"2025-11-30T10:14:35.250Z"}
+{"level":"info","message":"Route loaded: /api/area → ./src/routes/area/areaRoutes","timestamp":"2025-11-30T10:14:35.256Z"}
+{"level":"info","message":"Route loaded: /api/cart → ./src/routes/cart/cartRoutes","timestamp":"2025-11-30T10:14:35.263Z"}
+{"level":"info","message":"Route loaded: /api/menu → ./src/routes/menu/menuRoutes","timestamp":"2025-11-30T10:14:35.270Z"}
+{"level":"info","message":"Route loaded: /api/order → ./src/routes/order/orderRoutes","timestamp":"2025-11-30T10:14:35.296Z"}
+{"level":"info","message":"Route loaded: /api/deal → ./src/routes/deal/dealRoutes","timestamp":"2025-11-30T10:14:35.315Z"}
+{"level":"info","message":"Route loaded: /api/rider → ./src/routes/rider/riderRoutes","timestamp":"2025-11-30T10:14:35.322Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard → ./src/routes/rider/riderDashboardRoutes","timestamp":"2025-11-30T10:14:35.326Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers → ./src/routes/admin/customerRoutes","timestamp":"2025-11-30T10:14:35.331Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider → ./src/routes/admin/riderAdminRoutes","timestamp":"2025-11-30T10:14:35.406Z"}
+{"level":"info","message":"Route loaded: /api/admin → ./src/routes/admin/adminRoutes","timestamp":"2025-11-30T10:14:35.410Z"}
+{"level":"info","message":"Route loaded: /api/order/analytics → ./src/routes/order/analyticsRoutes","timestamp":"2025-11-30T10:14:35.412Z"}
+{"level":"info","message":"Route loaded: /api/contact → ./src/routes/contact/contactRoutes","timestamp":"2025-11-30T10:14:35.418Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact → ./src/routes/admin/contactAdminRoutes","timestamp":"2025-11-30T10:14:35.421Z"}
+{"level":"info","message":"MongoDB Connected Successfully","timestamp":"2025-11-30T10:14:35.469Z"}
+{"level":"info","message":"Received SIGINT. Shutting down gracefully...","timestamp":"2025-11-30T10:14:40.132Z"}

@@ -1,4 +1,4 @@
-// src/middleware/stripe/verifyStripeWebhook.js
+// src/middleware/stripe/c.js
 // PAKISTAN KA SABSE SAFE STRIPE WEBHOOK MIDDLEWARE — NOV 2025 FINAL
 const stripe = require('../../config/stripe');
 const logger = require('../../utils/logger');
