@@ -1,5 +1,12 @@
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -18,7 +25,8 @@ export const Footer = () => {
               </div>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Bringing authentic Pakistani taste to your table with love and tradition.
+              Bringing authentic Pakistani taste to your table with love and
+              tradition.
             </p>
             <div className="flex gap-3">
               <a
@@ -47,22 +55,34 @@ export const Footer = () => {
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/menu" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/menu"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   Menu
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/about"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/contact"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   Contact
                 </Link>
               </li>
@@ -74,18 +94,11 @@ export const Footer = () => {
             <h4 className="font-semibold mb-4">Portals</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/login"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   User Login
-                </Link>
-              </li>
-              <li>
-                <Link to="/rider/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Rider Portal
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Admin Portal
                 </Link>
               </li>
             </ul>
@@ -115,7 +128,10 @@ export const Footer = () => {
         </div>
 
         <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} AM Foods - AM Enterprises. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} AM Foods - AM Enterprises. All
+            rights reserved.
+          </p>
         </div>
       </div>
     </footer>
