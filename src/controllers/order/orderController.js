@@ -82,22 +82,41 @@ const sendNotification = async (order, event, extra = {}) => {
 
 // ====================== CREATE REGISTERED USER ORDER ======================
 const createOrder = async (req, res) => {
-  const { items, addressId, paymentMethod = 'cod', promoCode } = req.body;
-  const customerId = req.user.id;
-
-  const paymentMap = { cod: 'cash', card: 'card', easypaisa: 'easypaisa', jazzcash: 'jazzcash', bank: 'bank' };
-  const method = paymentMap[paymentMethod] || 'cash';
-
-  if (!['cash', 'card', 'easypaisa', 'jazzcash', 'bank'].includes(method)) {
-    return res.status(400).json({ success: false, message: 'Invalid payment method' });
-  }
-
   try {
-    const address = await Address.findOne({ _id: addressId, user: customerId }).populate('area');
-    if (!address) return res.status(404).json({ success: false, message: 'Address not found' });
+    const { items, addressId, paymentMethod = 'cod', promoCode } = req.body;
+    const customerId = req.user.id;
 
-    const deliveryZone = await DeliveryZone.findOne({ area: address.area._id, isActive: true });
-    if (!deliveryZone) return res.status(400).json({ success: false, message: 'Delivery not available in your area' });
+    const paymentMap = {
+      cod: 'cash',
+      card: 'card',
+      easypaisa: 'easypaisa',
+      jazzcash: 'jazzcash',
+      bank: 'bank'
+    };
+
+    const method = paymentMap[paymentMethod] || 'cash';
+
+    if (!['cash', 'card', 'easypaisa', 'jazzcash', 'bank'].includes(method)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid payment method'
+      });
+    }
+
+    const address = await Address.findOne({ _id: addressId, user: customerId }).populate('area');
+    if (!address)
+      return res.status(404).json({ success: false, message: 'Address not found' });
+
+    const deliveryZone = await DeliveryZone.findOne({
+      area: address.area._id,
+      isActive: true
+    });
+
+    if (!deliveryZone)
+      return res.status(400).json({
+        success: false,
+        message: 'Delivery not available in your area'
+      });
 
     const orderItems = [];
     let subtotal = 0;
@@ -107,6 +126,7 @@ const createOrder = async (req, res) => {
       if (!menuItem || !menuItem.isAvailable) continue;
 
       const qty = Math.max(1, Number(item.quantity) || 1);
+
       orderItems.push({
         menuItem: menuItem._id,
         name: menuItem.name,
@@ -114,22 +134,32 @@ const createOrder = async (req, res) => {
         priceAtOrder: menuItem.price,
         quantity: qty
       });
+
       subtotal += menuItem.price * qty;
     }
 
-    if (orderItems.length === 0) {
-      return res.status(400).json({ success: false, message: 'No items available or in stock' });
-    }
+    if (orderItems.length === 0)
+      return res
+        .status(400)
+        .json({ success: false, message: 'No items available or in stock' });
 
-    if (subtotal < deliveryZone.minOrderAmount) {
-      return res.status(400).json({ success: false, message: `Minimum order amount is PKR ${deliveryZone.minOrderAmount}` });
-    }
+    if (subtotal < deliveryZone.minOrderAmount)
+      return res.status(400).json({
+        success: false,
+        message: `Minimum order amount is PKR ${deliveryZone.minOrderAmount}`
+      });
 
     let discount = 0;
     let appliedDeal = null;
+
     if (promoCode) {
-      const result = await applyAndTrackDeal(promoCode.trim().toUpperCase(), subtotal, customerId);
-      if (result?.discount > 0) {
+      const result = await applyAndTrackDeal(
+        promoCode.trim().toUpperCase(),
+        subtotal,
+        customerId
+      );
+
+      if (result && result.discount > 0) {
         discount = result.discount;
         appliedDeal = {
           dealId: result.dealId,
@@ -161,7 +191,7 @@ const createOrder = async (req, res) => {
 
     let order;
 
-    // CASH, EASYPAISA, JAZZCASH
+    // ===================== CASH, EASYPAISA, JAZZCASH =====================
     if (['cash', 'easypaisa', 'jazzcash'].includes(method)) {
       order = await Order.create({
         ...baseData,
@@ -170,8 +200,9 @@ const createOrder = async (req, res) => {
         paymentStatus: method === 'cash' ? 'pending' : 'paid',
         paidAt: method !== 'cash' ? new Date() : null
       });
-    } 
-    // CARD PAYMENT
+    }
+
+    // ===================== CARD PAYMENT =====================
     else if (method === 'card') {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(finalAmount * 100),
@@ -192,15 +223,18 @@ const createOrder = async (req, res) => {
         metadata: { orderId: order._id.toString() }
       });
 
-      // Auto-cancel if not paid in 15 mins
+      // Auto cancel after 15 mins
       global.pendingOrderTimeouts[order._id.toString()] = setTimeout(async () => {
         const o = await Order.findById(order._id);
         if (o && o.status === 'pending_payment') {
-          await Order.findByIdAndUpdate(o._id, { status: 'cancelled', paymentStatus: 'canceled' });
+          await Order.findByIdAndUpdate(o._id, {
+            status: 'cancelled',
+            paymentStatus: 'cancelled'
+          }).catch(() => {});
           await stripe.paymentIntents.cancel(paymentIntent.id).catch(() => {});
           await sendNotification(o, 'order_cancelled');
-          delete global.pendingOrderTimeouts[o._id.toString()];
         }
+        delete global.pendingOrderTimeouts[o._id.toString()];
       }, AUTO_CANCEL_DELAY);
 
       await Cart.deleteOne({ user: customerId });
@@ -214,7 +248,8 @@ const createOrder = async (req, res) => {
         clientSecret: paymentIntent.client_secret
       });
     }
-    // BANK TRANSFER
+
+    // ===================== BANK TRANSFER =====================
     else if (method === 'bank') {
       order = await Order.create({
         ...baseData,
@@ -230,14 +265,17 @@ const createOrder = async (req, res) => {
       global.pendingOrderTimeouts[order._id.toString()] = setTimeout(async () => {
         const o = await Order.findById(order._id);
         if (o && o.status === 'pending_payment') {
-          await o.updateOne({ status: 'cancelled', paymentStatus: 'canceled' });
+          await o.updateOne({
+            status: 'cancelled',
+            paymentStatus: 'cancelled'
+          });
           await sendNotification(o, 'order_cancelled');
-          delete global.pendingOrderTimeouts[o._id.toString()];
         }
+        delete global.pendingOrderTimeouts[o._id.toString()];
       }, AUTO_CANCEL_DELAY);
     }
 
-    // Final steps for non-card payments
+    // ===================== COMMON SUCCESS PATH =====================
     await Cart.deleteOne({ user: customerId });
     await order.populate('address area items.menuItem customer');
     await sendNotification(order, 'new_order');
@@ -247,15 +285,25 @@ const createOrder = async (req, res) => {
         success: true,
         message: 'Please transfer money to confirm order',
         order,
-        bankDetails: { ...BANK_DETAILS, amount: finalAmount, reference: order.bankTransferReference }
+        bankDetails: {
+          ...BANK_DETAILS,
+          amount: finalAmount,
+          reference: order.bankTransferReference
+        }
       });
     }
 
-    res.json({ success: true, message: 'Order placed successfully!', order });
-
+    return res.json({
+      success: true,
+      message: 'Order placed successfully!',
+      order
+    });
   } catch (err) {
     console.error('createOrder error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
   }
 };
 

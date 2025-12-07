@@ -1,17 +1,28 @@
-// utils/areaCache.js
+// src/utils/areaCache.js
 const Area = require('../models/area/Area');
 
 const areaCache = new Map();
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
 
-const getAreaByCoords = async (lat, lng) => {
-  if (!lat || !lng) return null;
+/**
+ * Returns the active area that contains the point (lng, lat)
+ * Uses proper caching + correct MongoDB GeoJSON order [lng, lat]
+ */
+const getAreaByCoords = async (lng, lat) => {
+  // Basic validation
+  if (typeof lng !== 'number' || typeof lat !== 'number' || isNaN(lng) || isNaN(lat)) {
+    return null;
+  }
 
-  const key = `${parseFloat(lng).toFixed(6)},${parseFloat(lat).toFixed(6)}`;
-  
+  const key = `${parseFloat(lng.toFixed(6))},${parseFloat(lat.toFixed(6))}`;
+
+  // Return cached result if still valid
   if (areaCache.has(key)) {
     const cached = areaCache.get(key);
-    // Return null if previously not found
-    return cached === null ? null : cached;
+    if (cached.expires > Date.now()) {
+      return cached.data; // could be null (not in any area) or area object
+    }
+    areaCache.delete(key); // expired → remove
   }
 
   try {
@@ -21,23 +32,31 @@ const getAreaByCoords = async (lat, lng) => {
         $geoIntersects: {
           $geometry: {
             type: 'Point',
-            coordinates: [parseFloat(lng), parseFloat(lat)]
-          }
-        }
-      }
-    }).select('_id name city');
+            coordinates: [lng, lat], // MongoDB: [longitude, latitude]
+          },
+        },
+      },
+    })
+      .select('_id name city center')
+      .lean(); // ← returns plain object or null
 
-    // Cache even if null (avoid repeated DB hits)
-    areaCache.set(key, area || null);
+    // Cache both hits and misses (important!)
+    areaCache.set(key, {
+      data: area || null, // null = "checked and not in any area"
+      expires: Date.now() + CACHE_TTL,
+    });
 
-    // Auto-clear after 15 minutes
-    setTimeout(() => areaCache.delete(key), 15 * 60 * 1000);
-
-    return area;
+    return area; // ← this is correct: object or null
   } catch (err) {
-    console.error('areaCache error:', err);
+    console.error('areaCache error:', err.message);
     return null;
   }
 };
 
-module.exports = { getAreaByCoords };
+// Optional: Admin can clear cache anytime
+const clearCache = () => areaCache.clear();
+
+module.exports = {
+  getAreaByCoords,
+  clearCache,
+};

@@ -102,7 +102,7 @@ const getMenuByLocation = async (req, res) => {
     const area = await Area.findOne({
       isActive: true,
       polygon: { $geoIntersects: { $geometry: point } }
-    }).select('name city _id');
+    }).select('name city _id center');
 
     if (!area) {
       return res.status(400).json({
@@ -114,18 +114,22 @@ const getMenuByLocation = async (req, res) => {
     const menu = await MenuItem.find({
       isAvailable: true,
       $or: [
-        { availableInAreas: { $size: 0 } }, // Global items
-        { availableInAreas: area._id }
+        { availableInAreas: { $size: 0 } }, // global items
+        { availableInAreas: { $in: [area._id] } } // area-specific
       ]
     })
       .sort({ category: 1, name: 1 })
       .select('-cloudinaryId -__v')
-      .lean();
+      .lean() || [];
 
     res.json({
       success: true,
-      area: area.name,
-      city: area.city,
+      area: {
+        _id: area._id,
+        name: area.name,
+        city: area.city,
+        center: area.centerLatLng
+      },
       menu
     });
   } catch (err) {
@@ -133,6 +137,7 @@ const getMenuByLocation = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
 
 // UPDATE MENU ITEM
 const updateMenuItem = async (req, res) => {
@@ -348,6 +353,25 @@ const getSingleMenuItem = async (req, res) => {
   }
 };
 
+// src/controllers/menu/menuController.js ← ADD THIS FUNCTION
+const getAllAvailableMenuItems = async (req, res) => {
+  try {
+    const menu = await MenuItem.find({ isAvailable: true })
+      .sort({ category: 1, name: 1 })
+      .select('-cloudinaryId -__v')
+      .lean();
+
+    res.json({
+      success: true,
+      message: "Full menu catalog",
+      totalItems: menu.length,
+      menu
+    });
+  } catch (err) {
+    console.error('getAllAvailableMenuItems error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
 module.exports = {
   addMenuItem,
   getMenuByLocation,
@@ -356,5 +380,6 @@ module.exports = {
   getAllMenuItems,
   toggleAvailability,
   getAllMenuItemsWithFilters,
-  getSingleMenuItem
+  getSingleMenuItem,
+  getAllAvailableMenuItems
 };

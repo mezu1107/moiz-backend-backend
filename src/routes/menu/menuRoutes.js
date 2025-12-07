@@ -1,3 +1,5 @@
+// src/routes/menu/menuRoutes.js ← FINAL CORRECTED VERSION
+
 const express = require('express');
 const router = express.Router();
 
@@ -14,7 +16,8 @@ const {
   getAllMenuItems,
   toggleAvailability,
   getAllMenuItemsWithFilters,
-  getSingleMenuItem
+  getSingleMenuItem,
+  getAllAvailableMenuItems
 } = require('../../controllers/menu/menuController');
 
 const {
@@ -26,11 +29,15 @@ const {
   menuItemIdParam
 } = require('../../validation/schemas/menuSchemas');
 
+// PUBLIC ROUTES (NO AUTH NEEDED)
+router.get('/all', getAllAvailableMenuItems);                    // ← FULL CATALOG
 router.get('/location', menuLocationSchema, validate, getMenuByLocation);
 router.get('/filters', menuFiltersSchema, validate, getAllMenuItemsWithFilters);
 router.get('/:id', menuItemIdParam, validate, getSingleMenuItem);
 
-router.use(auth, role(['admin']));
+// ADMIN ROUTES (PROTECTED)
+router.use(auth, role(['admin']));  // ← YE AB SAHI JAGAH HAI!
+
 router.get('/admin/all', getAllMenuItems);
 router.post('/', upload.single('image'), addMenuSchema, validate, addMenuItem);
 router.put('/:id', menuItemIdParam, upload.single('image'), updateMenuSchema, validate, updateMenuItem);

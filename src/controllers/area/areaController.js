@@ -1,7 +1,9 @@
 // src/controllers/area/areaController.js
 const Area = require('../../models/area/Area');
 const DeliveryZone = require('../../models/deliveryZone/DeliveryZone');
+const { getAreaByCoords } = require('../../utils/areaCache');
 
+// GET /api/areas
 const getAreas = async (req, res) => {
   try {
     const areas = await Area.find({ isActive: true })
@@ -9,70 +11,71 @@ const getAreas = async (req, res) => {
       .sort({ name: 1 })
       .lean();
 
-    res.json({ success: true, areas });
+    res.json({
+      success: true,
+      areas: areas.map(a => ({
+        ...a,
+        center: a.centerLatLng // ensure client uses correct virtual
+      }))
+    });
   } catch (err) {
     console.error('getAreas error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
+// GET /api/areas/check?lat=&lng=
 const checkArea = async (req, res) => {
-  const { lat, lng } = req.query;
-
-  if (!lat || !lng) {
-    return res.status(400).json({
-      success: false,
-      message: 'Latitude and longitude are required'
-    });
-  }
-
   try {
-    const point = {
-      type: 'Point',
-      coordinates: [parseFloat(lng), parseFloat(lat)]
-    };
+    const { lat, lng } = req.query;
 
-    // Find area that contains the point AND has an active delivery zone
-    const area = await Area.findOne({
-      isActive: true,
-      polygon: { $geoIntersects: { $geometry: point } }
-    }).select('_id name city center');
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+
+    if (isNaN(latNum) || isNaN(lngNum)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid coordinates'
+      });
+    }
+
+    // MongoDB order: [lng, lat]
+    const area = await getAreaByCoords(lngNum, latNum);
 
     if (!area) {
       return res.json({
         success: true,
         inService: false,
-        message: 'Sorry, we do not deliver to this location yet'
+        message: 'Location outside service zone'
       });
     }
 
     const zone = await DeliveryZone.findOne({
       area: area._id,
       isActive: true
-    }).select('deliveryFee minOrderAmount estimatedTime');
+    })
+      .select('deliveryFee minOrderAmount estimatedTime')
+      .lean();
 
-    if (!zone) {
-      return res.json({
-        success: true,
-        inService: false,
-        message: 'Delivery not available in this area yet'
-      });
-    }
-
-res.json({
-  success: true,
-  inService: true,
+    res.json({
+      success: true,
+      inService: !!zone,
       area: {
         _id: area._id,
         name: area.name,
         city: area.city,
-        center: area.center
+        center: area.centerLatLng
       },
-      delivery: {
-        fee: zone.deliveryFee,
-        minOrder: zone.minOrderAmount,
-        estimatedTime: zone.estimatedTime
-      }
+      delivery: zone
+        ? {
+            fee: zone.deliveryFee,
+            minOrder: zone.minOrderAmount,
+            estimatedTime: zone.estimatedTime
+          }
+        : null,
+      message: zone
+        ? 'Delivery available!'
+        : 'Area mapped but delivery paused'
     });
   } catch (err) {
     console.error('checkArea error:', err);
@@ -80,5 +83,7 @@ res.json({
   }
 };
 
-
-module.exports = { getAreas, checkArea,};
+module.exports = {
+  getAreas,
+  checkArea
+};

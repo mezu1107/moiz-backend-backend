@@ -4,20 +4,24 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
+
   email: { 
     type: String, 
     unique: true, 
-    sparse: true, 
-    lowercase: true, 
+    sparse: true,
+    lowercase: true,
     trim: true 
   },
-  phone: { 
-    type: String, 
-    required: true, 
-    unique: true, 
-    trim: true 
+
+  phone: {
+    type: String,
+    required: true,
+    unique: true, // Unique index auto-created
+    trim: true
   },
+
   password: { type: String, required: true, minlength: 6, select: false },
+
   role: { type: String, enum: ['customer', 'rider', 'admin'], default: 'customer' },
   isActive: { type: Boolean, default: true },
 
@@ -27,7 +31,7 @@ const userSchema = new mongoose.Schema({
     default: 'none'
   },
 
-  // Account Safety
+  // Account safety & moderation
   isDeleted: { type: Boolean, default: false, select: false },
   deletedAt: { type: Date, select: false },
   isPermanentlyBanned: { type: Boolean, default: false, select: false },
@@ -47,9 +51,10 @@ const userSchema = new mongoose.Schema({
     vehicleType: { type: String, enum: ['bike', 'car', 'bicycle'], default: 'bike' }
   },
 
+  // GeoLocation
   currentLocation: {
     type: { type: String, enum: ['Point'], default: 'Point' },
-    coordinates: { type: [Number], default: [74.3587, 31.5204] } // [lng, lat] → Lahore
+    coordinates: { type: [Number], default: [74.3587, 31.5204] } // Lahore default
   },
   isOnline: { type: Boolean, default: false },
   isAvailable: { type: Boolean, default: false },
@@ -64,33 +69,39 @@ const userSchema = new mongoose.Schema({
   otp: { type: String, select: false },
   otpExpires: { type: Date, select: false },
   otpAttempts: { type: Number, default: 0, select: false }
+
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
 
-// === INDEXES (Perfect) ===
+// ===== Indexes (Optimized & No Duplicates) =====
 userSchema.index({ currentLocation: '2dsphere' });
 userSchema.index({ role: 1, riderStatus: 1 });
 userSchema.index({ isOnline: 1, isAvailable: 1 });
-userSchema.index({ phone: 1 }); // Already from unique
 userSchema.index({ isDeleted: 1 });
 userSchema.index({ isPermanentlyBanned: 1 });
 userSchema.index({ isBlocked: 1 });
 
-// Auto-exclude soft-deleted & banned users
+// Auto-filter soft-deleted & banned users
 userSchema.pre(/^find/, function(next) {
-  this.where({ isDeleted: { $ne: true }, isPermanentlyBanned: { $ne: true } });
+  this.where({
+    isDeleted: { $ne: true },
+    isPermanentlyBanned: { $ne: true }
+  });
   next();
 });
 
 userSchema.pre('findOneAndUpdate', function(next) {
-  this.where({ isDeleted: { $ne: true }, isPermanentlyBanned: { $ne: true } });
+  this.where({
+    isDeleted: { $ne: true },
+    isPermanentlyBanned: { $ne: true }
+  });
   next();
 });
 
-// Hash password
+// Password hashing
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
@@ -101,7 +112,7 @@ userSchema.methods.comparePassword = async function(candidate) {
   return bcrypt.compare(candidate, this.password);
 };
 
-// Clean JSON output
+// Remove sensitive data from JSON
 userSchema.set('toJSON', {
   virtuals: true,
   versionKey: false,
