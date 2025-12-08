@@ -28,65 +28,59 @@ const uploadToCloudinary = (buffer) => {
 // ADD NEW MENU ITEM
 const addMenuItem = async (req, res) => {
   try {
-    // Image is required
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Image is required' });
     }
 
-    // Upload image to Cloudinary
     const image = await uploadToCloudinary(req.file.buffer);
 
-    // availableInAreas is already validated & cleaned by express-validator
-    // It is guaranteed to be a clean array of valid ObjectIds (or empty)
-    const areaIds = Array.isArray(req.body.availableInAreas)
-      ? req.body.availableInAreas
-      : [];
+    let areaIds = [];
+    if (req.body.availableInAreas) {
+      if (Array.isArray(req.body.availableInAreas)) {
+        areaIds = req.body.availableInAreas;
+      } else if (typeof req.body.availableInAreas === 'string') {
+        try {
+          const parsed = JSON.parse(req.body.availableInAreas);
+          areaIds = Array.isArray(parsed) ? parsed : [parsed];
+        } catch {
+          areaIds = [req.body.availableInAreas];
+        }
+      }
+    }
+    areaIds = areaIds.filter(id => mongoose.Types.ObjectId.isValid(id));
 
-    // Parse booleans safely
     const isVeg = req.body.isVeg === true || req.body.isVeg === 'true';
     const isSpicy = req.body.isSpicy === true || req.body.isSpicy === 'true';
 
-    // Create menu item
     const item = await MenuItem.create({
-      name: req.body.name.trim(),
+      name: req.body.name?.trim(),
       description: req.body.description?.trim() || '',
       price: Number(req.body.price),
       category: req.body.category,
       image: image.secure_url,
       cloudinaryId: image.public_id,
-      availableInAreas: areaIds, // Clean & safe
+      availableInAreas: areaIds,
       isVeg,
       isSpicy,
-      isAvailable: true
+      isAvailable: true,
     });
 
     return res.status(201).json({
       success: true,
       message: 'Menu item added successfully!',
-      item
+      item,
     });
-
   } catch (err) {
     console.error('addMenuItem error:', err);
-
     if (err.name === 'ValidationError') {
       const messages = Object.values(err.errors).map(e => e.message);
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: messages
-      });
+      return res.status(400).json({ success: false, message: 'Validation failed', errors: messages });
     }
-
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to add item',
-      error: err.message
-    });
+    return res.status(500).json({ success: false, message: 'Failed to add menu item' });
   }
 };
 
-// GET MENU BASED ON USER LOCATION
+// GET MENU BY USER LOCATION (lat/lng)
 const getMenuByLocation = async (req, res) => {
   try {
     const { lat, lng } = req.query;
@@ -94,10 +88,7 @@ const getMenuByLocation = async (req, res) => {
       return res.status(400).json({ success: false, message: 'lat and lng are required' });
     }
 
-    const point = {
-      type: 'Point',
-      coordinates: [parseFloat(lng), parseFloat(lat)]
-    };
+    const point = { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] };
 
     const area = await Area.findOne({
       isActive: true,
@@ -107,6 +98,7 @@ const getMenuByLocation = async (req, res) => {
     if (!area) {
       return res.status(400).json({
         success: false,
+        inService: false,
         message: "Sorry, we don't deliver to this location yet"
       });
     }
@@ -114,22 +106,24 @@ const getMenuByLocation = async (req, res) => {
     const menu = await MenuItem.find({
       isAvailable: true,
       $or: [
-        { availableInAreas: { $size: 0 } }, // global items
-        { availableInAreas: { $in: [area._id] } } // area-specific
+        { availableInAreas: { $size: 0 } },
+        { availableInAreas: area._id }
       ]
     })
       .sort({ category: 1, name: 1 })
       .select('-cloudinaryId -__v')
-      .lean() || [];
+      .lean();
 
     res.json({
       success: true,
+      inService: true,
       area: {
         _id: area._id,
         name: area.name,
         city: area.city,
-        center: area.centerLatLng
+        center: area.center ? { lat: area.center.coordinates[1], lng: area.center.coordinates[0] } : null
       },
+      delivery: { fee: 150, estimatedTime: '30-45 mins' }, // You can make this dynamic later
       menu
     });
   } catch (err) {
@@ -138,57 +132,35 @@ const getMenuByLocation = async (req, res) => {
   }
 };
 
-
 // UPDATE MENU ITEM
 const updateMenuItem = async (req, res) => {
   try {
     const item = await MenuItem.findById(req.params.id);
-    if (!item) {
-      return res.status(404).json({ success: false, message: 'Item not found' });
-    }
+    if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
 
-    // Handle image update
     if (req.file) {
-      if (item.cloudinaryId) {
-        await cloudinary.uploader.destroy(item.cloudinaryId).catch(() => {});
-      }
+      if (item.cloudinaryId) await cloudinary.uploader.destroy(item.cloudinaryId).catch(() => {});
       const result = await uploadToCloudinary(req.file.buffer);
       item.image = result.secure_url;
       item.cloudinaryId = result.public_id;
     }
 
-    // Update text fields
     if (req.body.name !== undefined) item.name = req.body.name.trim();
-    if (req.body.description !== undefined) item.description = req.body.description.trim();
+    if (req.body.description !== undefined) item.description = req.body.description?.trim();
     if (req.body.price !== undefined) item.price = Number(req.body.price);
     if (req.body.category !== undefined) item.category = req.body.category;
+    if (req.body.isVeg !== undefined) item.isVeg = req.body.isVeg === true || req.body.isVeg === 'true';
+    if (req.body.isSpicy !== undefined) item.isSpicy = req.body.isSpicy === true || req.body.isSpicy === 'true';
+    if (req.body.isAvailable !== undefined) item.isAvailable = req.body.isAvailable === true || req.body.isAvailable === 'true';
 
-    // Booleans
-    if (req.body.isVeg !== undefined) {
-      item.isVeg = req.body.isVeg === true || req.body.isVeg === 'true';
-    }
-    if (req.body.isSpicy !== undefined) {
-      item.isSpicy = req.body.isSpicy === true || req.body.isSpicy === 'true';
-    }
-    if (req.body.isAvailable !== undefined) {
-      item.isAvailable = req.body.isAvailable === true || req.body.isAvailable === 'true';
-    }
-
-    // availableInAreas – already validated and cleaned
     if (req.body.availableInAreas !== undefined) {
-      const areas = Array.isArray(req.body.availableInAreas)
-        ? req.body.availableInAreas
-        : [];
-      item.availableInAreas = areas;
+      const areas = Array.isArray(req.body.availableInAreas) ? req.body.availableInAreas : [];
+      item.availableInAreas = areas.filter(id => mongoose.Types.ObjectId.isValid(id));
     }
 
     await item.save();
 
-    res.json({
-      success: true,
-      message: 'Menu item updated successfully!',
-      item
-    });
+    res.json({ success: true, message: 'Menu item updated successfully!', item });
   } catch (err) {
     console.error('updateMenuItem error:', err);
     res.status(500).json({ success: false, message: 'Update failed' });
@@ -199,9 +171,7 @@ const updateMenuItem = async (req, res) => {
 const deleteMenuItem = async (req, res) => {
   try {
     const item = await MenuItem.findByIdAndDelete(req.params.id);
-    if (!item) {
-      return res.status(404).json({ success: false, message: 'Item not found' });
-    }
+    if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
 
     if (item.cloudinaryId) {
       await cloudinary.uploader.destroy(item.cloudinaryId).catch(() => {});
@@ -214,13 +184,12 @@ const deleteMenuItem = async (req, res) => {
   }
 };
 
-// ADMIN: GET ALL ITEMS
+// ADMIN: GET ALL MENU ITEMS (including unavailable)
 const getAllMenuItems = async (req, res) => {
   try {
     const items = await MenuItem.find()
       .sort({ category: 1, name: 1 })
       .select('-cloudinaryId -__v');
-
     res.json({ success: true, items });
   } catch (err) {
     console.error('getAllMenuItems error:', err);
@@ -232,9 +201,7 @@ const getAllMenuItems = async (req, res) => {
 const toggleAvailability = async (req, res) => {
   try {
     const item = await MenuItem.findById(req.params.id);
-    if (!item) {
-      return res.status(404).json({ success: false, message: 'Item not found' });
-    }
+    if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
 
     item.isAvailable = req.body.isAvailable;
     await item.save();
@@ -250,27 +217,31 @@ const toggleAvailability = async (req, res) => {
   }
 };
 
-// PUBLIC: FILTERED MENU WITH PAGINATION
+// PUBLIC: FILTERED + PAGINATED MENU
 const getAllMenuItemsWithFilters = async (req, res) => {
   try {
     const {
       page = 1,
       limit = 15,
       category,
-      isVeg,
-      isSpicy,
+      isVeg: isVegStr,
+      isSpicy: isSpicyStr,
       minPrice,
       maxPrice,
       search,
-      availableOnly = 'true',
-      sort = 'category_asc'
+      sort = 'category_asc',
+      availableOnly = 'true'
     } = req.query;
 
-    const query = { isAvailable: availableOnly === 'true' };
+    const query = {};
 
-    if (category) query.category = category;
-    if (isVeg !== undefined) query.isVeg = isVeg === 'true';
-    if (isSpicy !== undefined) query.isSpicy = isSpicy === 'true';
+    if (availableOnly === 'true' || availableOnly === true) {
+      query.isAvailable = true;
+    }
+
+    if (category && typeof category === 'string') query.category = category;
+    if (isVegStr !== undefined) query.isVeg = isVegStr === 'true';
+    if (isSpicyStr !== undefined) query.isSpicy = isSpicyStr === 'true';
 
     if (minPrice || maxPrice) {
       query.price = {};
@@ -278,7 +249,7 @@ const getAllMenuItemsWithFilters = async (req, res) => {
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
 
-    if (search?.trim()) {
+    if (search && typeof search === 'string' && search.trim()) {
       const regex = { $regex: search.trim(), $options: 'i' };
       query.$or = [{ name: regex }, { description: regex }];
     }
@@ -293,8 +264,8 @@ const getAllMenuItemsWithFilters = async (req, res) => {
       category_asc: { category: 1, name: 1 }
     };
 
-    const pageNum = Math.max(1, parseInt(page));
-    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 15));
     const skip = (pageNum - 1) * limitNum;
 
     const [items, total] = await Promise.all([
@@ -307,29 +278,30 @@ const getAllMenuItemsWithFilters = async (req, res) => {
       MenuItem.countDocuments(query)
     ]);
 
+    const totalPages = Math.ceil(total / limitNum);
+
     res.json({
       success: true,
       pagination: {
         page: pageNum,
         limit: limitNum,
         total,
-        totalPages: Math.ceil(total / limitNum),
-        hasNext: pageNum < Math.ceil(total / limitNum),
+        totalPages,
+        hasNext: pageNum < totalPages,
         hasPrev: pageNum > 1
       },
       items
     });
   } catch (err) {
     console.error('getAllMenuItemsWithFilters error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Failed to fetch menu items' });
   }
 };
 
-// GET SINGLE MENU ITEM
+// GET SINGLE MENU ITEM (PUBLIC)
 const getSingleMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: 'Invalid item ID' });
     }
@@ -338,12 +310,8 @@ const getSingleMenuItem = async (req, res) => {
       .select('-cloudinaryId -__v')
       .lean();
 
-    if (!item) {
-      return res.status(404).json({ success: false, message: 'Item not found' });
-    }
-
-    if (!item.isAvailable) {
-      return res.status(404).json({ success: false, message: 'This item is currently unavailable' });
+    if (!item || !item.isAvailable) {
+      return res.status(404).json({ success: false, message: 'Item not found or unavailable' });
     }
 
     res.json({ success: true, item });
@@ -353,7 +321,7 @@ const getSingleMenuItem = async (req, res) => {
   }
 };
 
-// src/controllers/menu/menuController.js ← ADD THIS FUNCTION
+// GET ALL AVAILABLE MENU (Simple catalog)
 const getAllAvailableMenuItems = async (req, res) => {
   try {
     const menu = await MenuItem.find({ isAvailable: true })
@@ -372,6 +340,51 @@ const getAllAvailableMenuItems = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+// GET MENU BY AREA ID (Public)
+const getMenuByAreaId = async (req, res) => {
+  try {
+    const { areaId } = req.params;
+
+    const area = await Area.findOne({ _id: areaId, isActive: true }).select('name city center');
+    if (!area) {
+      return res.status(404).json({
+        success: false,
+        message: 'Delivery area not found or currently unavailable'
+      });
+    }
+
+    const menu = await MenuItem.find({
+      isAvailable: true,
+      $or: [
+        { availableInAreas: { $size: 0 } },
+        { availableInAreas: areaId }
+      ]
+    })
+      .sort({ category: 1, name: 1 })
+      .select('-cloudinaryId -__v')
+      .lean();
+
+    res.json({
+      success: true,
+      area: {
+        _id: area._id,
+        name: area.name,
+        city: area.city,
+        center: area.center ? {
+          lat: area.center.coordinates[1],
+          lng: area.center.coordinates[0]
+        } : null
+      },
+      totalItems: menu.length,
+      menu
+    });
+  } catch (err) {
+    console.error('getMenuByAreaId error:', err);
+    res.status(500).json({ success: false, message: 'Server error while fetching menu for area' });
+  }
+};
+
 module.exports = {
   addMenuItem,
   getMenuByLocation,
@@ -381,5 +394,6 @@ module.exports = {
   toggleAvailability,
   getAllMenuItemsWithFilters,
   getSingleMenuItem,
-  getAllAvailableMenuItems
+  getAllAvailableMenuItems,
+  getMenuByAreaId
 };

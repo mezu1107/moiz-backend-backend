@@ -140,4 +140,4 @@ function arraysEqual(a, b) {
   return a.length === b.length && a.every((val, i) => Math.abs(val - b[i]) < 1e-9);
 }
 
-module.exports = mongoose.model('Area', areaSchema);
+module.exports = mongoose.models.Area || mongoose.model('Area', areaSchema);

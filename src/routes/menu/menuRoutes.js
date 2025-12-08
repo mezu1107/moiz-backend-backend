@@ -1,7 +1,8 @@
-// src/routes/menu/menuRoutes.js ← FINAL CORRECTED VERSION
+// src/routes/menu/menuRoutes.js ← FINAL 100% WORKING VERSION
 
 const express = require('express');
 const router = express.Router();
+const { param } = require('express-validator'); // ← THIS WAS MISSING!!!
 
 const upload = require('../../middleware/upload/Upload');
 const { auth } = require('../../middleware/auth/auth');
@@ -17,31 +18,57 @@ const {
   toggleAvailability,
   getAllMenuItemsWithFilters,
   getSingleMenuItem,
-  getAllAvailableMenuItems
+  getAllAvailableMenuItems,
+  getMenuByAreaId: getMenuByAreaIdController
 } = require('../../controllers/menu/menuController');
 
 const {
   getMenuByLocation: menuLocationSchema,
   getAllMenuItemsWithFilters: menuFiltersSchema,
-  addMenuItem: addMenuSchema,
-  updateMenuItem: updateMenuSchema,
-  toggleAvailability: toggleSchema,
-  menuItemIdParam
+  addMenuItem: addMenuItemSchema,
+  updateMenuItem: updateMenuItemSchema,
+  toggleAvailability: toggleAvailabilitySchema,
+  menuItemIdParam,
+  getMenuByAreaId
 } = require('../../validation/schemas/menuSchemas');
 
-// PUBLIC ROUTES (NO AUTH NEEDED)
-router.get('/all', getAllAvailableMenuItems);                    // ← FULL CATALOG
+// PUBLIC ROUTES
+router.get('/all', getAllAvailableMenuItems);
 router.get('/location', menuLocationSchema, validate, getMenuByLocation);
 router.get('/filters', menuFiltersSchema, validate, getAllMenuItemsWithFilters);
 router.get('/:id', menuItemIdParam, validate, getSingleMenuItem);
+router.get('/area/:areaId', getMenuByAreaId, validate, getMenuByAreaIdController);
 
-// ADMIN ROUTES (PROTECTED)
-router.use(auth, role(['admin']));  // ← YE AB SAHI JAGAH HAI!
+// ADMIN ROUTES
+router.use(auth, role(['admin']));
 
 router.get('/admin/all', getAllMenuItems);
-router.post('/', upload.single('image'), addMenuSchema, validate, addMenuItem);
-router.put('/:id', menuItemIdParam, upload.single('image'), updateMenuSchema, validate, updateMenuItem);
-router.delete('/:id', menuItemIdParam, validate, deleteMenuItem);
-router.patch('/:id/toggle', toggleSchema, validate, toggleAvailability);
+
+router.post('/', 
+  upload.single('image'), 
+  addMenuItemSchema, 
+  validate, 
+  addMenuItem
+);
+
+router.put('/:id', 
+  menuItemIdParam, 
+  upload.single('image'), 
+  updateMenuItemSchema, 
+  validate, 
+  updateMenuItem
+);
+
+router.delete('/:id', 
+  menuItemIdParam, 
+  validate, 
+  deleteMenuItem
+);
+
+router.patch('/:id/toggle', 
+  toggleAvailabilitySchema, 
+  validate, 
+  toggleAvailability
+);
 
 module.exports = router;

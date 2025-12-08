@@ -1,97 +1,127 @@
 // src/validation/schemas/areaSchemas.js
 const { body, query } = require('express-validator');
 
-// Reusable validator for { lat, lng } object
-const validatePoint = (value) => {
+// Reusable: Validate { lat, lng } object with Pakistan bounds
+const validatePakistanPoint = (value, { req, path }) => {
   if (!value || typeof value !== 'object') {
-    throw new Error('Center must be an object');
+   throw new Error('Must be an object { lat: number, lng: number }');
   }
-  if (typeof value.lat !== 'number' || typeof value.lng !== 'number') {
-    throw new Error('lat and lng must be numbers');
+
+  const { lat, lng } = value;
+
+  if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+   throw new Error('lat and lng must be valid numbers');
   }
-  if (value.lat < 23.5 || value.lat > 37.5) {
-    throw new Error('Latitude must be between 23.5 and 37.5');
+
+  if (lat < 23.5 || lat > 37.5) {
+   throw new Error('Latitude must be between 23.5 and 37.5 (Pakistan bounds)');
   }
-  if (value.lng < 60.0 || value.lng > 78.0) {
-    throw new Error('Longitude must be between 60.0 and 78.0');
+
+  if (lng < 60.0 || lng > 78.0) {
+   throw new Error('Longitude must be between 60.0 and 78.0 (Pakistan bounds)');
   }
+
   return true;
 };
 
-// ==================== ADD AREA ====================
+// Reusable: Validate a single ring [[lat, lng], ...]
+const validateRing = (ring) => {
+  if (!Array.isArray(ring) || ring.length < 4) return false;
+  return ring.every(point =>
+   Array.isArray(point) &&
+   point.length === 2 &&
+   typeof point[0] === 'number' &&
+   typeof point[1] === 'number'
+  );
+};
+
+// ==================== ADD AREA (POST /admin/area) ====================
 exports.addArea = [
-  body('name')
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Area name must be 2–50 characters'),
+ body('name')
+   .trim()
+   .notEmpty()
+   .withMessage('Area name is required')
+   .isLength({ min: 2, max: 50 })
+   .withMessage('Name must be 2–50 characters'),
 
-  body('city')
-    .optional()
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .default('Lahore'),
+ body('city')
+   .optional()
+   .trim()
+   .isLength({ min: 2, max: 50 })
+   .withMessage('City must be 2–50 characters')
+   .default('Lahore'),
 
-  body('center')
-    .custom(validatePoint)
-    .withMessage('Invalid center: must be { lat: number, lng: number } within Pakistan'),
+ body('center')
+   .exists({ checkNull: true })
+   .withMessage('Center is required')
+   .bail()
+   .custom(validatePakistanPoint),
 
-  body('polygon')
-    .isObject().withMessage('polygon must be an object')
-    .bail()
-    .custom(p => p.type === 'Polygon')
-    .withMessage('polygon.type must be "Polygon"')
-    .bail()
-    .custom(p => Array.isArray(p.coordinates) && p.coordinates.length >= 1)
-    .withMessage('polygon.coordinates must contain at least one ring')
-    .bail()
-    .custom(p => p.coordinates.every(ring => 
-      Array.isArray(ring) && ring.length >= 4
-    ))
-    .withMessage('Each ring must have at least 4 points')
-    .bail()
-    .custom(p => p.coordinates.flat(2).every(c => typeof c === 'number'))
-    .withMessage('All coordinates must be numbers'),
+ body('polygon')
+   .exists({ checkNull: true })
+   .withMessage('Polygon is required')
+   .bail()
+   .isObject()
+   .withMessage('Polygon must be a GeoJSON object')
+   .bail()
+   .custom(p => p.type === 'Polygon')
+   .withMessage('polygon.type must be "Polygon"')
+   .bail()
+   .custom(p => Array.isArray(p.coordinates) && p.coordinates.length >= 1)
+   .withMessage('polygon.coordinates must have at least one ring')
+   .bail()
+   .custom(p => p.coordinates.every(ring => validateRing(ring)))
+   .withMessage('Each ring must have ≥4 valid [lat, lng] points and be closed'),
 ];
 
-// ==================== UPDATE AREA (All fields optional) ====================
+// ==================== UPDATE AREA (PUT /admin/area/:id) ====================
 exports.updateArea = [
-  body('name')
-    .optional()
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be 2–50 characters'),
+ body('name')
+   .optional()
+   .trim()
+   .isLength({ min: 2, max: 50 })
+   .withMessage('Name must be 2–50 characters'),
 
-  body('city')
-    .optional()
-    .trim()
-    .isLength({ min: 2, max: 50 }),
+ body('city')
+   .optional()
+   .trim()
+   .isLength({ min: 2, max: 50 })
+   .withMessage('City must be 2–50 characters'),
 
-  body('center')
-    .optional()
-    .custom(validatePoint)
-    .withMessage('Invalid center format'),
+ body('center')
+   .optional()
+   .custom(validatePakistanPoint),
 
-  body('polygon')
-    .optional()
-    .custom(p => !p || (
-      p.type === 'Polygon' &&
-      Array.isArray(p.coordinates) &&
-      p.coordinates.every(ring => Array.isArray(ring) && ring.length >= 4)
-    ))
-    .withMessage('Invalid polygon format'),
+ body('polygon')
+   .optional()
+   .custom(p => {
+     if (!p) return true; // allow null/undefined
+     if (typeof p !== 'object' || p.type !== 'Polygon') {
+       throw new Error('polygon.type must be "Polygon"');
+     }
+     if (!Array.isArray(p.coordinates) || p.coordinates.length === 0) {
+       throw new Error('polygon.coordinates must be a non-empty array');
+     }
+     if (!p.coordinates.every(ring => validateRing(ring))) {
+       throw new Error('Each ring must have ≥4 valid [lat, lng] points');
+     }
+     return true;
+   }),
 ];
 
-// ==================== PUBLIC: Check Delivery Availability ====================
+// ==================== CHECK AREA (PUBLIC: /api/areas/check) ====================
 exports.checkAreaQuery = [
-  query('lat')
-    .notEmpty()
-    .isFloat({ min: 23.5, max: 37.5 })
-    .withMessage('Valid latitude required (23.5–37.5)')
-    .toFloat(),
+ query('lat')
+   .notEmpty()
+   .withMessage('Latitude is required')
+   .isFloat({ min: 23.5, max: 37.5 })
+   .withMessage('Latitude must be between 23.5 and 37.5')
+   .toFloat(),
 
-  query('lng')
-    .notEmpty()
-    .isFloat({ min: 60.0, max: 78.0 })
-    .withMessage('Valid longitude required (60.0–78.0)')
-    .toFloat(),
+ query('lng')
+   .notEmpty()
+   .withMessage('Longitude is required')
+   .isFloat({ min: 60.0, max: 78.0 })
+   .withMessage('Longitude must be between 60.0 and 78.0')
+   .toFloat(),
 ];

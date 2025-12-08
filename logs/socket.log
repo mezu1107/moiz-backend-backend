@@ -6168,3 +6168,621 @@
 {"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T12:15:34.985Z"}
 {"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T12:15:34.991Z"}
 {"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T12:15:34.994Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-07T14:13:02.418Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-07T14:13:03.062Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-07T14:13:03.081Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-07T14:13:03.101Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-07T14:13:03.125Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-07T14:13:03.157Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-07T14:13:03.242Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-07T14:13:03.303Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-07T14:13:03.311Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-07T14:13:03.342Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-07T14:13:03.355Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-07T14:13:03.568Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-07T14:13:03.580Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T14:13:03.584Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T14:13:03.606Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T14:13:03.616Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-07T17:23:08.955Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-07T17:23:09.124Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-07T17:23:09.129Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-07T17:23:09.134Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-07T17:23:09.143Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-07T17:23:09.160Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-07T17:23:09.205Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-07T17:23:09.223Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-07T17:23:09.225Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-07T17:23:09.230Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-07T17:23:09.236Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-07T17:23:09.338Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-07T17:23:09.341Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T17:23:09.342Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T17:23:09.347Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T17:23:09.349Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-07T17:26:27.699Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-07T17:26:27.909Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-07T17:26:27.915Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-07T17:26:27.924Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-07T17:26:27.931Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-07T17:26:27.938Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-07T17:26:27.976Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-07T17:26:28.017Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-07T17:26:28.024Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-07T17:26:28.042Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-07T17:26:28.064Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-07T17:26:28.216Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-07T17:26:28.223Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T17:26:28.227Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T17:26:28.241Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T17:26:28.246Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-07T17:30:44.957Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-07T17:30:45.431Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-07T17:30:45.446Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-07T17:30:45.462Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-07T17:30:45.476Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-07T17:30:45.500Z"}
+{"level":"error","message":"ReferenceError: menuItemAreaSchema is not defined\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\menu\\menuRoutes.js:37:29)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:108:25","timestamp":"2025-12-07T17:30:45.503Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-07T17:30:45.572Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-07T17:30:45.617Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-07T17:30:45.623Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-07T17:30:45.644Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-07T17:30:45.672Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-07T17:30:45.837Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-07T17:30:45.848Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T17:30:45.853Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T17:30:45.891Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T17:30:45.899Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-07T17:32:18.940Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-07T17:32:19.414Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-07T17:32:19.433Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-07T17:32:19.457Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-07T17:32:19.478Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-07T17:32:19.504Z"}
+{"level":"error","message":"ReferenceError: getMenuByAreaId is not defined\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\menu\\menuRoutes.js:38:59)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:108:25","timestamp":"2025-12-07T17:32:19.506Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-07T17:32:19.562Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-07T17:32:19.604Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-07T17:32:19.611Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-07T17:32:19.627Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-07T17:32:19.638Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-07T17:32:19.807Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-07T17:32:19.817Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T17:32:19.821Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T17:32:19.842Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T17:32:19.855Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-07T17:32:47.882Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-07T17:32:48.181Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-07T17:32:48.192Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-07T17:32:48.205Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-07T17:32:48.215Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-07T17:32:48.238Z"}
+{"level":"error","message":"ReferenceError: getMenuByAreaId is not defined\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\menu\\menuRoutes.js:38:59)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:108:25","timestamp":"2025-12-07T17:32:48.239Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-07T17:32:48.314Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-07T17:32:48.352Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-07T17:32:48.360Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-07T17:32:48.382Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-07T17:32:48.392Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-07T17:32:48.524Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-07T17:32:48.529Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T17:32:48.531Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T17:32:48.546Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T17:32:48.552Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-07T17:34:52.925Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-07T17:34:53.173Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-07T17:34:53.184Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-07T17:34:53.193Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-07T17:34:53.200Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-07T17:34:53.213Z"}
+{"level":"error","message":"ReferenceError: getMenuByAreaId is not defined\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\menu\\menuRoutes.js:38:59)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:108:25","timestamp":"2025-12-07T17:34:53.214Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-07T17:34:53.240Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-07T17:34:53.255Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-07T17:34:53.262Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-07T17:34:53.281Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-07T17:34:53.287Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-07T17:34:53.344Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-07T17:34:53.346Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T17:34:53.347Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T17:34:53.353Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T17:34:53.355Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-07T17:34:59.018Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-07T17:34:59.117Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-07T17:34:59.121Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-07T17:34:59.125Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-07T17:34:59.127Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-07T17:34:59.133Z"}
+{"level":"error","message":"ReferenceError: getMenuByAreaId is not defined\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\menu\\menuRoutes.js:38:59)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:108:25","timestamp":"2025-12-07T17:34:59.134Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-07T17:34:59.156Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-07T17:34:59.167Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-07T17:34:59.171Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-07T17:34:59.175Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-07T17:34:59.178Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-07T17:34:59.214Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-07T17:34:59.218Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T17:34:59.220Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T17:34:59.232Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T17:34:59.235Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-07T17:48:26.076Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-07T17:48:26.322Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-07T17:48:26.328Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-07T17:48:26.336Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-07T17:48:26.340Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-07T17:48:26.347Z"}
+{"level":"error","message":"TypeError: argument handler must be a function\n    at Route.<computed> [as post] (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\lib\\route.js:228:15)\n    at Router.<computed> [as post] (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:448:19)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\menu\\menuRoutes.js:47:8)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)","timestamp":"2025-12-07T17:48:26.347Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-07T17:48:26.372Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-07T17:48:26.390Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-07T17:48:26.393Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-07T17:48:26.402Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-07T17:48:26.406Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-07T17:48:26.486Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-07T17:48:26.489Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T17:48:26.490Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T17:48:26.496Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T17:48:26.500Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-07T17:48:58.169Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-07T17:48:58.442Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-07T17:48:58.449Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-07T17:48:58.456Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-07T17:48:58.462Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-07T17:48:58.474Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-07T17:48:58.506Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-07T17:48:58.527Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-07T17:48:58.532Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-07T17:48:58.540Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-07T17:48:58.550Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-07T17:48:58.623Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-07T17:48:58.625Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T17:48:58.626Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T17:48:58.630Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T17:48:58.632Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-07T19:17:16.292Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-07T19:17:16.953Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-07T19:17:16.980Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-07T19:17:17.012Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-07T19:17:17.032Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-07T19:17:17.070Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-07T19:17:17.157Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-07T19:17:17.213Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-07T19:17:17.226Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-07T19:17:17.277Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-07T19:17:17.304Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-07T19:17:17.513Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-07T19:17:17.551Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-07T19:17:17.560Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-07T19:17:17.602Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-07T19:17:17.616Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T09:22:48.430Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T09:22:48.651Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T09:22:48.659Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T09:22:48.666Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T09:22:48.672Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T09:22:48.679Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T09:22:48.711Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T09:22:48.740Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T09:22:48.743Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T09:22:48.750Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T09:22:48.759Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T09:22:48.832Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T09:22:48.836Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T09:22:48.838Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T09:22:48.846Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T09:22:48.850Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T09:53:45.203Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T09:53:45.799Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T09:53:45.828Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T09:53:45.867Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T09:53:45.895Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T09:53:45.938Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T09:53:46.052Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T09:53:46.124Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T09:53:46.135Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T09:53:46.156Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T09:53:46.181Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T09:53:46.380Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T09:53:46.397Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T09:53:46.405Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T09:53:46.443Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T09:53:46.461Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T09:54:01.469Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T09:54:01.847Z"}
+{"level":"error","message":"❌ Failed to load route /api/address","timestamp":"2025-12-08T09:54:01.863Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:90:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T09:54:01.867Z"}
+{"level":"error","message":"❌ Failed to load route /api/areas","timestamp":"2025-12-08T09:54:01.888Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:90:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T09:54:01.889Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T09:54:01.908Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-08T09:54:01.925Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:90:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T09:54:01.927Z"}
+{"level":"error","message":"❌ Failed to load route /api/order","timestamp":"2025-12-08T09:54:01.941Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:90:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T09:54:01.943Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T09:54:02.035Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T09:54:02.043Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T09:54:02.349Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T09:54:02.360Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T09:54:02.530Z"}
+{"level":"error","message":"❌ Failed to load route /api/admin","timestamp":"2025-12-08T09:54:02.543Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:90:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T09:54:02.544Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T09:54:02.615Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T09:54:02.632Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T09:54:02.642Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T09:54:16.932Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T09:54:17.383Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T09:54:17.404Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T09:54:17.425Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T09:54:17.442Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T09:54:17.471Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T09:54:17.537Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T09:54:17.594Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T09:54:17.601Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T09:54:17.628Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T09:54:17.645Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T09:54:17.844Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T09:54:17.856Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T09:54:17.862Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T09:54:17.910Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T09:54:17.920Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T09:58:21.442Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T09:58:21.576Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T09:58:21.581Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T09:58:21.585Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T09:58:21.589Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T09:58:21.597Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T09:58:21.618Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T09:58:21.632Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T09:58:21.635Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T09:58:21.640Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T09:58:21.644Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T09:58:21.702Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T09:58:21.706Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T09:58:21.708Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T09:58:21.713Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T09:58:21.715Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:29:46.790Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:29:46.997Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T11:29:47.003Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T11:29:47.012Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:29:47.020Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T11:29:47.028Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T11:29:47.057Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:29:47.081Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:29:47.090Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:29:47.110Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:29:47.119Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:29:47.208Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T11:29:47.211Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:29:47.214Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:29:47.223Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:29:47.227Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:40:05.913Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:40:06.158Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T11:40:06.166Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T11:40:06.180Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:40:06.186Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T11:40:06.197Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T11:40:06.227Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:40:06.245Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:40:06.248Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:40:06.256Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:40:06.260Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:40:06.331Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T11:40:06.343Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:40:06.347Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:40:06.356Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:40:06.361Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:40:56.984Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:40:57.086Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T11:40:57.090Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T11:40:57.093Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:40:57.096Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T11:40:57.108Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T11:40:57.129Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:40:57.144Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:40:57.146Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:40:57.152Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:40:57.158Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:40:57.200Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T11:40:57.211Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:40:57.214Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:40:57.219Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:40:57.222Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:41:59.042Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:41:59.182Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T11:41:59.186Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T11:41:59.189Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:41:59.192Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T11:41:59.199Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T11:41:59.215Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:41:59.226Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:41:59.228Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:41:59.239Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:41:59.244Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:41:59.289Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T11:41:59.292Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:41:59.293Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:41:59.298Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:41:59.300Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:44:36.999Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:44:37.249Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T11:44:37.254Z"}
+{"level":"error","message":"❌ Failed to load route /api/areas","timestamp":"2025-12-08T11:44:37.262Z"}
+{"level":"error","message":"C:\\amfood\\FoodWebsite-backend\\src\\utils\\areaCache.js:61\n});\n ^\n\nSyntaxError: Unexpected token ')'\n    at wrapSafe (node:internal/modules/cjs/loader:1515:18)\n    at Module._compile (node:internal/modules/cjs/loader:1537:20)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\controllers\\area\\areaController.js:4:29)","timestamp":"2025-12-08T11:44:37.263Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:44:37.267Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T11:44:37.278Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T11:44:37.306Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:44:37.328Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:44:37.331Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:44:37.337Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:44:37.345Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:44:37.419Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T11:44:37.431Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:44:37.437Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:44:37.449Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:44:37.452Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:45:42.920Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:45:43.048Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T11:45:43.052Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T11:45:43.057Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:45:43.061Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T11:45:43.066Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T11:45:43.088Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:45:43.102Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:45:43.105Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:45:43.117Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:45:43.124Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:45:43.181Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T11:45:43.185Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:45:43.187Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:45:43.192Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:45:43.196Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:47:52.440Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:47:52.542Z"}
+{"level":"error","message":"❌ Failed to load route /api/address","timestamp":"2025-12-08T11:47:52.546Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:47:52.547Z"}
+{"level":"error","message":"❌ Failed to load route /api/areas","timestamp":"2025-12-08T11:47:52.552Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:47:52.552Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:47:52.555Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-08T11:47:52.558Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:47:52.559Z"}
+{"level":"error","message":"❌ Failed to load route /api/order","timestamp":"2025-12-08T11:47:52.562Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:47:52.562Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:47:52.582Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:47:52.584Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:47:52.655Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:47:52.658Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:47:52.692Z"}
+{"level":"error","message":"❌ Failed to load route /api/admin","timestamp":"2025-12-08T11:47:52.694Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:47:52.695Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:47:52.715Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:47:52.723Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:47:52.725Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:48:03.010Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:48:03.108Z"}
+{"level":"error","message":"❌ Failed to load route /api/address","timestamp":"2025-12-08T11:48:03.111Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:48:03.112Z"}
+{"level":"error","message":"❌ Failed to load route /api/areas","timestamp":"2025-12-08T11:48:03.115Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:48:03.116Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:48:03.119Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-08T11:48:03.122Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:48:03.123Z"}
+{"level":"error","message":"❌ Failed to load route /api/order","timestamp":"2025-12-08T11:48:03.125Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:48:03.126Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:48:03.145Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:48:03.150Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:48:03.219Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:48:03.222Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:48:03.255Z"}
+{"level":"error","message":"❌ Failed to load route /api/admin","timestamp":"2025-12-08T11:48:03.257Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:48:03.258Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:48:03.276Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:48:03.282Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:48:03.284Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:48:49.186Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:48:49.274Z"}
+{"level":"error","message":"❌ Failed to load route /api/address","timestamp":"2025-12-08T11:48:49.278Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:48:49.279Z"}
+{"level":"error","message":"❌ Failed to load route /api/areas","timestamp":"2025-12-08T11:48:49.282Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:48:49.282Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:48:49.286Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-08T11:48:49.290Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:48:49.291Z"}
+{"level":"error","message":"❌ Failed to load route /api/order","timestamp":"2025-12-08T11:48:49.293Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:48:49.294Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:48:49.320Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:48:49.325Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:48:49.397Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:48:49.400Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:48:49.435Z"}
+{"level":"error","message":"❌ Failed to load route /api/admin","timestamp":"2025-12-08T11:48:49.441Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:48:49.441Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:48:49.462Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:48:49.466Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:48:49.469Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:51:25.065Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:51:25.156Z"}
+{"level":"error","message":"❌ Failed to load route /api/address","timestamp":"2025-12-08T11:51:25.159Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:51:25.160Z"}
+{"level":"error","message":"❌ Failed to load route /api/areas","timestamp":"2025-12-08T11:51:25.162Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:51:25.162Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:51:25.166Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-08T11:51:25.169Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:51:25.170Z"}
+{"level":"error","message":"❌ Failed to load route /api/order","timestamp":"2025-12-08T11:51:25.175Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:51:25.177Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:51:25.198Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:51:25.201Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:51:25.275Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:51:25.278Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:51:25.313Z"}
+{"level":"error","message":"❌ Failed to load route /api/admin","timestamp":"2025-12-08T11:51:25.316Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:51:25.316Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:51:25.337Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:51:25.345Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:51:25.347Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:52:35.063Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:52:35.154Z"}
+{"level":"error","message":"❌ Failed to load route /api/address","timestamp":"2025-12-08T11:52:35.157Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:52:35.158Z"}
+{"level":"error","message":"❌ Failed to load route /api/areas","timestamp":"2025-12-08T11:52:35.160Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:52:35.160Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:52:35.163Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-08T11:52:35.168Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:52:35.169Z"}
+{"level":"error","message":"❌ Failed to load route /api/order","timestamp":"2025-12-08T11:52:35.172Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:52:35.172Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:52:35.192Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:52:35.194Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:52:35.265Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:52:35.269Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:52:35.301Z"}
+{"level":"error","message":"❌ Failed to load route /api/admin","timestamp":"2025-12-08T11:52:35.304Z"}
+{"level":"error","message":"OverwriteModelError: Cannot overwrite `Area` model once compiled.\n    at Mongoose.model (C:\\amfood\\FoodWebsite-backend\\node_modules\\mongoose\\lib\\mongoose.js:610:13)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\models\\area\\Area.js:143:27)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-08T11:52:35.305Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:52:35.322Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:52:35.327Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:52:35.328Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:53:32.144Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:53:32.233Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T11:53:32.240Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T11:53:32.244Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:53:32.246Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T11:53:32.253Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T11:53:32.271Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:53:32.282Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:53:32.286Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:53:32.291Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:53:32.294Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:53:32.369Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T11:53:32.372Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:53:32.373Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:53:32.378Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:53:32.380Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T11:57:05.657Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T11:57:05.869Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T11:57:05.878Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T11:57:05.882Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T11:57:05.886Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T11:57:05.897Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T11:57:05.924Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T11:57:05.944Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T11:57:05.947Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T11:57:05.951Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T11:57:05.956Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T11:57:06.029Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T11:57:06.034Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T11:57:06.036Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T11:57:06.045Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T11:57:06.047Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T12:52:34.493Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T12:52:34.921Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T12:52:34.939Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T12:52:34.956Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T12:52:34.970Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T12:52:35.017Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T12:52:35.120Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T12:52:35.174Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T12:52:35.179Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T12:52:35.195Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T12:52:35.211Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T12:52:35.407Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T12:52:35.415Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T12:52:35.419Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T12:52:35.439Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T12:52:35.449Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T13:06:30.814Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T13:06:31.017Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T13:06:31.023Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T13:06:31.032Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T13:06:31.037Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-08T13:06:31.047Z"}
+{"level":"error","message":"ReferenceError: param is not defined\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\menu\\menuRoutes.js:39:8)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:108:25","timestamp":"2025-12-08T13:06:31.048Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T13:06:31.073Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T13:06:31.099Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T13:06:31.102Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T13:06:31.111Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T13:06:31.116Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T13:06:31.199Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T13:06:31.205Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T13:06:31.213Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T13:06:31.225Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T13:06:31.230Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T13:32:26.700Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T13:32:26.894Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T13:32:26.899Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T13:32:26.909Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T13:32:26.913Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-08T13:32:26.923Z"}
+{"level":"error","message":"ReferenceError: param is not defined\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\menu\\menuRoutes.js:39:8)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:108:25","timestamp":"2025-12-08T13:32:26.924Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T13:32:26.949Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T13:32:26.972Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T13:32:26.976Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T13:32:26.981Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T13:32:26.988Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T13:32:27.068Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T13:32:27.072Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T13:32:27.073Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T13:32:27.080Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T13:32:27.084Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T13:36:48.097Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T13:36:48.314Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T13:36:48.320Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T13:36:48.327Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T13:36:48.331Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-08T13:36:48.339Z"}
+{"level":"error","message":"ReferenceError: param is not defined\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\menu\\menuRoutes.js:39:8)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:108:25","timestamp":"2025-12-08T13:36:48.341Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T13:36:48.374Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T13:36:48.418Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T13:36:48.422Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T13:36:48.431Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T13:36:48.436Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T13:36:48.509Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T13:36:48.513Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T13:36:48.514Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T13:36:48.520Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T13:36:48.525Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T13:37:27.595Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T13:37:27.871Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T13:37:27.884Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T13:37:27.904Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T13:37:27.910Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-08T13:37:27.918Z"}
+{"level":"error","message":"ReferenceError: param is not defined\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\menu\\menuRoutes.js:39:8)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:108:25","timestamp":"2025-12-08T13:37:27.920Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T13:37:27.956Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T13:37:27.975Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T13:37:27.979Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T13:37:27.988Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T13:37:27.994Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T13:37:28.071Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T13:37:28.084Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T13:37:28.087Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T13:37:28.094Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T13:37:28.099Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T13:37:46.369Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T13:37:46.538Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T13:37:46.543Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T13:37:46.548Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T13:37:46.551Z"}
+{"level":"error","message":"❌ Failed to load route /api/menu","timestamp":"2025-12-08T13:37:46.559Z"}
+{"level":"error","message":"ReferenceError: param is not defined\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\menu\\menuRoutes.js:39:8)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:108:25","timestamp":"2025-12-08T13:37:46.560Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T13:37:46.583Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T13:37:46.598Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T13:37:46.602Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T13:37:46.608Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T13:37:46.615Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T13:37:46.674Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T13:37:46.678Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T13:37:46.683Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T13:37:46.694Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T13:37:46.696Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-08T13:39:40.041Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-08T13:39:40.249Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-08T13:39:40.253Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-08T13:39:40.261Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-08T13:39:40.266Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-08T13:39:40.274Z"}
+{"level":"info","message":"Route loaded successfully: /api/order","timestamp":"2025-12-08T13:39:40.301Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-08T13:39:40.321Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-08T13:39:40.325Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-08T13:39:40.331Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-08T13:39:40.336Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-08T13:39:40.418Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-08T13:39:40.422Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-08T13:39:40.423Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-08T13:39:40.430Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-08T13:39:40.435Z"}
