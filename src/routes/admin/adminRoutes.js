@@ -11,6 +11,7 @@ const {
   toggleAreaActive,
   updateDeliveryZone,
   deleteDeliveryZone,
+  toggleDeliveryZone, // ← ADD THIS
 } = require('../../controllers/admin/adminController');
 
 const { addArea: addAreaSchema, updateArea: updateAreaSchema } = require('../../validation/schemas/areaSchemas');
@@ -18,19 +19,20 @@ const { auth } = require('../../middleware/auth/auth');
 const { role } = require('../../middleware/role/role');
 const validate = require('../../middleware/validate/validate');
 
-// Protect all admin routes
+// Protect all routes
 router.use(auth, role('admin'));
 
-// ==================== AREA MANAGEMENT ====================
+// Area Management
 router.post('/area', addAreaSchema, validate, addArea);
-router.get('/areas', getAllAreasWithZones);                    // Best for Admin Panel
+router.get('/areas', getAllAreasWithZones);
 router.get('/area/:id', getAreaById);
 router.put('/area/:id', updateAreaSchema, validate, updateArea);
 router.delete('/area/:id', deleteArea);
-router.put('/area/:id/toggle-active', toggleAreaActive);       // Quick on/off switch
+router.patch('/area/:id/toggle-active', toggleAreaActive);        // inService toggle
 
-// ==================== DELIVERY ZONE MANAGEMENT ====================
-router.put('/delivery-zone/:areaId', updateDeliveryZone);      // UPSERT (create or update)
+// Delivery Zone Management
+router.put('/delivery-zone/:areaId', updateDeliveryZone);         // Full update
 router.delete('/delivery-zone/:areaId', deleteDeliveryZone);
+router.patch('/delivery-zone/:areaId/toggle', toggleDeliveryZone); // hasDeliveryZone toggle
 
 module.exports = router;

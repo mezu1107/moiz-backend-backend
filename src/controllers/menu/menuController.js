@@ -81,54 +81,109 @@ const addMenuItem = async (req, res) => {
 };
 
 // GET MENU BY USER LOCATION (lat/lng)
+// src/controllers/menu/menuController.js
+
 const getMenuByLocation = async (req, res) => {
   try {
     const { lat, lng } = req.query;
+
+    // Validate coordinates
     if (!lat || !lng) {
-      return res.status(400).json({ success: false, message: 'lat and lng are required' });
-    }
-
-    const point = { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] };
-
-    const area = await Area.findOne({
-      isActive: true,
-      polygon: { $geoIntersects: { $geometry: point } }
-    }).select('name city _id center');
-
-    if (!area) {
       return res.status(400).json({
         success: false,
-        inService: false,
-        message: "Sorry, we don't deliver to this location yet"
+        message: 'Latitude and longitude are required',
       });
     }
 
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+
+    if (isNaN(latNum) || isNaN(lngNum)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid coordinates format',
+      });
+    }
+
+    // Optional: Reject outside Pakistan
+    if (latNum < 23.5 || latNum > 37.5 || lngNum < 60.0 || lngNum > 78.0) {
+      return res.json({
+        success: true,
+        inService: false,
+        hasDeliveryZone: false,
+        message: 'Location outside Pakistan',
+        area: null,
+        delivery: null,
+        menu: []
+      });
+    }
+
+    // GeoJSON Point: MongoDB expects [longitude, latitude]
+    const point = {
+      type: 'Point',
+      coordinates: [lngNum, latNum],
+    };
+
+    // Find active area that contains this point
+    const area = await Area.findOne({
+      isActive: true,
+      polygon: { $geoIntersects: { $geometry: point } },
+    })
+      .select('name city _id center')
+      .lean();
+
+    // Not in any active delivery zone
+    if (!area) {
+      return res.json({
+        success: true,
+        inService: false,
+        hasDeliveryZone: false,
+        area: null,
+        delivery: null,
+        menu: [],
+        message: "Sorry, we don't deliver to this location yet",
+      });
+    }
+
+    // Find menu items available in this area
     const menu = await MenuItem.find({
       isAvailable: true,
       $or: [
-        { availableInAreas: { $size: 0 } },
-        { availableInAreas: area._id }
-      ]
+        { availableInAreas: { $size: 0 } },           // Global items (everywhere)
+        { availableInAreas: area._id },               // Specific to this area
+      ],
     })
       .sort({ category: 1, name: 1 })
       .select('-cloudinaryId -__v')
       .lean();
 
-    res.json({
+    // Final response
+    return res.json({
       success: true,
       inService: true,
+      hasDeliveryZone: true,
       area: {
         _id: area._id,
         name: area.name,
         city: area.city,
-        center: area.center ? { lat: area.center.coordinates[1], lng: area.center.coordinates[0] } : null
+        center: area.centerLatLng || {
+          lat: Number(area.center.coordinates[1].toFixed(6)),
+          lng: Number(area.center.coordinates[0].toFixed(6)),
+        },
       },
-      delivery: { fee: 150, estimatedTime: '30-45 mins' }, // You can make this dynamic later
-      menu
+      delivery: {
+        fee: 149,
+        estimatedTime: '35-50 mins',
+      },
+      menu,
+      message: `Welcome to ${area.name}! ${menu.length} items available`,
     });
   } catch (err) {
     console.error('getMenuByLocation error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(500).json({
+      success: false,
+      message: 'Server error. Please try again.',
+    });
   }
 };
 

@@ -1,9 +1,10 @@
 // src/controllers/admin/adminController.js
+
 const Area = require('../../models/area/Area');
 const DeliveryZone = require('../../models/deliveryZone/DeliveryZone');
 const mongoose = require('mongoose');
 
-// Convert { lat, lng } → MongoDB [lng, lat]
+// Helper: Convert { lat, lng } → [lng, lat]
 const toMongoPoint = (center) => {
   if (!center || typeof center.lat !== 'number' || typeof center.lng !== 'number') {
     throw new Error('Center must be { lat: number, lng: number }');
@@ -15,62 +16,42 @@ const toMongoPoint = (center) => {
   return { type: 'Point', coordinates: [lng, lat] };
 };
 
-// Convert Leaflet [[lat, lng]] → MongoDB [[[lng, lat]]]
+// Helper: Convert Leaflet polygon → MongoDB format
 const toMongoPolygon = (polygon) => {
-  if (!polygon || polygon.type !== 'Polygon') {
-    throw new Error('Invalid polygon format');
-  }
+  if (!polygon || polygon.type !== 'Polygon') throw new Error('Invalid polygon format');
 
   const coordinates = polygon.coordinates.map(ring =>
-    ring.map(point => {
-      const [lat, lng] = point;
-      if (typeof lat !== 'number' || typeof lng !== 'number') {
-        throw new Error('Invalid coordinate');
-      }
+    ring.map(([lat, lng]) => {
+      if (typeof lat !== 'number' || typeof lng !== 'number') throw new Error('Invalid coordinate');
       return [lng, lat];
     })
   );
 
-  // Auto-close rings
   coordinates.forEach(ring => {
     if (ring.length >= 4) {
       const first = ring[0];
       const last = ring[ring.length - 1];
-      if (first[0] !== last[0] || first[1] !== last[1]) {
-        ring.push([...first]);
-      }
+      if (first[0] !== last[0] || first[1] !== last[1]) ring.push([...first]);
     }
   });
 
   return { type: 'Polygon', coordinates };
 };
 
+
 // ==================== ADD AREA ====================
 const addArea = async (req, res) => {
   try {
-    const { name, city = 'Lahore', center, polygon } = req.body;
-
-    if (!name?.trim() || !center || !polygon) {
-      return res.status(400).json({ success: false, message: 'name, center, and polygon required' });
-    }
-
-    const mongoCenter = toMongoPoint(center);
-    const mongoPolygon = toMongoPolygon(polygon);
-
-    const exists = await Area.findOne({
-      name: { $regex: `^${name.trim()}$`, $options: 'i' },
-      city: city.trim().toUpperCase(),
-    });
-
-    if (exists) {
-      return res.status(400).json({ success: false, message: 'Area already exists in this city' });
-    }
+    const { name, city = 'Lahore' } = req.body;
 
     const area = await Area.create({
       name: name.trim(),
       city: city.trim().toUpperCase(),
-      center: mongoCenter,
-      polygon: mongoPolygon,
+      center: {
+        type: 'Point',
+        coordinates: [req.body.normalizedCenter.lng, req.body.normalizedCenter.lat]
+      },
+      polygon: req.body.mongoPolygon,
       isActive: false,
     });
 
@@ -89,43 +70,76 @@ const addArea = async (req, res) => {
 const updateArea = async (req, res) => {
   try {
     const { id } = req.params;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: 'Invalid area ID' });
     }
 
     const updateData = {};
-    if (req.body.name !== undefined) updateData.name = req.body.name.trim();
-    if (req.body.city !== undefined) updateData.city = req.body.city.trim().toUpperCase();
-    if (req.body.center !== undefined) updateData.center = toMongoPoint(req.body.center);
-    if (req.body.polygon !== undefined) updateData.polygon = toMongoPolygon(req.body.polygon);
 
+    // Name & City
+    if (req.body.name !== undefined) {
+      updateData.name = req.body.name.trim();
+    }
+    if (req.body.city !== undefined) {
+      updateData.city = req.body.city.trim().toUpperCase();
+    }
+
+    // Center – use pre-validated & normalized data from validation
+    if (req.body.normalizedCenter) {
+      updateData.center = {
+        type: 'Point',
+        coordinates: [req.body.normalizedCenter.lng, req.body.normalizedCenter.lat], // [lng, lat]
+      };
+    }
+
+    // Polygon – use pre-converted MongoDB-ready polygon
+    if (req.body.mongoPolygon) {
+      updateData.polygon = req.body.mongoPolygon;
+    }
+
+    // If nothing to update
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ success: false, message: 'No update data provided' });
     }
 
     // Prevent duplicate name in same city
     if (updateData.name || updateData.city) {
-      const check = {
-        _id: { $ne: id },
-        name: updateData.name ? { $regex: `^${updateData.name}$`, $options: 'i' } : undefined,
-        city: updateData.city || undefined,
-      };
-      if (await Area.findOne(check)) {
-        return res.status(400).json({ success: false, message: 'Area name already exists in this city' });
+      const duplicateQuery = { _id: { $ne: id } };
+      if (updateData.name) duplicateQuery.name = { $regex: `^${updateData.name}$`, $options: 'i' };
+      if (updateData.city) duplicateQuery.city = updateData.city;
+
+      const existing = await Area.findOne(duplicateQuery);
+
+      if (existing) {
+        return res.status(400).json({
+          success: false,
+          message: 'Another area with this name already exists in the city',
+        });
       }
     }
 
+    // Update area
     const area = await Area.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
     });
 
-    if (!area) return res.status(404).json({ success: false, message: 'Area not found' });
+    if (!area) {
+      return res.status(404).json({ success: false, message: 'Area not found' });
+    }
 
-    res.json({ success: true, message: 'Area updated successfully', area });
+    return res.json({
+      success: true,
+      message: 'Area updated successfully',
+      area,
+    });
   } catch (err) {
     console.error('updateArea error:', err);
-    res.status(400).json({ success: false, message: err.message || 'Update failed' });
+    return res.status(400).json({
+      success: false,
+      message: err.message || 'Failed to update area',
+    });
   }
 };
 
@@ -153,7 +167,7 @@ const getAllAreasWithZones = async (req, res) => {
 
     const result = areas.map(area => ({
       ...area,
-      center: area.centerLatLng,
+      center: area.center ? { lat: area.center.coordinates[1], lng: area.center.coordinates[0] } : null,
       deliveryZone: zoneMap[area._id] || null,
       hasDeliveryZone: !!zoneMap[area._id],
     }));
@@ -186,6 +200,7 @@ const getAreaById = async (req, res) => {
 
     res.json({ success: true, area, deliveryZone: zone || null });
   } catch (err) {
+    console.error('getAreaById error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
@@ -204,6 +219,7 @@ const deleteArea = async (req, res) => {
 
     res.json({ success: true, message: 'Area deleted permanently' });
   } catch (err) {
+    console.error('deleteArea error:', err);
     res.status(500).json({ success: false, message: 'Delete failed' });
   }
 };
@@ -240,7 +256,7 @@ const updateDeliveryZone = async (req, res) => {
       zone,
     });
   } catch (err) {
-    console.error(err);
+    console.error('updateDeliveryZone error:', err);
     res.status(500).json({ success: false, message: 'Failed to update zone' });
   }
 };
@@ -256,6 +272,7 @@ const deleteDeliveryZone = async (req, res) => {
     await Area.findByIdAndUpdate(areaId, { isActive: false });
     res.json({ success: true, message: 'Delivery zone removed' });
   } catch (err) {
+    console.error('deleteDeliveryZone error:', err);
     res.status(500).json({ success: false, message: 'Delete failed' });
   }
 };
@@ -264,23 +281,84 @@ const deleteDeliveryZone = async (req, res) => {
 const toggleAreaActive = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid area ID' });
+    }
+
     const area = await Area.findById(id);
     if (!area) return res.status(404).json({ success: false, message: 'Area not found' });
 
     area.isActive = !area.isActive;
     await area.save();
 
+    // If area is turned OFF → disable delivery too
     if (!area.isActive) {
-      await DeliveryZone.updateMany({ area: id }, { isActive: false });
+      await DeliveryZone.updateOne({ area: id }, { isActive: false });
     }
 
-    res.json({
+    return res.json({
       success: true,
-      message: `Area ${area.isActive ? 'activated' : 'deactivated'}`,
+      message: area.isActive ? 'Area activated (inService: true)' : 'Area deactivated (inService: false)',
       area: { _id: area._id, name: area.name, isActive: area.isActive },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Toggle failed' });
+    console.error('toggleAreaActive error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// ==================== TOGGLE DELIVERY ZONE (hasDeliveryZone) ====================
+const toggleDeliveryZone = async (req, res) => {
+  try {
+    const { areaId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(areaId)) {
+      return res.status(400).json({ success: false, message: 'Invalid areaId' });
+    }
+
+    const area = await Area.findById(areaId);
+    if (!area) return res.status(404).json({ success: false, message: 'Area not found' });
+
+    // Toggle delivery zone (create if not exists)
+    const zone = await DeliveryZone.findOneAndUpdate(
+      { area: areaId },
+      [
+        {
+          $set: {
+            isActive: { $not: "$isActive" },
+            deliveryFee: { $ifNull: ["$deliveryFee", 149] },
+            minOrderAmount: { $ifNull: ["$minOrderAmount", 0] },
+            estimatedTime: { $ifNull: ["$estimatedTime", "35-50 min"] },
+          }
+        }
+      ],
+      {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true,
+      }
+    );
+
+    // Keep area.isActive in sync: if delivery ON → area must be ON
+    if (zone.isActive && !area.isActive) {
+      await Area.findByIdAndUpdate(areaId, { isActive: true });
+    }
+
+    return res.json({
+      success: true,
+      message: zone.isActive
+        ? 'Delivery enabled → hasDeliveryZone: true'
+        : 'Delivery paused → hasDeliveryZone: false',
+      deliveryZone: {
+        areaId: zone.area,
+        deliveryFee: zone.deliveryFee,
+        minOrderAmount: zone.minOrderAmount,
+        estimatedTime: zone.estimatedTime,
+        isActive: zone.isActive,
+      },
+    });
+  } catch (err) {
+    console.error('toggleDeliveryZone error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -293,4 +371,5 @@ module.exports = {
   updateDeliveryZone,
   deleteDeliveryZone,
   toggleAreaActive,
+  toggleDeliveryZone,
 };
