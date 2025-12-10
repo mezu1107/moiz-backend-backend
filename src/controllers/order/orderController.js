@@ -1,6 +1,6 @@
 // src/controllers/order/orderController.js
 // FINAL PRODUCTION VERSION — DECEMBER 2025 — UNIFIED GUEST + AUTH FLOW
-
+const User = require('../../models/user/User');
 const Order = require('../../models/order/Order');
 const Address = require('../../models/address/Address');
 const DeliveryZone = require('../../models/deliveryZone/DeliveryZone');
@@ -572,8 +572,48 @@ const trackOrdersByPhone = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+const paymentSuccess = async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    if (!orderId) return res.status(400).json({ success: false, message: "Order ID missing" });
+
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+    // Determine paymentIntentId from body (webhook) or query (client redirect)
+    const paymentIntentId = req.body?.paymentIntentId || req.query?.payment_intent || null;
+
+    // Already paid
+    if (order.paymentStatus === "paid") {
+      return res.json({ success: true, message: "Payment already confirmed", order });
+    }
+
+    // No paymentIntentId (GET redirect) — frontend can show "awaiting confirmation"
+    if (!paymentIntentId) {
+      return res.json({ success: true, message: "Awaiting Stripe confirmation", order });
+    }
+
+    // Confirm payment
+    if (!order.paymentIntentId) order.paymentIntentId = paymentIntentId;
+    order.paymentStatus = "paid";
+    order.paidAt = new Date();
+    if (order.status === "pending_payment") order.status = "pending";
+    await order.save();
+
+    global.io?.emit("orderStatusChanged", { orderId: order._id.toString(), status: order.status });
+    await sendNotification(order, "payment_success");
+
+    return res.json({ success: true, message: "Payment confirmed successfully", order });
+
+  } catch (err) {
+    console.error("Payment success error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 module.exports = {
-  createOrder,                    // ← ONLY ONE createOrder now
+  createOrder,                  
   getCustomerOrders,
   getOrderById,
   cancelOrder,
@@ -584,5 +624,6 @@ module.exports = {
   adminRejectOrder,
   customerRejectOrder,
   trackOrderById,
-  trackOrdersByPhone
+  trackOrdersByPhone,
+  paymentSuccess                  
 };

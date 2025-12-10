@@ -371,6 +371,8 @@ const toggleAreaActive = async (req, res) => {
 };
 
 // ==================== TOGGLE DELIVERY ZONE ====================
+// src/controllers/admin/adminController.js
+
 const toggleDeliveryZone = async (req, res) => {
   try {
     const { areaId } = req.params;
@@ -387,6 +389,7 @@ const toggleDeliveryZone = async (req, res) => {
       message: 'Area not found' 
     });
 
+    // Toggle + upsert (same as before)
     const zone = await DeliveryZone.findOneAndUpdate(
       { area: areaId },
       [
@@ -402,9 +405,13 @@ const toggleDeliveryZone = async (req, res) => {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
+    // Activate area if delivery is enabled
     if (zone.isActive && !area.isActive) {
       await Area.findByIdAndUpdate(areaId, { isActive: true });
     }
+
+    // REFRESH AREA TO GET LATEST isActive
+    const updatedArea = await Area.findById(areaId).lean();
 
     return res.json({
       success: true,
@@ -418,6 +425,18 @@ const toggleDeliveryZone = async (req, res) => {
         estimatedTime: zone.estimatedTime,
         isActive: zone.isActive,
       },
+      // THIS IS THE KEY LINE YOUR FRONTEND NEEDS
+      hasDeliveryZone: true,
+      area: {
+        _id: updatedArea._id,
+        name: updatedArea.name,
+        city: updatedArea.city,
+        isActive: updatedArea.isActive,
+        center: updatedArea.center ? {
+          lat: updatedArea.center.coordinates[1],
+          lng: updatedArea.center.coordinates[0]
+        } : null
+      }
     });
   } catch (err) {
     console.error('toggleDeliveryZone error:', err);

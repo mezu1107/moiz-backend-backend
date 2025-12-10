@@ -122,5 +122,28 @@ const authenticateSocket = async (socket, next) => {
     next(new Error('Authentication failed'));
   }
 };
+// src/middleware/auth/auth.js
+// ← Add this function at the bottom of the file
 
-module.exports = { auth, authenticateSocket };
+const optionalAuth = async (req, res, next) => {
+  const authHeader = req.header('Authorization') || req.header('authorization');
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const token = authHeader.replace('Bearer ', '').trim();
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id).select('-password');
+      
+      if (user && user.isActive && !user.isPermanentlyBanned && !user.isDeleted) {
+        req.user = user;
+        req.token = token;
+      }
+    } catch (err) {
+      // Invalid/expired token → just ignore, continue as guest
+    }
+  }
+  // No token or invalid token → proceed as guest (req.user = undefined)
+  next();
+};
+
+module.exports = { auth, authenticateSocket, optionalAuth }; // ← export it!
