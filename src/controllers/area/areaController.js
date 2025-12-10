@@ -1,7 +1,6 @@
 // src/controllers/area/areaController.js
 const Area = require('../../models/area/Area');
 const DeliveryZone = require('../../models/deliveryZone/DeliveryZone');
-const { getAreaByCoords } = require('../../utils/areaCache');
 
 // GET /api/areas
 const getAreas = async (req, res) => {
@@ -15,8 +14,8 @@ const getAreas = async (req, res) => {
       success: true,
       areas: areas.map(a => ({
         ...a,
-        center: a.centerLatLng // ensure client uses correct virtual
-      }))
+        center: a.centerLatLng,
+      })),
     });
   } catch (err) {
     console.error('getAreas error:', err);
@@ -24,11 +23,10 @@ const getAreas = async (req, res) => {
   }
 };
 
+// GET /api/areas/check?lat=...&lng=...
 const checkArea = async (req, res) => {
   try {
     const { lat, lng } = req.query;
-
-    // === 1. Validate coordinates ===
     const latNum = parseFloat(lat);
     const lngNum = parseFloat(lng);
 
@@ -39,7 +37,7 @@ const checkArea = async (req, res) => {
       });
     }
 
-    // Optional: Reject outside Pakistan early (saves query time)
+    // Reject if outside Pakistan
     if (latNum < 23.5 || latNum > 37.5 || lngNum < 60.0 || lngNum > 78.0) {
       return res.json({
         success: true,
@@ -49,26 +47,10 @@ const checkArea = async (req, res) => {
       });
     }
 
-    // === 2. GeoJSON Point: MongoDB expects [longitude, latitude] ===
-    const point = {
-      type: 'Point',
-      coordinates: [lngNum, latNum], // [lng, lat] — correct order!
-    };
+    // Use cache + DB fallback (imported below)
+    const result = await getAreaAndZoneByCoords(lngNum, latNum);
 
-    // === 3. Find ACTIVE area that contains this point ===
-    const area = await Area.findOne({
-      isActive: true,
-      polygon: {
-        $geoIntersects: {
-          $geometry: point,
-        },
-      },
-    })
-      .select('name city center _id')
-      .lean(); // lean() = faster + virtuals still work
-
-    // Not inside any active area
-    if (!area) {
+    if (!result || !result.area) {
       return res.json({
         success: true,
         inService: false,
@@ -77,27 +59,13 @@ const checkArea = async (req, res) => {
       });
     }
 
-    // === 4. Check if delivery is ACTIVE in this area ===
-    const zone = await DeliveryZone.findOne({
-      area: area._id,
-      isActive: true,
-    })
-      .select('deliveryFee minOrderAmount estimatedTime')
-      .lean();
+    const { area, zone, hasDelivery } = result;
 
-    const hasDelivery = !!zone;
-
-    // === 5. Final Response ===
     return res.json({
       success: true,
-      inService: true,                    // Area is mapped + active → show menu
-      hasDeliveryZone: hasDelivery,       // Can actually deliver now?
-      area: {
-        _id: area._id,
-        name: area.name,
-        city: area.city,
-        center: area.centerLatLng,        // virtual: { lat, lng }
-      },
+      inService: true,
+      hasDeliveryZone: hasDelivery,
+      area,
       delivery: hasDelivery
         ? {
             fee: zone.deliveryFee,
@@ -113,12 +81,13 @@ const checkArea = async (req, res) => {
     console.error('checkArea error:', err);
     return res.status(500).json({
       success: false,
-      message: 'Server error. Please try again.',
+      message: 'Server error',
     });
   }
 };
 
-module.exports = {
-  getAreas,
-  checkArea
-};
+// Import AFTER function definitions to avoid circular dependency issues
+const { getAreaAndZoneByCoords } = require('../../utils/areaCache');
+
+// Export at the very end
+module.exports = { getAreas, checkArea };

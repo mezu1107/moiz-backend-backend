@@ -1,6 +1,9 @@
-// src/routes/admin/adminRoutes.js
 const express = require('express');
 const router = express.Router();
+
+const { auth } = require('../../middleware/auth/auth');
+const { role } = require('../../middleware/role/role');
+const validate = require('../../middleware/validate/validate');
 
 const {
   addArea,
@@ -9,30 +12,29 @@ const {
   getAreaById,
   deleteArea,
   toggleAreaActive,
+  toggleDeliveryZone,
   updateDeliveryZone,
   deleteDeliveryZone,
-  toggleDeliveryZone, // ← ADD THIS
 } = require('../../controllers/admin/adminController');
 
 const { addArea: addAreaSchema, updateArea: updateAreaSchema } = require('../../validation/schemas/areaSchemas');
-const { auth } = require('../../middleware/auth/auth');
-const { role } = require('../../middleware/role/role');
-const validate = require('../../middleware/validate/validate');
 
-// Protect all routes
-router.use(auth, role('admin'));
+// ====================== MIDDLEWARE ======================
+// Use reference to auth middleware (do NOT call it)
+router.use(auth);
+router.use(role(['admin', 'superadmin']));
 
-// Area Management
+// ====================== AREA ROUTES ======================
 router.post('/area', addAreaSchema, validate, addArea);
+router.put('/area/:id', updateAreaSchema, validate, updateArea);
 router.get('/areas', getAllAreasWithZones);
 router.get('/area/:id', getAreaById);
-router.put('/area/:id', updateAreaSchema, validate, updateArea);
 router.delete('/area/:id', deleteArea);
-router.patch('/area/:id/toggle-active', toggleAreaActive);        // inService toggle
 
-// Delivery Zone Management
-router.put('/delivery-zone/:areaId', updateDeliveryZone);         // Full update
+// ====================== DELIVERY ZONE ROUTES ======================
+router.patch('/area/:id/toggle-active', toggleAreaActive);
+router.patch('/delivery-zone/:areaId/toggle', toggleDeliveryZone);
+router.put('/delivery-zone/:areaId', updateDeliveryZone);
 router.delete('/delivery-zone/:areaId', deleteDeliveryZone);
-router.patch('/delivery-zone/:areaId/toggle', toggleDeliveryZone); // hasDeliveryZone toggle
 
 module.exports = router;

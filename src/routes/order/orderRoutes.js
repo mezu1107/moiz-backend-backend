@@ -7,7 +7,6 @@ const validate = require('../../middleware/validate/validate');
 
 const {
   createOrder,
-  createGuestOrder,
   getCustomerOrders,
   getOrderById,
   cancelOrder,
@@ -22,49 +21,45 @@ const {
 } = require('../../controllers/order/orderController');
 
 const {
-  getOrderAnalytics,
-  getRealtimeStats
-} = require('../../controllers/order/orderAnalyticsController');
-
-const {
-  createOrder: createOrderSchema,
-  createGuestOrder: createGuestOrderSchema,
-  trackByPhone: trackByPhoneSchema,
-  updateStatus: updateStatusSchema,
-  assignRider: assignRiderSchema,
-  rejectOrder: rejectOrderSchema
+  createOrderSchema,
+  trackByPhone,
+  updateStatus,
+  assignRiderSchema,
+  rejectOrder
 } = require('../../validation/schemas/orderSchemas');
 
-// PUBLIC TRACKING
+// ====================== PUBLIC TRACKING ======================
 router.get('/track/:orderId', trackOrderById);
-router.post('/track/by-phone', trackByPhoneSchema, validate, trackOrdersByPhone);
+router.post('/track/by-phone', trackByPhone, validate, trackOrdersByPhone);
 
-// GUEST ORDER
-// Replace or add alongside current guest route
-router.post('/guest', createGuestOrderSchema, validate, createGuestOrder);
-// AUTH REQUIRED
+// ====================== UNIFIED ORDER — GUEST + AUTH ======================
+// Use optional auth middleware reference (handle inside auth)
+router.post(
+  '/',
+  auth,                // ← Pass reference, auth middleware decides if guest is allowed
+  createOrderSchema,
+  validate,
+  createOrder
+);
+
+// ====================== AUTH REQUIRED FROM HERE ======================
 router.use(auth);
 
-// Customer Routes
-router.post('/', createOrderSchema, validate, createOrder);
+// -------------------- CUSTOMER --------------------
 router.get('/my', getCustomerOrders);
 router.get('/:id', getOrderById);
 router.patch('/:id/cancel', cancelOrder);
-router.patch('/:id/reject', rejectOrderSchema, validate, customerRejectOrder);
+router.patch('/:id/reject', rejectOrder, validate, customerRejectOrder);
 router.get('/:id/receipt', generateReceipt);
 
-// Admin & Rider
+// -------------------- ADMIN & RIDER --------------------
 router.use(role(['admin', 'rider']));
-router.patch('/:id/status', updateStatusSchema, validate, updateOrderStatus);
+router.patch('/:id/status', updateStatus, validate, updateOrderStatus);
 
-// Admin Only
+// -------------------- ADMIN ONLY --------------------
 router.use(role(['admin']));
-router.patch('/:id/admin-reject', rejectOrderSchema, validate, adminRejectOrder);
+router.patch('/:id/admin-reject', rejectOrder, validate, adminRejectOrder);
 router.patch('/:id/assign', assignRiderSchema, validate, assignRider);
 router.get('/', getAllOrders);
-
-// Analytics (Admin Only)
-router.get('/analytics', getOrderAnalytics);
-router.get('/realtime', getRealtimeStats);
 
 module.exports = router;

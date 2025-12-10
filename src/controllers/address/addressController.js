@@ -1,39 +1,31 @@
-// src/controllers/address/addressController.js
 const Address = require('../../models/address/Address');
 const Area = require('../../models/area/Area');
 
-const validatePointInArea = async (point) => {
-  return await Area.findOne({
-    isActive: true,
-    polygon: { $geoIntersects: { $geometry: point } }
-  });
-};
-
 const createAddress = async (req, res) => {
-  const { label, fullAddress, areaId, lat, lng, instructions, isDefault } = req.body;
+  const { label, fullAddress, areaId, instructions, isDefault } = req.body;
   const userId = req.user.id;
 
   try {
-    const point = { type: 'Point', coordinates: [lng, lat] };
-
-    const area = await validatePointInArea(point);
-    if (!area || area._id.toString() !== areaId) {
+    // Check area exists and is active
+    const area = await Area.findOne({ _id: areaId, isActive: true });
+    if (!area) {
       return res.status(400).json({
         success: false,
-        message: 'This location is outside our service area'
+        message: 'Selected area is not serviceable'
       });
     }
 
+    // If default, reset other addresses
     if (isDefault) {
       await Address.updateMany({ user: userId }, { isDefault: false });
     }
 
+    // Create address
     const address = await Address.create({
       user: userId,
       label,
       fullAddress,
       area: areaId,
-      location: point,
       instructions: instructions || '',
       isDefault: !!isDefault
     });
@@ -68,24 +60,14 @@ const updateAddress = async (req, res) => {
     const address = await Address.findOne({ _id: id, user: req.user.id });
     if (!address) return res.status(404).json({ success: false, message: 'Address not found' });
 
-    if (updates.lat && updates.lng) {
-      const newPoint = { type: 'Point', coordinates: [updates.lng, updates.lat] };
-      const validArea = await validatePointInArea(newPoint);
-      if (!validArea || (updates.areaId && validArea._id.toString() !== updates.areaId)) {
-        return res.status(400).json({ success: false, message: 'New location not serviceable' });
-      }
-      address.location = newPoint;
-      if (updates.areaId) address.area = updates.areaId;
-    }
-
     if (updates.isDefault) {
       await Address.updateMany({ user: req.user.id }, { isDefault: false });
       address.isDefault = true;
     }
 
     Object.keys(updates).forEach(key => {
-      if (['label', 'fullAddress', 'instructions'].includes(key)) {
-        address[key] = updates[key]?.trim() || address[key];
+      if (['label', 'fullAddress', 'instructions', 'areaId'].includes(key)) {
+        address[key === 'areaId' ? 'area' : key] = updates[key]?.trim() || address[key];
       }
     });
 

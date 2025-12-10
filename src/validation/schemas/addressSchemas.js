@@ -1,4 +1,3 @@
-// src/validation/schemas/addressSchemas.js
 const { body, param } = require('express-validator');
 
 exports.createAddress = [
@@ -16,16 +15,6 @@ exports.createAddress = [
   body('areaId')
     .isMongoId()
     .withMessage('Valid area ID required'),
-
-  body('lat')
-    .isFloat({ min: 23.5, max: 37.5 })
-    .withMessage('Latitude must be in Pakistan range (23.5–37.5)')
-    .toFloat(),
-
-  body('lng')
-    .isFloat({ min: 60.0, max: 78.0 })
-    .withMessage('Longitude must be in Pakistan range (60–78)')
-    .toFloat(),
 
   body('instructions')
     .optional({ nullable: true })
@@ -55,16 +44,6 @@ exports.updateAddress = [
   body('areaId')
     .optional()
     .isMongoId(),
-
-  body('lat')
-    .optional()
-    .isFloat({ min: 23.5, max: 37.5 })
-    .toFloat(),
-
-  body('lng')
-    .optional()
-    .isFloat({ min: 60.0, max: 78.0 })
-    .toFloat(),
 
   body('instructions')
     .optional({ nullable: true })

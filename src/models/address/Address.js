@@ -12,8 +12,8 @@ const addressSchema = new mongoose.Schema({
     type: String, 
     required: true, 
     trim: true,
-    enum: ['Home', 'Work', 'Other'],     // ← Enforced in DB
-    default: 'Home'                      // ← Auto-set if not provided
+    enum: ['Home', 'Work', 'Other'],
+    default: 'Home'
   },
   
   fullAddress: { 
@@ -26,11 +26,6 @@ const addressSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Area', 
     required: true 
-  },
-  
-  location: {
-    type: { type: String, enum: ['Point'], default: 'Point' },
-    coordinates: { type: [Number], required: true } // [lng, lat]
   },
   
   instructions: { 
@@ -48,9 +43,8 @@ const addressSchema = new mongoose.Schema({
 });
 
 // Indexes
-addressSchema.index({ location: '2dsphere' });
 addressSchema.index({ user: 1 });
 addressSchema.index({ user: 1, isDefault: -1 });
 addressSchema.index({ area: 1 });
 
-module.exports = mongoose.model('Address', addressSchema);
+module.exports = mongoose.models.Address || mongoose.model('Address', addressSchema);

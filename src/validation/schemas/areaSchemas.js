@@ -1,84 +1,53 @@
 // src/validation/schemas/areaSchemas.js
 const { body, query } = require('express-validator');
 
-/* ------------------------------------------------------------------
-   HELPER FUNCTIONS – Accept strings OR numbers
------------------------------------------------------------------- */
+const toFloat = (val) => (typeof val === 'string' ? parseFloat(val.trim()) : val);
 
-const toFloat = (val) => {
-  if (val === null || val === undefined || val === '') return NaN;
-  if (typeof val === 'number') return val;
-  if (typeof val === 'string') return parseFloat(val.trim());
-  return NaN;
-};
-
-const validatePakistanPoint = (value, { req, path }) => {
+const validatePakistanPoint = (value) => {
   const lat = toFloat(value?.lat);
-  lng = toFloat(value?.lng);
+  const lng = toFloat(value?.lng);
 
-  if (isNaN(lat) || isNaN(lng)) {
-    throw new Error('lat and lng must be valid numbers');
-  }
+  if (isNaN(lat) || isNaN(lng)) throw new Error('lat and lng must be valid numbers');
+  if (lat < 23.5 || lat > 37.5) throw new Error('Latitude must be in Pakistan range');
+  if (lng < 60.0 || lng > 78.0) throw new Error('Longitude must be in Pakistan range');
 
-  if (lat < 23.5 || lat > 37.5) {
-    throw new Error('Latitude must be between 23.5 and 37.5 (Pakistan)');
-  }
-
-  if (lng < 60.0 || lng > 78.0) {
-    throw new Error('Longitude must be between 60.0 and 78.0 (Pakistan)');
-  }
-
-  // Save normalized version for controller
-  req.body.normalizedCenter = { lat, lng };
-  return true;
+  return { lat, lng };
 };
 
-const convertAndValidatePolygon = (polygon, { req }) => {
+const convertPolygonToMongo = (polygon, { req }) => {
   if (!polygon || polygon.type !== 'Polygon' || !Array.isArray(polygon.coordinates)) {
-    throw new Error('Invalid GeoJSON Polygon format');
+    throw new Error('Invalid GeoJSON Polygon');
   }
 
-  const convertedRings = polygon.coordinates.map(ring => {
+  const coordinates = polygon.coordinates.map(ring => {
     if (!Array.isArray(ring) || ring.length < 4) {
-      throw new Error('Each polygon ring must have at least 4 points');
+      throw new Error('Polygon ring must have ≥4 points');
     }
-
-    const mongoRing = ring.map(point => {
-      const lat = toFloat(point[0]);
-      const lng = toFloat(point[1]);
-      if (isNaN(lat) || isNaN(lng)) {
-        throw new Error('Polygon coordinates must be valid numbers');
-      }
-      return [lng, lat]; // → [lng, lat] for MongoDB
+    const mongoRing = ring.map(([lat, lng]) => {
+      const l = toFloat(lat);
+      const g = toFloat(lng);
+      if (isNaN(l) || isNaN(g)) throw new Error('Invalid coordinates in polygon');
+      return [g, l]; // [lng, lat]
     });
 
-    // Auto-close ring
-    const first = mongoRing[0];
-    const last = mongoRing[mongoRing.length - 1];
-    if (first[0] !== last[0] || first[1] !== last[1]) {
-      mongoRing.push([...first]);
+    // Auto-close
+    if (mongoRing[0][0] !== mongoRing[mongoRing.length - 1][0] ||
+        mongoRing[0][1] !== mongoRing[mongoRing.length - 1][1]) {
+      mongoRing.push(mongoRing[0]);
     }
-
     return mongoRing;
   });
 
-  // Save ready-to-use MongoDB polygon
-  req.body.mongoPolygon = {
-    type: 'Polygon',
-    coordinates: convertedRings
-  };
-
+  req.body.mongoPolygon = { type: 'Polygon', coordinates };
   return true;
 };
 
-/* ------------------------------------------------------------------
-   ADMIN: ADD AREA
------------------------------------------------------------------- */
+// ADD AREA
 exports.addArea = [
   body('name')
     .trim()
     .notEmpty().withMessage('Area name is required')
-    .isLength({ min: 2, max: 50 }).withMessage('Name must be 2–50 characters'),
+    .isLength({ min: 2, max: 50 }),
 
   body('city')
     .optional()
@@ -87,19 +56,18 @@ exports.addArea = [
     .default('Lahore'),
 
   body('center')
-    .exists({ checkNull: true }).withMessage('Center is required')
-    .bail()
-    .custom(validatePakistanPoint),
+    .exists().withMessage('Center is required')
+    .custom((value, { req }) => {
+      req.body.normalizedCenter = validatePakistanPoint(value);
+      return true;
+    }),
 
   body('polygon')
-    .exists({ checkNull: true }).withMessage('Polygon is required')
-    .bail()
-    .custom(convertAndValidatePolygon),
+    .exists().withMessage('Polygon is required')
+    .custom(convertPolygonToMongo),
 ];
 
-/* ------------------------------------------------------------------
-   ADMIN: UPDATE AREA
------------------------------------------------------------------- */
+// UPDATE AREA
 exports.updateArea = [
   body('name')
     .optional()
@@ -113,20 +81,20 @@ exports.updateArea = [
 
   body('center')
     .optional()
-    .custom(validatePakistanPoint),
+    .custom((value, { req }) => {
+      if (value) req.body.normalizedCenter = validatePakistanPoint(value);
+      return true;
+    }),
 
   body('polygon')
     .optional()
     .custom((value, { req }) => {
-      if (!value) return true;
-      return convertAndValidatePolygon(value, { req });
+      if (value) convertPolygonToMongo(value, { req });
+      return true;
     }),
 ];
 
-/* ------------------------------------------------------------------
-   PUBLIC: /api/areas/check?lat=...&lng=...
-   NOW ACCEPTS STRINGS AND NUMBERS!
------------------------------------------------------------------- */
+// CHECK AREA QUERY
 exports.checkAreaQuery = [
   query('lat')
     .notEmpty().withMessage('Latitude is required')

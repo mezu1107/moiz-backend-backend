@@ -1,14 +1,12 @@
-// src/routes/menu/menuRoutes.js ← FINAL 100% WORKING VERSION
-
+// src/routes/menu/menuRoutes.js
 const express = require('express');
 const router = express.Router();
-const { param } = require('express-validator'); // ← THIS WAS MISSING!!!
-
 const upload = require('../../middleware/upload/Upload');
 const { auth } = require('../../middleware/auth/auth');
 const { role } = require('../../middleware/role/role');
 const validate = require('../../middleware/validate/validate');
 
+// Controllers
 const {
   getMenuByLocation,
   addMenuItem,
@@ -22,52 +20,55 @@ const {
   getMenuByAreaId: getMenuByAreaIdController
 } = require('../../controllers/menu/menuController');
 
+// Validation Schemas
 const {
-  getMenuByLocation: menuLocationSchema,
-  getAllMenuItemsWithFilters: menuFiltersSchema,
-  addMenuItem: addMenuItemSchema,
-  updateMenuItem: updateMenuItemSchema,
-  toggleAvailability: toggleAvailabilitySchema,
+  getMenuByLocation: locationSchema,
+  getAllMenuItemsWithFilters: filtersSchema,
+  addMenuItemSchema,
+  updateMenuItemSchema,
+  toggleAvailabilitySchema,
   menuItemIdParam,
-  getMenuByAreaId
+  getMenuByAreaIdValidation
 } = require('../../validation/schemas/menuSchemas');
 
-// PUBLIC ROUTES
+// ==================== PUBLIC ROUTES (MUST BE BEFORE ADMIN MIDDLEWARE) ====================
 router.get('/all', getAllAvailableMenuItems);
-router.get('/location', menuLocationSchema, validate, getMenuByLocation);
-router.get('/filters', menuFiltersSchema, validate, getAllMenuItemsWithFilters);
+router.get('/location', locationSchema, validate, getMenuByLocation);
+router.get('/filters', filtersSchema, validate, getAllMenuItemsWithFilters);
 router.get('/:id', menuItemIdParam, validate, getSingleMenuItem);
-router.get('/area/:areaId', getMenuByAreaId, validate, getMenuByAreaIdController);
+router.get('/area/:areaId', getMenuByAreaIdValidation, validate, getMenuByAreaIdController); // ← MOVED UP!
 
-// ADMIN ROUTES
-router.use(auth, role(['admin']));
+// ==================== APPLY ADMIN PROTECTION HERE (AFTER ALL PUBLIC ROUTES) ====================
+router.use(auth, role(['admin']));   
 
+// ==================== ADMIN-ONLY ROUTES ====================
 router.get('/admin/all', getAllMenuItems);
 
-router.post('/', 
-  upload.single('image'), 
-  addMenuItemSchema, 
-  validate, 
+router.post('/',
+  upload.single('image'),
+  addMenuItemSchema,
+  validate,
   addMenuItem
 );
 
-router.put('/:id', 
-  menuItemIdParam, 
-  upload.single('image'), 
-  updateMenuItemSchema, 
-  validate, 
+router.put('/:id',
+  menuItemIdParam,
+  validate,
+  upload.single('image'),
+  updateMenuItemSchema,
+  validate,
   updateMenuItem
 );
 
-router.delete('/:id', 
-  menuItemIdParam, 
-  validate, 
+router.delete('/:id',
+  menuItemIdParam,
+  validate,
   deleteMenuItem
 );
 
-router.patch('/:id/toggle', 
-  toggleAvailabilitySchema, 
-  validate, 
+router.patch('/:id/toggle',
+  toggleAvailabilitySchema,
+  validate,
   toggleAvailability
 );
 

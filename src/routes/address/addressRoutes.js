@@ -1,4 +1,3 @@
-// src/routes/address/addressRoutes.js
 const express = require('express');
 const router = express.Router();
 
@@ -20,14 +19,15 @@ const {
 } = require('../../validation/schemas/addressSchemas');
 
 // ====================== MIDDLEWARE ======================
-router.use(auth); // All routes require authenticated user
+// All routes require authenticated user
+router.use(auth); // ← pass reference, do NOT call it
 
 // ====================== ROUTES ======================
 
 /**
  * @route   POST /api/address
- * @desc    Create a new delivery address
- * @access  Full validation + geo-check inside controller
+ * @desc    Create a new delivery address (only areaId required)
+ * @access  Private
  */
 router.post(
   '/',
@@ -45,20 +45,20 @@ router.get('/', getUserAddresses);
 
 /**
  * @route   PUT /api/address/:id
- * @desc    Fully update an existing address (with geo-validation if lat/lng changed)
+ * @desc    Update an existing address (label, fullAddress, areaId, instructions)
  * @access  Private
  */
 router.put(
   '/:id',
-  addressIdParam,           // Validates :id is MongoId
-  updateAddressSchema,          // Validates body fields
+  addressIdParam,         // Validate :id is MongoId
+  updateAddressSchema,    // Validate body fields
   validate,
   updateAddress
 );
 
 /**
  * @route   DELETE /api/address/:id
- * @desc    Delete address + auto-promote next address to default if needed
+ * @desc    Delete an address and auto-promote next to default if needed
  * @access  Private
  */
 router.delete(

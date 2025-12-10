@@ -19,6 +19,26 @@ app.use(require('cors')({
   origin: true,
   credentials: true
 }));
+const session = require('express-session');
+const MongoStore = require('connect-mongo').default; // ✅ note the `.default`
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'amfood-secret-guest-cart-2025',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: 'sessions'
+    }),
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  })
+);
 
 app.use(require('helmet')({ contentSecurityPolicy: false }));
 app.use(require('compression')());

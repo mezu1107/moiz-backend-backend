@@ -1,67 +1,101 @@
 // src/utils/areaCache.js
 const Area = require('../models/area/Area');
+const DeliveryZone = require('../models/deliveryZone/DeliveryZone');
 
-const areaCache = new Map();
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
-const MAX_CACHE_SIZE = 50_000;
+const cache = new Map();
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+const MAX_CACHE_SIZE = 100_000; // Prevent memory leaks
 
 /**
- * Correct, fast, reliable version — uses direct $geoIntersects
+ * Get area and delivery zone by coordinates (cached)
+ * @returns { area, zone, hasDelivery }
  */
-const getAreaByCoords = async (lng, lat) => {
+const getAreaAndZoneByCoords = async (lng, lat) => {
   if (typeof lng !== 'number' || typeof lat !== 'number' || !isFinite(lng) || !isFinite(lat)) {
     return null;
   }
 
   const key = `${lng.toFixed(6)},${lat.toFixed(6)}`;
-  const cached = areaCache.get(key);
+  const now = Date.now();
 
-  if (cached && cached.expires > Date.now()) {
+  // Check cache
+  const cached = cache.get(key);
+  if (cached && cached.expires > now) {
     return cached.data;
   }
 
-  // Clear old entries if too big
-  if (areaCache.size > MAX_CACHE_SIZE) {
-    areaCache.clear();
+  // Clear cache if too large
+  if (cache.size > MAX_CACHE_SIZE) {
+    console.log(`Area cache full — cleared ${cache.size} entries`);
+    cache.clear();
   }
 
   try {
+    // MongoDB Geo Query
+    const point = { type: 'Point', coordinates: [lng, lat] };
+
     const area = await Area.findOne({
       isActive: true,
-      polygon: {
-        $geoIntersects: {
-          $geometry: {
-            type: 'Point',
-            coordinates: [lng, lat] // [lng, lat] — CORRECT ORDER
-          }
-        }
-      }
+      polygon: { $geoIntersects: { $geometry: point } },
     })
-    .select('_id name city center')
-    .lean();
+      .select('name city center _id')
+      .lean();
 
-    const result = area || null;
+    if (!area) {
+      const result = { area: null, zone: null, hasDelivery: false };
+      cache.set(key, { data: result, expires: now + CACHE_TTL });
+      return result;
+    }
 
-    areaCache.set(key, {
-      data: result,
-      expires: Date.now() + CACHE_TTL
-    });
+    // Get delivery zone
+    const zone = await DeliveryZone.findOne({
+      area: area._id,
+      isActive: true,
+    })
+      .select('deliveryFee minOrderAmount estimatedTime')
+      .lean();
+
+    const result = {
+      area: {
+        _id: area._id,
+        name: area.name,
+        city: area.city,
+        center: area.centerLatLng,
+      },
+      zone: zone || null,
+      hasDelivery: !!zone,
+    };
+
+    // Cache result
+    cache.set(key, { data: result, expires: now + CACHE_TTL });
 
     return result;
-
   } catch (err) {
-    console.error('getAreaByCoords error:', err.message);
+    console.error('getAreaAndZoneByCoords error:', err.message);
     return null;
   }
 };
 
-const clearCache = () => {
-  const size = areaCache.size;
-  areaCache.clear();
+/**
+ * Clear cache (call after admin updates areas)
+ */
+const clearAreaCache = () => {
+  const size = cache.size;
+  cache.clear();
   console.log(`Area cache cleared (${size} entries)`);
 };
 
+/**
+ * Cache stats for debugging
+ */
+const getCacheStats = () => ({
+  size: cache.size,
+  maxSize: MAX_CACHE_SIZE,
+  ttl: CACHE_TTL,
+});
+
 module.exports = {
-  getAreaByCoords,
-  clearCache
+  getAreaAndZoneByCoords,
+  clearAreaCache,
+  getCacheStats,
 };

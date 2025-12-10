@@ -1,8 +1,8 @@
-// src/validation/schemas/menuSchemas.js
 const { body, param, query } = require('express-validator');
 const mongoose = require('mongoose');
 const Area = require('../../models/area/Area');
 
+// Custom validator for availableInAreas (used in add & update)
 const validateAvailableInAreas = () => {
   return body('availableInAreas')
     .optional({ nullable: true })
@@ -37,7 +37,7 @@ const validateAvailableInAreas = () => {
         const validIds = validAreas.map(a => a._id.toString());
         const invalidIds = ids.filter(id => !validIds.includes(id));
         if (invalidIds.length > 0) {
-         throw new Error(`Area not found or inactive: ${invalidIds[0]}`);
+          throw new Error(`Area not found or inactive: ${invalidIds[0]}`);
         }
       }
 
@@ -46,10 +46,13 @@ const validateAvailableInAreas = () => {
     });
 };
 
-const getMenuByAreaId = [
+// Validation for /area/:areaId route
+const getMenuByAreaIdValidation = [
   param('areaId')
     .trim()
     .notEmpty()
+    .withMessage('Area ID is required')
+    .bail()
     .isMongoId()
     .withMessage('Invalid area ID format')
     .bail()
@@ -62,8 +65,8 @@ const getMenuByAreaId = [
 
 module.exports = {
   getMenuByLocation: [
-    query('lat').exists({ checkFalsy: true }).isFloat({ min: 23.5, max: 37.5 }).withMessage('Valid latitude required'),
-    query('lng').exists({ checkFalsy: true }).isFloat({ min: 60, max: 78 }).withMessage('Valid longitude required')
+    query('lat').exists({ checkFalsy: true }).isFloat({ min: 23.5, max: 37.5 }).withMessage('Valid latitude required (23.5 - 37.5)'),
+    query('lng').exists({ checkFalsy: true }).isFloat({ min: 60, max: 78 }).withMessage('Valid longitude required (60 - 78)')
   ],
 
   getAllMenuItemsWithFilters: [
@@ -79,25 +82,27 @@ module.exports = {
     query('availableOnly').optional().isIn(['true', 'false'])
   ],
 
-  menuItemIdParam: [param('id').isMongoId().withMessage('Invalid menu item ID')],
-
-  toggleAvailability: [
-    param('id').isMongoId().withMessage('Invalid menu item ID'),
-    body('isAvailable').notEmpty().isBoolean().toBoolean()
+  menuItemIdParam: [
+    param('id').trim().isMongoId().withMessage('Invalid menu item ID')
   ],
 
-  addMenuItem: [
-    body('name').trim().notEmpty().isLength({ min: 2, max: 100 }),
+  toggleAvailabilitySchema: [
+    param('id').trim().isMongoId().withMessage('Invalid menu item ID'),
+    body('isAvailable').notEmpty().isBoolean().toBoolean().withMessage('isAvailable must be true/false')
+  ],
+
+  addMenuItemSchema: [
+    body('name').trim().notEmpty().isLength({ min: 2, max: 100 }).withMessage('Name is required (2-100 chars)'),
     body('description').optional({ nullable: true }).trim().isLength({ max: 500 }),
-    body('price').notEmpty().isFloat({ min: 50 }).toFloat(),
+    body('price').notEmpty().isFloat({ min: 50 }).toFloat().withMessage('Price must be ≥ 50'),
     body('category').notEmpty().isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']),
     body('isVeg').optional().isBoolean().toBoolean(),
     body('isSpicy').optional().isBoolean().toBoolean(),
     validateAvailableInAreas()
   ],
 
-  updateMenuItem: [
-    param('id').isMongoId().withMessage('Invalid menu item ID'),
+  updateMenuItemSchema: [
+    param('id').trim().isMongoId().withMessage('Invalid menu item ID'),
     body('name').optional().trim().isLength({ min: 2, max: 100 }),
     body('description').optional({ nullable: true }).trim().isLength({ max: 500 }),
     body('price').optional().isFloat({ min: 50 }).toFloat(),
@@ -108,5 +113,6 @@ module.exports = {
     validateAvailableInAreas()
   ],
 
-  getMenuByAreaId
+  // Export with clear name to avoid conflict
+  getMenuByAreaIdValidation
 };

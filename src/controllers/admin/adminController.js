@@ -39,6 +39,9 @@ const toMongoPolygon = (polygon) => {
 };
 
 
+// src/controllers/admin/adminController.js
+// ... (existing imports and helpers remain unchanged)
+
 // ==================== ADD AREA ====================
 const addArea = async (req, res) => {
   try {
@@ -57,12 +60,21 @@ const addArea = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Area created successfully',
+      message: `Area "${area.name}" created successfully in ${area.city}`,
       area,
     });
   } catch (err) {
     console.error('addArea error:', err);
-    res.status(400).json({ success: false, message: err.message || 'Failed to create area' });
+    if (err.code === 11000) {
+      return res.status(409).json({ 
+        success: false, 
+        message: 'An area with this name already exists in the city' 
+      });
+    }
+    res.status(400).json({ 
+      success: false, 
+      message: err.message || 'Failed to create area' 
+    });
   }
 };
 
@@ -72,66 +84,57 @@ const updateArea = async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid area ID' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid area ID format' 
+      });
     }
 
     const updateData = {};
 
-    // Name & City
-    if (req.body.name !== undefined) {
-      updateData.name = req.body.name.trim();
-    }
-    if (req.body.city !== undefined) {
-      updateData.city = req.body.city.trim().toUpperCase();
-    }
-
-    // Center – use pre-validated & normalized data from validation
+    if (req.body.name !== undefined) updateData.name = req.body.name.trim();
+    if (req.body.city !== undefined) updateData.city = req.body.city.trim().toUpperCase();
     if (req.body.normalizedCenter) {
       updateData.center = {
         type: 'Point',
-        coordinates: [req.body.normalizedCenter.lng, req.body.normalizedCenter.lat], // [lng, lat]
+        coordinates: [req.body.normalizedCenter.lng, req.body.normalizedCenter.lat],
       };
     }
+    if (req.body.mongoPolygon) updateData.polygon = req.body.mongoPolygon;
 
-    // Polygon – use pre-converted MongoDB-ready polygon
-    if (req.body.mongoPolygon) {
-      updateData.polygon = req.body.mongoPolygon;
-    }
-
-    // If nothing to update
     if (Object.keys(updateData).length === 0) {
-      return res.status(400).json({ success: false, message: 'No update data provided' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No update data provided' 
+      });
     }
 
-    // Prevent duplicate name in same city
     if (updateData.name || updateData.city) {
       const duplicateQuery = { _id: { $ne: id } };
       if (updateData.name) duplicateQuery.name = { $regex: `^${updateData.name}$`, $options: 'i' };
       if (updateData.city) duplicateQuery.city = updateData.city;
 
       const existing = await Area.findOne(duplicateQuery);
-
       if (existing) {
-        return res.status(400).json({
+        return res.status(409).json({
           success: false,
-          message: 'Another area with this name already exists in the city',
+          message: `Area "${updateData.name || existing.name}" already exists in ${updateData.city || existing.city}`,
         });
       }
     }
 
-    // Update area
-    const area = await Area.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const area = await Area.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 
     if (!area) {
-      return res.status(404).json({ success: false, message: 'Area not found' });
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Area not found or already deleted' 
+      });
     }
 
     return res.json({
       success: true,
-      message: 'Area updated successfully',
+      message: `Area "${area.name}" updated successfully`,
       area,
     });
   } catch (err) {
@@ -176,12 +179,16 @@ const getAllAreasWithZones = async (req, res) => {
 
     res.json({
       success: true,
+      message: areas.length ? 'Areas fetched successfully' : 'No areas found matching criteria',
       areas: result,
       pagination: { total, page: +page, pages: Math.ceil(total / limit), limit: +limit },
     });
   } catch (err) {
     console.error('getAllAreasWithZones error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch areas and delivery zones' 
+    });
   }
 };
 
@@ -190,18 +197,32 @@ const getAreaById = async (req, res) => {
   try {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid ID' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid area ID format' 
+      });
     }
 
     const area = await Area.findById(id);
-    if (!area) return res.status(404).json({ success: false, message: 'Area not found' });
+    if (!area) return res.status(404).json({ 
+      success: false, 
+      message: 'Area not found' 
+    });
 
     const zone = await DeliveryZone.findOne({ area: id }).lean();
 
-    res.json({ success: true, area, deliveryZone: zone || null });
+    res.json({ 
+      success: true, 
+      message: 'Area details fetched successfully',
+      area, 
+      deliveryZone: zone || null 
+    });
   } catch (err) {
     console.error('getAreaById error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error while fetching area' 
+    });
   }
 };
 
@@ -210,17 +231,29 @@ const deleteArea = async (req, res) => {
   try {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid ID' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid area ID format' 
+      });
     }
 
     await DeliveryZone.deleteOne({ area: id });
     const deleted = await Area.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ success: false, message: 'Area not found' });
+    if (!deleted) return res.status(404).json({ 
+      success: false, 
+      message: 'Area not found or already deleted' 
+    });
 
-    res.json({ success: true, message: 'Area deleted permanently' });
+    res.json({ 
+      success: true, 
+      message: `Area "${deleted.name}" and its delivery zone deleted permanently` 
+    });
   } catch (err) {
     console.error('deleteArea error:', err);
-    res.status(500).json({ success: false, message: 'Delete failed' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete area' 
+    });
   }
 };
 
@@ -231,11 +264,17 @@ const updateDeliveryZone = async (req, res) => {
     const { deliveryFee = 149, minOrderAmount = 0, estimatedTime = '35-50 min', isActive } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(areaId)) {
-      return res.status(400).json({ success: false, message: 'Invalid areaId' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid area ID format' 
+      });
     }
 
     const area = await Area.findById(areaId);
-    if (!area) return res.status(404).json({ success: false, message: 'Area not found' });
+    if (!area) return res.status(404).json({ 
+      success: false, 
+      message: 'Area not found' 
+    });
 
     const zone = await DeliveryZone.findOneAndUpdate(
       { area: areaId },
@@ -252,12 +291,17 @@ const updateDeliveryZone = async (req, res) => {
 
     res.json({
       success: true,
-      message: zone.isActive ? 'Delivery activated' : 'Delivery paused',
+      message: zone.isActive 
+        ? `Delivery activated for "${area.name}"` 
+        : `Delivery paused for "${area.name}"`,
       zone,
     });
   } catch (err) {
     console.error('updateDeliveryZone error:', err);
-    res.status(500).json({ success: false, message: 'Failed to update zone' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update delivery zone' 
+    });
   }
 };
 
@@ -267,13 +311,22 @@ const deleteDeliveryZone = async (req, res) => {
     const { areaId } = req.params;
     const result = await DeliveryZone.deleteOne({ area: areaId });
     if (result.deletedCount === 0) {
-      return res.status(404).json({ success: false, message: 'Zone not found' });
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Delivery zone not found for this area' 
+      });
     }
     await Area.findByIdAndUpdate(areaId, { isActive: false });
-    res.json({ success: true, message: 'Delivery zone removed' });
+    res.json({ 
+      success: true, 
+      message: 'Delivery zone removed and area deactivated' 
+    });
   } catch (err) {
     console.error('deleteDeliveryZone error:', err);
-    res.status(500).json({ success: false, message: 'Delete failed' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete delivery zone' 
+    });
   }
 };
 
@@ -282,43 +335,58 @@ const toggleAreaActive = async (req, res) => {
   try {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid area ID' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid area ID format' 
+      });
     }
 
     const area = await Area.findById(id);
-    if (!area) return res.status(404).json({ success: false, message: 'Area not found' });
+    if (!area) return res.status(404).json({ 
+      success: false, 
+      message: 'Area not found' 
+    });
 
     area.isActive = !area.isActive;
     await area.save();
 
-    // If area is turned OFF → disable delivery too
     if (!area.isActive) {
       await DeliveryZone.updateOne({ area: id }, { isActive: false });
     }
 
     return res.json({
       success: true,
-      message: area.isActive ? 'Area activated (inService: true)' : 'Area deactivated (inService: false)',
+      message: area.isActive 
+        ? `"${area.name}" is now ACTIVE and available for service` 
+        : `"${area.name}" is now INACTIVE and paused`,
       area: { _id: area._id, name: area.name, isActive: area.isActive },
     });
   } catch (err) {
     console.error('toggleAreaActive error:', err);
-    return res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Failed to toggle area status' 
+    });
   }
 };
 
-// ==================== TOGGLE DELIVERY ZONE (hasDeliveryZone) ====================
+// ==================== TOGGLE DELIVERY ZONE ====================
 const toggleDeliveryZone = async (req, res) => {
   try {
     const { areaId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(areaId)) {
-      return res.status(400).json({ success: false, message: 'Invalid areaId' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid area ID' 
+      });
     }
 
     const area = await Area.findById(areaId);
-    if (!area) return res.status(404).json({ success: false, message: 'Area not found' });
+    if (!area) return res.status(404).json({ 
+      success: false, 
+      message: 'Area not found' 
+    });
 
-    // Toggle delivery zone (create if not exists)
     const zone = await DeliveryZone.findOneAndUpdate(
       { area: areaId },
       [
@@ -331,14 +399,9 @@ const toggleDeliveryZone = async (req, res) => {
           }
         }
       ],
-      {
-        upsert: true,
-        new: true,
-        setDefaultsOnInsert: true,
-      }
+      { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    // Keep area.isActive in sync: if delivery ON → area must be ON
     if (zone.isActive && !area.isActive) {
       await Area.findByIdAndUpdate(areaId, { isActive: true });
     }
@@ -346,8 +409,8 @@ const toggleDeliveryZone = async (req, res) => {
     return res.json({
       success: true,
       message: zone.isActive
-        ? 'Delivery enabled → hasDeliveryZone: true'
-        : 'Delivery paused → hasDeliveryZone: false',
+        ? `Delivery ENABLED for "${area.name}"`
+        : `Delivery PAUSED for "${area.name}"`,
       deliveryZone: {
         areaId: zone.area,
         deliveryFee: zone.deliveryFee,
@@ -358,7 +421,10 @@ const toggleDeliveryZone = async (req, res) => {
     });
   } catch (err) {
     console.error('toggleDeliveryZone error:', err);
-    return res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Failed to toggle delivery zone' 
+    });
   }
 };
 

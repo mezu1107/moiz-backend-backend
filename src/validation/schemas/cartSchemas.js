@@ -1,10 +1,14 @@
 // src/validation/schemas/cartSchemas.js
 const { body, param } = require('express-validator');
 
-exports.addToCart = [
+/**
+ * POST /api/cart
+ */
+exports.addToCartSchema = [
   body('menuItemId')
-    .isMongoId()
-    .withMessage('Invalid menu item ID'),
+    .trim()
+    .notEmpty().withMessage('menuItemId is required')
+    .isMongoId().withMessage('Invalid menu item ID'),
 
   body('quantity')
     .optional()
@@ -13,8 +17,26 @@ exports.addToCart = [
     .toInt()
 ];
 
-exports.cartItemParam = [
-  param('itemId')
-    .isMongoId()
-    .withMessage('Invalid cart item ID')
+/**
+ * PATCH /api/cart/item/:itemId
+ * quantity = 0 → remove item (smart delete)
+ */
+exports.updateQuantitySchema = [
+  body('quantity')
+    .notEmpty().withMessage('quantity is required')
+    .isInt({ min: 0, max: 50 })
+    .withMessage('quantity must be 0–50 (0 removes item)')
+    .toInt()
 ];
+
+/**
+ * Used for both PATCH and DELETE /item/:itemId
+ */
+exports.cartItemParamSchema = [
+  param('itemId')
+    .trim()
+    .notEmpty().withMessage('itemId is required')
+    .isMongoId().withMessage('Invalid cart item ID')
+];
+
+module.exports = exports;

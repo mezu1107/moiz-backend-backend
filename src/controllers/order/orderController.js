@@ -1,12 +1,11 @@
 // src/controllers/order/orderController.js
-// FINAL PRODUCTION VERSION — NOVEMBER 2025 — ZERO BUGS, ZERO LEAKS, FULLY SECURE
+// FINAL PRODUCTION VERSION — DECEMBER 2025 — UNIFIED GUEST + AUTH FLOW
 
 const Order = require('../../models/order/Order');
 const Address = require('../../models/address/Address');
 const DeliveryZone = require('../../models/deliveryZone/DeliveryZone');
 const MenuItem = require('../../models/menuItem/MenuItem');
 const Cart = require('../../models/cart/Cart');
-const User = require('../../models/user/User');
 const Area = require('../../models/area/Area');
 const stripe = require('../../config/stripe');
 const { applyAndTrackDeal } = require('../deal/dealController');
@@ -14,6 +13,7 @@ const PDFDocument = require('pdfkit');
 const admin = require('firebase-admin');
 const mongoose = require('mongoose');
 const io = global.io;
+
 global.pendingOrderTimeouts = global.pendingOrderTimeouts || {};
 const AUTO_CANCEL_DELAY = 15 * 60 * 1000; // 15 minutes
 
@@ -27,7 +27,7 @@ const BANK_DETAILS = {
 
 const orderIdShort = (id) => id?.toString().slice(-6).toUpperCase() || 'TEMP';
 
-// ====================== SECURE NOTIFICATION SYSTEM ======================
+// ====================== NOTIFICATION SYSTEM ======================
 const sendNotification = async (order, event, extra = {}) => {
   if (!io || !order) return;
 
@@ -47,20 +47,11 @@ const sendNotification = async (order, event, extra = {}) => {
     ...extra
   };
 
-  // Notify logged-in customer (only if registered)
-  if (order.customer) {
-    io.to(`user:${order.customer}`).emit('orderUpdate', payload);
-  }
-
-  // Notify rider
-  if (order.rider) {
-    io.to(`rider:${order.rider}`).emit('orderUpdate', payload);
-  }
-
-  // Always notify admin
+  if (order.customer) io.to(`user:${order.customer}`).emit('orderUpdate', payload);
+  if (order.rider) io.to(`rider:${order.rider}`).emit('orderUpdate', payload);
   io.to('admin').emit('orderUpdate', payload);
 
-  // FCM Push only for registered users
+  // FCM only for registered users
   if (order.customer && event !== 'order_cancelled') {
     try {
       const user = await User.findById(order.customer).select('fcmToken name');
@@ -80,44 +71,77 @@ const sendNotification = async (order, event, extra = {}) => {
   }
 };
 
-// ====================== CREATE REGISTERED USER ORDER ======================
 const createOrder = async (req, res) => {
   try {
-    const { items, addressId, paymentMethod = 'cod', promoCode } = req.body;
-    const customerId = req.user.id;
+    const {
+      items,
+      addressId,           // For logged-in users
+      guestAddress,        // For guests: { fullAddress, label, floor, instructions, areaId }
+      name,                // Guest only
+      phone,               // Guest only
+      paymentMethod = 'cod',
+      promoCode
+    } = req.body;
 
-    const paymentMap = {
-      cod: 'cash',
-      card: 'card',
-      easypaisa: 'easypaisa',
-      jazzcash: 'jazzcash',
-      bank: 'bank'
-    };
+    const isGuest = !req.user;
+    const customerId = req.user?.id || null;
 
-    const method = paymentMap[paymentMethod] || 'cash';
-
-    if (!['cash', 'card', 'easypaisa', 'jazzcash', 'bank'].includes(method)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid payment method'
-      });
+    // === Basic validation ===
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: 'Cart is empty' });
     }
 
-    const address = await Address.findOne({ _id: addressId, user: customerId }).populate('area');
-    if (!address)
-      return res.status(404).json({ success: false, message: 'Address not found' });
+    const methodMap = { cod: 'cash', card: 'card', easypaisa: 'easypaisa', jazzcash: 'jazzcash', bank: 'bank' };
+    const payment = methodMap[paymentMethod];
+    if (!payment) {
+      return res.status(400).json({ success: false, message: 'Invalid payment method' });
+    }
 
-    const deliveryZone = await DeliveryZone.findOne({
-      area: address.area._id,
-      isActive: true
-    });
+    let area, areaId, deliveryAddress;
 
-    if (!deliveryZone)
-      return res.status(400).json({
-        success: false,
-        message: 'Delivery not available in your area'
-      });
+    // === ADDRESS HANDLING ===
+    if (isGuest) {
+      if (!guestAddress?.fullAddress?.trim() || !guestAddress.areaId || !name?.trim() || !phone?.trim()) {
+        return res.status(400).json({ success: false, message: 'Guest address, name, and phone required' });
+      }
+      if (!mongoose.Types.ObjectId.isValid(guestAddress.areaId)) {
+        return res.status(400).json({ success: false, message: 'Invalid area ID' });
+      }
 
+      area = await Area.findById(guestAddress.areaId);
+      if (!area) return res.status(400).json({ success: false, message: 'Area not found' });
+
+      areaId = area._id;
+      deliveryAddress = {
+        fullAddress: guestAddress.fullAddress.trim(),
+        label: guestAddress.label || 'Home',
+        floor: guestAddress.floor || '',
+        instructions: guestAddress.instructions || ''
+      };
+    } else {
+      if (!addressId) {
+        return res.status(400).json({ success: false, message: 'Please select a delivery address' });
+      }
+      const savedAddr = await Address.findOne({ _id: addressId, user: customerId }).populate('area');
+      if (!savedAddr) return res.status(404).json({ success: false, message: 'Address not found' });
+
+      area = savedAddr.area;
+      areaId = area._id;
+      deliveryAddress = {
+        fullAddress: savedAddr.fullAddress,
+        label: savedAddr.label,
+        floor: savedAddr.floor || '',
+        instructions: savedAddr.instructions || ''
+      };
+    }
+
+    // === Delivery zone check ===
+    const deliveryZone = await DeliveryZone.findOne({ area: areaId, isActive: true });
+    if (!deliveryZone) {
+      return res.status(400).json({ success: false, message: 'Delivery not available in your area' });
+    }
+
+    // === Process items ===
     const orderItems = [];
     let subtotal = 0;
 
@@ -126,7 +150,6 @@ const createOrder = async (req, res) => {
       if (!menuItem || !menuItem.isAvailable) continue;
 
       const qty = Math.max(1, Number(item.quantity) || 1);
-
       orderItems.push({
         menuItem: menuItem._id,
         name: menuItem.name,
@@ -134,32 +157,26 @@ const createOrder = async (req, res) => {
         priceAtOrder: menuItem.price,
         quantity: qty
       });
-
       subtotal += menuItem.price * qty;
     }
 
-    if (orderItems.length === 0)
-      return res
-        .status(400)
-        .json({ success: false, message: 'No items available or in stock' });
+    if (orderItems.length === 0) {
+      return res.status(400).json({ success: false, message: 'No items available' });
+    }
 
-    if (subtotal < deliveryZone.minOrderAmount)
+    if (subtotal < deliveryZone.minOrderAmount) {
       return res.status(400).json({
         success: false,
         message: `Minimum order amount is PKR ${deliveryZone.minOrderAmount}`
       });
+    }
 
+    // === Promo code ===
     let discount = 0;
     let appliedDeal = null;
-
     if (promoCode) {
-      const result = await applyAndTrackDeal(
-        promoCode.trim().toUpperCase(),
-        subtotal,
-        customerId
-      );
-
-      if (result && result.discount > 0) {
+      const result = await applyAndTrackDeal(promoCode.trim().toUpperCase(), subtotal, customerId);
+      if (result?.discount > 0) {
         discount = result.discount;
         appliedDeal = {
           dealId: result.dealId,
@@ -175,243 +192,55 @@ const createOrder = async (req, res) => {
 
     const finalAmount = Math.max(0, subtotal + deliveryZone.deliveryFee - discount);
 
+    // === Base order data ===
     const baseData = {
-      customer: customerId,
       items: orderItems,
       totalAmount: subtotal,
       deliveryFee: deliveryZone.deliveryFee,
       discountApplied: discount,
       finalAmount,
-      address: addressId,
-      area: address.area._id,
-      deliveryZone: deliveryZone._id,
-      estimatedDelivery: deliveryZone.estimatedTime || '40-55 min',
-      appliedDeal
-    };
-
-    let order;
-
-    // ===================== CASH, EASYPAISA, JAZZCASH =====================
-    if (['cash', 'easypaisa', 'jazzcash'].includes(method)) {
-      order = await Order.create({
-        ...baseData,
-        paymentMethod: method,
-        status: 'pending',
-        paymentStatus: method === 'cash' ? 'pending' : 'paid',
-        paidAt: method !== 'cash' ? new Date() : null
-      });
-    }
-
-    // ===================== CARD PAYMENT =====================
-    else if (method === 'card') {
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(finalAmount * 100),
-        currency: 'pkr',
-        metadata: { orderId: 'pending', customerId: customerId.toString() },
-        automatic_payment_methods: { enabled: true }
-      });
-
-      order = await Order.create({
-        ...baseData,
-        paymentMethod: 'card',
-        paymentIntentId: paymentIntent.id,
-        status: 'pending_payment',
-        paymentStatus: 'pending'
-      });
-
-      await stripe.paymentIntents.update(paymentIntent.id, {
-        metadata: { orderId: order._id.toString() }
-      });
-
-      // Auto cancel after 15 mins
-      global.pendingOrderTimeouts[order._id.toString()] = setTimeout(async () => {
-        const o = await Order.findById(order._id);
-        if (o && o.status === 'pending_payment') {
-          await Order.findByIdAndUpdate(o._id, {
-            status: 'cancelled',
-            paymentStatus: 'cancelled'
-          }).catch(() => {});
-          await stripe.paymentIntents.cancel(paymentIntent.id).catch(() => {});
-          await sendNotification(o, 'order_cancelled');
-        }
-        delete global.pendingOrderTimeouts[o._id.toString()];
-      }, AUTO_CANCEL_DELAY);
-
-      await Cart.deleteOne({ user: customerId });
-      await order.populate('address area items.menuItem customer');
-      await sendNotification(order, 'new_order');
-
-      return res.status(201).json({
-        success: true,
-        message: 'Complete payment with card',
-        order,
-        clientSecret: paymentIntent.client_secret
-      });
-    }
-
-    // ===================== BANK TRANSFER =====================
-    else if (method === 'bank') {
-      order = await Order.create({
-        ...baseData,
-        paymentMethod: 'bank',
-        status: 'pending_payment',
-        paymentStatus: 'pending'
-      });
-
-      const reference = `FOOD-${orderIdShort(order._id)}`;
-      order.bankTransferReference = reference;
-      await order.save();
-
-      global.pendingOrderTimeouts[order._id.toString()] = setTimeout(async () => {
-        const o = await Order.findById(order._id);
-        if (o && o.status === 'pending_payment') {
-          await o.updateOne({
-            status: 'cancelled',
-            paymentStatus: 'cancelled'
-          });
-          await sendNotification(o, 'order_cancelled');
-        }
-        delete global.pendingOrderTimeouts[o._id.toString()];
-      }, AUTO_CANCEL_DELAY);
-    }
-
-    // ===================== COMMON SUCCESS PATH =====================
-    await Cart.deleteOne({ user: customerId });
-    await order.populate('address area items.menuItem customer');
-    await sendNotification(order, 'new_order');
-
-    if (method === 'bank') {
-      return res.json({
-        success: true,
-        message: 'Please transfer money to confirm order',
-        order,
-        bankDetails: {
-          ...BANK_DETAILS,
-          amount: finalAmount,
-          reference: order.bankTransferReference
-        }
-      });
-    }
-
-    return res.json({
-      success: true,
-      message: 'Order placed successfully!',
-      order
-    });
-  } catch (err) {
-    console.error('createOrder error:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
-  }
-};
-
-// ====================== CREATE GUEST ORDER – FULLY FIXED & WORKING ======================
-const createGuestOrder = async (req, res) => {
-  const { name, phone, items, address, areaId, paymentMethod = 'cash', promoCode } = req.body;
-
-  // Validation
-  if (!name?.trim() || !phone?.trim() || !items?.length || !address?.fullAddress?.trim() || !areaId) {
-    return res.status(400).json({ success: false, message: 'All required fields are missing' });
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(areaId)) {
-    return res.status(400).json({ success: false, message: 'Valid areaId is required' });
-  }
-
-  const method = paymentMethod === 'cod' ? 'cash' : paymentMethod;
-  if (!['cash', 'card', 'easypaisa', 'jazzcash', 'bank'].includes(method)) {
-    return res.status(400).json({ success: false, message: 'Invalid payment method' });
-  }
-
-  try {
-    const area = await Area.findById(areaId);
-    if (!area) return res.status(400).json({ success: false, message: 'Area not found' });
-
-    const deliveryZone = await DeliveryZone.findOne({ area: area._id, isActive: true });
-    if (!deliveryZone) return res.status(400).json({ success: false, message: 'Delivery not available in this area' });
-
-    // Process items
-    const orderItems = [];
-    let subtotal = 0;
-    for (const item of items) {
-      const menuItem = await MenuItem.findById(item.menuItem);
-      if (!menuItem || !menuItem.isAvailable) continue;
-      const qty = Math.max(1, parseInt(item.quantity) || 1);
-      orderItems.push({
-        menuItem: menuItem._id,
-        name: menuItem.name,
-        image: menuItem.image,
-        priceAtOrder: menuItem.price,
-        quantity: qty
-      });
-      subtotal += menuItem.price * qty;
-    }
-
-    if (orderItems.length === 0) return res.status(400).json({ success: false, message: 'No items available' });
-    if (subtotal < deliveryZone.minOrderAmount) {
-      return res.status(400).json({ success: false, message: `Minimum order: PKR ${deliveryZone.minOrderAmount}` });
-    }
-
-    // Promo code
-    let discount = 0;
-    let appliedDeal = null;
-    if (promoCode) {
-      const result = await applyAndTrackDeal(promoCode.trim().toUpperCase(), subtotal, null);
-      if (result?.discount > 0) {
-        discount = result.discount;
-        appliedDeal = { dealId: result.dealId, code: result.code, appliedDiscount: discount };
-      }
-    }
-
-    const finalAmount = Math.max(0, subtotal + deliveryZone.deliveryFee - discount);
-
-    const baseData = {
-      guestInfo: { name: name.trim(), phone: phone.trim(), isGuest: true },
-      items: orderItems,
-      totalAmount: subtotal,
-      deliveryFee: deliveryZone.deliveryFee,
-      discountApplied: discount,
-      finalAmount,
-      area: area._id,
+      area: areaId,
       deliveryZone: deliveryZone._id,
       estimatedDelivery: deliveryZone.estimatedTime || '40-55 min',
       appliedDeal,
-      addressDetails: {
-        fullAddress: address.fullAddress.trim(),
-        label: address.label || 'Home',
-        floor: address.floor || '',
-        instructions: address.instructions || ''
-      }
+      paymentMethod: payment,
+      addressDetails: deliveryAddress
     };
 
-    let order;
-    let clientSecret = null;  // ← This will hold the secret if card payment
+    if (isGuest) {
+      baseData.guestInfo = { name: name.trim(), phone: phone.trim(), isGuest: true };
+    } else {
+      baseData.customer = customerId;
+      baseData.address = addressId;
+    }
 
-    // CASH / EASYPAISA / JAZZCASH
-    if (['cash', 'easypaisa', 'jazzcash'].includes(method)) {
+    let order;
+    let clientSecret = null;
+
+    // === Payment handling ===
+    if (['cash', 'easypaisa', 'jazzcash'].includes(payment)) {
       order = await Order.create({
         ...baseData,
-        paymentMethod: method,
         status: 'pending',
-        paymentStatus: method === 'cash' ? 'pending' : 'paid',
-        paidAt: method !== 'cash' ? new Date() : null
+        paymentStatus: payment === 'cash' ? 'pending' : 'paid',
+        paidAt: payment !== 'cash' ? new Date() : null
       });
     }
 
-    // CARD PAYMENT – FIXED: paymentIntent stays in scope
-    else if (method === 'card') {
+    else if (payment === 'card') {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(finalAmount * 100),
         currency: 'pkr',
-        metadata: { orderId: 'pending', guestPhone: phone.trim() },
+        metadata: {
+          orderId: 'pending',
+          customerId: customerId || 'guest',
+          guestPhone: isGuest ? phone?.trim() : undefined
+        },
         automatic_payment_methods: { enabled: true }
       });
 
       order = await Order.create({
         ...baseData,
-        paymentMethod: 'card',
         paymentIntentId: paymentIntent.id,
         status: 'pending_payment',
         paymentStatus: 'pending'
@@ -421,13 +250,12 @@ const createGuestOrder = async (req, res) => {
         metadata: { orderId: order._id.toString() }
       });
 
-      clientSecret = paymentIntent.client_secret;  // ← Save it here
+      clientSecret = paymentIntent.client_secret;
 
-      // Auto-cancel timeout
       global.pendingOrderTimeouts[order._id.toString()] = setTimeout(async () => {
         const o = await Order.findById(order._id);
-        if (o && o.status === 'pending_payment') {
-          await Order.findByIdAndUpdate(o._id, { status: 'cancelled', paymentStatus: 'canceled' });
+        if (o?.status === 'pending_payment') {
+          await Order.findByIdAndUpdate(o._id, { status: 'cancelled', paymentStatus: 'cancelled' });
           await stripe.paymentIntents.cancel(paymentIntent.id).catch(() => {});
           await sendNotification(o, 'order_cancelled');
           delete global.pendingOrderTimeouts[o._id.toString()];
@@ -435,54 +263,53 @@ const createGuestOrder = async (req, res) => {
       }, AUTO_CANCEL_DELAY);
     }
 
-    // BANK TRANSFER
-    else if (method === 'bank') {
+    else if (payment === 'bank') {
       order = await Order.create({
         ...baseData,
-        paymentMethod: 'bank',
         status: 'pending_payment',
         paymentStatus: 'pending'
       });
-      order.bankTransferReference = `GUEST-${orderIdShort(order._id)}`;
+      order.bankTransferReference = `${isGuest ? 'GUEST' : 'USER'}-${orderIdShort(order._id)}`;
       await order.save();
 
       global.pendingOrderTimeouts[order._id.toString()] = setTimeout(async () => {
         const o = await Order.findById(order._id);
-        if (o && o.status === 'pending_payment') {
-          await o.updateOne({ status: 'cancelled', paymentStatus: 'canceled' });
+        if (o?.status === 'pending_payment') {
+          await o.updateOne({ status: 'cancelled', paymentStatus: 'cancelled' });
+          await sendNotification(o, 'order_cancelled');
           delete global.pendingOrderTimeouts[o._id.toString()];
         }
       }, AUTO_CANCEL_DELAY);
     }
 
-    // Common final steps
-    await order.populate('area items.menuItem');
+    // === Finalize ===
+    if (!isGuest) await Cart.deleteOne({ user: customerId });
+    await order.populate('area items.menuItem customer rider');
     await sendNotification(order, 'new_order');
 
-    // RETURN CORRECT RESPONSE BASED ON METHOD
-    if (method === 'card') {
+    // === Response ===
+    if (payment === 'card') {
       return res.status(201).json({
         success: true,
-        message: 'Complete payment with card',
+        message: 'Complete payment to confirm order',
         order,
-        clientSecret  // ← Now it's always defined
+        clientSecret
       });
     }
 
-    if (method === 'bank') {
+    if (payment === 'bank') {
       return res.json({
         success: true,
-        message: 'Please transfer money to confirm order',
+        message: 'Transfer money to confirm your order',
         order,
         bankDetails: { ...BANK_DETAILS, amount: finalAmount, reference: order.bankTransferReference }
       });
     }
 
-    // Default: cash/easypaisa/jazzcash
     res.json({ success: true, message: 'Order placed successfully!', order });
 
   } catch (err) {
-    console.error('createGuestOrder error:', err);
+    console.error('createOrder error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
@@ -745,10 +572,8 @@ const trackOrdersByPhone = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
 module.exports = {
-  createOrder,
-  createGuestOrder,
+  createOrder,                    // ← ONLY ONE createOrder now
   getCustomerOrders,
   getOrderById,
   cancelOrder,
