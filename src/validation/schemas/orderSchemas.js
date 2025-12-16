@@ -1,67 +1,77 @@
 // src/validation/schemas/orderSchemas.js
-// FINAL PRODUCTION — DECEMBER 2025
+// FINAL PRODUCTION — DECEMBER 16, 2025
+// FULLY SYNCHRONIZED WITH orderController.js
+
 const { body } = require('express-validator');
 
 const createOrderSchema = [
-  // Items — always required
+  // === ITEMS — REQUIRED ===
   body('items')
     .isArray({ min: 1 })
     .withMessage('At least one item is required'),
+
   body('items.*.menuItem')
     .isMongoId()
     .withMessage('Invalid menu item ID'),
+
   body('items.*.quantity')
     .isInt({ min: 1, max: 50 })
     .toInt()
-    .withMessage('Quantity must be 1–50'),
+    .withMessage('Quantity must be between 1 and 50'),
 
-  // Optional fields
+  // === PAYMENT METHOD ===
   body('paymentMethod')
     .optional()
-    .isIn(['cod', 'card', 'easypaisa', 'jazzcash', 'bank', 'wallet', 'mixed'])
-    .withMessage('Invalid payment method'),
+    .isIn(['cod', 'card', 'easypaisa', 'jazzcash', 'bank', 'wallet'])
+    .withMessage('Invalid payment method. Allowed: cod, card, easypaisa, jazzcash, bank, wallet'),
 
+  // === WALLET USAGE ===
   body('useWallet')
     .optional()
     .isBoolean()
-    .toBoolean(),
+    .toBoolean()
+    .withMessage('useWallet must be true or false'),
 
+  // === PROMO CODE ===
   body('promoCode')
     .optional()
     .isString()
-    .trim(),
+    .trim()
+    .isLength({ max: 50 })
+    .withMessage('Promo code too long'),
 
+  // === INSTRUCTIONS ===
   body('instructions')
     .optional()
     .isString()
     .trim()
     .isLength({ max: 300 })
-    .withMessage('Instructions max 300 characters'),
+    .withMessage('Instructions cannot exceed 300 characters'),
 
-  // === Logged-in User: addressId required ===
+  // === LOGGED-IN USER: addressId required ===
   body('addressId')
-    .if((value, { req }) => !!req.user)
+    .if((value, { req }) => !!req.user) // Only if authenticated
     .notEmpty()
-    .withMessage('Delivery address is required')
+    .withMessage('Address ID is required for logged-in users')
     .isMongoId()
     .withMessage('Invalid address ID'),
 
-  // === Guest User: full guest info required ===
+  // === GUEST USER: Full guest details required ===
   body('guestAddress')
     .if((value, { req }) => !req.user)
     .isObject()
-    .withMessage('Guest address object is required'),
+    .withMessage('guestAddress object is required for guest checkout'),
 
   body('guestAddress.fullAddress')
     .if((value, { req }) => !req.user)
     .trim()
     .notEmpty()
-    .withMessage('Full address is required'),
+    .withMessage('Full address is required for guest'),
 
   body('guestAddress.areaId')
     .if((value, { req }) => !req.user)
     .isMongoId()
-    .withMessage('Valid area ID required'),
+    .withMessage('Valid area ID is required for guest'),
 
   body('guestAddress.label')
     .optional()
@@ -75,19 +85,21 @@ const createOrderSchema = [
     .optional()
     .trim(),
 
+  // === GUEST NAME & PHONE ===
   body('name')
     .if((value, { req }) => !req.user)
     .trim()
     .notEmpty()
-    .isLength({ min: 2 })
-    .withMessage('Name is required for guest'),
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Name is required and must be 2–50 characters'),
 
   body('phone')
     .if((value, { req }) => !req.user)
     .trim()
+    .notEmpty()
     .isLength({ min: 11, max: 11 })
     .matches(/^03[0-9]{9}$/)
-    .withMessage('Valid Pakistani number required: 03XXXXXXXXX'),
+    .withMessage('Valid Pakistani phone number required (e.g., 03XXXXXXXXX)'),
 ];
 
 const trackByPhoneSchema = [
@@ -96,42 +108,53 @@ const trackByPhoneSchema = [
     .notEmpty()
     .isLength({ min: 11, max: 11 })
     .matches(/^03[0-9]{9}$/)
-    .withMessage('Valid 11-digit phone required'),
+    .withMessage('Valid 11-digit Pakistani phone number required'),
 ];
 
 const updateStatusSchema = [
   body('status')
+    .trim()
+    .notEmpty()
     .isIn(['confirmed', 'preparing', 'out_for_delivery', 'delivered', 'rejected'])
-    .withMessage('Invalid status'),
+    .withMessage('Invalid status. Allowed: confirmed, preparing, out_for_delivery, delivered, rejected'),
 ];
 
 const assignRiderSchema = [
   body('riderId')
+    .trim()
+    .notEmpty()
+    .withMessage('riderId is required')
     .isMongoId()
-    .withMessage('Valid rider ID required'),
+    .withMessage('Invalid riderId format'),
 ];
 
 const rejectOrderSchema = [
   body('reason')
     .optional()
     .isString()
-    .trim(),
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('Reason too long'),
+
   body('note')
     .optional()
     .isString()
-    .trim(),
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Note too long'),
 ];
 
 const requestRefundSchema = [
   body('amount')
-    .isFloat({ min: 1 })
+    .isFloat({ gt: 0 })
     .toFloat()
-    .withMessage('Valid refund amount required'),
+    .withMessage('Amount must be a positive number'),
+
   body('reason')
     .trim()
     .notEmpty()
     .isLength({ min: 15, max: 300 })
-    .withMessage('Reason must be 15–300 characters'),
+    .withMessage('Refund reason must be between 15 and 300 characters'),
 ];
 
 module.exports = {
@@ -140,5 +163,5 @@ module.exports = {
   updateStatusSchema,
   assignRiderSchema,
   rejectOrderSchema,
-  requestRefundSchema
+  requestRefundSchema,
 };

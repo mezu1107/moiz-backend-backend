@@ -1,4 +1,4 @@
-// src/models/user/User.js — FINAL PRODUCTION VERSION (DECEMBER 13, 2025)
+// src/models/user/User.js — FINAL PRODUCTION VERSION (DECEMBER 16, 2025)
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -44,6 +44,15 @@ const userSchema = new mongoose.Schema({
     default: 'none'
   },
 
+  // City default to Rawalpindi
+  city: {
+    type: String,
+    required: true,
+    default: 'RAWALPINDI',
+    trim: true,
+    uppercase: true
+  },
+
   // Account moderation
   isDeleted: { type: Boolean, default: false, select: false },
   deletedAt: { type: Date, select: false },
@@ -73,7 +82,8 @@ const userSchema = new mongoose.Schema({
 
   currentLocation: {
     type: { type: String, enum: ['Point'], default: 'Point' },
-    coordinates: { type: [Number], default: [74.3587, 31.5204] } // Lahore
+    // Rawalpindi coordinates: [lng, lat]
+    coordinates: { type: [Number], default: [73.0479, 33.6844] }
   },
   isOnline: { type: Boolean, default: false },
   isAvailable: { type: Boolean, default: false },
@@ -88,6 +98,7 @@ const userSchema = new mongoose.Schema({
   otp: { type: String, select: false },
   otpExpires: { type: Date, select: false },
   otpAttempts: { type: Number, default: 0, select: false }
+
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
@@ -103,7 +114,6 @@ userSchema.index({ isPermanentlyBanned: 1 });
 userSchema.index({ isBlocked: 1 });
 
 // ==================== SOFT DELETE & BAN FILTER (CORRECT & SAFE) ====================
-// Modern middleware — no `next` needed
 userSchema.pre(/^find/, function () {
   this.and([
     { isDeleted: { $ne: true } },
@@ -146,4 +156,4 @@ userSchema.set('toJSON', {
   }
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);

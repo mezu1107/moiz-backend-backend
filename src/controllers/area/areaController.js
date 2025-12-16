@@ -1,6 +1,5 @@
 // src/controllers/area/areaController.js
 const Area = require('../../models/area/Area');
-const DeliveryZone = require('../../models/deliveryZone/DeliveryZone');
 
 // GET /api/areas
 const getAreas = async (req, res) => {
@@ -13,13 +12,18 @@ const getAreas = async (req, res) => {
     res.json({
       success: true,
       areas: areas.map(a => ({
-        ...a,
-        center: a.centerLatLng,
+        _id: a._id,
+        name: a.name,
+        city: a.city,
+        center: a.center, // ✅ FIXED (lat/lng)
       })),
     });
   } catch (err) {
     console.error('getAreas error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+    });
   }
 };
 
@@ -38,7 +42,12 @@ const checkArea = async (req, res) => {
     }
 
     // Reject if outside Pakistan
-    if (latNum < 23.5 || latNum > 37.5 || lngNum < 60.0 || lngNum > 78.0) {
+    if (
+      latNum < 23.5 ||
+      latNum > 37.5 ||
+      lngNum < 60.0 ||
+      lngNum > 78.0
+    ) {
       return res.json({
         success: true,
         inService: false,
@@ -47,7 +56,7 @@ const checkArea = async (req, res) => {
       });
     }
 
-    // Use cache + DB fallback (imported below)
+    // Cache + DB lookup
     const result = await getAreaAndZoneByCoords(lngNum, latNum);
 
     if (!result || !result.area) {
@@ -79,15 +88,14 @@ const checkArea = async (req, res) => {
     });
   } catch (err) {
     console.error('checkArea error:', err);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: 'Server error',
     });
   }
 };
 
-// Import AFTER function definitions to avoid circular dependency issues
+// Import AFTER functions (avoid circular dependency)
 const { getAreaAndZoneByCoords } = require('../../utils/areaCache');
 
-// Export at the very end
 module.exports = { getAreas, checkArea };

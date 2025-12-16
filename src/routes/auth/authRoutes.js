@@ -14,21 +14,27 @@ const {
   changePassword: changePasswordSchema,
   forgotPassword: forgotPasswordSchema,
   verifyOtp: verifyOtpSchema,
-  resetPassword: resetPasswordSchema
+  resetPassword: resetPasswordSchema,
+  updateProfile
 } = require('../../validation/schemas/authSchemas');
 
-// Public
+// ======================
+// Public Routes
+// ======================
 router.post('/register', registerSchema, validate, register);
 router.post('/login', loginSchema, validate, login);
 router.post('/forgot-password', forgotPasswordSchema, validate, forgotPassword);
 router.post('/verify-otp', verifyOtpSchema, validate, verifyOtp);
 router.post('/reset-password', resetPasswordSchema, validate, resetPassword);
 
-// Protected
+// ======================
+// Protected Routes
+// ======================
 router.use(auth);
+
 router.post('/logout', logout);
 router.get('/me', getMe);
-router.put('/me', updateMyProfile);
+router.patch('/me', updateProfile, validate, updateMyProfile);
 router.patch('/change-password', changePasswordSchema, validate, changePassword);
 
 module.exports = router;
