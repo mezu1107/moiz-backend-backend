@@ -1,91 +1,144 @@
 // src/validation/schemas/orderSchemas.js
+// FINAL PRODUCTION — DECEMBER 2025
 const { body } = require('express-validator');
 
 const createOrderSchema = [
-  // === Items (common for both) ===
+  // Items — always required
   body('items')
     .isArray({ min: 1 })
     .withMessage('At least one item is required'),
   body('items.*.menuItem')
     .isMongoId()
-    .withMessage('Valid menu item ID required'),
+    .withMessage('Invalid menu item ID'),
   body('items.*.quantity')
     .isInt({ min: 1, max: 50 })
-    .withMessage('Quantity must be between 1 and 50')
-    .toInt(),
+    .toInt()
+    .withMessage('Quantity must be 1–50'),
 
+  // Optional fields
   body('paymentMethod')
     .optional()
-    .isIn(['cod', 'card', 'easypaisa', 'jazzcash', 'bank'])
+    .isIn(['cod', 'card', 'easypaisa', 'jazzcash', 'bank', 'wallet', 'mixed'])
     .withMessage('Invalid payment method'),
 
-  body('promoCode').optional().trim(),
+  body('useWallet')
+    .optional()
+    .isBoolean()
+    .toBoolean(),
 
-  // Logged-in user
+  body('promoCode')
+    .optional()
+    .isString()
+    .trim(),
+
+  body('instructions')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 300 })
+    .withMessage('Instructions max 300 characters'),
+
+  // === Logged-in User: addressId required ===
   body('addressId')
-    .if((value, { req }) => req.user)
+    .if((value, { req }) => !!req.user)
     .notEmpty()
-    .withMessage('Please select a delivery address')
+    .withMessage('Delivery address is required')
     .isMongoId()
-    .withMessage('Valid address ID required'),
+    .withMessage('Invalid address ID'),
 
-  // Guest user
+  // === Guest User: full guest info required ===
   body('guestAddress')
     .if((value, { req }) => !req.user)
     .isObject()
-    .withMessage('Guest address is required'),
+    .withMessage('Guest address object is required'),
+
   body('guestAddress.fullAddress')
     .if((value, { req }) => !req.user)
     .trim()
     .notEmpty()
-    .withMessage('Full delivery address is required'),
+    .withMessage('Full address is required'),
+
   body('guestAddress.areaId')
     .if((value, { req }) => !req.user)
     .isMongoId()
     .withMessage('Valid area ID required'),
-  body('guestAddress.label').optional().trim(),
-  body('guestAddress.floor').optional().trim(),
-  body('guestAddress.instructions').optional().trim(),
+
+  body('guestAddress.label')
+    .optional()
+    .trim(),
+
+  body('guestAddress.floor')
+    .optional()
+    .trim(),
+
+  body('guestAddress.instructions')
+    .optional()
+    .trim(),
 
   body('name')
     .if((value, { req }) => !req.user)
     .trim()
     .notEmpty()
-    .withMessage('Name is required for guest checkout'),
+    .isLength({ min: 2 })
+    .withMessage('Name is required for guest'),
+
   body('phone')
     .if((value, { req }) => !req.user)
-    .isMobilePhone('any', { strictMode: false })
-    .withMessage('Valid phone number required'),
+    .trim()
+    .isLength({ min: 11, max: 11 })
+    .matches(/^03[0-9]{9}$/)
+    .withMessage('Valid Pakistani number required: 03XXXXXXXXX'),
 ];
 
-const trackByPhone = [
+const trackByPhoneSchema = [
   body('phone')
-    .isLength({ min: 10, max: 15 })
-    .withMessage('Valid phone number required')
+    .trim()
+    .notEmpty()
+    .isLength({ min: 11, max: 11 })
+    .matches(/^03[0-9]{9}$/)
+    .withMessage('Valid 11-digit phone required'),
 ];
 
-const updateStatus = [
+const updateStatusSchema = [
   body('status')
     .isIn(['confirmed', 'preparing', 'out_for_delivery', 'delivered', 'rejected'])
-    .withMessage('Invalid order status')
+    .withMessage('Invalid status'),
 ];
 
-const assignRiderSchema = [  // ← Correct name
+const assignRiderSchema = [
   body('riderId')
     .isMongoId()
-    .withMessage('Valid rider ID required')
+    .withMessage('Valid rider ID required'),
 ];
 
-const rejectOrder = [
-  body('reason').optional().trim(),
-  body('note').optional().trim()
+const rejectOrderSchema = [
+  body('reason')
+    .optional()
+    .isString()
+    .trim(),
+  body('note')
+    .optional()
+    .isString()
+    .trim(),
 ];
 
-// EXPORT WITH CORRECT NAME
+const requestRefundSchema = [
+  body('amount')
+    .isFloat({ min: 1 })
+    .toFloat()
+    .withMessage('Valid refund amount required'),
+  body('reason')
+    .trim()
+    .notEmpty()
+    .isLength({ min: 15, max: 300 })
+    .withMessage('Reason must be 15–300 characters'),
+];
+
 module.exports = {
   createOrderSchema,
-  trackByPhone,
-  updateStatus,
-  assignRiderSchema,   // ← This must match the import!
-  rejectOrder
+  trackByPhoneSchema,
+  updateStatusSchema,
+  assignRiderSchema,
+  rejectOrderSchema,
+  requestRefundSchema
 };

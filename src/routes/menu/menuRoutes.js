@@ -17,7 +17,7 @@ const {
   getAllMenuItemsWithFilters,
   getSingleMenuItem,
   getAllAvailableMenuItems,
-  getMenuByAreaId: getMenuByAreaIdController
+  getMenuByAreaId: getMenuByAreaIdController  // Renamed to avoid conflict
 } = require('../../controllers/menu/menuController');
 
 // Validation Schemas
@@ -28,7 +28,7 @@ const {
   updateMenuItemSchema,
   toggleAvailabilitySchema,
   menuItemIdParam,
-  getMenuByAreaIdValidation
+  getMenuByAreaIdValidation  // ← Correct import (this is the validation array)
 } = require('../../validation/schemas/menuSchemas');
 
 // ==================== PUBLIC ROUTES (MUST BE BEFORE ADMIN MIDDLEWARE) ====================
@@ -36,22 +36,24 @@ router.get('/all', getAllAvailableMenuItems);
 router.get('/location', locationSchema, validate, getMenuByLocation);
 router.get('/filters', filtersSchema, validate, getAllMenuItemsWithFilters);
 router.get('/:id', menuItemIdParam, validate, getSingleMenuItem);
-router.get('/area/:areaId', getMenuByAreaIdValidation, validate, getMenuByAreaIdController); // ← MOVED UP!
+router.get('/area/:areaId', getMenuByAreaIdValidation, validate, getMenuByAreaIdController);
 
 // ==================== APPLY ADMIN PROTECTION HERE (AFTER ALL PUBLIC ROUTES) ====================
-router.use(auth, role(['admin']));   
+router.use(auth, role(['admin']));
 
 // ==================== ADMIN-ONLY ROUTES ====================
 router.get('/admin/all', getAllMenuItems);
 
-router.post('/',
+router.post(
+  '/',
   upload.single('image'),
   addMenuItemSchema,
   validate,
   addMenuItem
 );
 
-router.put('/:id',
+router.put(
+  '/:id',
   menuItemIdParam,
   validate,
   upload.single('image'),
@@ -60,13 +62,15 @@ router.put('/:id',
   updateMenuItem
 );
 
-router.delete('/:id',
+router.delete(
+  '/:id',
   menuItemIdParam,
   validate,
   deleteMenuItem
 );
 
-router.patch('/:id/toggle',
+router.patch(
+  '/:id/toggle',
   toggleAvailabilitySchema,
   validate,
   toggleAvailability

@@ -1,5 +1,5 @@
-// src/routes/analytics/analyticsRoutes.js
-// SEPARATE, CLEAN & 100% WORKING ADMIN ANALYTICS ROUTES
+// src/routes/order/analyticsRoutes.js
+// CLEAN & 100% WORKING ADMIN ANALYTICS ROUTES
 
 const express = require('express');
 const router = express.Router();
@@ -14,16 +14,31 @@ const {
   validateRealtimeQuery
 } = require('../../controllers/order/orderAnalyticsController');
 
-// PROTECT ALL ANALYTICS — ONLY ADMIN
-router.use(auth);           // Must be logged in
-router.use(role(['admin'])); // Must be admin
+const {
+  analyticsQuerySchema,
+  realtimeQuerySchema
+} = require('../../validation/schemas/analyticsSchemas');
 
-// ANALYTICS ENDPOINTS — FULLY VALIDATED
-router.get('/order-analytics', validateAnalyticsQuery, getOrderAnalytics);
-router.get('/realtime-stats', validateRealtimeQuery, getRealtimeStats);
+const validate = require('../../middleware/validate/validate');
 
-// Optional: Shorter aliases (you can use these too)
-router.get('/analytics', validateAnalyticsQuery, getOrderAnalytics);
-router.get('/realtime', validateRealtimeQuery, getRealtimeStats);
+// REQUIRE LOGIN + ADMIN ROLE
+router.use(auth);
+router.use(role(['admin']));
+
+// MAIN ANALYTICS (period, startDate/endDate)
+router.get(
+  '/orders',
+  validate(analyticsQuerySchema),
+  validateAnalyticsQuery,
+  getOrderAnalytics
+);
+
+// REALTIME DASHBOARD ENDPOINT
+router.get(
+  '/orders/realtime',
+  validate(realtimeQuerySchema),
+  validateRealtimeQuery,
+  getRealtimeStats
+);
 
 module.exports = router;

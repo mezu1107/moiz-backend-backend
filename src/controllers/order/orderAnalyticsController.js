@@ -1,23 +1,23 @@
 // src/controllers/order/orderAnalyticsController.js
-// PURE REAL DATA ONLY — NO FAKE DATA — NOV 27, 2025
+// FINAL PRODUCTION — DECEMBER 15, 2025 — ENHANCED ANALYTICS ENGINE
 
 const Order = require('../../models/order/Order');
 const moment = require('moment-timezone');
 moment.tz.setDefault('Asia/Karachi');
 
-// INPUT VALIDATION
+// ====================== INPUT VALIDATION ======================
 const validateAnalyticsQuery = (req, res, next) => {
   const { period, startDate, endDate } = req.query;
 
-  const validPeriods = ['24h', '7d', '30d', '90d', 'today', 'custom'];
+  const validPeriods = ['24h', '7d', '30d', '90d', 'today', 'yesterday', 'custom'];
   if (period && !validPeriods.includes(period)) {
     return res.status(400).json({
       success: false,
-      message: "Invalid period. Use: 24h, 7d, 30d, 90d, today"
+      message: "Invalid period. Valid: 24h, 7d, 30d, 90d, today, yesterday, custom"
     });
   }
 
-  if (startDate || endDate) {
+  if (period === 'custom' || (startDate && endDate)) {
     if (!startDate || !endDate) {
       return res.status(400).json({
         success: false,
@@ -28,7 +28,7 @@ const validateAnalyticsQuery = (req, res, next) => {
     if (!moment(startDate, 'YYYY-MM-DD', true).isValid() || !moment(endDate, 'YYYY-MM-DD', true).isValid()) {
       return res.status(400).json({
         success: false,
-        message: "Date format must be YYYY-MM-DD"
+        message: "Invalid date format. Use YYYY-MM-DD"
       });
     }
 
@@ -38,56 +38,100 @@ const validateAnalyticsQuery = (req, res, next) => {
       return res.status(400).json({ success: false, message: "endDate cannot be before startDate" });
     }
     if (end.diff(start, 'days') > 365) {
-      return res.status(400).json({ success: false, message: "Max range: 365 days" });
+      return res.status(400).json({ success: false, message: "Maximum range: 365 days" });
     }
   }
 
-  console.log('[ANALYTICS] Valid request →', { period, startDate, endDate });
   next();
 };
 
 const validateRealtimeQuery = (req, res, next) => {
-  const allowed = ['refresh', 'fast'];
+  const allowed = ['mode']; // future-proof
   const invalid = Object.keys(req.query).filter(k => !allowed.includes(k));
   if (invalid.length > 0) {
     return res.status(400).json({
       success: false,
-      message: `Invalid params: ${invalid.join(', ')}`
+      message: `Invalid query params: ${invalid.join(', ')}`
     });
   }
   next();
 };
 
-// MAIN ANALYTICS — 100% REAL DATA ONLY
+// ====================== MAIN ANALYTICS ======================
 const getOrderAnalytics = async (req, res) => {
   try {
-    let start, end = moment().endOf('day').toDate();
+    let startDate, endDate;
 
+    // Determine date range
     if (req.query.startDate && req.query.endDate) {
-      start = moment(req.query.startDate).startOf('day').toDate();
-      end = moment(req.query.endDate).endOf('day').toDate();
+      startDate = moment(req.query.startDate).startOf('day').toDate();
+      endDate = moment(req.query.endDate).endOf('day').toDate();
     } else {
-      const daysMap = { '24h': 1, '7d': 7, '30d': 30, '90d': 90, 'today': 0 };
-      const days = daysMap[req.query.period || '7d'];
-      start = days === 0 
-        ? moment().startOf('day').toDate()
-        : moment().subtract(days, 'days').startOf('day').toDate();
+      const period = req.query.period || '7d';
+      const map = {
+        '24h': () => moment().subtract(1, 'day').startOf('day'),
+        'today': () => moment().startOf('day'),
+        'yesterday': () => moment().subtract(1, 'day').startOf('day'),
+        '7d': () => moment().subtract(7, 'days').startOf('day'),
+        '30d': () => moment().subtract(30, 'days').startOf('day'),
+        '90d': () => moment().subtract(90, 'days').startOf('day')
+      };
+
+      const getStart = map[period] || map['7d'];
+      startDate = getStart().toDate();
+      endDate = period === 'today' || period === 'yesterday'
+        ? getStart().endOf('day').toDate()
+        : moment().endOf('day').toDate();
     }
 
-    const matchSuccess = {
-      placedAt: { $gte: start, $lte: end },
-      status: { $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery'] }
-    };
+    // Previous period for growth comparison
+    const daysDiff = moment(endDate).diff(moment(startDate), 'days') + 1;
+    const prevStart = moment(startDate).subtract(daysDiff, 'days').toDate();
+    const prevEnd = moment(endDate).subtract(daysDiff, 'days').toDate();
 
-    const matchAll = { placedAt: { $gte: start, $lte: end } };
+    // Match conditions
+    const matchCurrent = { placedAt: { $gte: startDate, $lte: endDate } };
+    const matchPrev = { placedAt: { $gte: prevStart, $lte: prevEnd } };
+    const matchSuccess = status => ({
+      ...matchCurrent,
+      status: { $in: status }
+    });
 
-    const results = await Promise.allSettled([
-      Order.aggregate([{ $match: matchSuccess }, { $group: { _id: null, revenue: { $sum: '$finalAmount' } } }]),
-      Order.countDocuments(matchSuccess),
-      Order.countDocuments({ ...matchAll, status: { $in: ['cancelled', 'rejected'] } }),
+    // Successful orders only
+    const successStatuses = ['delivered', 'confirmed', 'preparing', 'out_for_delivery'];
+
+    // Run all aggregations in parallel
+    const [
+      currentSuccess,
+      currentCancelled,
+      prevSuccess,
+      dailyTrend,
+      paymentMethods,
+      topAreas,
+      peakHours,
+      topDeals,
+      userType
+    ] = await Promise.all([
+      // Current period - success
       Order.aggregate([
-        { $match: matchSuccess },
-        { $group: {
+        { $match: matchSuccess(successStatuses) },
+        { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' }, discount: { $sum: '$discountApplied' } } }
+      ]),
+
+      // Current cancelled/rejected
+      Order.countDocuments({ ...matchCurrent, status: { $in: ['cancelled', 'rejected'] } }),
+
+      // Previous period - success (for growth)
+      Order.aggregate([
+        { $match: { ...matchPrev, status: { $in: successStatuses } } },
+        { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
+      ]),
+
+      // Daily trend
+      Order.aggregate([
+        { $match: matchSuccess(successStatuses) },
+        {
+          $group: {
             _id: { $dateToString: { format: '%Y-%m-%d', date: '$placedAt', timezone: 'Asia/Karachi' } },
             orders: { $sum: 1 },
             revenue: { $sum: '$finalAmount' },
@@ -97,16 +141,21 @@ const getOrderAnalytics = async (req, res) => {
         },
         { $sort: { _id: 1 } }
       ]),
+
+      // Payment methods
       Order.aggregate([
-        { $match: matchSuccess },
-        { $group: { _id: '$paymentMethod', count: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
+        { $match: matchSuccess(successStatuses) },
+        { $group: { _id: '$paymentMethod', orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
       ]),
+
+      // Top 10 areas
       Order.aggregate([
-        { $match: matchSuccess },
+        { $match: matchSuccess(successStatuses) },
         { $lookup: { from: 'areas', localField: 'area', foreignField: '_id', as: 'areaInfo' } },
         { $unwind: { path: '$areaInfo', preserveNullAndEmptyArrays: true } },
-        { $group: {
-            _id: '$areaInfo.name',
+        {
+          $group: {
+            _id: '$areaInfo.name' || 'Unknown',
             orders: { $sum: 1 },
             revenue: { $sum: '$finalAmount' }
           }
@@ -114,28 +163,41 @@ const getOrderAnalytics = async (req, res) => {
         { $sort: { orders: -1 } },
         { $limit: 10 }
       ]),
+
+      // Peak hours
       Order.aggregate([
-        { $match: matchSuccess },
-        { $group: { _id: { $hour: { date: '$placedAt', timezone: 'Asia/Karachi' } }, orders: { $sum: 1 } } },
+        { $match: matchSuccess(successStatuses) },
+        {
+          $group: {
+            _id: { $hour: { date: '$placedAt', timezone: 'Asia/Karachi' } },
+            orders: { $sum: 1 }
+          }
+        },
         { $sort: { orders: -1 } },
-        { $limit: 10 }
+        { $limit: 8 }
       ]),
+
+      // Top deals
       Order.aggregate([
-        { $match: { ...matchSuccess, 'appliedDeal.code': { $exists: true, $ne: null } } },
-        { $group: {
+        { $match: { ...matchSuccess(successStatuses), 'appliedDeal.code': { $exists: true, $ne: null } } },
+        {
+          $group: {
             _id: '$appliedDeal.code',
             title: { $first: { $ifNull: ['$appliedDeal.title', '$appliedDeal.code'] } },
             uses: { $sum: 1 },
             discountGiven: { $sum: '$discountApplied' },
-            revenueGenerated: { $sum: '$finalAmount' }
+            revenue: { $sum: '$finalAmount' }
           }
         },
         { $sort: { uses: -1 } },
         { $limit: 10 }
       ]),
+
+      // User type breakdown
       Order.aggregate([
-        { $match: matchAll },
-        { $group: {
+        { $match: matchCurrent },
+        {
+          $group: {
             _id: null,
             registered: { $sum: { $cond: [{ $ifNull: ['$customer', false] }, 1, 0] } },
             guest: { $sum: { $cond: [{ $eq: ['$guestInfo.isGuest', true] }, 1, 0] } }
@@ -144,71 +206,91 @@ const getOrderAnalytics = async (req, res) => {
       ])
     ]);
 
-    const [
-      revenueRes, totalOrders, cancelledCount, dailyTrend, paymentBreakdown,
-      topAreasRaw, peakHours, topDealsRaw, guestResult
-    ] = results.map(r => r.status === 'fulfilled' ? r.value : []);
+    // Extract values safely
+    const current = currentSuccess[0] || { orders: 0, revenue: 0, discount: 0 };
+    const prev = prevSuccess[0] || { orders: 0, revenue: 0 };
+    const totalOrders = current.orders;
+    const totalRevenue = current.revenue;
+    const totalDiscount = current.discount;
 
-    const totalRevenue = revenueRes[0]?.revenue || 0;
-    const totalDiscount = dailyTrend.reduce((acc, d) => acc + (d.discount || 0), 0);
-    const guestData = guestResult[0] || { registered: 0, guest: 0 };
+    // Growth calculations
+    const ordersGrowth = prev.orders > 0 ? ((totalOrders - prev.orders) / prev.orders * 100).toFixed(1) : totalOrders > 0 ? '100' : '0';
+    const revenueGrowth = prev.revenue > 0 ? ((totalRevenue - prev.revenue) / prev.revenue * 100).toFixed(1) : totalRevenue > 0 ? '100' : '0';
+
+    const aov = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+    const cancellationRate = (totalOrders + currentCancelled) > 0
+      ? ((currentCancelled / (totalOrders + currentCancelled)) * 100).toFixed(1)
+      : '0';
+
+    const users = userType[0] || { registered: 0, guest: 0 };
+    const registeredPct = (users.registered + users.guest) > 0
+      ? ((users.registered / (users.registered + users.guest)) * 100).toFixed(1)
+      : '0';
 
     res.json({
       success: true,
       analytics: {
+        period: {
+          label: req.query.period || 'custom',
+          start: moment(startDate).format('YYYY-MM-DD'),
+          end: moment(endDate).format('YYYY-MM-DD'),
+          days: daysDiff
+        },
         summary: {
-          period: { 
-            start: start.toISOString().split('T')[0], 
-            end: end.toISOString().split('T')[0] 
-          },
-          totalOrders: totalOrders || 0,
+          totalOrders,
           totalRevenue: Math.round(totalRevenue),
-          avgOrderValue: totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0,
+          avgOrderValue: aov,
           totalDiscountGiven: Math.round(totalDiscount),
-          cancelledOrders: cancelledCount || 0,
-          cancellationRate: (totalOrders + cancelledCount) > 0 
-            ? ((cancelledCount / (totalOrders + cancelledCount)) * 100).toFixed(1) + '%'
-            : '0%',
-          conversionRate: totalOrders > 0 
-            ? ((totalOrders / (totalOrders + cancelledCount)) * 100).toFixed(1) + '%'
-            : '0%'
+          cancelledOrders: currentCancelled,
+          cancellationRate: cancellationRate + '%',
+          ordersGrowth: (ordersGrowth > 0 ? '+' : '') + ordersGrowth + '%',
+          revenueGrowth: (revenueGrowth > 0 ? '+' : '') + revenueGrowth + '%'
         },
         userInsights: {
-          registeredUsers: guestData.registered || 0,
-          guestUsers: guestData.guest || 0,
-          registeredPercentage: (guestData.registered + guestData.guest) > 0
-            ? ((guestData.registered / (guestData.registered + guestData.guest)) * 100).toFixed(1) + '%'
-            : '0%'
+          registeredOrders: users.registered,
+          guestOrders: users.guest,
+          registeredPercentage: registeredPct + '%'
         },
         charts: {
-          dailyTrend: (dailyTrend || []).map(d => ({
+          dailyTrend: dailyTrend.map(d => ({
             date: d._id,
-            orders: d.orders || 0,
-            revenue: Math.round(d.revenue || 0),
-            aov: Math.round(d.aov || 0)
+            orders: d.orders,
+            revenue: Math.round(d.revenue),
+            aov: Math.round(d.aov || 0),
+            discount: Math.round(d.discount || 0)
           })),
-          paymentMethods: (paymentBreakdown || []).map(p => ({
-            method: p._id === 'cash' ? 'Cash on Delivery' : p._id === 'card' ? 'Card' : p._id || 'Unknown',
-            orders: p.count || 0,
-            revenue: Math.round(p.revenue || 0),
-            percentage: totalOrders > 0 ? ((p.count / totalOrders) * 100).toFixed(1) + '%' : '0%'
+          paymentMethods: paymentMethods.map(p => {
+            const label = {
+              cash: 'Cash on Delivery',
+              card: 'Card',
+              wallet: 'Wallet',
+              easypaisa: 'Easypaisa',
+              jazzcash: 'JazzCash',
+              bank: 'Bank Transfer'
+            }[p._id] || p._id || 'Other';
+            return {
+              method: label,
+              orders: p.orders,
+              revenue: Math.round(p.revenue),
+              percentage: totalOrders > 0 ? ((p.orders / totalOrders) * 100).toFixed(1) + '%' : '0%'
+            };
+          }),
+          topAreas: topAreas.map(a => ({
+            area: a._id,
+            orders: a.orders,
+            revenue: Math.round(a.revenue)
           })),
-          topAreas: (topAreasRaw || []).map(a => ({
-            area: a._id || 'Unknown',
-            orders: a.orders || 0,
-            revenue: Math.round(a.revenue || 0)
-          })),
-          peakHours: (peakHours || []).map(h => ({
+          peakHours: peakHours.map(h => ({
             hour: h._id,
             label: `${h._id}:00 - ${h._id + 1}:00`,
             orders: h.orders
           })),
-          topDeals: (topDealsRaw || []).map(d => ({
+          topDeals: topDeals.map(d => ({
             code: d._id,
-            title: d.title || d._id,
-            uses: d.uses || 0,
-            discountGiven: Math.round(d.discountGiven || 0),
-            revenueGenerated: Math.round(d.revenueGenerated || 0)
+            title: d.title,
+            uses: d.uses,
+            discountGiven: Math.round(d.discountGiven),
+            revenueGenerated: Math.round(d.revenue)
           }))
         }
       }
@@ -216,66 +298,89 @@ const getOrderAnalytics = async (req, res) => {
 
   } catch (err) {
     console.error('ANALYTICS ERROR:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Analytics temporarily unavailable' });
   }
 };
 
+// ====================== REALTIME DASHBOARD STATS ======================
 const getRealtimeStats = async (req, res) => {
   try {
-    const today = moment().startOf('day').toDate();
+    const now = new Date();
+    const todayStart = moment().startOf('day').toDate();
+    const yesterdayStart = moment().subtract(1, 'day').startOf('day').toDate();
+    const yesterdayEnd = moment().subtract(1, 'day').endOf('day').toDate();
 
-    const [todayStats, live] = await Promise.all([
-      Order.aggregate([
-        { $match: { placedAt: { $gte: today }, status: { $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery'] } } },
-        { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
-      ]).catch(() => [{ orders: 0, revenue: 0 }]),
-
-      Order.aggregate([
-        {
-          $facet: {
-            pending: [{ $match: { status: 'pending' } }, { $count: 'count' }],
-            confirmed: [{ $match: { status: 'confirmed' } }, { $count: 'count' }],
-            preparing: [{ $match: { status: 'preparing' } }, { $count: 'count' }],
-            outForDelivery: [{ $match: { status: 'out_for_delivery' } }, { $count: 'count' }],
-            pendingPayment: [{ $match: { status: 'pending_payment' } }, { $count: 'count' }],
-            cancelledToday: [{ $match: { placedAt: { $gte: today }, status: { $in: ['cancelled', 'rejected'] } } }, { $count: 'count' }]
-          }
+    const pipeline = [
+      {
+        $facet: {
+          todaySuccess: [
+            { $match: { placedAt: { $gte: todayStart }, status: { $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery'] } } },
+            { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
+          ],
+          yesterdaySuccess: [
+            { $match: { placedAt: { $gte: yesterdayStart, $lte: yesterdayEnd }, status: { $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery'] } } },
+            { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
+          ],
+          liveStatus: [
+            { $group: {
+                _id: '$status',
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          cancelledToday: [
+            { $match: { placedAt: { $gte: todayStart }, status: { $in: ['cancelled', 'rejected'] } } },
+            { $count: 'count' }
+          ]
         }
-      ]).catch(() => [{}])
-    ]);
+      }
+    ];
 
-    const t = todayStats[0] || { orders: 0, revenue: 0 };
-    const l = live[0] || {};
+    const [result] = await Order.aggregate(pipeline);
+    const data = result[0];
+
+    const today = data.todaySuccess[0] || { orders: 0, revenue: 0 };
+    const yesterday = data.yesterdaySuccess[0] || { orders: 0, revenue: 0 };
+
+    const ordersGrowth = yesterday.orders > 0
+      ? ((today.orders - yesterday.orders) / yesterday.orders * 100).toFixed(1)
+      : today.orders > 0 ? 100 : 0;
+
+    const statusMap = {};
+    data.liveStatus.forEach(s => statusMap[s._id] = s.count);
+
+    const active = (statusMap.confirmed || 0) + (statusMap.preparing || 0) + (statusMap.out_for_delivery || 0);
 
     res.json({
       success: true,
       realtime: {
-        updatedAt: new Date().toISOString(),
-        today: { 
-          orders: t.orders, 
-          revenue: Math.round(t.revenue || 0),
-          growth: "+0%" // Will improve later with yesterday compare
+        updatedAt: now.toISOString(),
+        today: {
+          orders: today.orders,
+          revenue: Math.round(today.revenue),
+          growth: (ordersGrowth > 0 ? '+' : '') + ordersGrowth + '%'
         },
         live: {
-          pending: l.pending?.[0]?.count || 0,
-          confirmed: l.confirmed?.[0]?.count || 0,
-          preparing: l.preparing?.[0]?.count || 0,
-          outForDelivery: l.outForDelivery?.[0]?.count || 0,
-          pendingPayment: l.pendingPayment?.[0]?.count || 0,
-          cancelledToday: l.cancelledToday?.[0]?.count || 0
+          pending: statusMap.pending || 0,
+          confirmed: statusMap.confirmed || 0,
+          preparing: statusMap.preparing || 0,
+          outForDelivery: statusMap.out_for_delivery || 0,
+          pendingPayment: statusMap.pending_payment || 0,
+          cancelledToday: data.cancelledToday[0]?.count || 0
         },
-        activeOrders: (l.confirmed?.[0]?.count || 0) + (l.preparing?.[0]?.count || 0) + (l.outForDelivery?.[0]?.count || 0)
+        activeOrders: active,
+        systemStatus: 'operational'
       }
     });
   } catch (err) {
-    console.error('REALTIME ERROR:', err);
-    res.status(500).json({ success: false, message: 'Live stats unavailable' });
+    console.error('REALTIME STATS ERROR:', err);
+    res.status(500).json({ success: false, message: 'Live stats temporarily unavailable' });
   }
 };
 
-module.exports = { 
-  getOrderAnalytics, 
-  getRealtimeStats, 
-  validateAnalyticsQuery, 
-  validateRealtimeQuery 
+module.exports = {
+  getOrderAnalytics,
+  getRealtimeStats,
+  validateAnalyticsQuery,
+  validateRealtimeQuery
 };

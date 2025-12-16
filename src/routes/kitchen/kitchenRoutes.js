@@ -1,15 +1,45 @@
 // src/routes/kitchen/kitchenRoutes.js
+// FINAL PRODUCTION VERSION — FULLY SECURE KITCHEN API (DEC 2025)
+
 const router = require('express').Router();
-const { auth, role } = require('../../middleware/auth/auth');
-const KitchenOrder = require('../../models/kitchen/KitchenOrder');
+const { auth } = require('../../middleware/auth/auth');
+const validate = require('../../middleware/validate/validate');
+const { role } = require('../../middleware/role/role');
 
-router.use(auth, role('admin'));
+const {
+  getKitchenOrders,
+  startPreparingItem,
+  completeItem
+} = require('../../controllers/kitchen/kitchenController');
 
-router.get('/orders', async (req, res) => {
-  const orders = await KitchenOrder.find()
-    .populate('items.menuItem', 'name')
-    .sort({ placedAt: -1 });
-  res.json({ success: true, orders });
-});
+const {
+  startItemSchema,
+  completeItemSchema
+} = require('../../validation/schemas/kitchenSchemas');
+
+// PROTECT ALL KITCHEN ROUTES
+// Only admin + kitchen staff allowed (admin has god mode via role middleware)
+router.use(auth, role(['admin', 'kitchen']));
+
+// ==================== ROUTES ====================
+
+// GET: Fetch all active + stats (for kitchen display)
+router.get('/orders', getKitchenOrders);
+
+// POST: Start preparing a specific item
+router.post(
+  '/start-item',
+  startItemSchema,
+  validate,
+  startPreparingItem
+);
+
+// POST: Mark item as ready (complete)
+router.post(
+  '/complete-item',
+  completeItemSchema,
+  validate,
+  completeItem
+);
 
 module.exports = router;

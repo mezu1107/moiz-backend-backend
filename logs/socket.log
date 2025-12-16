@@ -10612,3 +10612,1647 @@
 {"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-10T18:44:27.979Z"}
 {"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-10T18:44:27.989Z"}
 {"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-10T18:44:27.991Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-11T13:42:07.570Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-11T13:42:07.860Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-11T13:42:07.869Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-11T13:42:07.880Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-11T13:42:07.891Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-11T13:42:07.904Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-11T13:42:07.913Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-11T13:42:07.944Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-11T13:42:07.958Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-11T13:42:07.963Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-11T13:42:07.969Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-11T13:42:07.980Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-11T13:42:07.994Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-11T13:42:08.003Z"}
+{"level":"info","message":"Route loaded: /api/admin/riders","timestamp":"2025-12-11T13:42:08.090Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-11T13:42:08.094Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/payments","timestamp":"2025-12-11T13:42:08.096Z"}
+{"level":"info","message":"Route loaded: /api/admin/refunds","timestamp":"2025-12-11T13:42:08.099Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/wallet","timestamp":"2025-12-11T13:42:08.100Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/kitchen","timestamp":"2025-12-11T13:42:08.105Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/analytics/orders","timestamp":"2025-12-11T13:42:08.106Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/analytics/realtime","timestamp":"2025-12-11T13:42:08.108Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/kitchen","timestamp":"2025-12-11T13:42:08.110Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/reviews","timestamp":"2025-12-11T13:42:08.124Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/support","timestamp":"2025-12-11T13:42:08.136Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/inventory","timestamp":"2025-12-11T13:42:08.151Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-11T13:43:29.161Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-11T13:43:29.331Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-11T13:43:29.335Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-11T13:43:29.340Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-11T13:43:29.345Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-11T13:43:29.354Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-11T13:43:29.359Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-11T13:43:29.377Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-11T13:43:29.391Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-11T13:43:29.395Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-11T13:43:29.402Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-11T13:43:29.408Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-11T13:43:29.411Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-11T13:43:29.418Z"}
+{"level":"info","message":"Route loaded: /api/admin/riders","timestamp":"2025-12-11T13:43:29.494Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-11T13:43:29.499Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/payments","timestamp":"2025-12-11T13:43:29.501Z"}
+{"level":"info","message":"Route loaded: /api/admin/refunds","timestamp":"2025-12-11T13:43:29.504Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/wallet","timestamp":"2025-12-11T13:43:29.506Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/kitchen","timestamp":"2025-12-11T13:43:29.511Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/analytics/orders","timestamp":"2025-12-11T13:43:29.512Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/analytics/realtime","timestamp":"2025-12-11T13:43:29.513Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/kitchen","timestamp":"2025-12-11T13:43:29.514Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/reviews","timestamp":"2025-12-11T13:43:29.530Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/support","timestamp":"2025-12-11T13:43:29.540Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/inventory","timestamp":"2025-12-11T13:43:29.547Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T07:17:10.886Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T07:17:11.184Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T07:17:11.193Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T07:17:11.207Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T07:17:11.212Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T07:17:11.227Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T07:17:11.237Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T07:17:11.260Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T07:17:11.272Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T07:17:11.276Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T07:17:11.279Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T07:17:11.291Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T07:17:11.295Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T07:17:11.302Z"}
+{"level":"info","message":"Route loaded: /api/admin/riders","timestamp":"2025-12-12T07:17:11.377Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T07:17:11.380Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/payments","timestamp":"2025-12-12T07:17:11.382Z"}
+{"level":"info","message":"Route loaded: /api/admin/refunds","timestamp":"2025-12-12T07:17:11.385Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/wallet","timestamp":"2025-12-12T07:17:11.386Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/kitchen","timestamp":"2025-12-12T07:17:11.392Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/analytics/orders","timestamp":"2025-12-12T07:17:11.392Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/analytics/realtime","timestamp":"2025-12-12T07:17:11.393Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/kitchen","timestamp":"2025-12-12T07:17:11.394Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/reviews","timestamp":"2025-12-12T07:17:11.405Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/support","timestamp":"2025-12-12T07:17:11.414Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/inventory","timestamp":"2025-12-12T07:17:11.424Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T07:27:00.936Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T07:27:01.195Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T07:27:01.202Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T07:27:01.214Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T07:27:01.222Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T07:27:01.236Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T07:27:01.245Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T07:27:01.277Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T07:27:01.286Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T07:27:01.291Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T07:27:01.298Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T07:27:01.308Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T07:27:01.316Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T07:27:01.323Z"}
+{"level":"info","message":"Route loaded: /api/admin/riders","timestamp":"2025-12-12T07:27:01.411Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T07:27:01.414Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/payments","timestamp":"2025-12-12T07:27:01.416Z"}
+{"level":"info","message":"Route loaded: /api/admin/refunds","timestamp":"2025-12-12T07:27:01.420Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/wallet","timestamp":"2025-12-12T07:27:01.421Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/kitchen","timestamp":"2025-12-12T07:27:01.429Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/analytics/orders","timestamp":"2025-12-12T07:27:01.429Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/analytics/realtime","timestamp":"2025-12-12T07:27:01.430Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/kitchen","timestamp":"2025-12-12T07:27:01.431Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/reviews","timestamp":"2025-12-12T07:27:01.446Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/support","timestamp":"2025-12-12T07:27:01.456Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/inventory","timestamp":"2025-12-12T07:27:01.468Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:27:54.625Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:27:54.791Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:27:54.800Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:27:54.814Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:27:54.820Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:27:54.839Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:27:54.849Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:27:54.879Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:27:54.882Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:27:54.889Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:27:54.896Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:27:54.955Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:27:54.958Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:27:55.013Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:27:55.020Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:27:55.023Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:28:02.343Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:28:02.514Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:28:02.520Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:28:02.526Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:28:02.533Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:28:02.544Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:28:02.550Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:28:02.570Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:28:02.574Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:28:02.584Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:28:02.588Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:28:02.648Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:28:02.651Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:28:02.678Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:28:02.685Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:28:02.688Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:31:24.475Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:31:24.687Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:31:24.694Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:31:24.704Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:31:24.709Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:31:24.721Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:31:24.727Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:31:24.747Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:31:24.753Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:31:24.765Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:31:24.770Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:31:24.830Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:31:24.834Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:31:24.866Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:31:24.873Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:31:24.877Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:36:55.363Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:36:55.634Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:36:55.641Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:36:55.664Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:36:55.672Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:36:55.686Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:36:55.698Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:36:55.721Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:36:55.726Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:36:55.744Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:36:55.751Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:36:55.842Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:36:55.848Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:36:55.880Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:36:55.893Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:36:55.899Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:39:37.017Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:39:37.188Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:39:37.194Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:39:37.204Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:39:37.209Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:39:37.217Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:39:37.230Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:39:37.252Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:39:37.259Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:39:37.266Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:39:37.273Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:39:37.333Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:39:37.338Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:39:37.361Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:39:37.371Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:39:37.375Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:40:54.402Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:40:54.595Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:40:54.603Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:40:54.613Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:40:54.619Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:40:54.633Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:40:54.642Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:40:54.666Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:40:54.671Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:40:54.691Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:40:54.696Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:40:54.762Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:40:54.765Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:40:54.794Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:40:54.807Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:40:54.811Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:40:54.829Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:41:29.103Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:41:29.290Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:41:29.296Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:41:29.303Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:41:29.310Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:41:29.319Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:41:29.330Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:41:29.358Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:41:29.362Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:41:29.370Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:41:29.376Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:41:29.436Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:41:29.442Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:41:29.463Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:41:29.478Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:41:29.483Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:41:29.487Z"}
+{"level":"error","message":"❌ Failed to load route /api/admin/kitchen","timestamp":"2025-12-12T07:41:29.499Z"}
+{"level":"error","message":"TypeError: role is not a function\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\kitchen\\kitchenRoutes.js:18:18)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:124:25","timestamp":"2025-12-12T07:41:29.501Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:41:55.836Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:41:56.013Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:41:56.019Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:41:56.029Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:41:56.035Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:41:56.048Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:41:56.054Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:41:56.074Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:41:56.078Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:41:56.090Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:41:56.095Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:41:56.159Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:41:56.162Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:41:56.189Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:41:56.205Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:41:56.209Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:41:56.212Z"}
+{"level":"error","message":"❌ Failed to load route /api/admin/kitchen","timestamp":"2025-12-12T07:41:56.216Z"}
+{"level":"error","message":"TypeError: role is not a function\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\kitchen\\kitchenRoutes.js:18:18)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:124:25","timestamp":"2025-12-12T07:41:56.217Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:43:20.399Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:43:20.623Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:43:20.629Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:43:20.635Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:43:20.642Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:43:20.652Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:43:20.660Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:43:20.681Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:43:20.684Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:43:20.696Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:43:20.700Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:43:20.757Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:43:20.761Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:43:20.789Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:43:20.798Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:43:20.803Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:43:20.806Z"}
+{"level":"error","message":"❌ Failed to load route /api/kitchen","timestamp":"2025-12-12T07:43:20.812Z"}
+{"level":"error","message":"TypeError: role is not a function\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\kitchen\\kitchenRoutes.js:18:18)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:124:25","timestamp":"2025-12-12T07:43:20.813Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:43:31.540Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:43:31.734Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:43:31.740Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:43:31.746Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:43:31.750Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:43:31.758Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:43:31.766Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:43:31.786Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:43:31.791Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:43:31.805Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:43:31.812Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:43:31.873Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:43:31.877Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:43:31.906Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:43:31.916Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:43:31.920Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:43:31.923Z"}
+{"level":"error","message":"❌ Failed to load route /api/kitchen","timestamp":"2025-12-12T07:43:31.927Z"}
+{"level":"error","message":"TypeError: role is not a function\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\kitchen\\kitchenRoutes.js:18:18)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:124:25","timestamp":"2025-12-12T07:43:31.927Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:44:23.803Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:44:24.004Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:44:24.013Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:44:24.023Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:44:24.031Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:44:24.040Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:44:24.051Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:44:24.077Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:44:24.080Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:44:24.092Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:44:24.099Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:44:24.159Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:44:24.163Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:44:24.191Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:44:24.203Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:44:24.209Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:44:24.215Z"}
+{"level":"error","message":"❌ Failed to load route /api/kitchen","timestamp":"2025-12-12T07:44:24.219Z"}
+{"level":"error","message":"TypeError: role is not a function\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\kitchen\\kitchenRoutes.js:18:18)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:124:25","timestamp":"2025-12-12T07:44:24.220Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:46:07.599Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:46:07.806Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:46:07.813Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:46:07.820Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:46:07.828Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:46:07.844Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:46:07.850Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:46:07.873Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:46:07.878Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:46:07.891Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:46:07.895Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:46:08.015Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:46:08.021Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:46:08.075Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:46:08.083Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:46:08.088Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:46:08.092Z"}
+{"level":"error","message":"❌ Failed to load route /api/kitchen","timestamp":"2025-12-12T07:46:08.098Z"}
+{"level":"error","message":"C:\\amfood\\FoodWebsite-backend\\src\\routes\\kitchen\\kitchenRoutes.js:6\nconst {const { role } = require('../../middleware/role/role');\n             ^\n\nSyntaxError: Unexpected token '{'\n    at wrapSafe (node:internal/modules/cjs/loader:1515:18)\n    at Module._compile (node:internal/modules/cjs/loader:1537:20)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:124:25","timestamp":"2025-12-12T07:46:08.098Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:46:11.642Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:46:11.819Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:46:11.825Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:46:11.841Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:46:11.846Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:46:11.862Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:46:11.870Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:46:11.891Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:46:11.895Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:46:11.905Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:46:11.910Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:46:11.990Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:46:11.995Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:46:12.043Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:46:12.058Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:46:12.063Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:46:12.068Z"}
+{"level":"error","message":"❌ Failed to load route /api/kitchen","timestamp":"2025-12-12T07:46:12.073Z"}
+{"level":"error","message":"C:\\amfood\\FoodWebsite-backend\\src\\routes\\kitchen\\kitchenRoutes.js:6\nconst {const { role } = require('../../middleware/role/role');\n             ^\n\nSyntaxError: Unexpected token '{'\n    at wrapSafe (node:internal/modules/cjs/loader:1515:18)\n    at Module._compile (node:internal/modules/cjs/loader:1537:20)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at C:\\amfood\\FoodWebsite-backend\\server.js:124:25","timestamp":"2025-12-12T07:46:12.074Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:46:42.344Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:46:42.544Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:46:42.553Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:46:42.560Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:46:42.566Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:46:42.579Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:46:42.589Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:46:42.610Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:46:42.615Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:46:42.627Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:46:42.632Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:46:42.704Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:46:42.708Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:46:42.739Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:46:42.749Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:46:42.755Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:46:42.758Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T07:46:42.762Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:47:49.706Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:47:49.920Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:47:49.932Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:47:49.938Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:47:49.949Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:47:49.961Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:47:49.973Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:47:50.011Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:47:50.019Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:47:50.031Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:47:50.037Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:47:50.109Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:47:50.113Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:47:50.145Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:47:50.153Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:47:50.157Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:47:50.159Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T07:47:50.163Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:49:20.246Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:49:20.753Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:49:20.768Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:49:20.787Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:49:20.801Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:49:20.830Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:49:20.848Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:49:20.895Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:49:20.905Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:49:20.932Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:49:20.947Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:49:21.076Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:49:21.084Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:49:21.147Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:49:21.165Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:49:21.172Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:49:21.183Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T07:49:21.199Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:52:56.446Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:52:56.917Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:52:56.930Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:52:56.946Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:52:56.957Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:52:56.979Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:52:57.008Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:52:57.057Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:52:57.066Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:52:57.087Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:52:57.099Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:52:57.233Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:52:57.242Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:52:57.295Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:52:57.312Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:52:57.319Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:52:57.330Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T07:52:57.342Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:53:43.589Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:53:43.815Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:53:43.822Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:53:43.830Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:53:43.838Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:53:43.849Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:53:43.861Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:53:43.881Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:53:43.888Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:53:43.900Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:53:43.910Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:53:44.013Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:53:44.023Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:53:44.074Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:53:44.087Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:53:44.093Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:53:44.099Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T07:53:44.107Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:55:43.936Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:55:44.457Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:55:44.471Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:55:44.491Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:55:44.502Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:55:44.527Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:55:44.542Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:55:44.603Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:55:44.616Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:55:44.638Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:55:44.653Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:55:44.792Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:55:44.801Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:55:44.860Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:55:44.876Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:55:44.888Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:55:44.896Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T07:55:44.907Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:55:55.334Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:55:55.537Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:55:55.547Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:55:55.553Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:55:55.560Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:55:55.569Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:55:55.579Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:55:55.602Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:55:55.607Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:55:55.620Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:55:55.628Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:55:55.694Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:55:55.698Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:55:55.724Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:55:55.734Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:55:55.738Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:55:55.742Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T07:55:55.746Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:58:27.075Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:58:27.601Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:58:27.616Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:58:27.638Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:58:27.659Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:58:27.700Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:58:27.722Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:58:27.777Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:58:27.786Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:58:27.816Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:58:27.832Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:58:27.993Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:58:28.001Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:58:28.074Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:58:28.090Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:58:28.101Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:58:28.124Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T07:58:28.148Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T07:58:37.611Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T07:58:37.787Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T07:58:37.795Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T07:58:37.803Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T07:58:37.808Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T07:58:37.819Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T07:58:37.825Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T07:58:37.847Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T07:58:37.853Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T07:58:37.861Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T07:58:37.867Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T07:58:37.931Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T07:58:37.935Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T07:58:37.962Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T07:58:37.972Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T07:58:37.980Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T07:58:37.986Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T07:58:37.993Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:02:03.569Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:02:03.773Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:02:03.777Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:02:03.784Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:02:03.789Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:02:03.804Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:02:03.816Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:02:03.836Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:02:03.841Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:02:03.853Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:02:03.860Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:02:03.926Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:02:03.929Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:02:03.962Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:02:03.983Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:02:03.987Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:02:03.997Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:02:04.003Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:09:03.840Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:09:04.072Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:09:04.079Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:09:04.085Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:09:04.095Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:09:04.105Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:09:04.109Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:09:04.127Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:09:04.131Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:09:04.137Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:09:04.142Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:09:04.203Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:09:04.205Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:09:04.228Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:09:04.234Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:09:04.237Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:09:04.240Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:09:04.243Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:09:51.596Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:09:51.949Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:09:51.955Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:09:51.962Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:09:51.965Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:09:51.971Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:09:51.976Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:09:51.992Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:09:52.000Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:09:52.010Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:09:52.016Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:09:52.071Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:09:52.075Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:09:52.099Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:09:52.109Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:09:52.112Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:09:52.116Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:09:52.124Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:10:15.938Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:10:16.250Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:10:16.261Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:10:16.276Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:10:16.287Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:10:16.304Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:10:16.317Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:10:16.349Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:10:16.354Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:10:16.368Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:10:16.376Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:10:16.455Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:10:16.459Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:10:16.499Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:10:16.511Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:10:16.517Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:10:16.529Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:10:16.542Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:10:26.096Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:10:26.525Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:10:26.534Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:10:26.545Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:10:26.555Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:10:26.574Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:10:26.586Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:10:26.623Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:10:26.632Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:10:26.646Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:10:26.656Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:10:26.738Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:10:26.743Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:10:26.795Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:10:26.816Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:10:26.828Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:10:26.838Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:10:26.849Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:14:40.606Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:14:41.066Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:14:41.080Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:14:41.109Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:14:41.127Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:14:41.143Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:14:41.160Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:14:41.206Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:14:41.213Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:14:41.233Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:14:41.243Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:14:41.381Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:14:41.390Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:14:41.441Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:14:41.458Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:14:41.466Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:14:41.472Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:14:41.486Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:14:54.706Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:14:55.030Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:14:55.040Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:14:55.055Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:14:55.066Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:14:55.084Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:14:55.097Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:14:55.129Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:14:55.134Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:14:55.150Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:14:55.157Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:14:55.246Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:14:55.251Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:14:55.296Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:14:55.311Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:14:55.315Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:14:55.321Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:14:55.332Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:15:11.940Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:15:12.265Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:15:12.275Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:15:12.287Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:15:12.297Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:15:12.331Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:15:12.356Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:15:12.414Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:15:12.424Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:15:12.439Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:15:12.448Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:15:12.544Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:15:12.550Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:15:12.593Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:15:12.604Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:15:12.608Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:15:12.613Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:15:12.621Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:15:16.695Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:15:16.870Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:15:16.876Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:15:16.887Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:15:16.893Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:15:16.904Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:15:16.913Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:15:16.958Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:15:16.971Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:15:16.990Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:15:17.003Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:15:17.117Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:15:17.123Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:15:17.164Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:15:17.176Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:15:17.181Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:15:17.186Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:15:17.199Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:16:04.846Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:16:04.976Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:16:04.983Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:16:04.991Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:16:04.996Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:16:05.009Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:16:05.015Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:16:05.032Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:16:05.038Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:16:05.045Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:16:05.050Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:16:05.102Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:16:05.109Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:16:05.131Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:16:05.140Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:16:05.145Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:16:05.149Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:16:05.159Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:16:48.910Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:16:49.291Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:16:49.302Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:16:49.317Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:16:49.326Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:16:49.348Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:16:49.360Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:16:49.391Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:16:49.396Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:16:49.410Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:16:49.417Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:16:49.501Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:16:49.506Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:16:49.549Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:16:49.564Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:16:49.570Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:16:49.577Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:16:49.592Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T08:16:58.606Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T08:16:58.737Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T08:16:58.741Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T08:16:58.745Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T08:16:58.751Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T08:16:58.761Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T08:16:58.766Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T08:16:58.783Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T08:16:58.790Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T08:16:58.798Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T08:16:58.806Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T08:16:58.855Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T08:16:58.858Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T08:16:58.877Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T08:16:58.883Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T08:16:58.889Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T08:16:58.892Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T08:16:58.895Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T08:22:28.702Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T08:22:28.984Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T08:22:28.989Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T08:22:28.996Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T08:22:29.003Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T08:22:29.012Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T08:22:29.023Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T08:22:29.043Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T08:22:29.048Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T08:22:29.059Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T08:22:29.065Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T08:22:29.135Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T08:22:29.140Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T08:22:29.145Z"}
+{"level":"info","message":"Route loaded: /api/order/analytics","timestamp":"2025-12-12T08:22:29.175Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T08:22:29.189Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T08:22:29.194Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T08:22:29.199Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T08:22:29.212Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T08:57:19.861Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T08:57:20.021Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T08:57:20.026Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T08:57:20.030Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T08:57:20.033Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T08:57:20.039Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T08:57:20.043Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T08:57:20.059Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T08:57:20.062Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T08:57:20.069Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T08:57:20.072Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T08:57:20.125Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T08:57:20.127Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T08:57:20.130Z"}
+{"level":"error","message":"Failed to load route /api/order/analytics","timestamp":"2025-12-12T08:57:20.152Z"}
+{"level":"error","message":"Error: Cannot find module 'joi'\nRequire stack:\n- C:\\amfood\\FoodWebsite-backend\\src\\validation\\schemas\\analyticsSchemas.js\n- C:\\amfood\\FoodWebsite-backend\\src\\routes\\order\\analyticsRoutes.js\n- C:\\amfood\\FoodWebsite-backend\\server.js\n    at Function._resolveFilename (node:internal/modules/cjs/loader:1249:15)\n    at Function._load (node:internal/modules/cjs/loader:1075:27)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\validation\\schemas\\analyticsSchemas.js:3:13)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)","timestamp":"2025-12-12T08:57:20.154Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T08:57:20.160Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T08:57:20.163Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T08:57:20.165Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T08:57:20.171Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T08:57:54.768Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T08:57:55.126Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T08:57:55.136Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T08:57:55.149Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T08:57:55.162Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T08:57:55.181Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T08:57:55.194Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T08:57:55.229Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T08:57:55.235Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T08:57:55.251Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T08:57:55.259Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T08:57:55.356Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T08:57:55.362Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T08:57:55.368Z"}
+{"level":"error","message":"Failed to load route /api/order/analytics","timestamp":"2025-12-12T08:57:55.586Z"}
+{"level":"error","message":"TypeError: next is not a function\n    at validateRequest (C:\\amfood\\FoodWebsite-backend\\src\\middleware\\validate\\validate.js:16:3)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\order\\analyticsRoutes.js:31:3)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-12T08:57:55.586Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T08:57:55.597Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T08:57:55.602Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T08:57:55.608Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T08:57:55.622Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T08:59:34.631Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T08:59:34.768Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T08:59:34.774Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T08:59:34.781Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T08:59:34.791Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T08:59:34.804Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T08:59:34.812Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T08:59:34.829Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T08:59:34.834Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T08:59:34.846Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T08:59:34.854Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T08:59:34.928Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T08:59:34.939Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T08:59:34.943Z"}
+{"level":"error","message":"Failed to load route /api/order/analytics","timestamp":"2025-12-12T08:59:35.023Z"}
+{"level":"error","message":"TypeError: next is not a function\n    at validateRequest (C:\\amfood\\FoodWebsite-backend\\src\\middleware\\validate\\validate.js:16:3)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\order\\analyticsRoutes.js:31:3)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-12T08:59:35.024Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T08:59:35.030Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T08:59:35.032Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T08:59:35.034Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T08:59:35.038Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:00:03.232Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:00:03.423Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:00:03.430Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:00:03.441Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:00:03.449Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:00:03.469Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:00:03.483Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:00:03.500Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:00:03.503Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:00:03.512Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:00:03.520Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:00:03.561Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:00:03.568Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:00:03.573Z"}
+{"level":"error","message":"Failed to load route /api/admin/analytics","timestamp":"2025-12-12T09:00:03.667Z"}
+{"level":"error","message":"TypeError: next is not a function\n    at validateRequest (C:\\amfood\\FoodWebsite-backend\\src\\middleware\\validate\\validate.js:16:3)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\order\\analyticsRoutes.js:31:3)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-12T09:00:03.668Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:00:03.672Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:00:03.676Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:00:03.679Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:00:03.683Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:01:31.005Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:01:31.186Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:01:31.194Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:01:31.205Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:01:31.210Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:01:31.216Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:01:31.220Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:01:31.233Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:01:31.237Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:01:31.247Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:01:31.252Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:01:31.360Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:01:31.362Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:01:31.365Z"}
+{"level":"info","message":"Route loaded: /api/admin/analytics","timestamp":"2025-12-12T09:01:31.444Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:01:31.451Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:01:31.453Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:01:31.456Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:01:31.460Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:06:12.794Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:06:12.950Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:06:12.954Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:06:12.959Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:06:12.964Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:06:12.970Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:06:12.974Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:06:12.990Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:06:12.996Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:06:13.002Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:06:13.006Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:06:13.061Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:06:13.064Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:06:13.066Z"}
+{"level":"info","message":"Route loaded: /api/admin/analytics","timestamp":"2025-12-12T09:06:13.152Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:06:13.156Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:06:13.159Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:06:13.161Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:06:13.166Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:08:37.774Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:08:38.002Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:08:38.007Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:08:38.011Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:08:38.015Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:08:38.021Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:08:38.026Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:08:38.046Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:08:38.049Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:08:38.058Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:08:38.062Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:08:38.119Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:08:38.124Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:08:38.127Z"}
+{"level":"info","message":"Route loaded: /api/admin/analytics","timestamp":"2025-12-12T09:08:38.224Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:08:38.229Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:08:38.231Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:08:38.233Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:08:38.237Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:09:07.247Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:09:07.460Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:09:07.467Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:09:07.474Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:09:07.478Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:09:07.488Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:09:07.493Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:09:07.509Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:09:07.512Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:09:07.525Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:09:07.543Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:09:07.588Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:09:07.591Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:09:07.592Z"}
+{"level":"info","message":"Route loaded: /api/admin/analytics","timestamp":"2025-12-12T09:09:07.661Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:09:07.666Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:09:07.669Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:09:07.671Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:09:07.673Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:09:45.954Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:09:46.304Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:09:46.318Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:09:46.332Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:09:46.341Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:09:46.359Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:09:46.375Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:09:46.410Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:09:46.419Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:09:46.433Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:09:46.441Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:09:46.526Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:09:46.532Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:09:46.539Z"}
+{"level":"info","message":"Route loaded: /api/admin/analytics","timestamp":"2025-12-12T09:09:46.735Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:09:46.749Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:09:46.755Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:09:46.760Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:09:46.767Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:10:03.227Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:10:03.408Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:10:03.423Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:10:03.443Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:10:03.449Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:10:03.460Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:10:03.470Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:10:03.486Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:10:03.488Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:10:03.494Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:10:03.498Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:10:03.584Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:10:03.588Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:10:03.591Z"}
+{"level":"info","message":"Route loaded: /api/admin/analytics","timestamp":"2025-12-12T09:10:03.835Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:10:03.856Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:10:03.862Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:10:03.872Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:10:03.881Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:10:35.258Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:10:35.363Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:10:35.366Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:10:35.370Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:10:35.374Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:10:35.383Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:10:35.387Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:10:35.399Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:10:35.402Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:10:35.408Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:10:35.413Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:10:35.466Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:10:35.470Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:10:35.473Z"}
+{"level":"info","message":"Route loaded: /api/admin/analytics","timestamp":"2025-12-12T09:10:35.561Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:10:35.569Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:10:35.575Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:10:35.591Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:10:35.595Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:10:54.258Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:10:54.571Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:10:54.581Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:10:54.593Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:10:54.601Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:10:54.617Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:10:54.627Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:10:54.669Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:10:54.676Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:10:54.696Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:10:54.705Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:10:54.790Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:10:54.802Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:10:54.808Z"}
+{"level":"error","message":"Failed to load route /api/admin/analytics","timestamp":"2025-12-12T09:10:55.008Z"}
+{"level":"error","message":"TypeError: next is not a function\n    at validateRequest (C:\\amfood\\FoodWebsite-backend\\src\\middleware\\validate\\validate.js:16:3)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\order\\analyticsRoutes.js:31:3)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-12T09:10:55.013Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:10:55.033Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:10:55.039Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:10:55.044Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:10:55.053Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:11:07.891Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:11:08.058Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:11:08.067Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:11:08.075Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:11:08.081Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:11:08.091Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:11:08.096Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:11:08.132Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:11:08.141Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:11:08.150Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:11:08.155Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:11:08.214Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:11:08.217Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:11:08.221Z"}
+{"level":"info","message":"Route loaded: /api/admin/analytics","timestamp":"2025-12-12T09:11:08.299Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:11:08.310Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:11:08.313Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:11:08.316Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:11:08.320Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:13:02.625Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:13:02.905Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:13:02.913Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:13:02.926Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:13:02.933Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:13:02.953Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:13:02.970Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:13:03.014Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:13:03.030Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:13:03.038Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:13:03.043Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:13:03.058Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:13:03.067Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:13:03.074Z"}
+{"level":"info","message":"Route loaded: /api/admin/riders","timestamp":"2025-12-12T09:13:03.147Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:13:03.152Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/payments","timestamp":"2025-12-12T09:13:03.155Z"}
+{"level":"info","message":"Route loaded: /api/admin/refunds","timestamp":"2025-12-12T09:13:03.163Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/admin/wallet","timestamp":"2025-12-12T09:13:03.164Z"}
+{"level":"info","message":"Route loaded: /api/admin/kitchen","timestamp":"2025-12-12T09:13:03.171Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/analytics/orders","timestamp":"2025-12-12T09:13:03.172Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/analytics/realtime","timestamp":"2025-12-12T09:13:03.173Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:13:03.176Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/reviews","timestamp":"2025-12-12T09:13:03.192Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/support","timestamp":"2025-12-12T09:13:03.206Z"}
+{"level":"warn","message":"Route not found (OK if not implemented yet): /api/inventory","timestamp":"2025-12-12T09:13:03.233Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:13:30.681Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:13:30.825Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:13:30.832Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:13:30.836Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:13:30.841Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:13:30.850Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:13:30.855Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:13:30.867Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:13:30.869Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:13:30.877Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:13:30.881Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:13:30.922Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:13:30.925Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:13:30.928Z"}
+{"level":"info","message":"Route loaded: /api/admin/analytics","timestamp":"2025-12-12T09:13:31.001Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:13:31.009Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:13:31.012Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:13:31.017Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:13:31.019Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T09:14:14.791Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T09:14:15.081Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T09:14:15.091Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T09:14:15.101Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T09:14:15.110Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T09:14:15.127Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T09:14:15.137Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T09:14:15.168Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T09:14:15.174Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T09:14:15.190Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T09:14:15.199Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T09:14:15.279Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T09:14:15.284Z"}
+{"level":"info","message":"Route loaded successfully: /api/order/analytics","timestamp":"2025-12-12T09:14:15.449Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T09:14:15.459Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T09:14:15.464Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T09:15:15.463Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T09:15:15.600Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T09:15:15.604Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T09:15:15.608Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T09:15:15.612Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T09:15:15.617Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T09:15:15.625Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T09:15:15.645Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T09:15:15.648Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T09:15:15.657Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T09:15:15.660Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T09:15:15.698Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/staff","timestamp":"2025-12-12T09:15:15.705Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T09:15:15.708Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/analytics","timestamp":"2025-12-12T09:15:15.786Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T09:15:15.792Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T09:15:15.795Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T09:15:15.799Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T09:15:15.805Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T09:18:26.597Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T09:18:26.901Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T09:18:26.914Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T09:18:26.936Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T09:18:26.950Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T09:18:26.978Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T09:18:26.996Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T09:18:27.037Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T09:18:27.044Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T09:18:27.065Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T09:18:27.077Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T09:18:27.182Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/staff","timestamp":"2025-12-12T09:18:27.193Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T09:18:27.202Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/analytics","timestamp":"2025-12-12T09:18:27.378Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T09:18:27.391Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T09:18:27.396Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T09:18:27.402Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T09:18:27.412Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T09:20:20.462Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T09:20:20.604Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T09:20:20.608Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T09:20:20.613Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T09:20:20.617Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T09:20:20.625Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T09:20:20.630Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T09:20:20.646Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T09:20:20.649Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T09:20:20.658Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T09:20:20.662Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T09:20:20.707Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/staff","timestamp":"2025-12-12T09:20:20.710Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T09:20:20.712Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/analytics","timestamp":"2025-12-12T09:20:20.794Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T09:20:20.799Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T09:20:20.801Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T09:20:20.803Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T09:20:20.808Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T09:21:41.347Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T09:21:41.511Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T09:21:41.515Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T09:21:41.525Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T09:21:41.530Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T09:21:41.537Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T09:21:41.541Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T09:21:41.554Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T09:21:41.558Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T09:21:41.567Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T09:21:41.573Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T09:21:41.620Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/staff","timestamp":"2025-12-12T09:21:41.623Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T09:21:41.626Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/analytics","timestamp":"2025-12-12T09:21:41.711Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T09:21:41.718Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T09:21:41.720Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T09:21:41.722Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T09:21:41.725Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T09:21:54.355Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T09:21:54.462Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T09:21:54.471Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T09:21:54.484Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T09:21:54.495Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T09:21:54.508Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T09:21:54.522Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T09:21:54.549Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T09:21:54.554Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T09:21:54.564Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T09:21:54.570Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T09:21:54.656Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/staff","timestamp":"2025-12-12T09:21:54.659Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T09:21:54.663Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/analytics","timestamp":"2025-12-12T09:21:54.775Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T09:21:54.781Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T09:21:54.783Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T09:21:54.785Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T09:21:54.788Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T09:26:15.725Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T09:26:15.872Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T09:26:15.877Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T09:26:15.883Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T09:26:15.888Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T09:26:15.895Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T09:26:15.899Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T09:26:15.915Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T09:26:15.920Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T09:26:15.928Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T09:26:15.932Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T09:26:15.981Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/staff","timestamp":"2025-12-12T09:26:15.984Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T09:26:15.989Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/analytics","timestamp":"2025-12-12T09:26:16.070Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T09:26:16.076Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T09:26:16.079Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T09:26:16.083Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T09:26:16.087Z"}
+{"level":"info","message":"Route loaded successfully: /api/auth","timestamp":"2025-12-12T09:31:04.969Z"}
+{"level":"info","message":"Route loaded successfully: /api/upload","timestamp":"2025-12-12T09:31:05.132Z"}
+{"level":"info","message":"Route loaded successfully: /api/address","timestamp":"2025-12-12T09:31:05.137Z"}
+{"level":"info","message":"Route loaded successfully: /api/areas","timestamp":"2025-12-12T09:31:05.142Z"}
+{"level":"info","message":"Route loaded successfully: /api/cart","timestamp":"2025-12-12T09:31:05.146Z"}
+{"level":"info","message":"Route loaded successfully: /api/menu","timestamp":"2025-12-12T09:31:05.151Z"}
+{"level":"info","message":"Route loaded successfully: /api/orders","timestamp":"2025-12-12T09:31:05.164Z"}
+{"level":"info","message":"Route loaded successfully: /api/deal","timestamp":"2025-12-12T09:31:05.185Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider/dashboard","timestamp":"2025-12-12T09:31:05.191Z"}
+{"level":"info","message":"Route loaded successfully: /api/rider","timestamp":"2025-12-12T09:31:05.201Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/customers","timestamp":"2025-12-12T09:31:05.207Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/rider","timestamp":"2025-12-12T09:31:05.294Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/staff","timestamp":"2025-12-12T09:31:05.298Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin","timestamp":"2025-12-12T09:31:05.303Z"}
+{"level":"error","message":"❌ Failed to load route /api/admin/analytics","timestamp":"2025-12-12T09:31:05.437Z"}
+{"level":"error","message":"TypeError: next is not a function\n    at validateRequest (C:\\amfood\\FoodWebsite-backend\\src\\middleware\\validate\\validate.js:16:3)\n    at Object.<anonymous> (C:\\amfood\\FoodWebsite-backend\\src\\routes\\order\\analyticsRoutes.js:31:3)\n    at Module._compile (node:internal/modules/cjs/loader:1565:14)\n    at Object..js (node:internal/modules/cjs/loader:1708:10)\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\n    at Module.require (node:internal/modules/cjs/loader:1340:12)\n    at require (node:internal/modules/helpers:138:16)","timestamp":"2025-12-12T09:31:05.439Z"}
+{"level":"info","message":"Route loaded successfully: /api/contact","timestamp":"2025-12-12T09:31:05.443Z"}
+{"level":"info","message":"Route loaded successfully: /api/admin/contact","timestamp":"2025-12-12T09:31:05.447Z"}
+{"level":"info","message":"Route loaded successfully: /api/wallet","timestamp":"2025-12-12T09:31:05.451Z"}
+{"level":"info","message":"Route loaded successfully: /api/kitchen","timestamp":"2025-12-12T09:31:05.456Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:31:20.576Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:31:20.971Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:31:21.059Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:31:21.063Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:31:21.067Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:31:21.070Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:31:21.077Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T09:31:21.084Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:31:21.100Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:31:21.103Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:31:21.114Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:31:21.118Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:31:21.126Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:31:21.132Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:31:21.136Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:31:21.142Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:31:21.148Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:31:21.150Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:31:21.154Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:37:17.873Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:37:18.287Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:37:18.371Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:37:18.374Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:37:18.378Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:37:18.382Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:37:18.390Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:37:18.392Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:37:18.403Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:37:18.407Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:37:18.412Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:37:18.414Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:37:18.420Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:37:18.429Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:37:18.431Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:37:18.436Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:37:18.440Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:37:18.444Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:37:18.446Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:39:07.515Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:39:07.935Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:39:08.066Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:39:08.069Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:39:08.074Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:39:08.077Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:39:08.085Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:39:08.088Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:39:08.098Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:39:08.103Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:39:08.107Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:39:08.112Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:39:08.121Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:39:08.123Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:39:08.125Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:39:08.130Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:39:08.135Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:39:08.138Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:39:08.142Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:40:12.541Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:40:13.701Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:40:14.009Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:40:14.019Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:40:14.035Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:40:14.051Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:40:14.072Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:40:14.078Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:40:14.122Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:40:14.128Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:40:14.145Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:40:14.157Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:40:14.173Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:40:14.182Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:40:14.190Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:40:14.206Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:40:14.212Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:40:14.222Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:40:14.230Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:40:21.036Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:40:21.591Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:40:21.757Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:40:21.762Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:40:21.766Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:40:21.769Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:40:21.777Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:40:21.780Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:40:21.795Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:40:21.801Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:40:21.806Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:40:21.810Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:40:21.819Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:40:21.822Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:40:21.824Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:40:21.829Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:40:21.833Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:40:21.835Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:40:21.838Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:40:48.321Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:40:48.783Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:40:49.072Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:40:49.080Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:40:49.090Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:40:49.098Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:40:49.120Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:40:49.128Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:40:49.163Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:40:49.171Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:40:49.185Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:40:49.194Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:40:49.211Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:40:49.224Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:40:49.234Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:40:49.248Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:40:49.255Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:40:49.261Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:40:49.271Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:42:05.485Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:42:05.909Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:42:06.043Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:42:06.050Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:42:06.063Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:42:06.068Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:42:06.081Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:42:06.085Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:42:06.114Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:42:06.118Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:42:06.148Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:42:06.153Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:42:06.164Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:42:06.168Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:42:06.172Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:42:06.183Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:42:06.186Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:42:06.188Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:42:06.196Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:44:14.049Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:44:14.628Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:44:14.769Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:44:14.773Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:44:14.780Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:44:14.785Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:44:14.793Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:44:14.795Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:44:14.812Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:44:14.814Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:44:14.823Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:44:14.826Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:44:14.833Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:44:14.839Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:44:14.842Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:44:14.847Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:44:14.852Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:44:14.855Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:44:14.858Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:45:53.152Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:45:53.650Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:45:53.783Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:45:53.792Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:45:53.805Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:45:53.817Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:45:53.838Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:45:53.842Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:45:53.868Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:45:53.871Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:45:53.875Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:45:53.881Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:45:53.889Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:45:53.893Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:45:53.896Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:45:53.903Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:45:53.906Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:45:53.908Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:45:53.910Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:49:01.421Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:49:02.032Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:49:02.171Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:49:02.175Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:49:02.179Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:49:02.190Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:49:02.198Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:49:02.201Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:49:02.219Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:49:02.225Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:49:02.233Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:49:02.240Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:49:02.248Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:49:02.251Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:49:02.255Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:49:02.261Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:49:02.263Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:49:02.266Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:49:02.272Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:54:44.327Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:54:44.841Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:54:44.977Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:54:44.981Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:54:44.985Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:54:44.990Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:54:44.997Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:54:45.000Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:54:45.020Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:54:45.023Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:54:45.032Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:54:45.040Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:54:45.048Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:54:45.052Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:54:45.057Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:54:45.064Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:54:45.066Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:54:45.068Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:54:45.076Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:55:03.407Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:55:03.792Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:55:03.882Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:55:03.886Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:55:03.891Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:55:03.894Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:55:03.900Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:55:03.902Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:55:03.915Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:55:03.917Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:55:03.921Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:55:03.929Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:55:03.935Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:55:03.938Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:55:03.940Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:55:03.947Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:55:03.950Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:55:03.952Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:55:03.955Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T09:55:08.773Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T09:55:09.135Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T09:55:09.234Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T09:55:09.240Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T09:55:09.246Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T09:55:09.253Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T09:55:09.266Z"}
+{"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:55:09.272Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T09:55:09.292Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T09:55:09.296Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T09:55:09.307Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T09:55:09.312Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T09:55:09.319Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T09:55:09.326Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T09:55:09.339Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T09:55:09.351Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T09:55:09.356Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T09:55:09.362Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T09:55:09.365Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T10:03:23.503Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T10:03:24.120Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T10:03:24.282Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T10:03:24.288Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T10:03:24.296Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T10:03:24.301Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T10:03:24.308Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T10:03:24.311Z"}
+{"level":"error","message":"Failed to load route /api/deal:","timestamp":"2025-12-12T10:03:24.336Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T10:03:24.338Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T10:03:24.346Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T10:03:24.352Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T10:03:24.358Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T10:03:24.361Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T10:03:24.368Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T10:03:24.376Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T10:03:24.381Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T10:03:24.384Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T10:03:24.388Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T10:03:42.514Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T10:03:42.875Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T10:03:42.976Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T10:03:42.980Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T10:03:42.984Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T10:03:42.987Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T10:03:42.999Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T10:03:43.004Z"}
+{"level":"error","message":"Failed to load route /api/deal:","timestamp":"2025-12-12T10:03:43.015Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T10:03:43.020Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T10:03:43.024Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T10:03:43.026Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T10:03:43.036Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T10:03:43.038Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T10:03:43.040Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T10:03:43.043Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T10:03:43.046Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T10:03:43.049Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T10:03:43.051Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T10:05:06.291Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T10:05:06.652Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T10:05:06.736Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T10:05:06.740Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T10:05:06.745Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T10:05:06.750Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T10:05:06.755Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T10:05:06.760Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T10:05:06.774Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T10:05:06.777Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T10:05:06.784Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T10:05:06.788Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T10:05:06.795Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T10:05:06.799Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T10:05:06.801Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T10:05:06.805Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T10:05:06.806Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T10:05:06.809Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T10:05:06.812Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T10:05:29.450Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T10:05:29.807Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T10:05:29.906Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T10:05:29.910Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T10:05:29.914Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T10:05:29.920Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T10:05:29.933Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T10:05:29.936Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T10:05:29.950Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T10:05:29.952Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T10:05:29.956Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T10:05:29.960Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T10:05:29.966Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T10:05:29.968Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T10:05:29.970Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T10:05:29.975Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T10:05:29.979Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T10:05:29.981Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T10:05:29.983Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T10:05:43.665Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T10:05:44.024Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T10:05:44.117Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T10:05:44.120Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T10:05:44.124Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T10:05:44.129Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T10:05:44.135Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T10:05:44.140Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T10:05:44.154Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T10:05:44.157Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T10:05:44.179Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T10:05:44.206Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T10:05:44.232Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T10:05:44.242Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T10:05:44.245Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T10:05:44.256Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T10:05:44.269Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T10:05:44.274Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T10:05:44.280Z"}
+{"level":"warn","message":"Firebase Admin not initialized (FCM disabled):","timestamp":"2025-12-12T10:07:07.978Z"}
+{"level":"info","message":"Route loaded: /api/auth","timestamp":"2025-12-12T10:07:08.341Z"}
+{"level":"info","message":"Route loaded: /api/upload","timestamp":"2025-12-12T10:07:08.428Z"}
+{"level":"info","message":"Route loaded: /api/address","timestamp":"2025-12-12T10:07:08.431Z"}
+{"level":"info","message":"Route loaded: /api/areas","timestamp":"2025-12-12T10:07:08.435Z"}
+{"level":"info","message":"Route loaded: /api/cart","timestamp":"2025-12-12T10:07:08.439Z"}
+{"level":"info","message":"Route loaded: /api/menu","timestamp":"2025-12-12T10:07:08.449Z"}
+{"level":"info","message":"Route loaded: /api/orders","timestamp":"2025-12-12T10:07:08.454Z"}
+{"level":"info","message":"Route loaded: /api/deal","timestamp":"2025-12-12T10:07:08.469Z"}
+{"level":"info","message":"Route loaded: /api/rider/dashboard","timestamp":"2025-12-12T10:07:08.472Z"}
+{"level":"info","message":"Route loaded: /api/rider","timestamp":"2025-12-12T10:07:08.477Z"}
+{"level":"info","message":"Route loaded: /api/admin/customers","timestamp":"2025-12-12T10:07:08.480Z"}
+{"level":"info","message":"Route loaded: /api/admin/rider","timestamp":"2025-12-12T10:07:08.486Z"}
+{"level":"info","message":"Route loaded: /api/admin/staff","timestamp":"2025-12-12T10:07:08.491Z"}
+{"level":"info","message":"Route loaded: /api/admin","timestamp":"2025-12-12T10:07:08.494Z"}
+{"level":"info","message":"Route loaded: /api/contact","timestamp":"2025-12-12T10:07:08.497Z"}
+{"level":"info","message":"Route loaded: /api/admin/contact","timestamp":"2025-12-12T10:07:08.499Z"}
+{"level":"info","message":"Route loaded: /api/wallet","timestamp":"2025-12-12T10:07:08.501Z"}
+{"level":"info","message":"Route loaded: /api/kitchen","timestamp":"2025-12-12T10:07:08.505Z"}
+{"level":"warn","message":"[2025-12-12T10:13:33.196Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:13:33.198Z"}
+{"level":"warn","message":"[2025-12-12T10:13:44.133Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:13:44.134Z"}
+{"level":"warn","message":"[2025-12-12T10:14:31.972Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:14:31.973Z"}
+{"level":"warn","message":"[2025-12-12T10:15:42.119Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:15:42.120Z"}
+{"level":"warn","message":"[2025-12-12T10:19:03.898Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:19:03.900Z"}
+{"level":"warn","message":"[2025-12-12T10:19:45.802Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:19:45.803Z"}
+{"level":"warn","message":"[2025-12-12T10:23:01.427Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:23:01.428Z"}
+{"level":"warn","message":"[2025-12-12T10:24:22.846Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:24:22.851Z"}
+{"level":"warn","message":"[2025-12-12T10:24:40.411Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:24:40.412Z"}
+{"level":"warn","message":"[2025-12-12T10:28:35.396Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:28:35.404Z"}
+{"level":"warn","message":"[2025-12-12T10:30:09.732Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:30:09.738Z"}
+{"level":"warn","message":"[2025-12-12T10:32:26.980Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:32:26.985Z"}
+{"level":"warn","message":"[2025-12-12T10:33:12.921Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:33:12.930Z"}
+{"level":"warn","message":"[2025-12-12T10:34:14.329Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:34:14.332Z"}
+{"level":"warn","message":"[2025-12-12T10:35:33.896Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:35:33.903Z"}
+{"level":"warn","message":"[2025-12-12T10:36:53.592Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:36:53.595Z"}
+{"level":"warn","message":"[2025-12-12T10:39:14.766Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:39:14.778Z"}
+{"level":"warn","message":"[2025-12-12T10:39:26.916Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:39:26.917Z"}
+{"level":"warn","message":"[2025-12-12T10:41:49.196Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:41:49.198Z"}
+{"level":"warn","message":"[2025-12-12T10:43:18.800Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:43:18.803Z"}
+{"level":"warn","message":"[2025-12-12T10:46:36.093Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:46:36.109Z"}
+{"level":"warn","message":"[2025-12-12T10:47:04.364Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:47:04.366Z"}
+{"level":"warn","message":"[2025-12-12T10:49:15.508Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:49:15.509Z"}
+{"level":"warn","message":"[2025-12-12T10:51:14.831Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:51:14.832Z"}
+{"level":"warn","message":"[2025-12-12T10:52:05.660Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:52:05.661Z"}
+{"level":"warn","message":"[2025-12-12T10:53:18.070Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:53:18.070Z"}
+{"level":"warn","message":"[2025-12-12T10:56:45.061Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:56:45.062Z"}
+{"level":"warn","message":"[2025-12-12T10:57:28.218Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T10:57:28.218Z"}
+{"level":"warn","message":"[2025-12-12T11:01:12.907Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:01:12.908Z"}
+{"level":"warn","message":"[2025-12-12T11:05:43.878Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:05:43.879Z"}
+{"level":"warn","message":"[2025-12-12T11:06:35.845Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:06:35.846Z"}
+{"level":"warn","message":"[2025-12-12T11:06:55.688Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:06:55.691Z"}
+{"level":"warn","message":"[2025-12-12T11:07:04.866Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:07:04.868Z"}
+{"level":"warn","message":"[2025-12-12T11:07:09.170Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:07:09.171Z"}
+{"level":"warn","message":"[2025-12-12T11:08:14.980Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:08:14.988Z"}
+{"level":"warn","message":"[2025-12-12T11:08:36.919Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:08:36.920Z"}
+{"level":"warn","message":"[2025-12-12T11:09:18.185Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:09:18.186Z"}
+{"level":"warn","message":"[2025-12-12T11:09:34.664Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:09:34.665Z"}
+{"level":"warn","message":"[2025-12-12T11:14:00.368Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:14:00.373Z"}
+{"level":"warn","message":"[2025-12-12T11:19:18.654Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:19:18.661Z"}
+{"level":"warn","message":"[2025-12-12T11:21:58.968Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:21:58.969Z"}
+{"level":"warn","message":"[2025-12-12T11:25:38.864Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:25:38.865Z"}
+{"level":"warn","message":"[2025-12-12T11:29:18.582Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T11:29:18.583Z"}
+{"level":"warn","message":"[2025-12-12T16:12:04.208Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T16:12:04.209Z"}
+{"level":"warn","message":"[2025-12-12T16:17:08.531Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T16:17:08.532Z"}
+{"level":"warn","message":"[2025-12-12T16:33:55.865Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T16:33:55.865Z"}
+{"level":"warn","message":"[2025-12-12T16:36:51.880Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T16:36:51.881Z"}
+{"level":"warn","message":"[2025-12-12T16:54:17.091Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T16:54:17.092Z"}
+{"level":"warn","message":"[2025-12-12T17:13:26.207Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T17:13:26.210Z"}
+{"level":"warn","message":"[2025-12-12T17:17:24.421Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T17:17:24.422Z"}
+{"level":"warn","message":"[2025-12-12T17:20:51.164Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T17:20:51.165Z"}
+{"level":"warn","message":"[2025-12-12T17:25:17.057Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T17:25:17.058Z"}
+{"level":"warn","message":"[2025-12-12T17:26:06.730Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T17:26:06.731Z"}
+{"level":"warn","message":"[2025-12-12T17:32:50.019Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-12T17:32:50.024Z"}
+{"level":"warn","message":"[2025-12-13T12:06:42.409Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T12:06:42.410Z"}
+{"level":"warn","message":"[2025-12-13T12:15:34.809Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T12:15:34.810Z"}
+{"level":"warn","message":"[2025-12-13T12:18:10.166Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T12:18:10.167Z"}
+{"level":"warn","message":"[2025-12-13T12:48:32.508Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T12:48:32.511Z"}
+{"level":"warn","message":"[2025-12-13T12:52:26.532Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T12:52:26.533Z"}
+{"level":"warn","message":"[2025-12-13T12:53:15.136Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T12:53:15.138Z"}
+{"level":"warn","message":"[2025-12-13T12:57:02.309Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T12:57:02.312Z"}
+{"level":"warn","message":"[2025-12-13T12:58:52.022Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T12:58:52.023Z"}
+{"level":"warn","message":"[2025-12-13T13:08:31.011Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:08:31.012Z"}
+{"level":"warn","message":"[2025-12-13T13:10:30.727Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:10:30.728Z"}
+{"level":"warn","message":"[2025-12-13T13:12:03.691Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:12:03.694Z"}
+{"level":"warn","message":"[2025-12-13T13:13:05.212Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:13:05.215Z"}
+{"level":"warn","message":"[2025-12-13T13:19:58.777Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:19:58.781Z"}
+{"level":"warn","message":"[2025-12-13T13:25:52.481Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:25:52.483Z"}
+{"level":"warn","message":"[2025-12-13T13:28:25.566Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:28:25.567Z"}
+{"level":"warn","message":"[2025-12-13T13:31:29.845Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:31:29.846Z"}
+{"level":"warn","message":"[2025-12-13T13:50:03.480Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:50:03.481Z"}
+{"level":"warn","message":"[2025-12-13T13:50:23.846Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:50:23.847Z"}
+{"level":"warn","message":"[2025-12-13T13:50:55.324Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:50:55.325Z"}
+{"level":"warn","message":"[2025-12-13T13:52:20.039Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:52:20.040Z"}
+{"level":"warn","message":"[2025-12-13T13:53:39.572Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:53:39.573Z"}
+{"level":"warn","message":"[2025-12-13T13:55:57.522Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:55:57.523Z"}
+{"level":"warn","message":"[2025-12-13T13:57:39.276Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:57:39.277Z"}
+{"level":"warn","message":"[2025-12-13T13:59:33.556Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T13:59:33.556Z"}
+{"level":"warn","message":"[2025-12-13T14:00:30.306Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T14:00:30.312Z"}
+{"level":"warn","message":"[2025-12-13T14:00:34.790Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T14:00:34.791Z"}
+{"level":"warn","message":"[2025-12-13T14:01:32.956Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T14:01:32.957Z"}
+{"level":"warn","message":"[2025-12-13T14:03:09.824Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-13T14:03:09.825Z"}
+{"level":"warn","message":"[2025-12-15T19:17:59.808Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-15T19:17:59.809Z"}
+{"level":"warn","message":"[2025-12-15T19:20:18.120Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-15T19:20:18.120Z"}
+{"level":"warn","message":"[2025-12-15T19:23:08.625Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-15T19:23:08.626Z"}
+{"level":"warn","message":"[2025-12-16T07:55:31.136Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T07:55:31.137Z"}
+{"level":"warn","message":"[2025-12-16T07:57:35.429Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T07:57:35.431Z"}
+{"level":"warn","message":"[2025-12-16T08:03:38.802Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T08:03:38.803Z"}
+{"level":"warn","message":"[2025-12-16T08:03:55.397Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T08:03:55.399Z"}
+{"level":"warn","message":"[2025-12-16T08:06:30.416Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T08:06:30.418Z"}
+{"level":"warn","message":"[2025-12-16T08:06:52.060Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T08:06:52.062Z"}
+{"level":"warn","message":"[2025-12-16T08:07:27.978Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T08:07:27.982Z"}
+{"level":"warn","message":"[2025-12-16T08:07:41.238Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T08:07:41.240Z"}
+{"level":"warn","message":"[2025-12-16T08:09:58.875Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T08:09:58.877Z"}
+{"level":"warn","message":"[2025-12-16T08:20:48.202Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T08:20:48.212Z"}
+{"level":"warn","message":"[2025-12-16T08:21:33.907Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T08:21:33.909Z"}
+{"level":"warn","message":"[2025-12-16T08:21:59.791Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T08:21:59.793Z"}
+{"level":"warn","message":"[2025-12-16T09:58:35.385Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T09:58:35.394Z"}
+{"level":"warn","message":"[2025-12-16T10:11:33.344Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T10:11:33.348Z"}
+{"level":"warn","message":"[2025-12-16T10:12:01.348Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T10:12:01.349Z"}
+{"level":"warn","message":"[2025-12-16T10:13:40.710Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T10:13:40.713Z"}
+{"level":"warn","message":"[2025-12-16T10:13:54.711Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T10:13:54.712Z"}
+{"level":"warn","message":"[2025-12-16T14:19:44.818Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T14:19:44.819Z"}
+{"level":"warn","message":"[2025-12-16T14:32:13.952Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T14:32:13.953Z"}
+{"level":"warn","message":"[2025-12-16T14:34:37.802Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-16T14:34:37.803Z"}

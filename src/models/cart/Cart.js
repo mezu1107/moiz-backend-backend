@@ -24,17 +24,18 @@ const cartItemSchema = new mongoose.Schema({
   }
 });
 
-const cartSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    unique: true
+const cartSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      unique: true   // creates { user: 1 } UNIQUE index automatically
+    },
+    items: [cartItemSchema]
   },
-  items: [cartItemSchema],
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-// Ensure only one cart per user
-cartSchema.index({ user: 1 }, { unique: true });
-
-module.exports = mongoose.model('Cart', cartSchema);
+module.exports =
+  mongoose.models.Cart || mongoose.model('Cart', cartSchema);

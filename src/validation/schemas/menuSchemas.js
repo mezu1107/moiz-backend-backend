@@ -1,3 +1,4 @@
+// src/validation/schemas/menuSchemas.js
 const { body, param, query } = require('express-validator');
 const mongoose = require('mongoose');
 const Area = require('../../models/area/Area');
@@ -41,12 +42,13 @@ const validateAvailableInAreas = () => {
         }
       }
 
+      // Normalize for controller use
       req.body.availableInAreas = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
       return true;
     });
 };
 
-// Validation for /area/:areaId route
+// Validation for GET /menu/area/:areaId
 const getMenuByAreaIdValidation = [
   param('areaId')
     .trim()
@@ -58,15 +60,23 @@ const getMenuByAreaIdValidation = [
     .bail()
     .custom(async (areaId) => {
       const area = await Area.findOne({ _id: areaId, isActive: true });
-      if (!area) throw new Error('Delivery area not found or currently inactive');
+      if (!area) {
+        throw new Error('Delivery area not found or currently inactive');
+      }
       return true;
     })
 ];
 
 module.exports = {
   getMenuByLocation: [
-    query('lat').exists({ checkFalsy: true }).isFloat({ min: 23.5, max: 37.5 }).withMessage('Valid latitude required (23.5 - 37.5)'),
-    query('lng').exists({ checkFalsy: true }).isFloat({ min: 60, max: 78 }).withMessage('Valid longitude required (60 - 78)')
+    query('lat')
+      .exists({ checkFalsy: true })
+      .isFloat({ min: 23.5, max: 37.5 })
+      .withMessage('Valid latitude required (23.5 - 37.5)'),
+    query('lng')
+      .exists({ checkFalsy: true })
+      .isFloat({ min: 60, max: 78 })
+      .withMessage('Valid longitude required (60 - 78)')
   ],
 
   getAllMenuItemsWithFilters: [
@@ -78,7 +88,10 @@ module.exports = {
     query('minPrice').optional().isFloat({ min: 0 }),
     query('maxPrice').optional().isFloat({ min: 0 }),
     query('search').optional().trim().isLength({ max: 100 }),
-    query('sort').optional().isIn(['name_asc', 'name_desc', 'price_asc', 'price_desc', 'newest', 'oldest', 'category_asc']),
+    query('sort').optional().isIn([
+      'name_asc', 'name_desc', 'price_asc', 'price_desc',
+      'newest', 'oldest', 'category_asc'
+    ]),
     query('availableOnly').optional().isIn(['true', 'false'])
   ],
 
@@ -88,14 +101,28 @@ module.exports = {
 
   toggleAvailabilitySchema: [
     param('id').trim().isMongoId().withMessage('Invalid menu item ID'),
-    body('isAvailable').notEmpty().isBoolean().toBoolean().withMessage('isAvailable must be true/false')
+    body('isAvailable')
+      .notEmpty()
+      .isBoolean()
+      .toBoolean()
+      .withMessage('isAvailable must be true or false')
   ],
 
   addMenuItemSchema: [
-    body('name').trim().notEmpty().isLength({ min: 2, max: 100 }).withMessage('Name is required (2-100 chars)'),
+    body('name')
+      .trim()
+      .notEmpty()
+      .isLength({ min: 2, max: 100 })
+      .withMessage('Name is required (2-100 chars)'),
     body('description').optional({ nullable: true }).trim().isLength({ max: 500 }),
-    body('price').notEmpty().isFloat({ min: 50 }).toFloat().withMessage('Price must be ≥ 50'),
-    body('category').notEmpty().isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']),
+    body('price')
+      .notEmpty()
+      .isFloat({ min: 50 })
+      .toFloat()
+      .withMessage('Price must be ≥ 50'),
+    body('category')
+      .notEmpty()
+      .isIn(['breakfast', 'lunch', 'dinner', 'desserts', 'beverages']),
     body('isVeg').optional().isBoolean().toBoolean(),
     body('isSpicy').optional().isBoolean().toBoolean(),
     validateAvailableInAreas()
@@ -113,6 +140,5 @@ module.exports = {
     validateAvailableInAreas()
   ],
 
-  // Export with clear name to avoid conflict
   getMenuByAreaIdValidation
 };

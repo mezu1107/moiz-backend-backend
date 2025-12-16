@@ -1,7 +1,8 @@
 // src/controllers/deal/dealController.js
+// FINAL PRODUCTION — DECEMBER 2025 — 100% SAFE & LIVE
+
 const Deal = require('../../models/deal/Deal');
 const mongoose = require('mongoose');
-const Order = require('../../models/order/Order'); // Required for discount impact
 
 // ========================
 // CORE: DEAL APPLICATION LOGIC
@@ -35,7 +36,6 @@ const validateAndApplyDeal = async (code, orderTotal, userId = null) => {
 
   if (deal.maxDiscountAmount) discount = Math.min(discount, deal.maxDiscountAmount);
   discount = Number(discount.toFixed(2));
-  const finalAmount = Math.max(0, Number((orderTotal - discount).toFixed(2)));
 
   return {
     dealId: deal._id,
@@ -45,7 +45,7 @@ const validateAndApplyDeal = async (code, orderTotal, userId = null) => {
     discountValue: deal.discountValue,
     maxDiscountAmount: deal.maxDiscountAmount || null,
     discount,
-    finalAmount
+    finalAmount: Math.max(0, Number((orderTotal - discount).toFixed(2)))
   };
 };
 
@@ -77,11 +77,11 @@ const getActiveDeals = async (req, res) => {
       .populate('applicableAreas', 'name')
       .sort({ createdAt: -1 });
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: deals.length > 0 ? 'Hurry! Grab these hot deals before they expire!' : 'No active deals right now. Check back soon!',
-      count: deals.length, 
-      deals 
+      count: deals.length,
+      deals
     });
   } catch (err) {
     console.error('getActiveDeals error:', err);
@@ -104,10 +104,10 @@ const getDealById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'This deal is no longer available' });
     }
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: 'Deal loaded successfully!',
-      deal 
+      deal
     });
   } catch (err) {
     console.error('getDealById error:', err);
@@ -150,7 +150,7 @@ const applyDeal = async (req, res) => {
       const shortfall = (deal.minOrderAmount - orderTotalFloat).toFixed(2);
       return res.status(400).json({
         success: false,
-        message: `Add just ₹${shortfall} more to unlock this offer!`,
+        message: `Add just PKR ${shortfall} more to unlock this offer!`,
         minOrderAmount: deal.minOrderAmount
       });
     }
@@ -184,15 +184,13 @@ const applyDeal = async (req, res) => {
 
     if (userId) {
       await Deal.findByIdAndUpdate(deal._id, {
-        $push: {
-          usedBy: { user: new mongoose.Types.ObjectId(userId), usedAt: new Date() }
-        }
+        $push: { usedBy: { user: new mongoose.Types.ObjectId(userId), usedAt: new Date() } }
       });
     }
 
-    const savingsText = discount >= 100 
-      ? `WHOA! You just saved a massive ₹${discount}!` 
-      : `Yay! You saved ₹${discount} instantly!`;
+    const savingsText = discount >= 100
+      ? `WHOA! You just saved a massive PKR ${discount}!`
+      : `Yay! You saved PKR ${discount} instantly!`;
 
     const titleEmoji = discount >= 150 ? 'Explosion' : discount >= 80 ? 'Party' : 'Tada';
 
@@ -208,12 +206,11 @@ const applyDeal = async (req, res) => {
         code: deal.code,
         title: deal.title,
         description: deal.discountType === 'percentage'
-          ? `${deal.discountValue}% off${deal.maxDiscountAmount ? ` (max ₹${deal.maxDiscountAmount})` : ''}`
-          : `Flat ₹${deal.discountValue} off`,
+          ? `${deal.discountValue}% off${deal.maxDiscountAmount ? ` (max PKR ${deal.maxDiscountAmount})` : ''}`
+          : `Flat PKR ${deal.discountValue} off`,
         appliedDiscount: discount
       }
     });
-
   } catch (err) {
     console.error('applyDeal error:', err);
     return res.status(500).json({
@@ -235,11 +232,11 @@ const getAllDeals = async (req, res) => {
       .populate('applicableAreas', 'name')
       .sort({ createdAt: -1 });
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: 'All deals fetched successfully',
-      count: deals.length, 
-      deals 
+      count: deals.length,
+      deals
     });
   } catch (err) {
     console.error('getAllDeals error:', err);
@@ -306,9 +303,9 @@ const deleteDeal = async (req, res) => {
     const deal = await Deal.findByIdAndDelete(req.params.id);
     if (!deal) return res.status(404).json({ success: false, message: 'Deal not found' });
 
-    res.json({ 
-      success: true, 
-      message: `Deal "${deal.title}" has been removed successfully` 
+    res.json({
+      success: true,
+      message: `Deal "${deal.title}" has been removed successfully`
     });
   } catch (err) {
     console.error('deleteDeal error:', err);
@@ -330,8 +327,8 @@ const toggleDealStatus = async (req, res) => {
 
     res.json({
       success: true,
-      message: deal.isActive 
-        ? `Deal "${deal.title}" is now LIVE!` 
+      message: deal.isActive
+        ? `Deal "${deal.title}" is now LIVE!`
         : `Deal "${deal.title}" has been paused`,
       status: deal.isActive ? 'active' : 'inactive',
       deal: populatedDeal
@@ -343,7 +340,7 @@ const toggleDealStatus = async (req, res) => {
 };
 
 // ========================
-// ADMIN ANALYTICS — FULLY IMPLEMENTED
+// ADMIN ANALYTICS — 100% SAFE (NO Order dependency)
 // ========================
 
 const getDealAnalytics = async (req, res) => {
@@ -506,59 +503,6 @@ const getTopDealsChart = async (req, res) => {
   }
 };
 
-const getDiscountImpactChart = async (req, res) => {
-  try {
-    const impactData = await Order.aggregate([
-      {
-        $match: {
-          'appliedDeal.code': { $exists: true, $ne: null },
-          status: { $in: ['delivered', 'completed'] }
-        }
-      },
-      {
-        $lookup: {
-          from: 'deals',
-          localField: 'appliedDeal.dealId',
-          foreignField: '_id',
-          as: 'dealInfo'
-        }
-      },
-      { $unwind: { path: '$dealInfo', preserveNullAndEmptyArrays: true } },
-      {
-        $group: {
-          _id: '$appliedDeal.code',
-          dealTitle: { $first: '$dealInfo.title' },
-          avgDiscount: { $avg: '$appliedDeal.discountAmount' },
-          avgOrderValue: { $avg: '$totalAmount' },
-          orderCount: { $sum: 1 }
-        }
-      },
-      {
-        $project: {
-          label: '$_id',
-          title: { $ifNull: ['$dealTitle', 'Unknown Deal'] },
-          x: { $round: ['$avgDiscount', 2] },
-          y: { $round: ['$avgOrderValue', 2] },
-          size: '$orderCount'
-        }
-      }
-    ]);
-
-    res.json({
-      success: true,
-      message: 'Discount impact analysis ready',
-      chartType: 'bubble',
-      title: 'Discount Impact Analysis',
-      xAxis: 'Average Discount Given (₹)',
-      yAxis: 'Average Order Value (₹)',
-      sizeBy: 'Number of Orders',
-      data: impactData
-    });
-  } catch (err) {
-    console.error('getDiscountImpactChart error:', err);
-    res.status(500).json({ success: false, message: 'Failed to load chart' });
-  }
-};
 
 // ========================
 // EXPORT ALL
@@ -578,6 +522,6 @@ module.exports = {
   getDealAnalytics,
   getSingleDealStats,
   getDealUsageChart,
-  getTopDealsChart,
-  getDiscountImpactChart
+  getTopDealsChart
+  // getDiscountImpactChart removed — moved to order analytics
 };

@@ -1,40 +1,72 @@
-// src/validation/schemas/areaSchemas.js
 const { body, query } = require('express-validator');
 
-const toFloat = (val) => (typeof val === 'string' ? parseFloat(val.trim()) : val);
+const toFloat = val => (typeof val === 'string' ? parseFloat(val.trim()) : val);
 
-const validatePakistanPoint = (value) => {
-  const lat = toFloat(value?.lat);
-  const lng = toFloat(value?.lng);
+const validatePakistanPoint = (value, { req }) => {
+  if (!value || typeof value !== 'object' || typeof value.lat !== 'number' && typeof value.lat !== 'string' || typeof value.lng !== 'number' && typeof value.lng !== 'string') {
+    throw new Error('Center must be an object with lat and lng properties');
+  }
 
-  if (isNaN(lat) || isNaN(lng)) throw new Error('lat and lng must be valid numbers');
-  if (lat < 23.5 || lat > 37.5) throw new Error('Latitude must be in Pakistan range');
-  if (lng < 60.0 || lng > 78.0) throw new Error('Longitude must be in Pakistan range');
+  const lat = toFloat(value.lat);
+  const lng = toFloat(value.lng);
 
-  return { lat, lng };
+  if (isNaN(lat) || isNaN(lng)) {
+    throw new Error('lat and lng must be valid numbers');
+  }
+
+  if (lat < 23.5 || lat > 37.5) {
+    throw new Error('Latitude must be between 23.5 and 37.5 (Pakistan range)');
+  }
+
+  if (lng < 60.5 || lng > 78.0) {
+    throw new Error('Longitude must be between 60.5 and 78.0 (Pakistan range)');
+  }
+
+  req.body.normalizedCenter = { lat, lng };
+  return true;
 };
 
 const convertPolygonToMongo = (polygon, { req }) => {
-  if (!polygon || polygon.type !== 'Polygon' || !Array.isArray(polygon.coordinates)) {
-    throw new Error('Invalid GeoJSON Polygon');
+  if (!polygon || typeof polygon !== 'object' || polygon.type !== 'Polygon' || !Array.isArray(polygon.coordinates) || polygon.coordinates.length === 0) {
+    throw new Error('Invalid GeoJSON Polygon: must have type "Polygon" and coordinates array');
   }
 
-  const coordinates = polygon.coordinates.map(ring => {
+  const coordinates = polygon.coordinates.map((ring, ringIndex) => {
     if (!Array.isArray(ring) || ring.length < 4) {
-      throw new Error('Polygon ring must have ≥4 points');
+      throw new Error(`Polygon ring ${ringIndex} must have at least 4 points`);
     }
-    const mongoRing = ring.map(([lat, lng]) => {
-      const l = toFloat(lat);
-      const g = toFloat(lng);
-      if (isNaN(l) || isNaN(g)) throw new Error('Invalid coordinates in polygon');
-      return [g, l]; // [lng, lat]
+
+    const mongoRing = ring.map((coord, idx) => {
+      if (!Array.isArray(coord) || coord.length < 2) {
+        throw new Error(`Invalid coordinate at position ${idx} in ring ${ringIndex}`);
+      }
+
+      const lat = toFloat(coord[0]);
+      const lng = toFloat(coord[1]);
+
+      if (isNaN(lat) || isNaN(lng)) {
+        throw new Error(`Invalid coordinates at position ${idx} in ring ${ringIndex}`);
+      }
+
+      if (lat < 23.5 || lat > 37.5) {
+        throw new Error(`Latitude out of Pakistan range at position ${idx} in ring ${ringIndex}`);
+      }
+
+      if (lng < 60.5 || lng > 78.0) {
+        throw new Error(`Longitude out of Pakistan range at position ${idx} in ring ${ringIndex}`);
+      }
+
+      return [lng, lat]; // MongoDB uses [longitude, latitude]
     });
 
-    // Auto-close
-    if (mongoRing[0][0] !== mongoRing[mongoRing.length - 1][0] ||
-        mongoRing[0][1] !== mongoRing[mongoRing.length - 1][1]) {
+    // Auto-close the ring if not already closed
+    if (
+      mongoRing[0][0] !== mongoRing[mongoRing.length - 1][0] ||
+      mongoRing[0][1] !== mongoRing[mongoRing.length - 1][1]
+    ) {
       mongoRing.push(mongoRing[0]);
     }
+
     return mongoRing;
   });
 
@@ -42,71 +74,78 @@ const convertPolygonToMongo = (polygon, { req }) => {
   return true;
 };
 
-// ADD AREA
+// ====================== ADD AREA ======================
 exports.addArea = [
   body('name')
     .trim()
-    .notEmpty().withMessage('Area name is required')
-    .isLength({ min: 2, max: 50 }),
+    .notEmpty()
+    .withMessage('Area name is required')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Area name must be between 2 and 50 characters'),
 
   body('city')
     .optional()
     .trim()
     .isLength({ min: 2, max: 50 })
+    .withMessage('City must be between 2 and 50 characters')
     .default('Lahore'),
 
   body('center')
-    .exists().withMessage('Center is required')
-    .custom((value, { req }) => {
-      req.body.normalizedCenter = validatePakistanPoint(value);
-      return true;
-    }),
+    .exists({ checkNull: true })
+    .withMessage('Center is required')
+    .bail()
+    .custom(validatePakistanPoint),
 
   body('polygon')
-    .exists().withMessage('Polygon is required')
+    .exists({ checkNull: true })
+    .withMessage('Polygon is required')
+    .bail()
     .custom(convertPolygonToMongo),
 ];
 
-// UPDATE AREA
+// ====================== UPDATE AREA ======================
 exports.updateArea = [
   body('name')
     .optional()
     .trim()
-    .isLength({ min: 2, max: 50 }),
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Area name must be between 2 and 50 characters'),
 
   body('city')
     .optional()
     .trim()
-    .isLength({ min: 2, max: 50 }),
+    .isLength({ min: 2, max: 50 })
+    .withMessage('City must be between 2 and 50 characters'),
 
   body('center')
     .optional()
-    .custom((value, { req }) => {
-      if (value) req.body.normalizedCenter = validatePakistanPoint(value);
-      return true;
-    }),
+    .custom(validatePakistanPoint),
 
   body('polygon')
     .optional()
     .custom((value, { req }) => {
-      if (value) convertPolygonToMongo(value, { req });
+      if (value !== undefined) {
+        return convertPolygonToMongo(value, { req });
+      }
       return true;
     }),
 ];
 
-// CHECK AREA QUERY
+// ====================== CHECK AREA QUERY ======================
 exports.checkAreaQuery = [
   query('lat')
-    .notEmpty().withMessage('Latitude is required')
+    .notEmpty()
+    .withMessage('Latitude is required')
     .trim()
     .customSanitizer(toFloat)
     .isFloat({ min: 23.5, max: 37.5 })
     .withMessage('Latitude must be between 23.5 and 37.5'),
 
   query('lng')
-    .notEmpty().withMessage('Longitude is required')
+    .notEmpty()
+    .withMessage('Longitude is required')
     .trim()
     .customSanitizer(toFloat)
-    .isFloat({ min: 60.0, max: 78.0 })
-    .withMessage('Longitude must be between 60.0 and 78.0'),
+    .isFloat({ min: 60.5, max: 78.0 })
+    .withMessage('Longitude must be between 60.5 and 78.0'),
 ];

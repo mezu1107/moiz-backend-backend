@@ -1,4 +1,4 @@
-// src/models/user/User.js
+// src/models/user/User.js — FINAL PRODUCTION VERSION (DECEMBER 13, 2025)
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -16,13 +16,26 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-    unique: true, // Unique index auto-created
+    unique: true,
     trim: true
   },
 
   password: { type: String, required: true, minlength: 6, select: false },
 
-  role: { type: String, enum: ['customer', 'rider', 'admin'], default: 'customer' },
+  role: { 
+    type: String, 
+    enum: [
+      'customer',
+      'rider', 
+      'admin',
+      'kitchen',
+      'delivery_manager',
+      'support',
+      'finance'
+    ], 
+    default: 'customer' 
+  },
+
   isActive: { type: Boolean, default: true },
 
   riderStatus: {
@@ -31,7 +44,7 @@ const userSchema = new mongoose.Schema({
     default: 'none'
   },
 
-  // Account safety & moderation
+  // Account moderation
   isDeleted: { type: Boolean, default: false, select: false },
   deletedAt: { type: Date, select: false },
   isPermanentlyBanned: { type: Boolean, default: false, select: false },
@@ -42,19 +55,25 @@ const userSchema = new mongoose.Schema({
   blockedAt: { type: Date, select: false },
 
   riderDocuments: {
-    cnicNumber: String,
-    cnicFront: String,
-    cnicBack: String,
-    drivingLicense: String,
-    riderPhoto: String,
-    vehicleNumber: String,
-    vehicleType: { type: String, enum: ['bike', 'car', 'bicycle'], default: 'bike' }
+    type: {
+      cnicNumber: String,
+      cnicFront: String,
+      cnicBack: String,
+      drivingLicense: String,
+      riderPhoto: String,
+      vehicleNumber: String,
+      vehicleType: {
+        type: String,
+        enum: ['bike', 'car', 'bicycle'],
+        default: 'bike'
+      }
+    },
+    default: {} // ← Ensures riderDocuments is never undefined
   },
 
-  // GeoLocation
   currentLocation: {
     type: { type: String, enum: ['Point'], default: 'Point' },
-    coordinates: { type: [Number], default: [74.3587, 31.5204] } // Lahore default
+    coordinates: { type: [Number], default: [74.3587, 31.5204] } // Lahore
   },
   isOnline: { type: Boolean, default: false },
   isAvailable: { type: Boolean, default: false },
@@ -69,14 +88,13 @@ const userSchema = new mongoose.Schema({
   otp: { type: String, select: false },
   otpExpires: { type: Date, select: false },
   otpAttempts: { type: Number, default: 0, select: false }
-
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
 
-// ===== Indexes (Optimized & No Duplicates) =====
+// ==================== INDEXES ====================
 userSchema.index({ currentLocation: '2dsphere' });
 userSchema.index({ role: 1, riderStatus: 1 });
 userSchema.index({ isOnline: 1, isAvailable: 1 });
@@ -84,38 +102,34 @@ userSchema.index({ isDeleted: 1 });
 userSchema.index({ isPermanentlyBanned: 1 });
 userSchema.index({ isBlocked: 1 });
 
-// Auto-filter soft-deleted & banned users
-userSchema.pre(/^find/, function(next) {
-  this.where({
-    isDeleted: { $ne: true },
-    isPermanentlyBanned: { $ne: true }
-  });
-  next();
+// ==================== SOFT DELETE & BAN FILTER (CORRECT & SAFE) ====================
+// Modern middleware — no `next` needed
+userSchema.pre(/^find/, function () {
+  this.and([
+    { isDeleted: { $ne: true } },
+    { isPermanentlyBanned: { $ne: true } }
+  ]);
 });
 
-userSchema.pre('findOneAndUpdate', function(next) {
-  this.where({
-    isDeleted: { $ne: true },
-    isPermanentlyBanned: { $ne: true }
-  });
-  next();
+userSchema.pre(/^findOneAnd/, function () {
+  this.and([
+    { isDeleted: { $ne: true } },
+    { isPermanentlyBanned: { $ne: true } }
+  ]);
 });
 
-// Password hashing
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+// ==================== PASSWORD HASHING ====================
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 12);
-  next();
 });
 
-userSchema.methods.comparePassword = async function(candidate) {
+userSchema.methods.comparePassword = async function (candidate) {
   return bcrypt.compare(candidate, this.password);
 };
 
-// Remove sensitive data from JSON
+// ==================== CLEAN JSON OUTPUT ====================
 userSchema.set('toJSON', {
-  virtuals: true,
-  versionKey: false,
   transform: (doc, ret) => {
     delete ret.password;
     delete ret.fcmToken;

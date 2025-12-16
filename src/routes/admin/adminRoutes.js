@@ -19,19 +19,18 @@ const {
 
 const { addArea: addAreaSchema, updateArea: updateAreaSchema } = require('../../validation/schemas/areaSchemas');
 
-// ====================== MIDDLEWARE ======================
-// Use reference to auth middleware (do NOT call it)
-router.use(auth);
-router.use(role(['admin', 'superadmin']));
+// ====================== PROTECTED ROUTES ======================
+router.use(auth); // must be authenticated
+router.use(role(['admin'])); // only admin can access
 
-// ====================== AREA ROUTES ======================
+// ---- AREA ----
 router.post('/area', addAreaSchema, validate, addArea);
 router.put('/area/:id', updateAreaSchema, validate, updateArea);
 router.get('/areas', getAllAreasWithZones);
 router.get('/area/:id', getAreaById);
 router.delete('/area/:id', deleteArea);
 
-// ====================== DELIVERY ZONE ROUTES ======================
+// ---- DELIVERY ZONE ----
 router.patch('/area/:id/toggle-active', toggleAreaActive);
 router.patch('/delivery-zone/:areaId/toggle', toggleDeliveryZone);
 router.put('/delivery-zone/:areaId', updateDeliveryZone);

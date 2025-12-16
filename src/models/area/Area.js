@@ -10,14 +10,16 @@ const areaSchema = new mongoose.Schema(
       minlength: [2, 'Name must be at least 2 characters'],
       maxlength: [50, 'Name cannot exceed 50 characters'],
     },
+
     city: {
       type: String,
       required: true,
-      default: 'LAHORE',
+      default: 'RAWALPINDI',
       trim: true,
       uppercase: true,
     },
-    // GeoJSON Polygon — MUST be in [lng, lat] order
+
+    // GeoJSON Polygon — stored as [lng, lat] (MongoDB standard)
     polygon: {
       type: {
         type: String,
@@ -26,11 +28,12 @@ const areaSchema = new mongoose.Schema(
         default: 'Polygon',
       },
       coordinates: {
-        type: [[[Number]]], // [[[lng, lat], ...]]
+        type: [[[Number]]], // array of rings: [[[lng, lat], ...]]
         required: [true, 'Polygon coordinates are required'],
       },
     },
-    // GeoJSON Point center
+
+    // GeoJSON Point for center
     center: {
       type: {
         type: String,
@@ -41,18 +44,12 @@ const areaSchema = new mongoose.Schema(
       coordinates: {
         type: [Number], // [lng, lat]
         required: [true, 'Center coordinates are required'],
-        validate: {
-          validator: function (v) {
-            return Array.isArray(v) && v.length === 2;
-          },
-          message: 'Center must have exactly 2 coordinates: [lng, lat]',
-        },
       },
     },
+
     isActive: {
       type: Boolean,
       default: false,
-      index: true,
     },
   },
   {
@@ -62,82 +59,86 @@ const areaSchema = new mongoose.Schema(
   }
 );
 
+//
 // ==================== INDEXES ====================
-
-// Critical for $geoIntersects on polygon
+//
 areaSchema.index({ polygon: '2dsphere' });
-
-// For finding nearest areas or clustering
 areaSchema.index({ center: '2dsphere' });
 
-// Case-insensitive unique name per city (perfect!)
+// Unique name per city (case-insensitive)
 areaSchema.index(
   { name: 1, city: 1 },
-  {
-    unique: true,
-    collation: { locale: 'en', strength: 2 }, // case & accent insensitive
-  }
+  { unique: true, collation: { locale: 'en', strength: 2 } }
 );
 
-// Fast filtering
 areaSchema.index({ city: 1, isActive: 1 });
 areaSchema.index({ isActive: 1 });
 
-// ==================== VIRTUALS ====================
 
+//
+// ==================== VIRTUALS ====================
+//
 areaSchema.virtual('centerLatLng').get(function () {
   if (!this.center?.coordinates) return null;
   const [lng, lat] = this.center.coordinates;
-  return { lat: Number(lat.toFixed(6)), lng: Number(lng.toFixed(6)) };
+  return {
+    lat: Number(lat.toFixed(6)),
+    lng: Number(lng.toFixed(6)),
+  };
 });
 
-// Optional: expose full polygon in Leaflet format
 areaSchema.virtual('polygonLatLng').get(function () {
   if (!this.polygon?.coordinates) return null;
+
   return this.polygon.coordinates.map(ring =>
-    ring.map(([lng, lat]) => [lat, lng]) // convert [lng, lat] → [lat, lng]
+    ring.map(([lng, lat]) => [lat, lng]) // → Leaflet format [lat, lng]
   );
 });
 
-// ==================== MIDDLEWARE: Auto-close polygon rings ====================
 
-areaSchema.pre('save', function (next) {
+//
+// ==================== MIDDLEWARE (MODERN STYLE) ====================
+//
+areaSchema.pre('save', async function () {
+  // Auto-close polygon rings if modified
   if (this.isModified('polygon')) {
-    try {
-      this.polygon.coordinates = this.polygon.coordinates.map(ring => {
-        if (!Array.isArray(ring) || ring.length < 4) {
-          throw new Error('Each polygon ring must have at least 4 points');
-        }
+    this.polygon.coordinates = this.polygon.coordinates.map(ring => {
+      if (!Array.isArray(ring) || ring.length < 4) {
+        throw new Error('Each polygon ring must have at least 4 points');
+      }
 
-        const first = ring[0];
-        const last = ring[ring.length - 1];
+      const first = ring[0];
+      const last = ring[ring.length - 1];
 
-        // Auto-close ring if not already closed
-        if (!arraysEqual(first, last)) {
-          ring.push([...first]);
-        }
+      // Auto-close if not already closed (with tolerance)
+      if (!arraysEqual(first, last)) {
+        ring.push([...first]);
+      }
 
-        return ring;
-      });
-    } catch (err) {
-      return next(err);
-    }
+      return ring;
+    });
   }
 
-  // Ensure center is in bounds (Pakistan)
-  if (this.isModified('center')) {
+  // Validate center is within Pakistan bounds
+  if (this.isModified('center') || this.isNew) {
     const [lng, lat] = this.center.coordinates;
-    if (lat < 23.5 || lat > 37.5 || lng < 60.0 || lng > 78.0) {
-      return next(new Error('Center coordinates outside Pakistan bounds'));
+    if (!lat || !lng) {
+      throw new Error('Center coordinates missing');
+    }
+    if (lat < 23.5 || lat > 37.5) {
+      throw new Error('Center latitude must be between 23.5 and 37.5');
+    }
+    if (lng < 60.5 || lng > 78.0) {
+      throw new Error('Center longitude must be between 60.5 and 78.0');
     }
   }
-
-  next();
 });
 
-// Helper: compare two coordinate arrays
+// Helper function (must be defined inside or hoisted)
 function arraysEqual(a, b) {
-  return a.length === b.length && a.every((val, i) => Math.abs(val - b[i]) < 1e-9);
+  if (!Array.isArray(a) || !Array.isArray(b)) return false;
+  if (a.length !== b.length) return false;
+  return a.every((val, i) => Math.abs(val - b[i]) < 1e-9);
 }
 
 module.exports = mongoose.models.Area || mongoose.model('Area', areaSchema);

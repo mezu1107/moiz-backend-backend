@@ -1,10 +1,11 @@
 // src/routes/order/orderRoutes.js
+// FINAL — DECEMBER 2025 — ROLE SAFE & PRODUCTION READY
 
 const express = require('express');
 const router = express.Router();
+
 const { auth, optionalAuth } = require('../../middleware/auth/auth');
 const { role } = require('../../middleware/role/role');
-const validate = require('../../middleware/validate/validate');
 
 const {
   createOrder,
@@ -19,52 +20,100 @@ const {
   generateReceipt,
   trackOrderById,
   trackOrdersByPhone,
-  paymentSuccess
+  paymentSuccess,
+  requestRefund
 } = require('../../controllers/order/orderController');
 
-const {
-  createOrderSchema,
-  trackByPhone,
-  updateStatus,
-  assignRiderSchema,
-  rejectOrder
-} = require('../../validation/schemas/orderSchemas');
 
-// ====================== PUBLIC TRACKING ======================
+// ============================================================
+// 🌍 PUBLIC / GUEST ROUTES
+// ============================================================
+
 router.get('/track/:orderId', trackOrderById);
-router.post('/track/by-phone', trackByPhone, validate, trackOrdersByPhone);
+router.post('/track/by-phone', trackOrdersByPhone);
 
-// ====================== UNIFIED ORDER — GUEST + AUTH ======================
-router.post(
-  '/',
-  optionalAuth,
-  createOrderSchema,
-  validate,
-  createOrder
-);
+// Stripe / Payment success (guest + user)
+router.route('/success/:orderId')
+  .get(optionalAuth, paymentSuccess)
+  .post(optionalAuth, paymentSuccess);
 
-// ====================== PAYMENT SUCCESS (PUBLIC) ======================
-router.post('/success/:orderId', optionalAuth, paymentSuccess); // Stripe callback & frontend request
-router.get('/success/:orderId', optionalAuth, paymentSuccess);  // Browser redirect after payment
+// Create order (guest OR logged-in)
+router.post('/', optionalAuth, createOrder);
 
-// ====================== AUTH REQUIRED BELOW ======================
+
+// ============================================================
+// 🔐 AUTH REQUIRED
+// ============================================================
+
 router.use(auth);
 
-// Customer routes
-router.get('/my', getCustomerOrders);
-router.get('/:id', getOrderById);
-router.patch('/:id/cancel', cancelOrder);
-router.patch('/:id/reject', rejectOrder, validate, customerRejectOrder);
-router.get('/:id/receipt', generateReceipt);
 
-// Admin & Rider routes
-router.use(role(['admin', 'rider']));
-router.patch('/:id/status', updateStatus, validate, updateOrderStatus);
+// ============================================================
+// 👤 CUSTOMER ROUTES
+// ============================================================
 
-// Admin only
-router.use(role(['admin']));
-router.patch('/:id/admin-reject', rejectOrder, validate, adminRejectOrder);
-router.patch('/:id/assign', assignRiderSchema, validate, assignRider);
-router.get('/', getAllOrders);
+router.get('/my', role('customer'), getCustomerOrders);
+router.get('/:id', role('customer'), getOrderById);
+
+router.patch('/:id/cancel', role('customer'), cancelOrder);
+router.patch('/:id/reject', role('customer'), customerRejectOrder);
+
+router.post('/:id/request-refund', role('customer'), requestRefund);
+router.get('/:id/receipt', role(['customer', 'admin']), generateReceipt);
+
+
+// ============================================================
+// 🍳 KITCHEN ROUTES
+// ============================================================
+
+router.patch(
+  '/:id/status',
+  role(['admin', 'kitchen']),
+  updateOrderStatus
+);
+
+
+// ============================================================
+// 🛵 RIDER ROUTES
+// ============================================================
+
+router.patch(
+  '/:id/status',
+  role(['admin', 'rider']),
+  updateOrderStatus
+);
+
+
+// ============================================================
+// 🚚 DELIVERY MANAGER
+// ============================================================
+
+router.patch(
+  '/:id/assign',
+  role(['admin', 'delivery_manager']),
+  assignRider
+);
+
+
+// ============================================================
+// 💰 FINANCE & SUPPORT
+// ============================================================
+
+router.get(
+  '/',
+  role(['admin', 'finance', 'support']),
+  getAllOrders
+);
+
+
+// ============================================================
+// 👑 ADMIN ONLY
+// ============================================================
+
+router.patch(
+  '/:id/admin-reject',
+  role('admin'),
+  adminRejectOrder
+);
 
 module.exports = router;

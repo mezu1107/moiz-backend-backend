@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const MenuItem = require('../../models/menuItem/MenuItem');
 const Area = require('../../models/area/Area');
+const DeliveryZone = require('../../models/deliveryZone/DeliveryZone'); // ← ADD THIS
 const cloudinary = require('../../config/cloudinary');
 const streamifier = require('streamifier');
 
@@ -25,7 +26,7 @@ const uploadToCloudinary = (buffer) => {
   });
 };
 
-// ADD NEW MENU ITEM
+// ADD NEW MENU ITEM (unchanged)
 const addMenuItem = async (req, res) => {
   try {
     if (!req.file) {
@@ -80,14 +81,11 @@ const addMenuItem = async (req, res) => {
   }
 };
 
-// GET MENU BY USER LOCATION (lat/lng)
-// src/controllers/menu/menuController.js
-
+// GET MENU BY USER LOCATION (lat/lng) — NOW DYNAMIC DELIVERY
 const getMenuByLocation = async (req, res) => {
   try {
     const { lat, lng } = req.query;
 
-    // Validate coordinates
     if (!lat || !lng) {
       return res.status(400).json({
         success: false,
@@ -105,7 +103,7 @@ const getMenuByLocation = async (req, res) => {
       });
     }
 
-    // Optional: Reject outside Pakistan
+    // Reject outside Pakistan
     if (latNum < 23.5 || latNum > 37.5 || lngNum < 60.0 || lngNum > 78.0) {
       return res.json({
         success: true,
@@ -118,13 +116,8 @@ const getMenuByLocation = async (req, res) => {
       });
     }
 
-    // GeoJSON Point: MongoDB expects [longitude, latitude]
-    const point = {
-      type: 'Point',
-      coordinates: [lngNum, latNum],
-    };
+    const point = { type: 'Point', coordinates: [lngNum, latNum] };
 
-    // Find active area that contains this point
     const area = await Area.findOne({
       isActive: true,
       polygon: { $geoIntersects: { $geometry: point } },
@@ -132,7 +125,6 @@ const getMenuByLocation = async (req, res) => {
       .select('name city _id center')
       .lean();
 
-    // Not in any active delivery zone
     if (!area) {
       return res.json({
         success: true,
@@ -145,23 +137,31 @@ const getMenuByLocation = async (req, res) => {
       });
     }
 
-    // Find menu items available in this area
+    // Fetch delivery zone for dynamic fee, minOrder, time
+    const zone = await DeliveryZone.findOne({ area: area._id }).lean();
+
+    const hasDelivery = zone && zone.isActive === true;
+    const deliveryInfo = hasDelivery ? {
+      fee: zone.deliveryFee || 199,
+      minOrder: zone.minOrderAmount || 0,
+      estimatedTime: zone.estimatedTime || '35-50 mins',
+    } : null;
+
     const menu = await MenuItem.find({
       isAvailable: true,
       $or: [
-        { availableInAreas: { $size: 0 } },           // Global items (everywhere)
-        { availableInAreas: area._id },               // Specific to this area
+        { availableInAreas: { $size: 0 } },
+        { availableInAreas: area._id },
       ],
     })
       .sort({ category: 1, name: 1 })
       .select('-cloudinaryId -__v')
       .lean();
 
-    // Final response
     return res.json({
       success: true,
       inService: true,
-      hasDeliveryZone: true,
+      hasDeliveryZone: hasDelivery,
       area: {
         _id: area._id,
         name: area.name,
@@ -171,12 +171,11 @@ const getMenuByLocation = async (req, res) => {
           lng: Number(area.center.coordinates[0].toFixed(6)),
         },
       },
-      delivery: {
-        fee: 149,
-        estimatedTime: '35-50 mins',
-      },
+      delivery: deliveryInfo,
       menu,
-      message: `Welcome to ${area.name}! ${menu.length} items available`,
+      message: hasDelivery
+        ? `Delivery available! Fee: Rs.${deliveryInfo.fee}`
+        : `Welcome to ${area.name}! ${menu.length} items available (delivery coming soon)`,
     });
   } catch (err) {
     console.error('getMenuByLocation error:', err);
@@ -401,13 +400,33 @@ const getMenuByAreaId = async (req, res) => {
   try {
     const { areaId } = req.params;
 
-    const area = await Area.findOne({ _id: areaId, isActive: true }).select('name city center');
+    if (!mongoose.Types.ObjectId.isValid(areaId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid area ID',
+      });
+    }
+
+    const area = await Area.findOne({ _id: areaId, isActive: true })
+      .select('name city center')
+      .lean();
+
     if (!area) {
       return res.status(404).json({
         success: false,
-        message: 'Delivery area not found or currently unavailable'
+        message: 'Delivery area not found or currently unavailable',
       });
     }
+
+    // Fetch delivery zone
+    const zone = await DeliveryZone.findOne({ area: areaId }).lean();
+
+    const hasDelivery = zone && zone.isActive === true;
+    const deliveryInfo = hasDelivery ? {
+      fee: zone.deliveryFee || 199,
+      minOrder: zone.minOrderAmount || 0,
+      estimatedTime: zone.estimatedTime || '35-50 mins',
+    } : null;
 
     const menu = await MenuItem.find({
       isAvailable: true,
@@ -422,17 +441,22 @@ const getMenuByAreaId = async (req, res) => {
 
     res.json({
       success: true,
+      hasDeliveryZone: hasDelivery,
       area: {
         _id: area._id,
         name: area.name,
         city: area.city,
         center: area.center ? {
-          lat: area.center.coordinates[1],
-          lng: area.center.coordinates[0]
+          lat: Number(area.center.coordinates[1].toFixed(6)),
+          lng: Number(area.center.coordinates[0].toFixed(6))
         } : null
       },
+      delivery: deliveryInfo,
       totalItems: menu.length,
-      menu
+      menu,
+      message: hasDelivery
+        ? `Delivery available! Fee: Rs.${deliveryInfo.fee}`
+        : 'Area active — delivery setup in progress',
     });
   } catch (err) {
     console.error('getMenuByAreaId error:', err);
