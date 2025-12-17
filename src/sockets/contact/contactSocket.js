@@ -1,19 +1,38 @@
-// src/sockets/contact/contactSocket.js
-const setupContactSocket = (io) => {
-  io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
+const { authenticateSocket } = require('../../middleware/auth/auth');
+const { roleSocket } = require('../../middleware/role/role');
 
-    // Admin joins admin room
-    socket.on('join-admin-room', (user) => {
-      if (user && user.role === 'admin') {
-        socket.join('admin-room');
-        console.log(`Admin ${user.name} (${user.id}) joined admin-room`);
-      }
+const setupContactSocket = (io) => {
+  // 🔌 Dedicated namespace for contact/admin
+  const contactNamespace = io.of('/contact-admin');
+
+  // 1️⃣ Authenticate socket (JWT)
+  contactNamespace.use(authenticateSocket);
+
+  // 2️⃣ Allow only ADMIN + SUPPORT
+  contactNamespace.use(roleSocket(['admin', 'support']));
+
+  contactNamespace.on('connection', (socket) => {
+    console.log(
+      `[CONTACT SOCKET] Connected: ${socket.user.role} (${socket.user.id})`
+    );
+
+    /**
+     * Admin & Support join secure room
+     */
+    socket.join('contact-admin-room');
+
+    /**
+     * Optional: confirm join
+     */
+    socket.emit('contact:connected', {
+      role: socket.user.role,
+      message: 'Connected to contact admin channel',
     });
 
-    // Optional: Leave room on disconnect
     socket.on('disconnect', () => {
-      console.log('User disconnected:', socket.id);
+      console.log(
+        `[CONTACT SOCKET] Disconnected: ${socket.user.id}`
+      );
     });
   });
 };

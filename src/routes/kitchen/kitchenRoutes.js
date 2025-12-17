@@ -1,4 +1,3 @@
-// src/routes/kitchen/kitchenRoutes.js
 // FINAL PRODUCTION VERSION — FULLY SECURE KITCHEN API (DEC 2025)
 
 const router = require('express').Router();
@@ -9,21 +8,23 @@ const { role } = require('../../middleware/role/role');
 const {
   getKitchenOrders,
   startPreparingItem,
-  completeItem
+  completeItem,
+  completeOrder // ✅ IMPORT WAS MISSING
 } = require('../../controllers/kitchen/kitchenController');
 
 const {
   startItemSchema,
-  completeItemSchema
+  completeItemSchema,
+  completeOrderSchema
 } = require('../../validation/schemas/kitchenSchemas');
 
-// PROTECT ALL KITCHEN ROUTES
-// Only admin + kitchen staff allowed (admin has god mode via role middleware)
+// ==================== SECURITY ====================
+// Only admin + kitchen staff allowed
 router.use(auth, role(['admin', 'kitchen']));
 
 // ==================== ROUTES ====================
 
-// GET: Fetch all active + stats (for kitchen display)
+// GET: Fetch all kitchen orders + stats
 router.get('/orders', getKitchenOrders);
 
 // POST: Start preparing a specific item
@@ -34,12 +35,20 @@ router.post(
   startPreparingItem
 );
 
-// POST: Mark item as ready (complete)
+// POST: Mark item as ready
 router.post(
   '/complete-item',
   completeItemSchema,
   validate,
   completeItem
+);
+
+// POST: Mark entire order as completed (served/delivered)
+router.post(
+  '/complete-order',
+  completeOrderSchema,
+  validate,
+  completeOrder
 );
 
 module.exports = router;

@@ -42,7 +42,20 @@ const completeItemSchema = [
     .custom(isValidMongoId)
 ];
 
+// src/validation/schemas/kitchenSchemas.js
+// ... existing code ...
+
+const completeOrderSchema = [
+  body('kitchenOrderId')
+    .trim()
+    .notEmpty()
+    .withMessage('Kitchen order ID is required')
+    .custom(isValidMongoId)
+];
+
 module.exports = {
   startItemSchema,
-  completeItemSchema
+  completeItemSchema,
+  completeOrderSchema // NEW
 };
+

@@ -12300,3 +12300,75 @@
 {"level":"warn","message":"[2025-12-17T10:36:35.176Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T10:36:35.180Z"}
 {"level":"warn","message":"[2025-12-17T10:36:52.486Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T10:36:52.487Z"}
 {"level":"warn","message":"[2025-12-17T10:39:53.356Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T10:39:53.364Z"}
+{"level":"warn","message":"[2025-12-17T17:01:33.700Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:01:33.702Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-17T17:29:33.251Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-17T17:30:05.887Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:30:25.750Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:32:37.945Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:32:39.311Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:32:52.817Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:32:53.772Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:34:06.829Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:34:07.749Z"}
+{"level":"warn","message":"[2025-12-17T17:40:12.952Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:40:12.955Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:40:18.777Z"}
+{"level":"warn","message":"[2025-12-17T17:40:49.085Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:40:49.086Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:40:51.498Z"}
+{"level":"warn","message":"[2025-12-17T17:40:56.625Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:40:56.626Z"}
+{"level":"warn","message":"[2025-12-17T17:41:41.051Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:41:41.052Z"}
+{"level":"warn","message":"[2025-12-17T17:42:05.596Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:42:05.597Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:46:33.249Z"}
+{"level":"warn","message":"[2025-12-17T17:47:13.900Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:47:13.900Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:47:21.265Z"}
+{"level":"warn","message":"[2025-12-17T17:48:58.498Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:48:58.499Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:49:04.299Z"}
+{"level":"warn","message":"[2025-12-17T17:49:27.097Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:49:27.097Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:49:29.860Z"}
+{"level":"warn","message":"[2025-12-17T17:49:45.809Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:49:45.812Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:49:48.244Z"}
+{"level":"warn","message":"[2025-12-17T17:50:23.434Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:50:23.437Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:50:25.693Z"}
+{"level":"warn","message":"[2025-12-17T17:51:53.084Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T17:51:53.085Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:53:53.237Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:54:43.830Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:54:44.789Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:58:35.252Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:58:37.762Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:58:49.837Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:58:51.405Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:58:53.830Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T17:58:55.311Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:00:06.839Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:00:08.423Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:00:33.849Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:00:35.585Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:00:43.845Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:00:45.485Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:00:56.830Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:00:58.487Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:05:00.725Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:05:01.834Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:07:24.673Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:11:18.802Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:12:13.704Z"}
+{"level":"warn","message":"[2025-12-17T18:13:16.447Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T18:13:16.448Z"}
+{"level":"warn","message":"[2025-12-17T18:14:34.193Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T18:14:34.194Z"}
+{"level":"warn","message":"[2025-12-17T18:15:47.263Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T18:15:47.264Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:16:04.831Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:24:09.775Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:24:20.906Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:24:21.093Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:24:21.940Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:29:31.846Z"}
+{"level":"warn","message":"[2025-12-17T18:30:31.954Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T18:30:31.958Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:32:51.977Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:33:20.854Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:33:22.474Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:37:45.804Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:40:14.413Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T18:55:59.975Z"}
+{"level":"warn","message":"[2025-12-17T19:03:03.036Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T19:03:03.041Z"}
+{"level":"warn","message":"[2025-12-17T19:06:02.222Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T19:06:02.227Z"}
+{"level":"warn","message":"[2025-12-17T19:07:38.481Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T19:07:38.483Z"}
+{"level":"warn","message":"[2025-12-17T19:08:49.785Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T19:08:49.786Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T19:20:16.286Z"}

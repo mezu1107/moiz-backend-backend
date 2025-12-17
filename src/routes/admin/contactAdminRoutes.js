@@ -10,8 +10,9 @@ const {
   markMessageAsReplied
 } = require('../../controllers/admin/contactAdminController');
 
-// All routes protected + admin only
-router.use(auth, role('admin'));
+// 🔐 HTTP → admin only
+router.use(auth);
+router.use(role('admin'));
 
 router.get('/messages', getAllContactMessages);
 
