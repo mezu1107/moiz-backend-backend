@@ -29,11 +29,12 @@ import {
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
+
 import { apiClient } from '@/lib/api';
-import { Area, AreasResponse, DeliveryZone } from '@/types/area';
+import { AreaWithCenter, AreasResponse } from '@/types/area';
 
 export default function AreasList() {
-  const [areas, setAreas] = useState<Area[]>([]);
+  const [areas, setAreas] = useState<AreaWithCenter[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -53,16 +54,14 @@ export default function AreasList() {
     fetchAreas();
   }, []);
 
-  const toggleAreaActive = async (area: Area) => {
+  const toggleAreaActive = async (area: AreaWithCenter) => {
     setActionLoading(area._id);
     try {
       await apiClient.patch(`/admin/area/${area._id}/toggle-active`);
       toast.success(area.isActive ? 'Area hidden from users' : 'Area now visible to users');
 
-      setAreas(prev =>
-        prev.map(a =>
-          a._id === area._id ? { ...a, isActive: !a.isActive } : a
-        )
+      setAreas((prev) =>
+        prev.map((a) => (a._id === area._id ? { ...a, isActive: !a.isActive } : a))
       );
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to update visibility');
@@ -71,7 +70,7 @@ export default function AreasList() {
     }
   };
 
-  const toggleDeliveryZone = async (area: Area) => {
+  const toggleDeliveryZone = async (area: AreaWithCenter) => {
     setActionLoading(area._id);
     try {
       const res = await apiClient.patch<{
@@ -93,8 +92,8 @@ export default function AreasList() {
           : `Delivery paused in ${area.name}`
       );
 
-      setAreas(prev =>
-        prev.map(a =>
+      setAreas((prev) =>
+        prev.map((a) =>
           a._id === area._id
             ? {
                 ...a,
@@ -107,10 +106,11 @@ export default function AreasList() {
                       isActive: true,
                       createdAt: new Date().toISOString(),
                       updatedAt: new Date().toISOString(),
-                    } as DeliveryZone
+                    }
                   : a.deliveryZone
                   ? { ...a.deliveryZone, isActive: false }
                   : null,
+                hasDeliveryZone: true,
               }
             : a
         )
@@ -127,7 +127,7 @@ export default function AreasList() {
     try {
       await apiClient.delete(`/admin/area/${areaId}`);
       toast.success('Area and delivery zone deleted permanently');
-      setAreas(prev => prev.filter(a => a._id !== areaId));
+      setAreas((prev) => prev.filter((a) => a._id !== areaId));
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to delete area');
     } finally {
@@ -146,9 +146,9 @@ export default function AreasList() {
     );
   }
 
-  const liveCount = areas.filter(a => a.deliveryZone?.isActive).length;
-  const pausedCount = areas.filter(a => a.deliveryZone && !a.deliveryZone?.isActive).length;
-  const noZoneCount = areas.filter(a => !a.deliveryZone).length;
+  const liveCount = areas.filter((a) => a.deliveryZone?.isActive).length;
+  const pausedCount = areas.filter((a) => a.deliveryZone && !a.deliveryZone.isActive).length;
+  const noZoneCount = areas.filter((a) => !a.deliveryZone).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-12">

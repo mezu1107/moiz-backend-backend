@@ -1,5 +1,5 @@
 // src/pages/admin/areas/AddArea.tsx
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,29 +20,37 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Loader2, MapPin, AlertCircle } from 'lucide-react';
 
 import { apiClient } from '@/lib/api';
 import AreaMapDrawer from '@/components/admin/AreaMapDrawer';
+import type { Map as LeafletMap } from 'leaflet';
 
-const CITIES = ['Lahore', 'Islamabad', 'Karachi', 'Rawalpindi'] as const;
+const CITIES = ['Rawalpindi', 'Islamabad', 'Lahore', 'Karachi'] as const;
 type City = typeof CITIES[number];
 
-// Fixed: polygon is REQUIRED for creation
 const areaSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(50),
+  name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name too long'),
   city: z.enum(CITIES),
   center: z.object({
-    lat: z.number().min(23.5, 'Latitude too low').max(37.5, 'Latitude too high'),
-    lng: z.number().min(60.0, 'Longitude too low').max(78.0, 'Longitude too high'),
+    lat: z.number().min(23.5).max(37.5),
+    lng: z.number().min(60.5).max(78.0),
   }),
   polygon: z.object({
     type: z.literal('Polygon'),
     coordinates: z
-      .array(z.array(z.tuple([z.number(), z.number()])))
-      .min(1, 'At least one ring required')
-      .refine((rings) => rings.every(ring => ring.length >= 4), {
-        message: 'Each polygon ring must have at least 4 points (including closing point)',
-      }),
+      .array(z.array(z.tuple([z.number(), z.number()])).min(4))
+      .min(1, 'At least one polygon ring required')
+      .refine(
+        (rings) =>
+          rings.every(
+            (ring) =>
+              ring.length >= 4 &&
+              ring[0][0] === ring[ring.length - 1][0] &&
+              ring[0][1] === ring[ring.length - 1][1]
+          ),
+        { message: 'Each ring must be closed (first and last point must match)' }
+      ),
   }),
 });
 
@@ -51,228 +59,308 @@ type AreaFormValues = z.infer<typeof areaSchema>;
 export default function AddArea() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [manualLoading, setManualLoading] = useState(false);
   const [mode, setMode] = useState<'draw' | 'manual'>('draw');
 
-  const [center, setCenter] = useState({ lat: 31.5204, lng: 74.3587 });
+  const [center, setCenter] = useState({ lat: 33.5651, lng: 73.0169 });
   const [polygon, setPolygon] = useState<[number, number][][]>([]);
   const [manualInput, setManualInput] = useState('');
+
+  // Ref to the Leaflet map instance (exposed via forwardRef in AreaMapDrawer)
+  const mapRef = useRef<LeafletMap | null>(null);
 
   const form = useForm<AreaFormValues>({
     resolver: zodResolver(areaSchema),
     defaultValues: {
       name: '',
-      city: 'Lahore',
-      center: { lat: 31.5204, lng: 74.3587 },
+      city: 'Rawalpindi',
+      center: { lat: 33.5651, lng: 73.0169 },
       polygon: { type: 'Polygon', coordinates: [] },
     },
   });
 
-  // Parse manual input: lat, lng per line → [lng, lat] for MongoDB
-  const parseManualPoints = () => {
+  const parseManualPoints = async () => {
+    setManualLoading(true);
     try {
-      const lines = manualInput.trim().split('\n').filter(line => line.trim());
-      if (lines.length < 3) throw new Error('Need at least 3 points to form a polygon');
+      const lines = manualInput.trim().split('\n').filter((l) => l.trim());
+      if (lines.length < 3) throw new Error('At least 3 points are required to form a polygon');
 
-      const coords: [number, number][] = lines.map((line, i) => {
-        const parts = line.split(',').map(s => s.trim());
-        if (parts.length !== 2) throw new Error(`Invalid format at line ${i + 1}`);
+      const points: [number, number][] = lines.map((line, i) => {
+        const parts = line.split(',').map((s) => s.trim());
+        if (parts.length !== 2) throw new Error(`Invalid format at line ${i + 1}: expected "lat, lng"`);
 
         const lat = parseFloat(parts[0]);
         const lng = parseFloat(parts[1]);
 
-        if (isNaN(lat) || isNaN(lng)) throw new Error(`Invalid number at line ${i + 1}`);
-        if (lat < 23.5 || lat > 37.5 || lng < 60.0 || lng > 78.0) {
-          throw new Error(`Point out of Pakistan bounds at line ${i + 1}`);
+        if (isNaN(lat) || isNaN(lng)) throw new Error(`Invalid coordinates at line ${i + 1}`);
+        if (lat < 23.5 || lat > 37.5 || lng < 60.5 || lng > 78.0) {
+          throw new Error(`Point at line ${i + 1} is outside Pakistan boundaries`);
         }
 
-        return [lng, lat] as [number, number]; // [lng, lat] → MongoDB order
+        return [lat, lng];
       });
 
       // Auto-close polygon
-      const first = coords[0];
-      const last = coords[coords.length - 1];
+      const first = points[0];
+      const last = points[points.length - 1];
       if (first[0] !== last[0] || first[1] !== last[1]) {
-        coords.push(first);
+        points.push(first);
       }
 
-      setPolygon([coords]);
-      form.setValue('polygon', { type: 'Polygon', coordinates: [coords] });
-      toast.success(`Loaded ${coords.length} points (polygon closed)`);
+      const newPolygon = [points];
+      setPolygon(newPolygon);
+      form.setValue('polygon', { type: 'Polygon', coordinates: newPolygon });
+
+      // Update center to polygon centroid
+      const avgLat = points.reduce((s, p) => s + p[0], 0) / points.length;
+      const avgLng = points.reduce((s, p) => s + p[1], 0) / points.length;
+      const newCenter = { lat: avgLat, lng: avgLng };
+      setCenter(newCenter);
+      form.setValue('center', newCenter);
+
+      toast.success(`Loaded ${points.length - 1} points (auto-closed)`);
     } catch (err: any) {
-      toast.error(err.message || 'Invalid coordinates');
+      toast.error(err.message || 'Failed to parse coordinates');
+    } finally {
+      setManualLoading(false);
     }
   };
 
   const onSubmit = async (data: AreaFormValues) => {
-    // Final safety check
-    if (!polygon.length || polygon[0].length < 4) {
-      toast.error('Please draw or load a valid delivery zone polygon');
+    if (polygon.length === 0 || polygon[0].length < 4) {
+      toast.error('Please define a valid delivery zone with at least 3 points');
       return;
     }
 
     const payload = {
       name: data.name.trim(),
       city: data.city,
-      center: { lat: data.center.lat, lng: data.center.lng },
-      polygon: { type: 'Polygon', coordinates: polygon },
+      center: data.center,
+      polygon: {
+        type: 'Polygon',
+        coordinates: polygon,
+      },
     };
 
     try {
       setLoading(true);
-await apiClient.post('/admin/area', payload);      toast.success('Delivery area created successfully!');
+      await apiClient.post('/admin/area', payload);
+      toast.success(`Delivery area "${data.name}" created successfully!`);
       navigate('/admin/areas');
     } catch (err: any) {
-      const message = err?.response?.data?.message || 'Failed to create area';
-      toast.error(message);
+      const msg = err?.response?.data?.message || 'Failed to create delivery area';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
+  // Resize map when switching to "Draw on Map" tab
+  useEffect(() => {
+    if (mode === 'draw' && mapRef.current) {
+      const timer = setTimeout(() => {
+        mapRef.current?.invalidateSize();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [mode]);
+
+  const pointCount = polygon[0]?.length ? polygon[0].length - 1 : 0;
+  const isPolygonValid = polygon.length > 0 && polygon[0].length >= 4;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-12">
-      <div className="container mx-auto px-6 max-w-7xl">
-        <Card className="shadow-2xl border-green-100">
-          <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-xl">
-            <CardTitle className="text-4xl font-extrabold">Add New Delivery Area</CardTitle>
-            <p className="text-green-100 mt-2 text-lg">Draw or paste coordinates to define delivery zone</p>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 py-12 px-4">
+      <div className="container mx-auto max-w-7xl">
+        <Card className="shadow-2xl border-0 overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-700 text-white">
+            <div className="flex items-center gap-4">
+              <MapPin className="w-12 h-12" />
+              <div>
+                <CardTitle className="text-4xl font-black">Add New Delivery Area</CardTitle>
+                <p className="text-green-100 mt-2 text-lg opacity-90">
+                  Draw on the map or paste coordinates to define your delivery zone
+                </p>
+              </div>
+            </div>
           </CardHeader>
 
-          <CardContent className="pt-8">
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-              {/* Name & City */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <Label className="text-lg font-medium">Area Name</Label>
+          <CardContent className="pt-10 pb-12">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
+              {/* Area Name & City */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <Label className="text-lg font-semibold flex items-center gap-2">
+                    Area Name <span className="text-red-500">*</span>
+                  </Label>
                   <Input
-                    placeholder="e.g. DHA Phase 8"
-                    className="mt-2 h-12 text-lg"
+                    placeholder="e.g. Bahria Town Phase 7, Saddar"
+                    className="h-14 text-lg"
                     {...form.register('name')}
                   />
                   {form.formState.errors.name && (
-                    <p className="text-red-500 text-sm mt-1">{form.formState.errors.name.message}</p>
+                    <p className="text-red-600 text-sm flex items-center gap-1">
+                      <AlertCircle size={16} />
+                      {form.formState.errors.name.message}
+                    </p>
                   )}
                 </div>
 
-                <div>
-                  <Label className="text-lg font-medium">City</Label>
+                <div className="space-y-2">
+                  <Label className="text-lg font-semibold">City</Label>
                   <Select
                     value={form.watch('city')}
                     onValueChange={(v) => form.setValue('city', v as City)}
                   >
-                    <SelectTrigger className="mt-2 h-12">
+                    <SelectTrigger className="h-14 text-lg">
                       <SelectValue placeholder="Select city" />
                     </SelectTrigger>
                     <SelectContent>
-                      {CITIES.map(c => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      {CITIES.map((city) => (
+                        <SelectItem key={city} value={city} className="text-lg py-3">
+                          {city}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              {/* Zone Definition */}
-              <div>
-                <Label className="text-lg font-medium">Define Delivery Zone</Label>
-                <Tabs value={mode} onValueChange={(v) => setMode(v as 'draw' | 'manual')} className="mt-4">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="draw">
-                      Draw on Map (Recommended)
+              {/* Polygon Definition */}
+              <div className="space-y-6">
+                <Label className="text-xl font-bold">Delivery Zone Polygon</Label>
+
+                <Tabs value={mode} onValueChange={(v) => setMode(v as 'draw' | 'manual')} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 h-14">
+                    <TabsTrigger value="draw" className="text-lg font-medium">
+                      Draw on Map
                     </TabsTrigger>
-                    <TabsTrigger value="manual">
+                    <TabsTrigger value="manual" className="text-lg font-medium">
                       Paste Coordinates
                     </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="draw" className="mt-6 border rounded-xl p-4 bg-gray-50">
-                    <AreaMapDrawer
-                      center={center}
-                      polygon={polygon}
-                      onCenterChange={(c) => {
-                        setCenter(c);
-                        form.setValue('center', c);
-                      }}
-                      onPolygonChange={(p) => {
-                        setPolygon(p);
-                        form.setValue('polygon', { type: 'Polygon', coordinates: p });
-                      }}
-                    />
+                  <TabsContent value="draw" className="mt-6">
+                    <div className="border-4 border-emerald-200 rounded-2xl overflow-hidden shadow-lg bg-gray-50">
+                      <AreaMapDrawer
+                        ref={mapRef} // ← Correct way: forwardRef exposes the map instance
+                        center={center}
+                        polygon={polygon}
+                        onCenterChange={(c) => {
+                          setCenter(c);
+                          form.setValue('center', c);
+                        }}
+                        onPolygonChange={(p) => {
+                          setPolygon(p);
+                          form.setValue('polygon', { type: 'Polygon', coordinates: p });
+                        }}
+                      />
+                    </div>
                   </TabsContent>
 
-                  <TabsContent value="manual" className="mt-6 space-y-4">
-                    <div className="bg-amber-50 border border-amber-300 rounded-xl p-5">
-                      <p className="text-sm font-medium text-amber-900 mb-3">
-                        Format: <code className="bg-amber-100 px-2 py-1 rounded">latitude, longitude</code> per line
+                  <TabsContent value="manual" className="mt-6 space-y-6">
+                    <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-8">
+                      <h4 className="font-bold text-amber-900 mb-4 text-lg">Coordinate Format</h4>
+                      <p className="text-amber-800 mb-6">
+                        Enter one coordinate per line: <code className="bg-amber-200 px-3 py-1 rounded font-mono">latitude, longitude</code>
                       </p>
-                      <pre className="text-xs bg-amber-100 p-3 rounded font-mono text-amber-800">
-                        31.520400, 74.358700<br />
-                        31.530000, 74.370000<br />
-                        31.510000, 74.380000<br />
-                        31.500000, 74.360000
+                      <pre className="bg-amber-100 p-6 rounded-xl font-mono text-sm overflow-x-auto border border-amber-300">
+{`33.565100, 73.016900
+33.575000, 73.026900
+33.575000, 73.006900
+33.565100, 73.016900   ← auto-closed`}
                       </pre>
-                      <p className="text-xs text-amber-700 mt-2">
-                        Polygon will be auto-closed. Coordinates must be within Pakistan.
+                      <p className="text-sm text-amber-700 mt-4">
+                        The polygon will be automatically closed. All points must be within Pakistan.
                       </p>
                     </div>
 
                     <Textarea
-                      placeholder="Paste coordinates here (one per line: lat, lng)"
+                      placeholder="Paste your coordinates here, one per line..."
                       value={manualInput}
                       onChange={(e) => setManualInput(e.target.value)}
-                      className="font-mono text-sm h-64 resize-none"
+                      className="h-80 font-mono text-sm resize-none border-2"
                     />
 
                     <Button
                       type="button"
                       onClick={parseManualPoints}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      disabled={manualLoading || !manualInput.trim()}
+                      size="lg"
+                      className="w-full h-14 text-lg font-semibold"
                     >
-                      Load Coordinates to Map
+                      {manualLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                          Loading Coordinates...
+                        </>
+                      ) : (
+                        'Load & Preview on Map'
+                      )}
                     </Button>
                   </TabsContent>
                 </Tabs>
               </div>
 
-              {/* Live Stats */}
-              <div className="flex justify-between items-center bg-gray-50 rounded-xl p-6 border">
-                <div className="text-sm space-y-1">
-                  <div><strong>Center:</strong> {center.lat.toFixed(6)}, {center.lng.toFixed(6)}</div>
-                  <div><strong>Points:</strong> {polygon[0]?.length || 0} (min 4)</div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant="secondary" className="text-lg px-4 py-2">
-                    {polygon[0]?.length || 0} points
-                  </Badge>
-                  {polygon.length > 0 && polygon[0].length >= 4 ? (
-                    <Badge variant="default" className="bg-green-600 text-white">
-                      Valid Polygon
-                    </Badge>
-                  ) : (
-                    <Badge variant="destructive">
-                      Invalid
-                    </Badge>
-                  )}
+              {/* Live Status Summary */}
+              <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl p-8 border-2 border-emerald-200">
+                <h3 className="font-bold text-xl mb-6 flex items-center gap-3">
+                  <MapPin className="w-8 h-8 text-emerald-600" />
+                  Current Zone Status
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-white rounded-xl p-5 shadow-md">
+                    <p className="text-gray-600 font-medium">Delivery Center</p>
+                    <p className="font-mono text-lg mt-2">
+                      {center.lat.toFixed(6)}, {center.lng.toFixed(6)}
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-xl p-5 shadow-md">
+                    <p className="text-gray-600 font-medium">Polygon Points</p>
+                    <p className="text-3xl font-black mt-2 text-emerald-600">{pointCount}</p>
+                  </div>
+
+                  <div className="bg-white rounded-xl p-5 shadow-md flex items-center justify-center">
+                    {isPolygonValid ? (
+                      <Badge className="text-xl px-8 py-4 bg-green-600 hover:bg-green-700">
+                        Ready to Save
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive" className="text-xl px-8 py-4">
+                        {pointCount === 0 ? 'Draw Polygon First' : 'Need More Points'}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Submit */}
-              <div className="flex justify-end gap-4 pt-8 border-t">
+              {/* Submit Actions */}
+              <div className="flex justify-end gap-6 pt-8 border-t-2 border-gray-200">
                 <Button
                   type="button"
                   variant="outline"
                   size="lg"
+                  className="px-10 py-6 text-lg"
                   onClick={() => navigate('/admin/areas')}
                 >
                   Cancel
                 </Button>
+
                 <Button
                   type="submit"
                   size="lg"
-                  className="bg-green-600 hover:bg-green-700 text-white font-bold px-12"
-                  disabled={loading || !polygon.length || polygon[0].length < 4}
+                  disabled={loading || !isPolygonValid}
+                  className="px-16 py-6 text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-xl"
                 >
-                  {loading ? 'Creating Area...' : 'Create Delivery Area'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                      Creating Area...
+                    </>
+                  ) : (
+                    'Create Delivery Area'
+                  )}
                 </Button>
               </div>
             </form>

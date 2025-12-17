@@ -61,8 +61,9 @@ export const useAreas = () => {
     queryKey: ['areas'],
     queryFn: async () => {
       const res = await apiClient.get<{ success: true; areas: AreaWithDelivery[] }>('/areas');
-      return res.areas;
+      return res.areas; // res is already the data object, not the Axios response
     },
     staleTime: 15 * 60 * 1000, // 15 minutes
   });
 };
+

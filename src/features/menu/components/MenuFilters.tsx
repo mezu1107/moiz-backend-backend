@@ -1,8 +1,9 @@
-import { Search, Leaf, Flame, X } from 'lucide-react';
+// src/features/menu/components/MenuFilters.tsx
+import { Search, Leaf, Flame, X, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import { CATEGORY_LABELS, CATEGORY_ICONS, type MenuCategory } from '../types/menu.types';
 
 interface MenuFiltersProps {
@@ -28,84 +29,111 @@ export function MenuFilters({
   isSpicy,
   onSpicyChange,
 }: MenuFiltersProps) {
-  const hasActiveFilters = selectedCategory || isVeg !== null || isSpicy !== null;
+  const activeFilterCount =
+    (selectedCategory !== null ? 1 : 0) +
+    (isVeg !== null ? 1 : 0) +
+    (isSpicy !== null ? 1 : 0);
 
-  const clearFilters = () => {
+  const clearAllFilters = () => {
     onCategoryChange(null);
     onVegChange(null);
     onSpicyChange(null);
+    onSearchChange('');
   };
 
   return (
-    <div className="space-y-4">
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <div className="space-y-6">
+      {/* Search Bar */}
+      <div className="relative max-w-xl">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
-          placeholder="Search menu..."
+          placeholder="Search dishes, ingredients..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10 bg-background border-border"
+          className="pl-12 h-12 text-base bg-background border-border/60 focus-visible:ring-primary"
         />
+        {search && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2"
+            onClick={() => onSearchChange('')}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
-      {/* Category Tabs */}
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-2 pb-2">
+      {/* Category Pills */}
+      <ScrollArea className="w-full">
+        <div className="flex gap-3 pb-3">
           <Button
             variant={selectedCategory === null ? 'default' : 'outline'}
-            size="sm"
+            size="lg"
             onClick={() => onCategoryChange(null)}
-            className="shrink-0"
+            className="shrink-0 font-medium"
           >
-            All
+            <Filter className="h-4 w-4 mr-2" />
+            All Items
           </Button>
-          {categories.map((cat) => (
-            <Button
-              key={cat}
-              variant={selectedCategory === cat ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => onCategoryChange(cat)}
-              className="shrink-0 gap-1.5"
-            >
-              <span>{CATEGORY_ICONS[cat]}</span>
-              {CATEGORY_LABELS[cat]}
-            </Button>
-          ))}
+
+          {categories.map((cat) => {
+            const Icon = CATEGORY_ICONS[cat];
+            const isActive = selectedCategory === cat;
+
+            return (
+              <Button
+                key={cat}
+                variant={isActive ? 'default' : 'outline'}
+                size="lg"
+                onClick={() => onCategoryChange(isActive ? null : cat)}
+                className="shrink-0 gap-2 font-medium"
+              >
+                <Icon className="h-5 w-5" />
+                {CATEGORY_LABELS[cat]}
+              </Button>
+            );
+          })}
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      {/* Quick Filters */}
-      <div className="flex flex-wrap items-center gap-2">
+      {/* Quick Filters + Clear */}
+      <div className="flex flex-wrap items-center gap-3">
         <Button
           variant={isVeg === true ? 'default' : 'outline'}
           size="sm"
           onClick={() => onVegChange(isVeg === true ? null : true)}
-          className={`gap-1.5 ${isVeg === true ? 'bg-accent hover:bg-accent/90' : ''}`}
+          className="gap-2 font-medium"
         >
-          <Leaf className="h-3.5 w-3.5" />
-          Veg Only
+          <Leaf className="h-4 w-4" />
+          Vegetarian Only
         </Button>
+
         <Button
           variant={isSpicy === true ? 'default' : 'outline'}
           size="sm"
           onClick={() => onSpicyChange(isSpicy === true ? null : true)}
-          className={`gap-1.5 ${isSpicy === true ? 'bg-destructive hover:bg-destructive/90' : ''}`}
+          className="gap-2 font-medium"
         >
-          <Flame className="h-3.5 w-3.5" />
-          Spicy
+          <Flame className="h-4 w-4" />
+          Spicy Dishes
         </Button>
 
-        {hasActiveFilters && (
+        {(activeFilterCount > 0 || search) && (
           <Button
             variant="ghost"
             size="sm"
-            onClick={clearFilters}
-            className="gap-1.5 text-muted-foreground"
+            onClick={clearAllFilters}
+            className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
           >
-            <X className="h-3.5 w-3.5" />
-            Clear
+            <X className="h-4 w-4" />
+            Clear All Filters
+            {activeFilterCount > 0 && (
+              <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
+                {activeFilterCount + (search ? 1 : 0)}
+              </Badge>
+            )}
           </Button>
         )}
       </div>

@@ -74,38 +74,38 @@ const RiderDeliveries = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 md:gap-4 grid-cols-2 md:grid-cols-3">
         <Card className="border-primary/20">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Deliveries</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6 md:pb-2">
+            <CardTitle className="text-xs md:text-sm font-medium">Active Deliveries</CardTitle>
             <Package className="h-4 w-4 text-primary" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">{activeOrders.length}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl md:text-2xl font-bold text-primary">{activeOrders.length}</div>
             <p className="text-xs text-muted-foreground">Currently in progress</p>
           </CardContent>
         </Card>
 
         <Card className="border-primary/20">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed Today</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6 md:pb-2">
+            <CardTitle className="text-xs md:text-sm font-medium">Completed Today</CardTitle>
             <CheckCircle className="h-4 w-4 text-primary" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">{completedOrders.length}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl md:text-2xl font-bold text-primary">{completedOrders.length}</div>
             <p className="text-xs text-muted-foreground">Successfully delivered</p>
           </CardContent>
         </Card>
 
-        <Card className="border-primary/20">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Deliveries</CardTitle>
+        <Card className="border-primary/20 col-span-2 md:col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 md:p-6 md:pb-2">
+            <CardTitle className="text-xs md:text-sm font-medium">Total Deliveries</CardTitle>
             <Clock className="h-4 w-4 text-primary" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">{allDeliveries.length}</div>
+          <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+            <div className="text-xl md:text-2xl font-bold text-primary">{allDeliveries.length}</div>
             <p className="text-xs text-muted-foreground">All time</p>
           </CardContent>
         </Card>
@@ -113,15 +113,15 @@ const RiderDeliveries = () => {
 
       {/* All Deliveries List */}
       <Card className="border-primary/20">
-        <CardHeader>
-          <CardTitle className="text-primary">All Deliveries</CardTitle>
-          <CardDescription>Complete history of your delivery orders</CardDescription>
+        <CardHeader className="p-4 md:p-6">
+          <CardTitle className="text-primary text-lg md:text-xl">All Deliveries</CardTitle>
+          <CardDescription className="text-xs md:text-sm">Complete history of your delivery orders</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
           {allDeliveries.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>No deliveries found</p>
+              <Package className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No deliveries found</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -131,22 +131,22 @@ const RiderDeliveries = () => {
                 
                 return (
                   <Card key={order.id} className={`border ${isActive ? 'border-primary/50 shadow-lg' : 'border-border'}`}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
+                    <CardContent className="p-4 md:p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg">Order #{order.id}</h3>
-                            <Badge className={getStatusColor(order.status)}>
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-base md:text-lg">Order #{order.id}</h3>
+                            <Badge className={`${getStatusColor(order.status)} text-xs`}>
                               {order.status}
                             </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {formatDate(order.createdAt)}
                           </p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-primary">
+                        <div className="text-left sm:text-right">
+                          <p className="text-xl md:text-2xl font-bold text-primary">
                             Rs. {order.total.toLocaleString()}
                           </p>
                         </div>
@@ -154,31 +154,31 @@ const RiderDeliveries = () => {
 
                       {/* Customer Info */}
                       {customer && (
-                        <div className="bg-muted/50 rounded-lg p-4 mb-4 space-y-2">
+                        <div className="bg-muted/50 rounded-lg p-3 md:p-4 mb-4 space-y-2">
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-primary" />
-                            <span className="font-medium">{customer.name}</span>
+                            <span className="font-medium text-sm">{customer.name}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Phone className="h-4 w-4 text-primary" />
-                            <span className="text-sm">{customer.phone}</span>
+                            <span className="text-xs md:text-sm">{customer.phone}</span>
                           </div>
                           <div className="flex items-start gap-2">
                             <MapPin className="h-4 w-4 text-primary mt-0.5" />
-                            <span className="text-sm">{order.deliveryAddress}</span>
+                            <span className="text-xs md:text-sm">{order.deliveryAddress}</span>
                           </div>
                         </div>
                       )}
 
                       {/* Order Items */}
                       <div className="border-t pt-4 mb-4">
-                        <h4 className="font-medium mb-2 flex items-center gap-2">
+                        <h4 className="font-medium mb-2 flex items-center gap-2 text-sm">
                           <Package className="h-4 w-4" />
                           Order Items
                         </h4>
-                        <div className="space-y-2">
+                        <div className="space-y-1 md:space-y-2">
                           {order.items.map((item, idx) => (
-                            <div key={idx} className="flex justify-between text-sm">
+                            <div key={idx} className="flex justify-between text-xs md:text-sm">
                               <span>{item.quantity}x {item.menuItem.name}</span>
                               <span className="text-muted-foreground">
                                 Rs. {(item.menuItem.price * item.quantity).toLocaleString()}
@@ -194,7 +194,7 @@ const RiderDeliveries = () => {
                           {order.status === "preparing" && (
                             <Button 
                               onClick={() => handleStatusUpdate(order.id, "out-for-delivery")}
-                              className="flex-1"
+                              className="flex-1 text-sm"
                               size="sm"
                             >
                               <Navigation className="h-4 w-4 mr-2" />
@@ -204,7 +204,7 @@ const RiderDeliveries = () => {
                           {order.status === "out-for-delivery" && (
                             <Button 
                               onClick={() => handleStatusUpdate(order.id, "delivered")}
-                              className="flex-1"
+                              className="flex-1 text-sm"
                               size="sm"
                             >
                               <CheckCircle className="h-4 w-4 mr-2" />

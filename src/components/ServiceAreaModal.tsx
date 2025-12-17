@@ -3,16 +3,21 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MapPin, X, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { apiClient } from "@/lib/api";
-import { useAreaStore } from "@/lib/areaStore";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import * as Dialog from "@radix-ui/react-dialog";
+
+import { apiClient } from "@/lib/api";
+import { useAreaStore } from "@/lib/areaStore";
 
 interface Area {
   _id: string;
   name: string;
   city: string;
+  center: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export default function ServiceAreaModal({
@@ -37,10 +42,17 @@ export default function ServiceAreaModal({
     const loadAreas = async () => {
       try {
         setLoading(true);
-        const response = await apiClient.get<{ areas: Area[] }>("/areas");
-        setAreas(response.areas);
+        const response = await apiClient.get<{ success: boolean; areas: Area[] }>("/areas");
+
+        if (response.success && response.areas) {
+          setAreas(response.areas);
+        } else {
+          setAreas([]);
+          toast.error("No delivery areas available");
+        }
       } catch (err: any) {
-        toast.error(err?.response?.data?.message || "Failed to load delivery areas");
+        const msg = err?.response?.data?.message || "Failed to load delivery areas";
+        toast.error(msg);
         setAreas([]);
       } finally {
         setLoading(false);
@@ -50,131 +62,150 @@ export default function ServiceAreaModal({
     loadAreas();
   }, [isOpen]);
 
-  const handleConfirm = () => {
-    if (!selectedArea) return;
+const handleConfirm = () => {
+  if (!selectedArea) {
+    toast.error("Please select a delivery area");
+    return;
+  }
 
-    const payload = {
-      id: selectedArea._id,
-      name: selectedArea.name,
-      city: selectedArea.city,
-      fullAddress: `${selectedArea.name}, ${selectedArea.city}`,
-      deliveryFee: 199,
-      estimatedTime: "30-45 min",
-    };
+  setSelectedAreaStore({
+    id: selectedArea._id,
+    name: selectedArea.name,
+    city: selectedArea.city,
+    fullAddress: `${selectedArea.name}, ${selectedArea.city}`,
+    centerLatLng: selectedArea.center,
+    deliveryFee: undefined,
+    minOrderAmount: undefined,
+    estimatedTime: undefined,
+  });
 
-    setSelectedAreaStore(payload);
-    sessionStorage.setItem("areaChecked", "true");
-    toast.success(`Delivering to ${selectedArea.name}!`);
-    navigate(`/menu/area/${selectedArea._id}`);
-    onClose();
-  };
+  toast.success(`Selected: ${selectedArea.name}, ${selectedArea.city}`);
+  onClose();
+  navigate(`/menu/area/${selectedArea._id}`);
+};
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
-        <Dialog.Content asChild>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed top-1/2 left-1/2 z-[9999] max-w-md w-full -translate-x-1/2 -translate-y-1/2 bg-card rounded-3xl shadow-2xl overflow-hidden border border-border"
-          >
-            <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6 text-white flex justify-between items-start">
-              <div>
-                <Dialog.Title className="text-2xl font-bold flex items-center gap-3">
-                  <MapPin className="h-8 w-8" />
-                  Select Delivery Area
-                </Dialog.Title>
-                <Dialog.Description className="text-green-100 mt-1">
-                  Choose where you want food delivered
-                </Dialog.Description>
-              </div>
-              <Dialog.Close asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-white/20"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </Dialog.Close>
-            </div>
+        {/* Perfectly centered overlay */}
+        <Dialog.Overlay className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Dialog.Content asChild>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="w-full max-w-lg"
+            >
+              <div className="bg-white rounded-3xl shadow-3xl overflow-hidden border border-gray-200">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-8 text-white">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <Dialog.Title className="text-3xl font-black flex items-center gap-4">
+                        <MapPin className="h-12 w-12" />
+                        Choose Delivery Area
+                      </Dialog.Title>
+                      <Dialog.Description className="text-green-100 mt-3 text-lg">
+                        Select where you'd like your food delivered
+                      </Dialog.Description>
+                    </div>
+                    <Dialog.Close asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-white hover:bg-white/20 rounded-full"
+                      >
+                        <X className="h-7 w-7" />
+                      </Button>
+                    </Dialog.Close>
+                  </div>
+                </div>
 
-            <div className="p-6 max-h-96">
-              {loading ? (
-                <div className="text-center py-12">
-                  <Loader2 className="h-12 w-12 animate-spin text-green-600 mx-auto" />
-                  <p className="mt-4 text-muted-foreground">Loading areas...</p>
-                </div>
-              ) : areas.length === 0 ? (
-                <div className="text-center py-12">
-                  <MapPin className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-lg font-medium text-muted-foreground">
-                    No delivery areas yet
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    We're expanding soon!
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3 mb-6 overflow-y-auto max-h-80">
-                  {areas.map((area) => (
-                    <button
-                      key={area._id}
-                      onClick={() => setSelectedArea(area)}
-                      className={`w-full p-5 rounded-2xl border-2 text-left transition-all flex items-center justify-between ${
-                        selectedArea?._id === area._id
-                          ? "border-green-500 bg-green-50 shadow-lg"
-                          : "border-border hover:border-green-300 hover:bg-muted/50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`p-3 rounded-full ${
-                            selectedArea?._id === area._id
-                              ? "bg-green-600"
-                              : "bg-gray-200"
-                          }`}
-                        >
-                          <MapPin
-                            className={`h-6 w-6 ${
-                              selectedArea?._id === area._id
-                                ? "text-white"
-                                : "text-gray-600"
-                            }`}
-                          />
-                        </div>
-                        <div>
-                          <p className="font-bold text-lg">{area.name}</p>
-                          <p className="text-sm text-muted-foreground">{area.city}</p>
-                        </div>
+                {/* Body */}
+                <div className="p-8">
+                  {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                      <Loader2 className="h-16 w-16 animate-spin text-green-600 mb-6" />
+                      <p className="text-xl text-gray-600">Loading available areas...</p>
+                    </div>
+                  ) : areas.length === 0 ? (
+                    <div className="text-center py-20">
+                      <MapPin className="h-24 w-24 text-gray-300 mx-auto mb-8" />
+                      <h3 className="text-3xl font-bold text-gray-700 mb-4">
+                        No delivery areas yet
+                      </h3>
+                      <p className="text-lg text-gray-500 max-w-sm mx-auto">
+                        We're working hard to expand our service. Check back soon!
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-4 mb-10 max-h-96 overflow-y-auto">
+                        {areas.map((area) => (
+                          <button
+                            key={area._id}
+                            onClick={() => setSelectedArea(area)}
+                            className={`
+                              w-full p-6 rounded-2xl border-3 text-left transition-all duration-300
+                              flex items-center justify-between group shadow-md
+                              ${selectedArea?._id === area._id
+                                ? "border-green-500 bg-green-50 ring-4 ring-green-200 shadow-xl"
+                                : "border-gray-200 hover:border-green-400 hover:bg-green-50/70 hover:shadow-lg"
+                              }
+                            `}
+                          >
+                            <div className="flex items-center gap-6">
+                              <div className={`
+                                p-5 rounded-2xl transition-all
+                                ${selectedArea?._id === area._id
+                                  ? "bg-green-600"
+                                  : "bg-gray-200 group-hover:bg-green-100"
+                                }
+                              `}>
+                                <MapPin className={`
+                                  h-10 w-10
+                                  ${selectedArea?._id === area._id
+                                    ? "text-white"
+                                    : "text-gray-600 group-hover:text-green-600"
+                                  }
+                                `} />
+                              </div>
+                              <div>
+                                <p className="font-bold text-2xl text-gray-900">{area.name}</p>
+                                <p className="text-lg text-gray-600 mt-1">{area.city}</p>
+                              </div>
+                            </div>
+
+                            {selectedArea?._id === area._id && (
+                              <div className="bg-green-600 text-white rounded-full p-4 shadow-2xl">
+                                <Check className="h-9 w-9" />
+                              </div>
+                            )}
+                          </button>
+                        ))}
                       </div>
-                      {selectedArea?._id === area._id && (
-                        <Check className="h-6 w-6 text-green-600" />
-                      )}
-                    </button>
-                  ))}
+
+                      <Button
+                        onClick={handleConfirm}
+                        disabled={!selectedArea}
+                        size="lg"
+                        className="w-full h-20 text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-2xl disabled:opacity-60"
+                      >
+                        {selectedArea
+                          ? `Deliver to ${selectedArea.name}`
+                          : "Select an area to continue"}
+                      </Button>
+
+                      <p className="text-center text-sm text-gray-500 mt-6">
+                        Delivery fee & time shown after selection
+                      </p>
+                    </>
+                  )}
                 </div>
-              )}
-
-              <Button
-                onClick={handleConfirm}
-                disabled={!selectedArea || loading}
-                className="w-full h-14 text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                size="lg"
-              >
-                {selectedArea
-                  ? `Deliver to ${selectedArea.name}`
-                  : "Please select an area"}
-              </Button>
-
-              <p className="text-center text-xs text-muted-foreground mt-4">
-                Delivery fee: Rs.199 • 30-45 min
-              </p>
-            </div>
-          </motion.div>
-        </Dialog.Content>
+              </div>
+            </motion.div>
+          </Dialog.Content>
+        </Dialog.Overlay>
       </Dialog.Portal>
     </Dialog.Root>
   );

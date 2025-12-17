@@ -1,54 +1,84 @@
+// src/features/menu/components/MenuHeader.tsx
 import { MapPin, Clock, Truck, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useDeliveryStore } from '@/features/delivery/store/deliveryStore';
+import { Badge } from '@/components/ui/badge';
 
 interface MenuHeaderProps {
   areaName: string;
   city: string;
   deliveryFee?: number;
+  minOrder?: number;
   estimatedTime?: string;
+  hasDelivery?: boolean;
   onChangeLocation?: () => void;
 }
 
 export function MenuHeader({
   areaName,
   city,
-  deliveryFee = 149,
+  deliveryFee,
+  minOrder,
   estimatedTime = '35-50 min',
+  hasDelivery = true,
   onChangeLocation,
 }: MenuHeaderProps) {
+  const formatFee = (amount?: number) =>
+    amount != null ? `Rs. ${amount.toLocaleString()}` : 'Free';
+
   return (
-    <div className="bg-card border-b border-border sticky top-0 z-40">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          {/* Location Info */}
+    <div className="bg-card border-b border-border/60 sticky top-0 z-50 shadow-sm">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          {/* Location Selector */}
           <Button
             variant="ghost"
+            size="lg"
             onClick={onChangeLocation}
-            className="gap-2 text-left h-auto py-2 px-3 -ml-3"
+            className="flex items-center gap-3 -ml-3 h-auto py-3 px-3 rounded-xl hover:bg-muted/50"
+            disabled={!onChangeLocation}
           >
-            <MapPin className="h-5 w-5 text-primary shrink-0" />
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">Delivering to</span>
-              <span className="font-semibold text-foreground">
+            <MapPin className="h-6 w-6 text-primary shrink-0" />
+            <div className="text-left">
+              <p className="text-xs text-muted-foreground">Delivering to</p>
+              <p className="font-bold text-lg leading-tight">
                 {areaName}, {city}
-              </span>
+              </p>
             </div>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            {onChangeLocation && <ChevronDown className="h-5 w-5 text-muted-foreground ml-auto" />}
           </Button>
 
           {/* Delivery Info */}
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Truck className="h-4 w-4" />
-              <span>Rs. {deliveryFee}</span>
+          {hasDelivery ? (
+            <div className="flex flex-wrap items-center gap-4 text-sm font-medium">
+              <div className="flex items-center gap-2">
+                <Truck className="h-5 w-5 text-primary" />
+                <span>
+                  Delivery: <strong className="text-foreground">{formatFee(deliveryFee)}</strong>
+                </span>
+              </div>
+
+              {minOrder !== undefined && (
+                <>
+                  <div className="h-5 w-px bg-border/50" />
+                  <span>
+                    Min Order: <strong className="text-foreground">{formatFee(minOrder)}</strong>
+                  </span>
+                </>
+              )}
+
+              <div className="h-5 w-px bg-border/50" />
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                <span>
+                  <strong className="text-foreground">{estimatedTime}</strong>
+                </span>
+              </div>
             </div>
-            <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Clock className="h-4 w-4" />
-              <span>{estimatedTime}</span>
-            </div>
-          </div>
+          ) : (
+            <Badge variant="secondary" className="text-sm px-4 py-2">
+              Pickup Only • Delivery Coming Soon
+            </Badge>
+          )}
         </div>
       </div>
     </div>

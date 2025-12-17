@@ -17,31 +17,39 @@ export const Portfolio = () => {
     {
       title: "Signature Biryani Collection",
       category: "Main Course",
-      image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800",
-      description: "Our award-winning biryani varieties that have won hearts across Pakistan",
+      image:
+        "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800",
+      description:
+        "Our award-winning biryani varieties that have won hearts across Pakistan",
     },
     {
       title: "Traditional Breakfast Menu",
       category: "Breakfast",
-      image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800",
-      description: "Authentic Pakistani breakfast items that start your day right",
+      image:
+        "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800",
+      description:
+        "Authentic Pakistani breakfast items that start your day right",
     },
     {
       title: "Karahi Specialties",
       category: "Dinner",
-      image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800",
-      description: "Traditional karahi dishes cooked to perfection with family recipes",
+      image:
+        "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800",
+      description:
+        "Traditional karahi dishes cooked to perfection with family recipes",
     },
     {
       title: "Dessert Delights",
       category: "Desserts",
-      image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=800",
+      image:
+        "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=800",
       description: "Sweet endings with traditional Pakistani desserts",
     },
     {
       title: "Fresh Beverages",
       category: "Beverages",
-      image: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=800",
+      image:
+        "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=800",
       description: "Refreshing drinks to complement your meal perfectly",
     },
     {
@@ -66,10 +74,13 @@ export const Portfolio = () => {
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Transforming Ideas into
-              <span className="text-primary block">Powerful Culinary Experiences</span>
+              <span className="text-primary block">
+                Powerful Culinary Experiences
+              </span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              Explore our portfolio of signature dishes and catering services that have delighted thousands of customers
+              Explore our portfolio of signature dishes and catering services
+              that have delighted thousands of customers
             </p>
           </motion.div>
         </div>
@@ -105,9 +116,12 @@ export const Portfolio = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Culinary Portfolio</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Our Culinary Portfolio
+          </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            From traditional recipes to modern innovations, discover what makes AM Foods special
+            From traditional recipes to modern innovations, discover what makes
+            Al Tawakkalfoods special
           </p>
         </motion.div>
 
@@ -133,7 +147,9 @@ export const Portfolio = () => {
               </div>
               <div className="p-6">
                 <h3 className="font-bold text-xl mb-2">{project.title}</h3>
-                <p className="text-sm text-muted-foreground">{project.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {project.description}
+                </p>
               </div>
             </motion.div>
           ))}
@@ -197,7 +213,8 @@ export const Portfolio = () => {
             Ready to Start Your Project?
           </h2>
           <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-            Whether it's a family dinner or a large event, we're here to make it special
+            Whether it's a family dinner or a large event, we're here to make it
+            special
           </p>
           <Button size="lg" variant="secondary" asChild>
             <Link to="/contact">Get in Touch</Link>

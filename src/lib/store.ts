@@ -1,47 +1,71 @@
-// src/lib/store.ts → Cleaned up version
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { User, Rider, Deal } from "./mockData";
 
 interface AppState {
-  currentUser: any | null;
+  // Auth
+  currentUser: User | null;
+  token: string | null;
 
-  orders: any[];
-  riders: any[];
-  deals: any[];
-  menuItems: any[];
+  // Actions
+  setCurrentUser: (user: User | null) => void;
+  setToken: (token: string | null) => void;
+  logout: () => void;
 
-  setCurrentUser: (user: any) => void;
+  // Riders
+  riders: Rider[];
+  updateRiderStatus: (riderId: string, status: Rider["status"]) => void;
+  assignOrderToRider: (orderId: string, riderId: string) => void;
 
-  // Orders, riders, deals, menu actions...
-  addOrder: (order: any) => void;
-  updateOrderStatus: (orderId: string, status: any) => void;
-  // ... keep all other admin/order logic
+  // Deals
+  deals: Deal[];
+  addDeal: (deal: Deal) => void;
+  updateDeal: (dealId: string, updates: Partial<Deal>) => void;
+  deleteDeal: (dealId: string) => void;
 }
 
-export const useStore = create<AppState>()(
-  persist(
-    (set) => ({
-      currentUser: null,
-      orders: [],
-      riders: [],
-      deals: [],
-      menuItems: [],
+export const useStore = create<AppState>((set) => ({
+  currentUser: null,
+  token: null,
+  riders: [],
+  deals: [],
 
-      setCurrentUser: (user) => set({ currentUser: user }),
+  // Auth Actions
+  setCurrentUser: (user) => set({ currentUser: user }),
+  setToken: (token) => set({ token }),
+  logout: () => set({ currentUser: null, token: null }),
 
-      addOrder: (order) => set((state) => ({ orders: [...state.orders, order] })),
-      updateOrderStatus: (orderId, status) =>
-        set((state) => ({
-          orders: state.orders.map((o) =>
-            o.id === orderId ? { ...o, status } : o
-          ),
-        })),
-      // ... other actions
-    }),
-    {
-      name: "amfood-storage-v2",
-      version: 2,
-      partialize: (state) => ({ currentUser: state.currentUser }),
-    }
-  )
-);
+  // Riders
+  updateRiderStatus: (riderId, status) =>
+    set((state) => ({
+      riders: state.riders.map((rider) =>
+        rider.id === riderId ? { ...rider, status } : rider
+      ),
+    })),
+
+  assignOrderToRider: (orderId, riderId) =>
+    set((state) => ({
+      riders: state.riders.map((rider) =>
+        rider.id === riderId
+          ? { ...rider, currentOrders: [...rider.currentOrders, orderId] }
+          : rider
+      ),
+    })),
+
+  // Deals
+  addDeal: (deal) =>
+    set((state) => ({
+      deals: [...state.deals, deal],
+    })),
+
+  updateDeal: (dealId, updates) =>
+    set((state) => ({
+      deals: state.deals.map((deal) =>
+        deal.id === dealId ? { ...deal, ...updates } : deal
+      ),
+    })),
+
+  deleteDeal: (dealId) =>
+    set((state) => ({
+      deals: state.deals.filter((deal) => deal.id !== dealId),
+    })),
+}));

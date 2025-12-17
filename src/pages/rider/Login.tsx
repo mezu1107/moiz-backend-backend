@@ -21,7 +21,7 @@ export const RiderLogin = () => {
 
     // Mock login - find rider user by email
     const user = mockUsers.find((u) => u.email === email && u.role === "rider");
-    
+
     if (user) {
       setCurrentUser(user);
       toast.success("Rider login successful!");
@@ -35,7 +35,7 @@ export const RiderLogin = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/10"></div>
-      
+
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -47,7 +47,9 @@ export const RiderLogin = () => {
             AM
           </div>
           <div>
-            <h1 className="font-bold text-2xl text-foreground">AM Foods</h1>
+            <h1 className="font-bold text-2xl text-foreground">
+              Al Tawakkalfoods
+            </h1>
             <p className="text-xs text-primary flex items-center gap-1">
               <Bike className="h-3 w-3" />
               Rider Portal
@@ -98,7 +100,11 @@ export const RiderLogin = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -114,7 +120,10 @@ export const RiderLogin = () => {
 
           <div className="mt-6 text-center space-y-2">
             <p className="text-sm text-muted-foreground">
-              <Link to="/login" className="text-primary hover:underline font-medium">
+              <Link
+                to="/login"
+                className="text-primary hover:underline font-medium"
+              >
                 ← Back to User Login
               </Link>
             </p>

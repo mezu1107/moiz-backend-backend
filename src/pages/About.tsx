@@ -5,23 +5,54 @@ import { Footer } from "@/components/Footer";
 
 export const About = () => {
   const team = [
-    { name: "Chef Rashid Ali", role: "Head Chef", image: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400" },
-    { name: "Hassan Raza", role: "Lead Delivery", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400" },
-    { name: "Fatima Khan", role: "Operations Manager", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400" },
+    {
+      name: "Chef Rashid Ali",
+      role: "Head Chef",
+      image:
+        "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400",
+    },
+    {
+      name: "Hassan Raza",
+      role: "Lead Delivery",
+      image:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
+    },
+    {
+      name: "Fatima Khan",
+      role: "Operations Manager",
+      image:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
+    },
   ];
 
   const timeline = [
-    { year: "2020", title: "Founded", description: "AM Foods was established with a vision to bring authentic Pakistani cuisine to homes" },
-    { year: "2021", title: "Expansion", description: "Expanded to 3 cities with over 50 delivery riders" },
-    { year: "2022", title: "Recognition", description: "Won Best Pakistani Restaurant award" },
-    { year: "2023", title: "Digital Growth", description: "Launched mobile app and expanded to 7+ service areas" },
+    {
+      year: "2020",
+      title: "Founded",
+      description:
+        "Al Tawakkalfoods was established with a vision to bring authentic Pakistani cuisine to homes",
+    },
+    {
+      year: "2021",
+      title: "Expansion",
+      description: "Expanded to 3 cities with over 50 delivery riders",
+    },
+    {
+      year: "2022",
+      title: "Recognition",
+      description: "Won Best Pakistani Restaurant award",
+    },
+    {
+      year: "2023",
+      title: "Digital Growth",
+      description: "Launched mobile app and expanded to 7+ service areas",
+    },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero */}
       <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20">
         <div className="container mx-auto px-4">
           <motion.div
@@ -34,21 +65,37 @@ export const About = () => {
               <span className="text-primary block">Taste to Your Table</span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              At AM Foods, we're passionate about delivering authentic Pakistani cuisine that reminds you of home. 
-              Every dish is prepared with love, tradition, and the finest ingredients.
+              At Al Tawakkalfoods, we're passionate about delivering authentic
+              Pakistani cuisine that reminds you of home. Every dish is prepared
+              with love, tradition, and the finest ingredients.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Values */}
       <section className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-4 gap-8">
           {[
-            { icon: Heart, title: "Passion", description: "We love what we do and it shows in every dish" },
-            { icon: Award, title: "Quality", description: "Only the finest ingredients make it to your plate" },
-            { icon: Users, title: "Community", description: "Serving our community with pride and dedication" },
-            { icon: Target, title: "Excellence", description: "Striving for perfection in every order" },
+            {
+              icon: Heart,
+              title: "Passion",
+              description: "We love what we do and it shows in every dish",
+            },
+            {
+              icon: Award,
+              title: "Quality",
+              description: "Only the finest ingredients make it to your plate",
+            },
+            {
+              icon: Users,
+              title: "Community",
+              description: "Serving our community with pride and dedication",
+            },
+            {
+              icon: Target,
+              title: "Excellence",
+              description: "Striving for perfection in every order",
+            },
           ].map((value, index) => (
             <motion.div
               key={value.title}
@@ -62,13 +109,14 @@ export const About = () => {
                 <value.icon className="h-8 w-8 text-primary" />
               </div>
               <h3 className="font-bold text-xl mb-2">{value.title}</h3>
-              <p className="text-sm text-muted-foreground">{value.description}</p>
+              <p className="text-sm text-muted-foreground">
+                {value.description}
+              </p>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Story */}
       <section className="bg-muted/50 py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -79,13 +127,21 @@ export const About = () => {
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Story</h2>
               <p className="text-muted-foreground mb-4">
-                Founded in 2020 under AM Enterprises, AM Foods began with a simple mission: to share the rich flavors of Pakistani cuisine with food lovers across the country.
+                Founded in 2020 Al Tawakkalfoods began with a simple mission: to
+                share the rich flavors of Pakistani cuisine with food lovers
+                across the country.
               </p>
               <p className="text-muted-foreground mb-4">
-                What started as a small kitchen in Lahore has grown into a beloved brand, serving thousands of satisfied customers daily. Our chefs use time-honored recipes passed down through generations, ensuring every bite is a taste of authentic Pakistani tradition.
+                What started as a small kitchen in Islamabad has grown into a
+                beloved brand, serving thousands of satisfied customers daily.
+                Our chefs use time-honored recipes passed down through
+                generations, ensuring every bite is a taste of authentic
+                Pakistani tradition.
               </p>
               <p className="text-muted-foreground">
-                Today, we operate across 7+ service areas, employing over 50 dedicated delivery riders and maintaining our commitment to quality, taste, and customer satisfaction.
+                Today, we operate across 7+ service areas, employing over 50
+                dedicated delivery riders and maintaining our commitment to
+                quality, taste, and customer satisfaction.
               </p>
             </motion.div>
 
@@ -110,7 +166,6 @@ export const About = () => {
         </div>
       </section>
 
-      {/* Timeline */}
       <section className="container mx-auto px-4 py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -135,14 +190,18 @@ export const About = () => {
               className="flex gap-8 mb-12 last:mb-0"
             >
               <div className="flex-shrink-0 w-24 text-right">
-                <span className="text-3xl font-bold text-primary">{milestone.year}</span>
+                <span className="text-3xl font-bold text-primary">
+                  {milestone.year}
+                </span>
               </div>
               <div className="relative flex-1 pb-12">
                 <div className="absolute left-0 top-2 w-4 h-4 rounded-full bg-primary" />
                 <div className="absolute left-2 top-6 w-0.5 h-full bg-border" />
                 <div className="pl-8">
                   <h3 className="font-bold text-xl mb-2">{milestone.title}</h3>
-                  <p className="text-muted-foreground">{milestone.description}</p>
+                  <p className="text-muted-foreground">
+                    {milestone.description}
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -150,7 +209,6 @@ export const About = () => {
         </div>
       </section>
 
-      {/* Team */}
       <section className="bg-muted/50 py-16">
         <div className="container mx-auto px-4">
           <motion.div
@@ -159,7 +217,9 @@ export const About = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Meet Our Team</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Meet Our Team
+            </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               The passionate people behind your favorite meals
             </p>

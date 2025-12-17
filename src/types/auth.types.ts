@@ -1,8 +1,19 @@
 // src/types/auth.types.ts
-export type UserRole = 'customer' | 'rider' | 'admin';
 
+// All possible user roles from backend User model
+export type UserRole =
+  | 'customer'
+  | 'rider'
+  | 'admin'
+  | 'kitchen'
+  | 'delivery_manager'
+  | 'support'
+  | 'finance';
+
+// Rider status enum
 export type RiderStatus = 'none' | 'pending' | 'approved' | 'rejected';
 
+// Rider documents structure
 export interface RiderDocuments {
   cnicNumber?: string;
   cnicFront?: string;
@@ -13,23 +24,26 @@ export interface RiderDocuments {
   vehicleType?: 'bike' | 'car' | 'bicycle';
 }
 
+// GeoJSON Point for location
 export interface UserLocation {
   type: 'Point';
-  coordinates: [number, number]; // [longitude, latitude]
+  coordinates: [number, number]; // [longitude, latitude] — e.g., [73.0479, 33.6844] for Rawalpindi
 }
 
+// Main User interface — matches exactly what backend returns in /me, login, register, verify-otp
 export interface User {
-  _id: string;
+  id: string; // backend sends `_id` as `id` in responses (due to toJSON transform or manual mapping)
   name: string;
-  email?: string | null;
   phone: string;
+  email?: string | null;
   role: UserRole;
-  isActive: boolean;
-
-  // Rider-specific
+  city: string; // Always present, default 'RAWALPINDI'
+  currentLocation?: UserLocation;
+  isActive?: boolean;
   riderStatus?: RiderStatus;
   riderDocuments?: RiderDocuments;
-  currentLocation?: UserLocation;
+
+  // Rider-specific stats (optional, present if role === 'rider')
   isOnline?: boolean;
   isAvailable?: boolean;
   locationUpdatedAt?: string | null;
@@ -38,27 +52,43 @@ export interface User {
   earnings?: number;
 
   // Timestamps
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
 
-  // Optional UI helpers (not from DB)
+  // Optional: for frontend UI only (not from backend)
   avatar?: string;
 }
 
-export interface LoginResponse {
-  success: boolean;
+// API Response Types
+
+// Successful login, register, and verify-otp
+export interface AuthSuccessWithToken {
+  success: true;
+  message: string;
   token: string;
   user: User;
-  message?: string;
 }
 
-export interface RegisterResponse {
-  success: boolean;
+// /auth/me response
+export interface AuthMeResponse {
+  success: true;
   user: User;
+}
+
+// Generic success (logout, change password, update profile, etc.)
+export interface AuthSuccessResponse {
+  success: true;
   message: string;
 }
 
-export interface AuthMeResponse {
-  success: boolean;
-  user: User;
+// Error response from backend
+export interface AuthErrorResponse {
+  success: false;
+  message: string;
 }
+
+// Union type for any auth API response
+export type AuthApiResponse =
+  | AuthSuccessWithToken
+  | AuthMeResponse
+  | AuthSuccessResponse
+  | AuthErrorResponse;

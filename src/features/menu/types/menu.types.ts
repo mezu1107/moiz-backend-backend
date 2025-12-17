@@ -1,6 +1,13 @@
 // src/features/menu/types/menu.types.ts
+import { Coffee, Drumstick, Cake, ForkKnife, Glasses } from 'lucide-react';
+import React from 'react';
 
-export type MenuCategory = 'breakfast' | 'lunch' | 'dinner' | 'desserts' | 'beverages';
+export type MenuCategory =
+  | 'breakfast'
+  | 'lunch'
+  | 'dinner'
+  | 'desserts'
+  | 'beverages';
 
 export interface MenuItem {
   _id: string;
@@ -18,33 +25,35 @@ export interface MenuItem {
   featured?: boolean;
 }
 
-
 export interface AreaInfo {
   _id: string;
   name: string;
   city: string;
-  center: { lat: number; lng: number };
+  center: { lat: number; lng: number } | null;
 }
 
 export interface DeliveryInfo {
   fee: number;
-  minOrder?: number;
+  minOrder?: number; // Present only when delivery is active
   estimatedTime: string;
 }
 
 export interface MenuByLocationResponse {
   success: boolean;
   inService: boolean;
-  area?: {
-    _id: string;
-    name: string;
-    city: string;
-    center: { lat: number; lng: number };
-  };
-  delivery?: {
-    fee: number;
-    estimatedTime: string;
-  };
+  hasDeliveryZone: boolean;
+  area: AreaInfo | null;
+  delivery: DeliveryInfo | null;
+  menu: MenuItem[];
+  message?: string;
+}
+
+export interface MenuByAreaResponse {
+  success: boolean;
+  hasDeliveryZone: boolean;
+  area: AreaInfo;
+  delivery: DeliveryInfo | null;
+  totalItems: number;
   menu: MenuItem[];
   message?: string;
 }
@@ -52,14 +61,6 @@ export interface MenuByLocationResponse {
 export interface FullMenuCatalogResponse {
   success: boolean;
   message: string;
-  totalItems: number;
-  menu: MenuItem[];
-}
-
-export interface MenuByAreaResponse {
-  success: boolean;
-  message?: string; // ✅ added
-  area: AreaInfo;
   totalItems: number;
   menu: MenuItem[];
 }
@@ -84,8 +85,8 @@ export interface AdminMenuResponse {
 
 export interface SingleMenuItemResponse {
   success: boolean;
-  message?: string; // ✅ added
   item: MenuItem;
+  message?: string;
 }
 
 export interface MenuMutationResponse {
@@ -131,28 +132,42 @@ export interface MenuFilterParams {
   minPrice?: number;
   maxPrice?: number;
   search?: string;
-  sort?: 'name_asc' | 'name_desc' | 'price_asc' | 'price_desc' | 'newest' | 'oldest' | 'category_asc';
+  sort?:
+    | 'name_asc'
+    | 'name_desc'
+    | 'price_asc'
+    | 'price_desc'
+    | 'newest'
+    | 'oldest'
+    | 'category_asc';
   availableOnly?: boolean;
 }
 
+// ✅ FIXED: Safe string labels (prevents React crash)
 export const CATEGORY_LABELS: Record<MenuCategory, string> = {
   breakfast: 'Breakfast',
   lunch: 'Lunch',
   dinner: 'Dinner',
   desserts: 'Desserts',
   beverages: 'Beverages',
-};
+} as const;
 
-export const CATEGORY_ICONS: Record<MenuCategory, string> = {
-  breakfast: 'Coffee',    // a cup of coffee for breakfast
-  lunch: 'Bowl',          // a bowl representing lunch (e.g., rice bowl)
-  dinner: 'Drumstick',    // chicken drumstick for dinner
-  desserts: 'Cake',       // slice of cake for desserts
-  beverages: 'Glass',     // glass for beverages (or 'Coffee' if preferred)
-};
+// ✅ Safe icons
+export const CATEGORY_ICONS: Record<MenuCategory, React.ElementType> = {
+  breakfast: Coffee,
+  lunch: ForkKnife,
+  dinner: Drumstick,
+  desserts: Cake,
+  beverages: Glasses,
+} as const;
 
-export const CATEGORY_OPTIONS = Object.entries(CATEGORY_LABELS).map(([value, label]) => ({
-  value: value as MenuCategory,
-  label,
-  icon: CATEGORY_ICONS[value as MenuCategory],
+// ✅ FIXED: Safe category options (no React components in text nodes)
+export const CATEGORY_OPTIONS: {
+  value: MenuCategory;
+  label: string;
+  icon: React.ReactNode;
+}[] = (Object.keys(CATEGORY_LABELS) as MenuCategory[]).map((cat) => ({
+  value: cat,
+  label: CATEGORY_LABELS[cat],
+  icon: React.createElement(CATEGORY_ICONS[cat]),
 }));

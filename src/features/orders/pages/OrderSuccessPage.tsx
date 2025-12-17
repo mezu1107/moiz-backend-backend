@@ -1,143 +1,190 @@
-// src/features/orders/pages/OrderSuccessPage.tsx
+// src/features/orders/pages/OrderTrackingPage.tsx
+// FINAL PRODUCTION — DECEMBER 16, 2025
+// Live order tracking page (success + real-time updates)
+
 import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, Clock, MapPin, Truck, ChefHat, Package, XCircle } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+
+import {
+  CheckCircle,
+  Clock,
+  ChefHat,
+  Truck,
+  Package,
+  XCircle,
+  MapPin,
+  Phone,
+} from 'lucide-react';
+
 import confetti from 'canvas-confetti';
-import { useOrder } from '@/features/orders/hooks/useOrders';
+
+import { useTrackOrder } from '@/features/orders/hooks/useOrders';
 import { useOrderSocket } from '@/features/orders/hooks/useOrderSocket';
+
 import {
   ORDER_STATUS_LABELS,
   ORDER_STATUS_COLORS,
-  type Order,
 } from '@/types/order.types';
-import { Skeleton } from '@/components/ui/skeleton';
 
 const STEPS = [
-  { status: 'pending', icon: Clock, label: 'Received' },
+  { status: 'pending', icon: Clock, label: 'Order Received' },
   { status: 'confirmed', icon: CheckCircle, label: 'Confirmed' },
   { status: 'preparing', icon: ChefHat, label: 'Preparing' },
   { status: 'out_for_delivery', icon: Truck, label: 'On the Way' },
   { status: 'delivered', icon: Package, label: 'Delivered' },
 ] as const;
 
-export default function OrderSuccessPage() {
+export default function OrderTrackingPage() {
   const { orderId } = useParams<{ orderId: string }>();
 
   if (!orderId) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="max-w-md w-full text-center p-8">
-          <XCircle className="h-16 w-16 text-red-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-3">Invalid Order</h2>
-          <p className="text-muted-foreground mb-6">
-            No order ID provided in the URL.
+      <div className="min-h-screen flex items-center justify-center p-4 bg-muted/20">
+        <Card className="max-w-md w-full text-center p-10">
+          <XCircle className="h-16 w-16 text-destructive mx-auto mb-6" />
+          <h2 className="text-2xl font-bold mb-4">Invalid Link</h2>
+          <p className="text-muted-foreground mb-8">
+            No order ID found. Please check your link or go to your orders.
           </p>
           <Button asChild>
-            <Link to="/orders">View Orders</Link>
+            <Link to="/orders">My Orders</Link>
           </Button>
         </Card>
       </div>
     );
   }
 
-  // Fetch order using custom hook
-  const { data: order, isLoading } = useOrder(orderId);
+  const { data: order, isLoading, error } = useTrackOrder(orderId);
 
-  // Subscribe to real-time updates
+  // Real-time updates
   useOrderSocket(orderId);
 
-  // Trigger confetti on delivery
+  // Confetti on delivery
   useEffect(() => {
     if (order?.status === 'delivered') {
-      confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+      confetti({
+        particleCount: 200,
+        spread: 100,
+        origin: { y: 0.6 },
+        colors: ['#e11d48', '#f97316', '#22c55e', '#3b82f6'],
+      });
     }
   }, [order?.status]);
 
   if (isLoading) {
-    return <Skeleton className="h-96 w-full mx-auto mt-8 rounded-xl" />;
+    return (
+      <div className="container mx-auto px-4 py-12 max-w-3xl">
+        <Skeleton className="h-96 rounded-2xl mb-6" />
+        <Skeleton className="h-64 rounded-2xl" />
+      </div>
+    );
   }
 
-  if (!order) {
+  if (error || !order) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="max-w-md w-full text-center p-8">
-          <XCircle className="h-16 w-16 text-red-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-3">Order Not Found</h2>
-          <p className="text-muted-foreground mb-6">
-            We couldn't find this order. It may have been removed or the link is invalid.
+      <div className="min-h-screen flex items-center justify-center p-4 bg-muted/20">
+        <Card className="max-w-md w-full text-center p-10">
+          <XCircle className="h-16 w-16 text-destructive mx-auto mb-6" />
+          <h2 className="text-2xl font-bold mb-4">Order Not Found</h2>
+          <p className="text-muted-foreground mb-8">
+            This order doesn't exist or has been removed.
           </p>
           <Button asChild>
-            <Link to="/orders">View Orders</Link>
+            <Link to="/orders">My Orders</Link>
           </Button>
         </Card>
       </div>
     );
   }
 
-  const currentStep = STEPS.findIndex((s) => s.status === order.status);
+  const currentStepIndex = STEPS.findIndex((s) => s.status === order.status);
+  const isTerminal = ['delivered', 'cancelled', 'rejected'].includes(order.status);
   const isCancelled = ['cancelled', 'rejected'].includes(order.status);
 
   return (
-    <div className="min-h-screen bg-muted/30 py-8">
-      <div className="container mx-auto px-4 max-w-2xl space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-muted/20 to-background py-8">
+      <div className="container mx-auto px-4 max-w-3xl space-y-8">
 
         {/* Header */}
         <div className="text-center py-8">
           <div
-            className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${
+            className={`inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 shadow-lg ${
               isCancelled
                 ? 'bg-red-100'
                 : order.status === 'delivered'
                 ? 'bg-green-100'
-                : 'bg-primary/10'
+                : 'bg-rose-100'
             }`}
           >
             {isCancelled ? (
-              <XCircle className="h-12 w-12 text-red-600" />
+              <XCircle className="h-14 w-14 text-red-600" />
             ) : order.status === 'delivered' ? (
-              <CheckCircle className="h-12 w-12 text-green-600" />
+              <CheckCircle className="h-14 w-14 text-green-600" />
             ) : (
-              <CheckCircle className="h-12 w-12 text-primary" />
+              <CheckCircle className="h-14 w-14 text-rose-600" />
             )}
           </div>
-          <h1 className="text-3xl font-bold">
+
+          <h1 className="text-4xl font-bold mb-3">
             {isCancelled
               ? 'Order Cancelled'
               : order.status === 'delivered'
-              ? 'Delivered!'
+              ? 'Order Delivered!'
               : 'Order Confirmed!'}
           </h1>
-          <p className="text-muted-foreground mt-2">#{order._id.slice(-6).toUpperCase()}</p>
-          <Badge className={`mt-4 text-lg px-4 py-1 ${ORDER_STATUS_COLORS[order.status]}`}>
+
+          <p className="text-xl text-muted-foreground mb-4">
+            Order <span className="font-mono font-bold text-rose-600">#{order.shortId}</span>
+          </p>
+
+          <Badge
+            className={`text-lg px-6 py-2 ${ORDER_STATUS_COLORS[order.status]} text-white`}
+          >
             {ORDER_STATUS_LABELS[order.status]}
           </Badge>
         </div>
 
-        {/* Progress Steps */}
-        {!isCancelled && (
-          <Card>
+        {/* Progress Timeline */}
+        {!isTerminal && (
+          <Card className="overflow-hidden shadow-xl">
+            <CardHeader>
+              <CardTitle>Order Progress</CardTitle>
+            </CardHeader>
             <CardContent className="p-8">
               <div className="relative">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   {STEPS.map((step, i) => {
                     const Icon = step.icon;
-                    const active = i <= currentStep;
+                    const isActive = i <= currentStepIndex;
+                    const isCompleted = i < currentStepIndex;
+
                     return (
-                      <div key={step.status} className="flex flex-col items-center">
+                      <div key={step.status} className="flex flex-col items-center relative z-10">
                         <div
-                          className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold ${
-                            active ? 'bg-primary' : 'bg-muted'
+                          className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 ${
+                            isCompleted
+                              ? 'bg-green-500 text-white'
+                              : isActive
+                              ? 'bg-rose-600 text-white scale-110 shadow-lg'
+                              : 'bg-muted text-muted-foreground'
                           }`}
                         >
-                          <Icon className="h-7 w-7" />
+                          <Icon className="h-8 w-8" />
                         </div>
                         <p
-                          className={`text-xs mt-2 ${
-                            active ? 'font-medium' : 'text-muted-foreground'
+                          className={`text-sm mt-3 font-medium transition-colors ${
+                            isActive || isCompleted ? 'text-foreground' : 'text-muted-foreground'
                           }`}
                         >
                           {step.label}
@@ -146,87 +193,121 @@ export default function OrderSuccessPage() {
                     );
                   })}
                 </div>
-                <div className="absolute top-7 left-0 right-0 h-1 bg-muted -z-10">
+
+                {/* Progress Bar */}
+                <div className="absolute top-8 left-0 right-0 h-2 bg-muted -z-10">
                   <div
-                    className="h-full bg-primary transition-all duration-500"
-                    style={{ width: `${(currentStep / (STEPS.length - 1)) * 100}%` }}
+                    className="h-full bg-rose-600 transition-all duration-700 ease-out rounded-full"
+                    style={{
+                      width: `${(currentStepIndex / (STEPS.length - 1)) * 100}%`,
+                    }}
                   />
                 </div>
               </div>
-              {order.estimatedDelivery && currentStep < STEPS.length - 1 && (
-                <p className="text-center mt-6 text-sm">
-                  Estimated Delivery: <strong>{order.estimatedDelivery}</strong>
+
+              {order.estimatedDelivery && currentStepIndex < 4 && (
+                <p className="text-center mt-8 text-lg">
+                  Estimated delivery: <strong>{order.estimatedDelivery}</strong>
                 </p>
               )}
             </CardContent>
           </Card>
         )}
 
-        {/* Items Summary */}
-        <Card>
-          <CardContent className="p-6 space-y-6">
-            <div>
-              <h3 className="font-bold mb-3">Order Items</h3>
-              {order.items.map((item, i) => (
-                <div key={i} className="flex justify-between py-2">
-                  <span>
-                    {item.quantity} × {item.menuItem.name}
-                  </span>
-                  <span>Rs. {item.priceAtOrder * item.quantity}</span>
+        {/* Order Items */}
+        <Card className="shadow-xl">
+          <CardHeader>
+            <CardTitle>Order Items</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {order.items.map((item, i) => (
+              <div key={i} className="flex justify-between items-center py-3">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold">
+                    {item.quantity}
+                  </div>
+                  <div>
+                    <p className="font-medium">{item.menuItem.name}</p>
+                  </div>
                 </div>
-              ))}
-            </div>
-            <Separator />
-            <div className="space-y-2 text-sm">
+                <p className="font-medium">
+                  Rs. {(item.priceAtOrder * item.quantity).toLocaleString()}
+                </p>
+              </div>
+            ))}
+
+            <Separator className="my-6" />
+
+            <div className="space-y-3 text-lg">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>Rs. {order.totalAmount}</span>
+                <span>Rs. {order.totalAmount.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span>Delivery Fee</span>
-                <span>Rs. {order.deliveryFee}</span>
+                <span>Rs. {order.deliveryFee.toLocaleString()}</span>
               </div>
               {order.discountApplied > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-green-600 font-medium">
                   <span>Discount</span>
-                  <span>-Rs. {order.discountApplied}</span>
+                  <span>-Rs. {order.discountApplied.toLocaleString()}</span>
                 </div>
               )}
-              <div className="flex justify-between font-bold text-lg pt-3 border-t">
+              {order.walletUsed > 0 && (
+                <div className="flex justify-between text-blue-600 font-medium">
+                  <span>Wallet Used</span>
+                  <span>-Rs. {order.walletUsed.toLocaleString()}</span>
+                </div>
+              )}
+              <Separator />
+              <div className="flex justify-between text-2xl font-bold pt-4">
                 <span>Total Paid</span>
-                <span>Rs. {order.finalAmount}</span>
+                <span className="text-rose-600">Rs. {order.finalAmount.toLocaleString()}</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Delivery Address */}
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <div className="flex gap-3">
-              <MapPin className="h-5 w-5 text-primary mt-1" />
-              <div>
-                <p className="font-medium">Delivery Address</p>
-                <p className="text-sm text-muted-foreground">
-                  {order.addressDetails?.fullAddress || 'Not available'}
+        {/* Delivery Info */}
+        <Card className="shadow-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Delivery Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <p className="font-medium mb-1">Address</p>
+              <p className="text-muted-foreground">
+                {order.addressDetails.fullAddress}
+                {order.addressDetails.floor && `, ${order.addressDetails.floor}`}
+              </p>
+              {order.instructions && (
+                <p className="text-sm text-muted-foreground mt-2 italic">
+                  "{order.instructions}"
                 </p>
-              </div>
+              )}
             </div>
 
-            {/* Rider Info */}
             {order.rider && (
               <>
                 <Separator />
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Truck className="h-8 w-8 text-primary" />
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Truck className="h-8 w-8 text-primary" />
+                    </div>
                     <div>
-                      <p className="font-medium">{order.rider.name}</p>
+                      <p className="font-bold text-lg">{order.rider.name}</p>
                       <p className="text-sm text-muted-foreground">Your Rider</p>
                     </div>
                   </div>
-                  <Button size="sm" asChild>
-                    <a href={`tel:${order.rider.phone}`}>Call Rider</a>
+                  <Button size="lg" asChild>
+                    <a href={`tel:${order.rider.phone}`}>
+                      <Phone className="h-5 w-5 mr-2" />
+                      Call Rider
+                    </a>
                   </Button>
                 </div>
               </>
@@ -234,12 +315,12 @@ export default function OrderSuccessPage() {
           </CardContent>
         </Card>
 
-        {/* Action Buttons */}
-        <div className="flex gap-4">
-          <Button asChild variant="outline" className="flex-1">
+        {/* Actions */}
+        <div className="grid grid-cols-2 gap-4 pb-8">
+          <Button variant="outline" size="lg" asChild>
             <Link to="/orders">View All Orders</Link>
           </Button>
-          <Button asChild className="flex-1">
+          <Button size="lg" asChild>
             <Link to="/menu">Order Again</Link>
           </Button>
         </div>

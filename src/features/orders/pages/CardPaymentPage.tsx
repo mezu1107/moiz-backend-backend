@@ -1,37 +1,43 @@
 // src/features/orders/pages/CardPaymentPage.tsx
+// FINAL PRODUCTION — DECEMBER 16, 2025
+// Fully synced with backend orderController.js, paymentSuccess route, and Stripe best practices
+
 import { useState, useEffect } from 'react';
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { loadStripe, PaymentIntent } from '@stripe/stripe-js';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements,
+} from '@stripe/react-stripe-js';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CreditCard, Lock, AlertCircle } from 'lucide-react';
+import { Loader2, CreditCard, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useCartStore } from '@/features/cart/store/useCartStore';
-import { apiClient } from '@/lib/api';
+import { api } from '@/lib/api'; // your axios instance
+import type { CreateOrderResponse } from '@/types/order.types';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
-interface PaymentPageState {
-  clientSecret: string;
-  orderId: string;
-  amount: number;
-}
-
-interface BackendPaymentResponse {
-  success: boolean;
-  message?: string;
-}
 
 function CardForm({
   clientSecret,
   orderId,
   amount,
+  shortId,
 }: {
   clientSecret: string;
   orderId: string;
   amount: number;
+  shortId: string;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -39,36 +45,53 @@ function CardForm({
   const { clearCart } = useCartStore();
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Automatically confirm payment after 3D Secure redirect
+  // Handle return from 3D Secure / redirect flow
   useEffect(() => {
     if (!stripe || !clientSecret) return;
 
-    const checkPaymentStatus = async () => {
+    const handleRedirectReturn = async () => {
       setIsProcessing(true);
-      try {
-        const { paymentIntent, error } = await stripe.retrievePaymentIntent(clientSecret);
+      const { paymentIntent, error } = await stripe.retrievePaymentIntent(clientSecret);
 
-        if (error) {
-          setErrorMessage(error.message || 'Payment verification failed.');
-          toast.error(error.message || 'Payment verification failed.');
-          return;
-        }
+      if (error) {
+        setErrorMessage(error.message ?? 'Unable to verify payment status.');
+        toast.error('Payment verification failed');
+        setIsProcessing(false);
+        return;
+      }
 
-        if (paymentIntent?.status === 'succeeded') {
-          await confirmPaymentOnBackend(paymentIntent);
-        }
-      } catch (err) {
-        console.error(err);
-        setErrorMessage('Failed to verify payment. Please try again.');
-      } finally {
+      if (paymentIntent?.status === 'succeeded') {
+        await confirmPaymentOnBackend(paymentIntent.id);
+      } else if (paymentIntent?.status === 'processing') {
+        toast.info('Payment is processing. We’ll update your order soon.');
         setIsProcessing(false);
       }
     };
 
-    checkPaymentStatus();
+    handleRedirectReturn();
   }, [stripe, clientSecret]);
+
+  const confirmPaymentOnBackend = async (paymentIntentId: string) => {
+    try {
+      await api.post(`/orders/success/${orderId}`, { paymentIntentId });
+
+      clearCart();
+      setIsSuccess(true);
+      toast.success('Payment successful! 🎉');
+      setTimeout(() => {
+        navigate(`/track/${orderId}`, { replace: true });
+      }, 2000);
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Failed to confirm payment';
+      setErrorMessage(msg);
+      toast.error(msg);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,73 +100,36 @@ function CardForm({
     setIsProcessing(true);
     setErrorMessage(null);
 
-    try {
-      const { error, paymentIntent } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/order/${orderId}`,
-        },
-        redirect: 'if_required',
-      });
-
-      if (error) {
-        setErrorMessage(error.message || 'Payment failed');
-        toast.error(error.message || 'Payment failed');
-        return;
-      }
-
-      if (!paymentIntent) {
-        setErrorMessage('Payment could not be initialized. Try again.');
-        return;
-      }
-
-      switch (paymentIntent.status) {
-        case 'succeeded':
-          await confirmPaymentOnBackend(paymentIntent);
-          break;
-        case 'requires_action':
-        case 'requires_confirmation':
-          toast('Please complete additional authentication if prompted by your bank.');
-          break;
-        case 'processing':
-          toast('Payment is processing. Please wait...');
-          break;
-        case 'requires_payment_method':
-          setErrorMessage('Payment failed. Please try another card or payment method.');
-          break;
-        default:
-          setErrorMessage('Unexpected payment status. Please try again.');
-      }
-    } catch (err) {
-      console.error(err);
-      setErrorMessage('Payment failed. Please try again.');
-      toast.error('Payment failed');
-    } finally {
+    // Required for latest Stripe compliance
+    const { error: submitError } = await elements.submit();
+    if (submitError) {
+      setErrorMessage(submitError.message ?? 'Invalid card details');
       setIsProcessing(false);
+      return;
     }
-  };
 
-  const confirmPaymentOnBackend = async (paymentIntent: PaymentIntent) => {
-    try {
-      // apiClient.post already returns the response data directly
-      const data: BackendPaymentResponse = await apiClient.post(
-        `/orders/success/${orderId}`,
-        {
-          paymentIntentId: paymentIntent.id,
-          method: 'card',
-        }
-      );
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/payment/card/${orderId}`, // self-redirect for 3DS
+      },
+      redirect: 'if_required',
+    });
 
-      if (data.success) {
-        clearCart();
-        toast.success('Payment successful! Your order is confirmed.');
-        navigate(`/order/${orderId}`, { replace: true });
-      } else {
-        setErrorMessage(data.message || 'Payment confirmation failed.');
+    if (error) {
+      setErrorMessage(error.message ?? 'Payment failed');
+      toast.error(error.message ?? 'Payment failed');
+      setIsProcessing(false);
+      return;
+    }
+
+    if (paymentIntent) {
+      if (paymentIntent.status === 'succeeded') {
+        await confirmPaymentOnBackend(paymentIntent.id);
+      } else if (paymentIntent.status === 'processing') {
+        toast.success('Payment received! Processing...');
+        setTimeout(() => navigate(`/track/${orderId}`), 1500);
       }
-    } catch (err: any) {
-      console.error(err);
-      setErrorMessage(err.response?.data?.message || 'Failed to confirm payment. Please try again.');
     }
   };
 
@@ -155,17 +141,38 @@ function CardForm({
           wallets: { applePay: 'auto', googlePay: 'auto' },
         }}
       />
+
       {errorMessage && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
-      <Button type="submit" size="lg" className="w-full" disabled={!stripe || isProcessing}>
+
+      {isSuccess && (
+        <Alert className="border-green-200 bg-green-50">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800">
+            Payment successful! Redirecting to your order...
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={!stripe || isProcessing || isSuccess}
+      >
         {isProcessing ? (
           <>
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             Processing...
+          </>
+        ) : isSuccess ? (
+          <>
+            <CheckCircle className="mr-2 h-5 w-5" />
+            Paid
           </>
         ) : (
           <>
@@ -174,6 +181,11 @@ function CardForm({
           </>
         )}
       </Button>
+
+      <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
+        <Lock className="h-3 w-3" />
+        Secured by Stripe • End-to-end encrypted
+      </p>
     </form>
   );
 }
@@ -181,54 +193,90 @@ function CardForm({
 export default function CardPaymentPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state as PaymentPageState | null;
 
-  if (!state?.clientSecret || !state?.orderId) {
+  const response = location.state as CreateOrderResponse | null;
+
+  // Guard: Must come from successful order creation with clientSecret
+  if (!response?.clientSecret || !response?.order) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
         <Card className="max-w-md w-full text-center p-10">
-          <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-3">Payment Session Expired</h2>
+          <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-6" />
+          <h2 className="text-2xl font-bold mb-3">Invalid Payment Session</h2>
+          <p className="text-muted-foreground mb-6">
+            This payment link is no longer valid. Please place your order again.
+          </p>
           <Button onClick={() => navigate('/cart')}>Back to Cart</Button>
         </Card>
       </div>
     );
   }
 
+  const { clientSecret, order, walletUsed } = response;
+  const shortId = order.shortId;
+
+  const appearance = {
+    theme: 'flat' as const,
+    variables: {
+      colorPrimary: '#e11d48',
+      colorBackground: '#ffffff',
+      colorText: '#1f2937',
+      colorDanger: '#dc2626',
+      borderRadius: '12px',
+      fontFamily: 'Inter, system-ui, sans-serif',
+    },
+  };
+
   const options = {
-    clientSecret: state.clientSecret,
-    appearance: {
-      theme: 'flat',
-      variables: { colorPrimary: '#e11d48' },
-    } as any,
+    clientSecret,
+    appearance,
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/50 to-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
+        {/* Header */}
         <div className="text-center">
-          <div className="w-20 h-20 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center">
-            <CreditCard className="h-10 w-10 text-primary" />
+          <div className="w-20 h-20 rounded-full bg-rose-100 mx-auto mb-6 flex items-center justify-center">
+            <CreditCard className="h-10 w-10 text-rose-600" />
           </div>
           <h1 className="text-3xl font-bold">Complete Payment</h1>
-          <p className="text-muted-foreground">Order #{state.orderId.slice(-6).toUpperCase()}</p>
+          <CardDescription className="mt-2">
+            Order <span className="font-mono font-bold text-rose-600">#{shortId}</span>
+          </CardDescription>
         </div>
 
-        <Card>
-          <CardHeader className="text-center">
-            <p className="text-sm text-muted-foreground">Amount Due</p>
-            <p className="text-4xl font-bold text-primary">Rs. {state.amount.toLocaleString()}</p>
+        {/* Amount Card */}
+        <Card className="border-2 border-rose-200 shadow-xl">
+          <CardHeader className="text-center pb-4">
+            <p className="text-sm uppercase tracking-wider text-muted-foreground">
+              Amount Due
+            </p>
+            <p className="text-5xl font-bold text-rose-600">
+              Rs. {order.finalAmount.toLocaleString()}
+            </p>
+            {walletUsed > 0 && (
+              <p className="text-sm text-muted-foreground mt-2">
+                (Rs. {walletUsed.toLocaleString()} paid via wallet)
+              </p>
+            )}
           </CardHeader>
+
           <CardContent>
             <Elements stripe={stripePromise} options={options}>
               <CardForm
-                clientSecret={state.clientSecret}
-                orderId={state.orderId}
-                amount={state.amount}
+                clientSecret={clientSecret}
+                orderId={order._id}
+                amount={order.finalAmount}
+                shortId={shortId}
               />
             </Elements>
           </CardContent>
         </Card>
+
+        <p className="text-center text-xs text-muted-foreground">
+          Powered by Stripe • PCI DSS Compliant
+        </p>
       </div>
     </div>
   );

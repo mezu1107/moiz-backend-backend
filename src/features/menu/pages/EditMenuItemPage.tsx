@@ -1,10 +1,10 @@
 // src/features/menu/pages/admin/EditMenuItemPage.tsx
 import { useEffect, useState, ChangeEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Trash2, Globe } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2, Globe, Upload } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod"; // ← THIS WAS MISSING
+import { z } from "zod";
 import { toast } from "sonner";
 
 import {
@@ -29,6 +29,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -37,31 +38,42 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().optional(),
-  price: z.coerce.number().positive("Price must be positive"),
+  price: z.coerce.number().min(1, "Price must be at least Rs. 1"),
   category: z.enum(["breakfast", "lunch", "dinner", "desserts", "beverages"]),
   isVeg: z.boolean(),
   isSpicy: z.boolean(),
   isAvailable: z.boolean(),
   availableInAreas: z.array(z.string()),
-  image: z.instanceof(File).optional().nullable(),
+  image: z.instanceof(File).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
 
 export default function EditMenuItemPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { data: itemData, isLoading: itemLoading } = useMenuItem(id);
-  const { data: areasData, isLoading: areasLoading } = useAvailableAreas();
+  const {
+    data: itemData,
+    isLoading: itemLoading,
+    isError: itemError,
+  } = useMenuItem(id);
+
+  const {
+    data: areasData,
+    isLoading: areasLoading,
+    isError: areasError,
+  } = useAvailableAreas();
+
   const updateMutation = useUpdateMenuItem();
 
   const item = itemData?.item;
+  const areas = areasData?.areas || [];
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -71,51 +83,57 @@ export default function EditMenuItemPage() {
       name: "",
       description: "",
       price: 0,
-      category: "lunch",
+      category: "dinner",
       isVeg: false,
       isSpicy: false,
       isAvailable: true,
       availableInAreas: [],
-      image: null,
     },
   });
 
+  // Sync form with fetched item
   useEffect(() => {
     if (item) {
       form.reset({
-        name: item.name,
+        name: item.name || "",
         description: item.description || "",
-        price: item.price,
-        category: item.category,
-        isVeg: item.isVeg,
-        isSpicy: item.isSpicy,
-        isAvailable: item.isAvailable,
+        price: item.price || 0,
+        category: item.category || "dinner",
+        isVeg: !!item.isVeg,
+        isSpicy: !!item.isSpicy,
+        isAvailable: item.isAvailable ?? true,
         availableInAreas: item.availableInAreas || [],
-        image: null,
       });
-      setPreviewUrl(null);
+      setPreviewUrl(item.image);
     }
   }, [item, form]);
 
   const selectedAreas = form.watch("availableInAreas");
+  const isSubmitting = updateMutation.isPending;
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image");
+      toast.error("Please select a valid image file");
       return;
     }
 
-    form.setValue("image", file);
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+
+    form.setValue("image", file, { shouldValidate: true });
     setPreviewUrl(URL.createObjectURL(file));
+    toast.success("New image selected");
   };
 
-  const removeImage = () => {
+  const removeNewImage = () => {
     form.setValue("image", undefined);
-    setPreviewUrl(null);
-    toast.info("New image removed");
+    setPreviewUrl(item?.image || null);
+    toast.success("New image removed – will keep current image");
   };
 
   const onSubmit = (values: FormValues) => {
@@ -125,36 +143,52 @@ export default function EditMenuItemPage() {
       {
         id,
         data: {
-          ...values,
-          description: values.description || undefined,
-          image: values.image || undefined,
+          name: values.name.trim(),
+          description: values.description?.trim(),
+          price: values.price,
+          category: values.category,
+          isVeg: values.isVeg,
+          isSpicy: values.isSpicy,
+          isAvailable: values.isAvailable,
+          availableInAreas: values.availableInAreas,
+          image: values.image,
         },
       },
       {
         onSuccess: () => {
-          toast.success("Item updated successfully!");
+          toast.success("Menu item updated successfully!");
           navigate("/admin/menu");
         },
         onError: () => {
-          toast.error("Failed to update item");
+          toast.error("Failed to update item. Please try again.");
         },
       }
     );
   };
 
+  // Loading state
   if (itemLoading || areasLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="flex h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading menu item...</p>
+        </div>
       </div>
     );
   }
 
-  if (!item) {
+  // Error or not found
+  if (itemError || areasError || !item) {
     return (
-      <div className="text-center py-20">
-        <p className="text-2xl text-muted-foreground">Item not found</p>
-        <Button variant="outline" onClick={() => navigate("/admin/menu")} className="mt-6">
+      <div className="container max-w-2xl mx-auto py-20 text-center">
+        <h2 className="text-3xl font-bold text-destructive mb-4">
+          {itemError || !item ? "Item not found" : "Failed to load areas"}
+        </h2>
+        <p className="text-muted-foreground mb-8">
+          The menu item could not be loaded. It may have been deleted or there was a network issue.
+        </p>
+        <Button variant="outline" onClick={() => navigate("/admin/menu")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Menu
         </Button>
@@ -163,66 +197,77 @@ export default function EditMenuItemPage() {
   }
 
   return (
-    <div className="container max-w-5xl mx-auto py-10">
+    <div className="container max-w-7xl mx-auto py-10 px-4">
       <div className="flex items-center gap-4 mb-8">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/admin/menu")}>
-          <ArrowLeft className="h-5 w-5" />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate("/admin/menu")}
+          aria-label="Back to menu list"
+        >
+          <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-4xl font-bold">Edit Menu Item</h1>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-          <div className="grid gap-10 md:grid-cols-3">
-            {/* Image Card */}
-            <Card className="md:col-span-1">
+          <div className="grid gap-8 lg:grid-cols-3">
+            {/* Image Section */}
+            <Card className="lg:col-span-1">
               <CardHeader>
-                <CardTitle>Image</CardTitle>
+                <CardTitle>Item Image</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="relative aspect-square overflow-hidden rounded-xl border-2 border-dashed border-muted-foreground/20 bg-muted/50">
-                  {previewUrl || item.image ? (
-                    <img
-                      src={previewUrl || item.image}
-                      alt="Preview"
-                      className="h-full w-full object-cover"
-                    />
+                <div className="relative aspect-square rounded-xl overflow-hidden bg-muted/40 border-2 border-dashed border-muted-foreground/25">
+                  {previewUrl ? (
+                    <>
+                      <img
+                        src={previewUrl}
+                        alt="Menu item preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-4 right-4 shadow-lg"
+                        onClick={removeNewImage}
+                        aria-label="Remove new image"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
                   ) : (
-                    <div className="flex h-full items-center justify-center text-muted-foreground">
-                      No image
+                    <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                      <Upload className="h-12 w-12 mb-3 opacity-50" />
+                      <p>No image</p>
                     </div>
-                  )}
-                  {(previewUrl || item.image) && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-3 right-3"
-                      onClick={removeImage}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   )}
                 </div>
 
                 <div>
-                  <Label htmlFor="image">Change Image</Label>
-                  <Input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="mt-2"
-                  />
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Recommended: 800×800px • JPG, PNG, WebP
-                  </p>
+                  <Label htmlFor="image-upload" className="cursor-pointer">
+                    <div className="flex flex-col gap-2">
+                      <Input
+                        id="image-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="cursor-pointer"
+                        disabled={isSubmitting}
+                      />
+                      <FormDescription>
+                        Recommended: 800×800px • JPG, PNG, WebP • Max 5MB
+                      </FormDescription>
+                    </div>
+                  </Label>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Details Card */}
-            <Card className="md:col-span-2">
+            {/* Details Section */}
+            <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>Item Details</CardTitle>
               </CardHeader>
@@ -235,7 +280,7 @@ export default function EditMenuItemPage() {
                       <FormItem>
                         <FormLabel>Name *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Butter Chicken" {...field} />
+                          <Input placeholder="e.g., Chicken Biryani" {...field} disabled={isSubmitting} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -249,7 +294,14 @@ export default function EditMenuItemPage() {
                       <FormItem>
                         <FormLabel>Price (Rs.) *</FormLabel>
                         <FormControl>
-                          <Input type="number" step="1" placeholder="299" {...field} />
+                          <Input
+                            type="number"
+                            min="1"
+                            step="1"
+                            placeholder="299"
+                            {...field}
+                            disabled={isSubmitting}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -262,12 +314,14 @@ export default function EditMenuItemPage() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Description (Optional)</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Rich, creamy tomato-based curry with tender chicken..."
+                          placeholder="Rich, aromatic rice layered with tender chicken..."
                           rows={4}
                           {...field}
+                          value={field.value ?? ""}
+                          disabled={isSubmitting}
                         />
                       </FormControl>
                       <FormMessage />
@@ -281,17 +335,17 @@ export default function EditMenuItemPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Category *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {CATEGORY_OPTIONS.map((opt) => (
                             <SelectItem key={opt.value} value={opt.value}>
                               <div className="flex items-center gap-3">
-                                <span>{opt.icon}</span>
+                                {opt.icon}
                                 <span>{opt.label}</span>
                               </div>
                             </SelectItem>
@@ -304,107 +358,84 @@ export default function EditMenuItemPage() {
                 />
 
                 <div className="flex flex-wrap gap-8">
-                  <FormField
-                    control={form.control}
-                    name="isVeg"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">Vegetarian</FormLabel>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="isSpicy"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">Spicy</FormLabel>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="isAvailable"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">Available</FormLabel>
-                      </FormItem>
-                    )}
-                  />
+                  {(["isVeg", "isSpicy", "isAvailable"] as const).map((key) => (
+                    <FormField
+                      key={key}
+                      control={form.control}
+                      name={key}
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={isSubmitting}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal cursor-pointer">
+                            {key === "isVeg" ? "Vegetarian" : key === "isSpicy" ? "Spicy" : "Available for Order"}
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  ))}
                 </div>
 
                 <Separator />
 
-                {/* Available Areas */}
                 <FormField
                   control={form.control}
                   name="availableInAreas"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Available In Areas</FormLabel>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto rounded-lg border p-4 bg-muted/30">
-                          {areasData?.areas.map((area) => (
-                            <FormItem
-                              key={area.id}
-                              className="flex flex-row items-center space-x-3 space-y-0"
-                            >
-                              <FormControl>
-                                <Checkbox
-                                  checked={selectedAreas.includes(area.id)}
-                                  onCheckedChange={(checked) => {
-                                    if (checked) {
-                                      form.setValue("availableInAreas", [...selectedAreas, area.id]);
-                                    } else {
-                                      form.setValue(
-                                        "availableInAreas",
-                                        selectedAreas.filter((id) => id !== area.id)
-                                      );
-                                    }
-                                  }}
-                                />
-                              </FormControl>
-                              <div className="leading-none">
-                                <FormLabel className="cursor-pointer">{area.name}</FormLabel>
-                                <p className="text-xs text-muted-foreground">{area.city}</p>
-                              </div>
-                            </FormItem>
-                          ))}
-                        </div>
-
-                        {/* Everywhere Badge */}
-                        <div className="flex justify-center">
-                          {selectedAreas.length === 0 ? (
-                            <Badge variant="default" className="gap-2 py-2 px-4">
-                              <Globe className="h-4 w-4" />
-                              Available Everywhere
-                            </Badge>
+                      <FormLabel>Available in Delivery Areas</FormLabel>
+                      <FormDescription>
+                        Leave empty for availability in <strong>all active areas</strong>
+                      </FormDescription>
+                      <ScrollArea className="h-64 w-full rounded-lg border bg-muted/20 p-4 mt-2">
+                        <div className="space-y-3">
+                          {areas.length === 0 ? (
+                            <p className="text-center text-muted-foreground py-8 text-sm">
+                              No active delivery areas found
+                            </p>
                           ) : (
-                            <Badge variant="secondary">
-                              {selectedAreas.length} area{selectedAreas.length > 1 ? "s" : ""} selected
-                            </Badge>
+                            areas.map((area) => (
+                              <div
+                                key={area._id}
+                                className="flex items-center space-x-3 rounded-lg p-3 hover:bg-muted/50 transition-colors"
+                              >
+                                <Checkbox
+                                  checked={selectedAreas.includes(area._id)}
+                                  onCheckedChange={(checked) => {
+                                    const current = form.getValues("availableInAreas");
+                                    const updated = checked
+                                      ? [...current, area._id]
+                                      : current.filter((id) => id !== area._id);
+                                    form.setValue("availableInAreas", updated, { shouldValidate: true });
+                                  }}
+                                  disabled={isSubmitting}
+                                />
+                                <div>
+                                  <Label className="font-medium cursor-pointer">{area.name}</Label>
+                                  <p className="text-xs text-muted-foreground">{area.city}</p>
+                                </div>
+                              </div>
+                            ))
                           )}
                         </div>
+                      </ScrollArea>
+
+                      <div className="mt-4 flex justify-center">
+                        {selectedAreas.length === 0 ? (
+                          <Badge variant="default" className="gap-2 py-2 px-6 text-sm">
+                            <Globe className="h-4 w-4" />
+                            Available Everywhere
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-sm">
+                            {selectedAreas.length} area{selectedAreas.length > 1 ? "s" : ""} selected
+                          </Badge>
+                        )}
                       </div>
                     </FormItem>
                   )}
@@ -414,15 +445,20 @@ export default function EditMenuItemPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-4 pt-6 border-t">
-            <Button type="button" variant="outline" onClick={() => navigate("/admin/menu")}>
+          <div className="flex justify-end gap-4 pt-8 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/admin/menu")}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? (
+            <Button type="submit" size="lg" disabled={isSubmitting}>
+              {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  Saving Changes...
                 </>
               ) : (
                 "Save Changes"

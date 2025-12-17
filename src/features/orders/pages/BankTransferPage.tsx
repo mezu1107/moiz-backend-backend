@@ -1,29 +1,29 @@
-
 // src/features/orders/pages/BankTransferPage.tsx
+// FINAL PRODUCTION — DECEMBER 16, 2025
+// Fully synced with backend orderController.js and order.types.ts
+
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Building2, Copy, CheckCircle, Clock, AlertCircle, ArrowRight } from 'lucide-react';
+import {
+  Building2,
+  Copy,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  ArrowRight,
+} from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-
-interface BankDetails {
-  amount: number;
-  bankName: string;
-  accountTitle: string;
-  accountNumber: string;
-  iban: string;
-  branch: string;
-  reference: string;
-}
-
-interface OrderInfo {
-  _id: string;
-  finalAmount: number;
-  status: string;
-}
+import type { Order, CreateOrderResponse } from '@/types/order.types';
 
 export default function BankTransferPage() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -31,17 +31,17 @@ export default function BankTransferPage() {
   const navigate = useNavigate();
   const [copied, setCopied] = useState<string | null>(null);
 
-  // Safely extract state from location
-  const state = location.state as { order: OrderInfo; bankDetails: BankDetails } | null;
-  
-  if (!state?.order || !state?.bankDetails) {
+  // Extract data safely from location.state (passed from useCreateOrder)
+  const response = location.state as CreateOrderResponse | null;
+
+  if (!response || !response.order || !response.bankDetails) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
         <Card className="max-w-md w-full text-center p-8">
           <AlertCircle className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">Payment Details Missing</h2>
           <p className="text-muted-foreground mb-6">
-            It looks like you reached this page directly. Please complete checkout first.
+            This page cannot be accessed directly. Please complete checkout first.
           </p>
           <Button onClick={() => navigate('/cart')}>Back to Cart</Button>
         </Card>
@@ -49,12 +49,13 @@ export default function BankTransferPage() {
     );
   }
 
-  const { order, bankDetails } = state;
+  const { order, bankDetails, walletUsed } = response;
+  const shortId = order.shortId; // Already computed on backend
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     setCopied(label);
-    toast.success(`${label} copied to clipboard!`);
+    toast.success(`${label} copied!`);
     setTimeout(() => setCopied(null), 2000);
   };
 
@@ -66,7 +67,7 @@ export default function BankTransferPage() {
       onClick={() => copyToClipboard(text, label)}
     >
       {copied === label ? (
-        <CheckCircle className="h-4 w-4 text-green-500" />
+        <CheckCircle className="h-4 w-4 text-green-600" />
       ) : (
         <Copy className="h-4 w-4" />
       )}
@@ -74,54 +75,66 @@ export default function BankTransferPage() {
   );
 
   return (
-    <div className="min-h-screen bg-muted/30 pb-8">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-b from-orange-500/10 to-background pt-8 pb-12 text-center">
-        <div className="w-20 h-20 rounded-full bg-orange-500/10 mx-auto mb-4 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-background">
+      {/* Header */}
+      <div className="bg-gradient-to-b from-orange-500/10 to-transparent pt-8 pb-12 text-center">
+        <div className="w-20 h-20 rounded-full bg-orange-100 mx-auto mb-6 flex items-center justify-center">
           <Building2 className="h-10 w-10 text-orange-600" />
         </div>
-        <h1 className="text-2xl font-bold mb-2">Complete Bank Transfer</h1>
-        <p className="text-muted-foreground">Transfer the exact amount to confirm your order</p>
-        <Badge className="mt-3 bg-orange-500">
+        <h1 className="text-3xl font-bold mb-2">Bank Transfer Required</h1>
+        <p className="text-muted-foreground max-w-md mx-auto px-4">
+          Please transfer the exact amount using the details below to confirm your order
+        </p>
+        <Badge variant="secondary" className="mt-4">
           <Clock className="h-3 w-3 mr-1" />
-          Expires in 15 minutes
+          Auto-cancels in 15 minutes
         </Badge>
       </div>
 
-      <div className="container mx-auto px-4 -mt-6 max-w-lg space-y-6">
-        {/* Amount Card */}
-        <Card className="border-2 border-primary/20 shadow-lg">
-          <CardContent className="p-6 text-center">
-            <p className="text-sm text-muted-foreground mb-1">Total Amount to Pay</p>
-            <p className="text-4xl font-bold text-primary">
-              Rs. {bankDetails.amount.toLocaleString()}
+      <div className="container mx-auto px-4 max-w-lg -mt-6 space-y-6">
+        {/* Amount Due */}
+        <Card className="border-2 border-primary shadow-xl overflow-hidden">
+          <CardContent className="p-8 text-center bg-gradient-to-br from-primary/5 to-transparent">
+            <p className="text-sm uppercase tracking-wider text-muted-foreground mb-2">
+              Amount to Transfer
             </p>
-            <p className="text-xs text-muted-foreground mt-2">
-              Order #{order._id.slice(-6).toUpperCase()}
+            <p className="text-5xl font-bold text-primary">
+              Rs. {order.finalAmount.toLocaleString()}
+            </p>
+            {walletUsed > 0 && (
+              <p className="text-sm text-muted-foreground mt-3">
+                (Rs. {walletUsed.toLocaleString()} paid via wallet)
+              </p>
+            )}
+            <Separator className="my-4" />
+            <p className="text-lg font-medium">
+              Order <span className="font-mono font-bold text-primary">#{shortId}</span>
             </p>
           </CardContent>
         </Card>
 
-        {/* Bank Details */}
+        {/* Bank Account Details */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              Bank Account Details
+              Transfer To
             </CardTitle>
+            <CardDescription>{bankDetails.bankName} • {bankDetails.branch}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {[
-              { label: 'Bank Name', value: bankDetails.bankName },
               { label: 'Account Title', value: bankDetails.accountTitle },
               { label: 'Account Number', value: bankDetails.accountNumber },
               { label: 'IBAN', value: bankDetails.iban },
-              { label: 'Branch', value: bankDetails.branch },
             ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between py-3 border-b last:border-0">
+              <div
+                key={item.label}
+                className="flex items-center justify-between py-3 border-b last:border-0"
+              >
                 <div>
                   <p className="text-sm text-muted-foreground">{item.label}</p>
-                  <p className="font-medium font-mono text-base">{item.value}</p>
+                  <p className="font-medium font-mono">{item.value}</p>
                 </div>
                 <CopyButton text={item.value} label={item.label} />
               </div>
@@ -129,63 +142,78 @@ export default function BankTransferPage() {
           </CardContent>
         </Card>
 
-        {/* Reference Code - Highlighted */}
-        <Card className="border-2 border-orange-500/30 bg-orange-500/5">
-          <CardContent className="p-6 text-center">
-            <p className="text-sm text-muted-foreground mb-2">Reference Code (Required)</p>
+        {/* Reference Code - Critical */}
+        <Card className="border-2 border-orange-500 bg-orange-500/5">
+          <CardContent className="p-8 text-center">
+            <p className="text-sm uppercase tracking-wider text-orange-600 mb-3">
+              Required Reference Code
+            </p>
             <div className="flex items-center justify-center gap-4">
-              <p className="text-3xl font-bold font-mono text-orange-600 tracking-widest">
+              <p className="text-4xl font-bold font-mono tracking-widest text-orange-600">
                 {bankDetails.reference}
               </p>
-              <CopyButton text={bankDetails.reference} label="Reference Code" />
+              <CopyButton text={bankDetails.reference} label="Reference" />
             </div>
-            <p className="text-xs text-orange-600 mt-4 flex items-center justify-center gap-1">
-              <AlertCircle className="h-4 w-4" />
-              Must include in transfer remarks/description
-            </p>
+            <div className="mt-6 p-4 bg-orange-100 rounded-lg border border-orange-300">
+              <p className="text-sm text-orange-800 flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <span>
+                  <strong>Must include this reference</strong> in the transfer description/remarks. 
+                  Without it, we cannot match your payment.
+                </span>
+              </p>
+            </div>
           </CardContent>
         </Card>
 
-        {/* How to Pay */}
+        {/* Step-by-step Instructions */}
         <Card>
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">How to Pay</h3>
-            <ol className="space-y-3 text-sm">
+          <CardHeader>
+            <CardTitle>How to Complete Payment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ol className="space-y-4">
               {[
-                "Open your banking app, ATM, or visit branch",
-                `Transfer exactly <strong>Rs. ${bankDetails.amount.toLocaleString()}</strong>`,
-                `In remarks/notes, write: <strong>${bankDetails.reference}</strong>`,
-                "Your order will be confirmed within 5–15 minutes",
+                'Open your banking app or visit your bank branch/ATM',
+                `Transfer exactly <strong>Rs. ${order.finalAmount.toLocaleString()}</strong>`,
+                `In the remarks/description field, write: <strong>${bankDetails.reference}</strong>`,
+                'Take a screenshot of the transaction for your records',
+                'Your order will be confirmed automatically within 5–15 minutes',
               ].map((step, i) => (
-                <li key={i} className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-medium">
+                <li key={i} className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white text-sm flex items-center justify-center font-bold">
                     {i + 1}
                   </span>
-                  <span dangerouslySetInnerHTML={{ __html: step }} />
+                  <span
+                    className="text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: step }}
+                  />
                 </li>
               ))}
             </ol>
           </CardContent>
         </Card>
 
-        {/* Warning */}
-        <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm text-center">
-          <AlertCircle className="inline-block h-4 w-4 mr-1" />
-          Order will be automatically cancelled if payment is not received within 15 minutes
+        {/* Final Warning */}
+        <div className="p-5 bg-destructive/10 border border-destructive/30 rounded-xl text-center">
+          <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
+          <p className="text-sm font-medium text-destructive">
+            This order will be automatically cancelled if payment is not received within 15 minutes.
+          </p>
         </div>
 
-        {/* Action Button */}
+        {/* CTA */}
         <Button
           size="lg"
-          className="w-full h-14 text-lg font-semibold"
-          onClick={() => navigate(`/orders/${orderId}`)}
+          className="w-full h-14 text-lg font-semibold shadow-lg"
+          onClick={() => navigate(`/track/${orderId}`)}
         >
           I’ve Made the Transfer
           <ArrowRight className="ml-3 h-6 w-6" />
         </Button>
 
-        <p className="text-center text-xs text-muted-foreground">
-          You’ll be notified as soon as we confirm your payment
+        <p className="text-center text-sm text-muted-foreground pb-8">
+          We’ll notify you as soon as your payment is confirmed. Thank you!
         </p>
       </div>
     </div>

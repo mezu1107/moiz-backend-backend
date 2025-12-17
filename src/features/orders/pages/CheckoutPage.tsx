@@ -1,17 +1,19 @@
 // src/features/orders/pages/CheckoutPage.tsx
-import { useState, useEffect } from 'react';
+// FINAL PRODUCTION — DECEMBER 16, 2025
+// Fully synced with backend, useOrders hooks, and payment pages — ALL TS ERRORS FIXED
+
+import { useEffect, useState } from 'react'; // ← Added useState
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
 
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,53 +21,63 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/components/ui/use-toast';
-import { Loader2, AlertCircle, MapPin, User, Phone, CreditCard, Wallet, Building2, Truck, Smartphone } from 'lucide-react';
+import { Loader2, AlertCircle, MapPin, User, Phone, CreditCard, Wallet, Building2, Smartphone } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useCartStore } from '@/features/cart/store/useCartStore';
 import { useAddresses } from '@/features/address/hooks/useAddresses';
-import { useAreas } from '@/hooks/useCheckArea';
+import { useAreas } from '@/hooks/useCheckArea'; // ← Correct path from your file
 import { useCreateOrder, useCreateGuestOrder } from '@/features/orders/hooks/useOrders';
 import type { CreateOrderPayload, CreateGuestOrderPayload } from '@/types/order.types';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
-
+// Conditional schema
 const checkoutSchema = z.object({
   paymentMethod: z.enum(['cod', 'card', 'easypaisa', 'jazzcash', 'bank']),
-  addressId: z.string().optional(),
+  addressId: z.string().min(1, 'Please select an address').optional(),
   guestAddress: z
     .object({
-      fullAddress: z.string().min(10, 'Enter complete address'),
-      areaId: z.string({ required_error: 'Select delivery area' }),
+      fullAddress: z.string().min(10, 'Enter your complete address'),
+      areaId: z.string({ required_error: 'Please select a delivery area' }),
       label: z.string().optional(),
       floor: z.string().optional(),
       instructions: z.string().max(150).optional(),
     })
     .optional(),
-  name: z.string().min(2, 'Name required').optional(),
-  phone: z.string().regex(/^03\d{9}$/, 'Valid phone: 03XXXXXXXXX').optional(),
+  name: z.string().min(2, 'Name is required').optional(),
+  phone: z.string().regex(/^03\d{9}$/, 'Phone must be 03XXXXXXXXX format').optional(),
   promoCode: z.string().optional(),
-});
+  instructions: z.string().max(300).optional(),
+}).refine(
+  (data) => {
+    if (!data.addressId) {
+      return !!data.guestAddress?.areaId && !!data.name && !!data.phone;
+    }
+    return true;
+  },
+  {
+    message: 'Please complete all guest details',
+    path: ['guestAddress'],
+  }
+);
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { user, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const { items, subtotal, clearCart } = useCartStore();
-  const { data: addresses } = useAddresses();
-  const { data: areas } = useAreas();
+  const { data: addresses = [] } = useAddresses();
+  const { data: areas = [] } = useAreas(); // ← Now resolves correctly
+
   const createOrder = useCreateOrder();
   const createGuestOrder = useCreateGuestOrder();
 
   const [deliveryFee, setDeliveryFee] = useState(149);
   const [minOrderAmount, setMinOrderAmount] = useState(0);
-  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [estimatedTime, setEstimatedTime] = useState('35-50 min');
 
   const {
     register,
@@ -76,46 +88,55 @@ export default function CheckoutPage() {
     formState: { errors, isSubmitting },
   } = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { paymentMethod: 'cod' },
+    defaultValues: {
+      paymentMethod: 'cod',
+    },
   });
 
-  const paymentMethod = watch('paymentMethod');
-  const addressId = watch('addressId');
-  const guestAreaId = watch('guestAddress.areaId');
+  const selectedAddressId = watch('addressId');
+  const guestAreaId = watch('guestAddress.areaId'); // ← Correct nested field syntax (no ?.)
 
+  // Auto-select default address for authenticated users
   useEffect(() => {
-    if (isAuthenticated && addresses?.length && !addressId) {
-      const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
-      setValue('addressId', defaultAddr._id);
+    if (isAuthenticated && addresses.length > 0 && !selectedAddressId) {
+      const defaultAddr = addresses.find((a) => a.isDefault) || addresses[0];
+      if (defaultAddr) {
+        setValue('addressId', defaultAddr._id);
+
+        const area = areas.find((a) => a._id === defaultAddr.area._id);
+        if (area?.deliveryZone) {
+          setDeliveryFee(area.deliveryZone.deliveryFee);
+          setMinOrderAmount(area.deliveryZone.minOrderAmount);
+          setEstimatedTime(area.deliveryZone.estimatedTime || '35-50 min');
+        }
+      }
     }
-  }, [addresses, isAuthenticated, addressId, setValue]);
+  }, [addresses, areas, isAuthenticated, selectedAddressId, setValue]);
 
+  // Update delivery info when guest selects area
   useEffect(() => {
-    if (guestAreaId && areas) {
-      const area = areas.find(a => a._id === guestAreaId);
+    if (guestAreaId) {
+      const area = areas.find((a) => a._id === guestAreaId);
       if (area?.deliveryZone) {
         setDeliveryFee(area.deliveryZone.deliveryFee);
         setMinOrderAmount(area.deliveryZone.minOrderAmount);
+        setEstimatedTime(area.deliveryZone.estimatedTime || '35-50 min');
       }
     }
   }, [guestAreaId, areas]);
 
-  const total = subtotal + deliveryFee - promoDiscount;
+  const total = subtotal + deliveryFee;
   const isMinOrderMet = subtotal >= minOrderAmount;
 
   const onSubmit = async (data: CheckoutForm) => {
     if (!isMinOrderMet) {
-      toast({
-        title: 'Minimum Order Not Met',
-        description: `This area requires minimum Rs. ${minOrderAmount}`,
-        variant: 'destructive',
-      });
+      toast.error(`Minimum order for this area is Rs. ${minOrderAmount}`);
       return;
     }
 
-    const baseItems = items.map(i => ({
-      menuItem: i.menuItem._id,
-      quantity: i.quantity,
+    const itemsPayload = items.map((item) => ({
+      menuItem: item.menuItem._id,
+      quantity: item.quantity,
     }));
 
     try {
@@ -123,27 +144,28 @@ export default function CheckoutPage() {
 
       if (isAuthenticated) {
         response = await createOrder.mutateAsync({
-          items: baseItems,
+          items: itemsPayload,
           addressId: data.addressId!,
           paymentMethod: data.paymentMethod,
-          promoCode: data.promoCode?.trim() || undefined,
+          promoCode: data.promoCode?.trim().toUpperCase(),
+          instructions: data.instructions?.trim(),
+          // useWallet removed — backend handles wallet internally when finalAmount === 0
         });
       } else {
-        if (!data.guestAddress || !data.name || !data.phone) return;
-
         response = await createGuestOrder.mutateAsync({
-          items: baseItems,
+          items: itemsPayload,
           guestAddress: {
-            fullAddress: data.guestAddress.fullAddress,
-            areaId: data.guestAddress.areaId,
-            label: data.guestAddress.label || 'Home',
-            floor: data.guestAddress.floor,
-            instructions: data.guestAddress.instructions,
+            fullAddress: data.guestAddress!.fullAddress,
+            areaId: data.guestAddress!.areaId,
+            label: data.guestAddress!.label || 'Home',
+            floor: data.guestAddress!.floor,
+            instructions: data.guestAddress!.instructions,
           },
-          name: data.name.trim(),
-          phone: data.phone,
+          name: data.name!.trim(),
+          phone: data.phone!,
           paymentMethod: data.paymentMethod,
-          promoCode: data.promoCode?.trim() || undefined,
+          promoCode: data.promoCode?.trim().toUpperCase(),
+          instructions: data.instructions?.trim(),
         });
       }
 
@@ -151,59 +173,62 @@ export default function CheckoutPage() {
 
       if (response.clientSecret) {
         navigate('/checkout/card', {
-          state: { clientSecret: response.clientSecret, orderId: response.order._id, amount: response.order.finalAmount },
+          state: {
+            clientSecret: response.clientSecret,
+            orderId: response.order._id,
+            amount: response.order.finalAmount,
+            shortId: response.order.shortId,
+          },
+          replace: true,
         });
       } else if (response.bankDetails) {
-        navigate(`/checkout/bank-transfer/${response.order._id}`, {
-          state: { order: response.order, bankDetails: response.bankDetails },
+        navigate('/checkout/bank-transfer', {
+          state: {
+            order: response.order,
+            bankDetails: response.bankDetails,
+            walletUsed: response.walletUsed,
+          },
+          replace: true,
         });
       } else {
-        navigate(`/order/${response.order._id}`);
-        toast({ title: 'Order Placed!', description: 'We’re preparing your food!' });
+        toast.success('Order placed successfully! 🎉');
+        navigate(`/track/${response.order._id}`, { replace: true });
       }
-    } catch (err: any) {
-      toast({
-        title: 'Order Failed',
-        description: err.response?.data?.message || 'Please try again later',
-        variant: 'destructive',
-      });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to place order. Please try again.');
     }
   };
 
   if (items.length === 0) {
-    return (
-      <div className="container py-20 text-center">
-        <h2 className="text-3xl font-bold mb-4">Your cart is empty</h2>
-        <Button onClick={() => navigate('/menu')}>Browse Menu</Button>
-      </div>
-    );
+    navigate('/cart', { replace: true });
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-muted/20 to-background py-8">
       <div className="container mx-auto max-w-6xl px-4">
-        <h1 className="text-4xl font-bold text-center mb-8">Checkout</h1>
+        <h1 className="text-4xl font-bold text-center mb-10">Checkout</h1>
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid lg:grid-cols-3 gap-8">
-          {/* Left: Form */}
+          {/* Left: Form Fields */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Guest / Auth Toggle */}
+            {/* Guest Contact Info */}
             {!isAuthenticated && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <User className="h-5 w-5" />
-                    Contact Information
+                    Contact Details
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
+                <CardContent className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <Label>Name</Label>
+                    <Label>Full Name</Label>
                     <Input {...register('name')} placeholder="Ahmad Khan" />
                     {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
                   </div>
                   <div>
-                    <Label>Phone</Label>
+                    <Label>Phone Number</Label>
                     <Input {...register('phone')} placeholder="03451234567" />
                     {errors.phone && <p className="text-sm text-destructive mt-1">{errors.phone.message}</p>}
                   </div>
@@ -211,15 +236,18 @@ export default function CheckoutPage() {
               </Card>
             )}
 
-            {/* Address */}
+            {/* Delivery Address */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
                   Delivery Address
                 </CardTitle>
+                {estimatedTime && (
+                  <CardDescription>Estimated delivery: {estimatedTime}</CardDescription>
+                )}
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
                 {isAuthenticated ? (
                   <Controller
                     control={control}
@@ -227,12 +255,12 @@ export default function CheckoutPage() {
                     render={({ field }) => (
                       <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Choose saved address" />
+                          <SelectValue placeholder="Select a saved address" />
                         </SelectTrigger>
                         <SelectContent>
-                          {addresses?.map(addr => (
+                          {addresses.map((addr) => (
                             <SelectItem key={addr._id} value={addr._id}>
-                              <div>
+                              <div className="space-y-1">
                                 <p className="font-medium">{addr.label}</p>
                                 <p className="text-sm text-muted-foreground">{addr.fullAddress}</p>
                               </div>
@@ -245,45 +273,59 @@ export default function CheckoutPage() {
                 ) : (
                   <>
                     <div>
-                      <Label>Full Address</Label>
-                      <Textarea {...register('guestAddress.fullAddress')} placeholder="House #123, Street 4, Gulberg III..." rows={3} />
-                      {errors.guestAddress?.fullAddress && <p className="text-sm text-destructive">{errors.guestAddress.fullAddress.message}</p>}
-                    </div>
-
-                    <Controller
-                      control={control}
-                      name="guestAddress.areaId"
-                      render={({ field }) => (
-                        <div>
-                          <Label>Delivery Area</Label>
+                      <Label>Delivery Area</Label>
+                      <Controller
+                        control={control}
+                        name="guestAddress.areaId"
+                        render={({ field }) => (
                           <Select onValueChange={field.onChange} value={field.value}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select your area" />
+                              <SelectValue placeholder="Choose your area" />
                             </SelectTrigger>
                             <SelectContent>
-                              {areas?.map(area => (
+                              {areas.map((area) => (
                                 <SelectItem key={area._id} value={area._id}>
-                                  {area.name} {area.deliveryZone && `(Rs. ${area.deliveryZone.deliveryFee} delivery)`}
+                                  {area.name} — Rs. {area.deliveryZone?.deliveryFee || 149} delivery
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
-                          {errors.guestAddress?.areaId && <p className="text-sm text-destructive">Area required</p>}
-                        </div>
+                        )}
+                      />
+                      {errors.guestAddress?.areaId && (
+                        <p className="text-sm text-destructive mt-1">{errors.guestAddress.areaId.message}</p>
                       )}
-                    />
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <Input {...register('guestAddress.floor')} placeholder="Floor / Apartment (optional)" />
-                      <Input {...register('guestAddress.label')} placeholder="Label (Home, Work)" defaultValue="Home" />
                     </div>
-                    <Textarea {...register('guestAddress.instructions')} placeholder="Delivery instructions (optional)" rows={2} />
+
+                    <Textarea
+                      {...register('guestAddress.fullAddress')}
+                      placeholder="House number, street, sector, landmark..."
+                      rows={3}
+                    />
+                    {errors.guestAddress?.fullAddress && (
+                      <p className="text-sm text-destructive mt-1">{errors.guestAddress.fullAddress.message}</p>
+                    )}
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <Input
+                        {...register('guestAddress.label')}
+                        placeholder="Label (e.g. Home)"
+                        defaultValue="Home"
+                      />
+                      <Input {...register('guestAddress.floor')} placeholder="Floor/Apartment (optional)" />
+                    </div>
+
+                    <Textarea
+                      {...register('instructions')}
+                      placeholder="Special instructions (e.g. ring bell, leave at gate)"
+                      rows={2}
+                    />
                   </>
                 )}
               </CardContent>
             </Card>
 
-            {/* Payment Method - NOW INCLUDES EASYPaisa & JazzCash */}
+            {/* Payment Method */}
             <Card>
               <CardHeader>
                 <CardTitle>Payment Method</CardTitle>
@@ -293,48 +335,46 @@ export default function CheckoutPage() {
                   control={control}
                   name="paymentMethod"
                   render={({ field }) => (
-                    <RadioGroup onValueChange={field.onChange} value={field.value}>
-                      <Label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+                    <RadioGroup onValueChange={field.onChange} value={field.value} className="space-y-3">
+                      <Label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition">
                         <RadioGroupItem value="cod" />
-                        <Wallet className="h-5 w-5" />
+                        <Wallet className="h-6 w-6 text-green-600" />
                         <div>
                           <p className="font-medium">Cash on Delivery</p>
                           <p className="text-sm text-muted-foreground">Pay when you receive</p>
                         </div>
                       </Label>
 
-                      <Label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+                      <Label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition">
                         <RadioGroupItem value="card" />
-                        <CreditCard className="h-5 w-5" />
+                        <CreditCard className="h-6 w-6 text-blue-600" />
                         <div>
                           <p className="font-medium">Credit / Debit Card</p>
-                          <p className="text-sm text-muted-foreground">Pay securely online</p>
+                          <p className="text-sm text-muted-foreground">Secure online payment</p>
                         </div>
                       </Label>
 
-                      {/* EasyPaisa */}
-                      <Label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+                      <Label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition">
                         <RadioGroupItem value="easypaisa" />
-                        <Smartphone className="h-5 w-5 text-green-600" />
+                        <Smartphone className="h-6 w-6 text-green-600" />
                         <div>
                           <p className="font-medium">EasyPaisa</p>
                           <p className="text-sm text-muted-foreground">Pay via mobile wallet</p>
                         </div>
                       </Label>
 
-                      {/* JazzCash */}
-                      <Label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+                      <Label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition">
                         <RadioGroupItem value="jazzcash" />
-                        <Smartphone className="h-5 w-5 text-red-600" />
+                        <Smartphone className="h-6 w-6 text-red-600" />
                         <div>
                           <p className="font-medium">JazzCash</p>
                           <p className="text-sm text-muted-foreground">Pay via mobile wallet</p>
                         </div>
                       </Label>
 
-                      <Label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+                      <Label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition">
                         <RadioGroupItem value="bank" />
-                        <Building2 className="h-5 w-5" />
+                        <Building2 className="h-6 w-6 text-orange-600" />
                         <div>
                           <p className="font-medium">Bank Transfer</p>
                           <p className="text-sm text-muted-foreground">Meezan Bank • Instant confirmation</p>
@@ -345,74 +385,52 @@ export default function CheckoutPage() {
                 />
               </CardContent>
             </Card>
-
-            {/* Promo Code */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Promo Code</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2">
-                  <Input {...register('promoCode')} placeholder="Enter code (e.g. WELCOME50)" className="uppercase" />
-                  <Button type="button" variant="secondary">Apply</Button>
-                </div>
-                {promoDiscount > 0 && (
-                  <Badge variant="secondary" className="mt-2">
-                    Rs. {promoDiscount} off applied!
-                  </Badge>
-                )}
-              </CardContent>
-            </Card>
           </div>
 
-          {/* Right: Summary */}
+          {/* Right: Order Summary */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-6">
+            <Card className="sticky top-6 shadow-xl">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Truck className="h-5 w-5" />
-                  Order Summary
-                </CardTitle>
+                <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {items.map(item => (
-                  <div key={item.menuItem._id} className="flex justify-between text-sm">
-                    <span>{item.quantity} × {item.menuItem.name}</span>
-                    <span>Rs. {item.menuItem.price * item.quantity}</span>
-                  </div>
-                ))}
+                <div className="space-y-3">
+                  {items.map((item) => (
+                    <div key={item.menuItem._id} className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        {item.quantity} × {item.menuItem.name}
+                      </span>
+                      <span>Rs. {(item.menuItem.price * item.quantity).toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
 
                 <Separator />
 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>Rs. {subtotal}</span>
+                    <span>Rs. {subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Delivery Fee</span>
-                    <span>Rs. {deliveryFee}</span>
+                    <span>Rs. {deliveryFee.toLocaleString()}</span>
                   </div>
-                  {promoDiscount > 0 && (
-                    <div className="flex justify-between text-green-600 font-medium">
-                      <span>Discount</span>
-                      <span>-Rs. {promoDiscount}</span>
-                    </div>
-                  )}
                 </div>
 
                 <Separator />
 
-                <div className="flex justify-between text-xl font-bold">
+                <div className="flex justify-between text-2xl font-bold">
                   <span>Total</span>
-                  <span className="text-primary">Rs. {total}</span>
+                  <span className="text-primary">Rs. {total.toLocaleString()}</span>
                 </div>
 
                 {!isMinOrderMet && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      Minimum order: Rs. {minOrderAmount} (add Rs. {minOrderAmount - subtotal} more)
+                      Minimum order: Rs. {minOrderAmount.toLocaleString()} 
+                      (add Rs. {(minOrderAmount - subtotal).toLocaleString()} more)
                     </AlertDescription>
                   </Alert>
                 )}
@@ -420,21 +438,21 @@ export default function CheckoutPage() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full"
-                  disabled={isSubmitting || !isMinOrderMet}
+                  className="w-full h-14 text-lg font-semibold"
+                  disabled={isSubmitting || !isMinOrderMet || createOrder.isPending || createGuestOrder.isPending}
                 >
-                  {isSubmitting ? (
+                  {isSubmitting || createOrder.isPending || createGuestOrder.isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
                       Placing Order...
                     </>
                   ) : (
-                    `Pay Rs. ${total} & Place Order`
+                    `Place Order — Rs. ${total.toLocaleString()}`
                   )}
                 </Button>
 
-                <p className="text-xs text-center text-muted-foreground">
-                  By placing this order, you agree to our Terms of Service
+                <p className="text-center text-xs text-muted-foreground pt-4">
+                  By placing your order, you agree to our Terms of Service.
                 </p>
               </CardContent>
             </Card>

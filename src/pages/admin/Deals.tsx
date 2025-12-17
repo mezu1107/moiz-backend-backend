@@ -76,7 +76,9 @@ const Deals = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Deals Management</h1>
-          <p className="text-muted-foreground">Create and manage special offers</p>
+          <p className="text-muted-foreground">
+            Create and manage special offers
+          </p>
         </div>
         <Button onClick={() => setIsDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
