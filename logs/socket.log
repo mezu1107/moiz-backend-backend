@@ -12372,3 +12372,15 @@
 {"level":"warn","message":"[2025-12-17T19:07:38.481Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T19:07:38.483Z"}
 {"level":"warn","message":"[2025-12-17T19:08:49.785Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T19:08:49.786Z"}
 {"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T19:20:16.286Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T19:29:16.045Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T19:42:10.898Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T19:46:55.824Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T19:48:21.173Z"}
+{"level":"warn","message":"[2025-12-17T19:59:12.951Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T19:59:12.955Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T19:59:18.333Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-17T19:59:29.266Z"}
+{"level":"warn","message":"[2025-12-17T20:02:45.888Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T20:02:45.902Z"}
+{"level":"warn","message":"[2025-12-17T20:06:57.781Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T20:06:57.793Z"}
+{"level":"warn","message":"[2025-12-17T20:07:26.616Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T20:07:26.617Z"}
+{"level":"warn","message":"[2025-12-17T20:15:46.752Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T20:15:46.757Z"}
+{"level":"warn","message":"[2025-12-17T20:18:54.363Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-17T20:18:54.370Z"}

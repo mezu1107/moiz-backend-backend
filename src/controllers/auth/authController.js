@@ -203,20 +203,37 @@ const updateMyProfile = async (req, res) => {
 };
 
 // ==================== FORGOT PASSWORD ====================
+// src/controllers/auth/authController.js → forgotPassword
+
 const forgotPassword = async (req, res) => {
   try {
-    let { email, phone } = req.body;
-    if (!email && !phone) return res.status(400).json({ success: false, message: 'Email or phone is required' });
+    const { email, phone } = req.body; // ← Destructure here
 
-    const user = email
-      ? await User.findOne({ email: email.toLowerCase().trim() })
-      : await User.findOne({ phone: phone.trim() });
+    if (!email && !phone) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email or phone number is required' 
+      });
+    }
 
-    if (!user) return res.status(404).json({ success: false, message: 'Account not found' });
+    // Normalize input
+    const normalizedEmail = email ? email.toLowerCase().trim() : null;
+    const normalizedPhone = phone ? phone.trim() : null;
+
+    const user = normalizedEmail
+      ? await User.findOne({ email: normalizedEmail })
+      : await User.findOne({ phone: normalizedPhone });
+
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'No account found with that email or phone' 
+      });
+    }
 
     const otp = generateOTP();
     user.otp = otp;
-    user.otpExpires = Date.now() + 5 * 60 * 1000;
+    user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
     user.otpAttempts = 0;
     await user.save({ validateBeforeSave: false });
 
@@ -224,12 +241,15 @@ const forgotPassword = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'OTP sent successfully',
+      message: 'OTP sent successfully!',
       debug_otp: process.env.NODE_ENV === 'development' ? otp : undefined
     });
   } catch (err) {
     console.error('Forgot Password Error:', err);
-    res.status(500).json({ success: false, message: 'Failed to send OTP' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to process request. Please try again.' 
+    });
   }
 };
 
@@ -277,21 +297,72 @@ const verifyOtp = async (req, res) => {
 };
 
 // ==================== RESET PASSWORD ====================
+
 const resetPassword = async (req, res) => {
   try {
     const { password } = req.body;
-    if (!password || password.length < 8) return res.status(400).json({ success: false, message: 'Password must be at least 8 characters' });
+    const authHeader = req.headers.authorization;
 
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    if (!password || password.length < 8) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Password must be at least 8 characters' 
+      });
+    }
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'No token provided' 
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Invalid or expired token' 
+      });
+    }
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User not found' 
+      });
+    }
 
     user.password = password;
     await user.save();
 
-    res.json({ success: true, message: 'Password changed successfully!', token: generateToken(user._id) });
+    // Generate new login token
+    const newToken = generateToken(user._id);
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully!',
+      token: newToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        role: user.role,
+        city: user.city,
+        currentLocation: user.currentLocation
+      }
+    });
   } catch (err) {
     console.error('Reset Password Error:', err);
-    res.status(500).json({ success: false, message: 'Password reset failed' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Password reset failed' 
+    });
   }
 };
 
