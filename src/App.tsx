@@ -13,6 +13,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { PublicLayout } from "./components/PublicLayout";
 import AdminLayout from "./components/admin/AdminLayout";
 import RiderLayout from "./components/rider/RiderLayout";
+import { KitchenLayout } from "./components/KitchenLayout"; // ← ADD THIS
 
 // Public Pages
 import Index from "./pages/Index";
@@ -48,7 +49,6 @@ import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminOrders from "./pages/admin/orders/Orders";
 import AdminOrderDetails from "./pages/admin/orders/OrderDetails";
-
 import AdminUsers from "./pages/admin/Users";
 import AdminRiders from "./pages/admin/Riders";
 import AdminDeals from "./pages/admin/Deals";
@@ -57,6 +57,11 @@ import EditMenuItemPage from "@/features/menu/pages/EditMenuItemPage";
 import AdminAreasList from "./pages/admin/areas/AreasList";
 import AdminAddArea from "./pages/admin/areas/AddArea";
 import AdminEditArea from "./pages/admin/areas/EditArea";
+import ContactMessagesPage from "./pages/admin/contact/ContactMessagesPage";
+
+
+// Kitchen
+import KitchenDashboard from "./pages/kitchen/KitchenDashboard";
 
 // Rider
 import RiderLogin from "./pages/rider/Login";
@@ -69,7 +74,7 @@ import DebugAPI from "./pages/DebugAPI";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
       retry: 1,
       refetchOnWindowFocus: false,
     },
@@ -97,37 +102,28 @@ export default function App() {
                 <Route path="/" element={<Index />} />
                 <Route path="/home" element={<Home openAreaChecker={openAreaChecker} />} />
 
-                {/* Menu */}
                 <Route path="/menu" element={<MenuPage />} />
                 <Route path="/menu/all" element={<MenuAllPage />} />
                 <Route path="/menu/filters" element={<MenuFiltersPage />} />
                 <Route path="/menu/area/:areaId" element={<MenuByLocationPage />} />
 
-                {/* Cart & Checkout */}
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
-
-                {/* Payment Pages */}
                 <Route path="/checkout/card" element={<CardPaymentPage />} />
                 <Route path="/checkout/bank-transfer" element={<BankTransferPage />} />
 
-                {/* Orders */}
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/track/:orderId" element={<OrderTrackingPage />} />
                 <Route path="/order/:orderId/refund" element={<OrderRefundRequestPage />} />
 
-                {/* Address */}
                 <Route path="/addresses" element={<AddressListPage />} />
 
-                {/* Auth */}
                 <Route path="/login" element={<Login />} />
 
-                {/* Static */}
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/portfolio" element={<Portfolio />} />
 
-                {/* Debug */}
                 <Route path="/debug-api" element={<DebugAPI />} />
               </Route>
 
@@ -143,10 +139,16 @@ export default function App() {
                 <Route path="menu/edit/:id" element={<EditMenuItemPage />} />
                 <Route path="areas" element={<AdminAreasList />} />
                 <Route path="areas/add" element={<AdminAddArea />} />
-                {/* Fixed: Changed :areaId → :id to match useParams<{ id: string }>() in EditArea */}
                 <Route path="areas/edit/:id" element={<AdminEditArea />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="orders/:orderId" element={<AdminOrderDetails />} />
+                <Route path="contact" element={<ContactMessagesPage />} />
+              </Route>
+
+              {/* ====================== KITCHEN ROUTES ====================== */}
+              <Route element={<KitchenLayout />}>
+                <Route path="/kitchen" element={<KitchenDashboard />} />
+                {/* Add more kitchen routes here in the future */}
               </Route>
 
               {/* ====================== RIDER ROUTES ====================== */}

@@ -1,4 +1,6 @@
 // src/components/Header.tsx
+// FINAL PRODUCTION VERSION — DECEMBER 17, 2025
+
 import { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -26,21 +28,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ServiceAreaModal from "@/components/ServiceAreaModal";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { useCartStore } from "@/features/cart/store/useCartStore";
-
 import {
   useServerCart,
   useRemoveFromCart,
   useUpdateCartQuantity,
 } from "@/features/cart/hooks/useServerCart";
 
-
 export const Header = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
-
   const guestCart = useCartStore();
-  const { data: serverCart, isLoading: serverLoading } = useServerCart();
 
+  const { data: serverCart, isLoading: serverLoading } = useServerCart();
   const removeItem = useRemoveFromCart();
   const updateQty = useUpdateCartQuantity();
 
@@ -48,31 +47,29 @@ export const Header = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [areaModalOpen, setAreaModalOpen] = useState(false);
 
-  // -------------------------------
-  // CART SOURCE SELECTION (SERVER / GUEST)
-  // -------------------------------
+  // ===============================
+  // CART LOGIC — UNIFIED SOURCE
+  // ===============================
 
-  const items = user ? serverCart?.items ?? [] : guestCart.items;
-  const total = user ? serverCart?.total ?? 0 : guestCart.getTotal();
+  const cartItems = user ? serverCart?.items ?? [] : guestCart.items;
+  const cartTotal = user ? serverCart?.total ?? 0 : guestCart.getTotal();
 
   const cartCount = useMemo(
-    () => items.reduce((sum, i) => sum + i.quantity, 0),
-    [items]
+    () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    [cartItems]
   );
 
-  // -------------------------------
-  // LOGOUT
-  // -------------------------------
+  // ===============================
+  // HANDLERS
+  // ===============================
+
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/", { replace: true });
   };
 
-  // -------------------------------
-  // QUANTITY HANDLING
-  // -------------------------------
   const handleQuantityChange = (cartItemId: string, delta: number) => {
-    const item = items.find((i) => i._id === cartItemId);
+    const item = cartItems.find((i) => i._id === cartItemId);
     if (!item) return;
 
     const newQty = item.quantity + delta;
@@ -87,69 +84,69 @@ export const Header = () => {
       : guestCart.updateQuantity(cartItemId, newQty);
   };
 
-  // -------------------------------
-  // CLEAR CART
-  // -------------------------------
-  const clearCart = () => {
-    user ? removeItem.mutate("all") : guestCart.clearCart();
+  const handleClearCart = () => {
+    if (user) {
+      // Assuming your remove mutation supports "all"
+      removeItem.mutate("all" as any);
+    } else {
+      guestCart.clearCart();
+    }
   };
 
-  // -------------------------------
+  // ===============================
   // RENDER
-  // -------------------------------
+  // ===============================
+
   return (
     <>
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur border-b">
+      {/* MAIN HEADER */}
+      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
-            
+
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold shadow-lg">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xl font-black shadow-lg">
                 AM
               </div>
-
               <div className="hidden sm:block">
                 <h1 className="text-lg font-bold">AM Foods</h1>
-                <p className="text-xs text-muted-foreground">
-                  Pakistani Cuisine
-                </p>
+                <p className="text-xs text-muted-foreground">Pakistani Cuisine</p>
               </div>
             </Link>
 
-            {/* Desktop Menu */}
-            <nav className="hidden lg:flex gap-8 items-center">
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-8">
               {[
-                { path: "/", label: "Home" },
-                { path: "/menu", label: "Menu" },
-                { path: "/about", label: "About" },
-                { path: "/contact", label: "Contact" },
-              ].map((item) => (
+                { to: "/", label: "Home" },
+                { to: "/menu/all", label: "Menu" },
+                { to: "/about", label: "About" },
+                { to: "/contact", label: "Contact" },
+              ].map(({ to, label }) => (
                 <Link
-                  key={item.path}
-                  to={item.path}
-                  className="text-sm font-medium hover:text-primary"
+                  key={to}
+                  to={to}
+                  className="text-sm font-medium hover:text-primary transition-colors"
                 >
-                  {item.label}
+                  {label}
                 </Link>
               ))}
             </nav>
 
-            {/* Right Section */}
-            <div className="flex items-center gap-2">
+            {/* Right Actions */}
+            <div className="flex items-center gap-3">
 
               {/* Area Selector */}
               <Button
                 variant="outline"
-                className="hidden md:flex items-center gap-2 rounded-full px-4"
+                className="hidden md:flex items-center gap-2 rounded-full"
                 onClick={() => setAreaModalOpen(true)}
               >
                 <MapPin className="h-4 w-4 text-green-600" />
-                Select Area
+                <span className="text-sm">Select Area</span>
               </Button>
 
-              {/* Cart Button */}
+              {/* Cart */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -158,35 +155,38 @@ export const Header = () => {
               >
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-primary text-xs rounded-full flex items-center justify-center text-primary-foreground font-bold">
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                     {cartCount}
                   </span>
                 )}
               </Button>
 
-              {/* User / Login */}
+              {/* Auth Controls */}
               {user ? (
                 <>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate("/profile")}
+                    className="hidden sm:flex"
                   >
                     <User className="h-4 w-4 mr-2" />
                     {user.name.split(" ")[0]}
                   </Button>
-
                   <Button variant="ghost" size="icon" onClick={handleLogout}>
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </>
               ) : (
-                <Button className="hidden sm:flex" onClick={() => navigate("/login")}>
+                <Button
+                  className="hidden sm:flex"
+                  onClick={() => navigate("/login")}
+                >
                   Login
                 </Button>
               )}
 
-              {/* Mobile Menu Trigger */}
+              {/* Mobile Menu */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -200,19 +200,18 @@ export const Header = () => {
         </div>
       </header>
 
-      {/* CART DRAWER */}
+      {/* CART SIDEBAR */}
       <Sheet open={cartOpen} onOpenChange={setCartOpen}>
         <SheetContent className="w-full sm:max-w-md flex flex-col">
           <SheetHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <SheetTitle>Cart ({cartCount} items)</SheetTitle>
-
               {cartCount > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={clearCart}
-                  className="text-destructive"
+                  onClick={handleClearCart}
+                  className="text-destructive hover:text-destructive"
                 >
                   Clear All
                 </Button>
@@ -220,97 +219,109 @@ export const Header = () => {
             </div>
           </SheetHeader>
 
-          {/* Cart Items */}
-          <ScrollArea className="flex-1 mt-4 px-1">
-            {serverLoading ? (
-              [...Array(3)].map((_, idx) => (
-                <Skeleton key={idx} className="h-24 w-full rounded-lg mb-3" />
+          <ScrollArea className="flex-1 -mx-1 px-1 py-4">
+            {serverLoading && user ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full rounded-lg mb-4" />
               ))
-            ) : items.length === 0 ? (
-              <div className="h-full flex flex-col justify-center items-center text-muted-foreground">
-                <Package className="h-16 w-16 mb-2" />
-                Your cart is empty
+            ) : cartItems.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                <Package className="h-20 w-20 mb-4 opacity-50" />
+                <p className="text-lg">Your cart is empty</p>
+                <p className="text-sm mt-2">Add items from the menu</p>
               </div>
             ) : (
-              items.map((item) => (
-                <div key={item._id} className="flex gap-3 p-3 border-b">
+              <div className="space-y-4">
+                {cartItems.map((item) => (
+                  <div
+                    key={item._id}
+                    className="flex gap-4 p-4 bg-muted/30 rounded-lg border"
+                  >
+                    <img
+                      src={item.menuItem.image || "/placeholder.jpg"}
+                      alt={item.menuItem.name}
+                      className="h-20 w-20 rounded-lg object-cover bg-muted"
+                    />
 
-                  <img
-                    src={item.menuItem.image || ""}
-                    className="w-20 h-20 rounded-lg object-cover bg-muted"
-                  />
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-base">
+                        {item.menuItem.name}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        Rs. {item.priceAtAdd.toFixed(2)} each
+                      </p>
 
-                  <div className="flex-1">
-                    <p className="font-semibold">{item.menuItem.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Rs. {item.priceAtAdd.toFixed(2)}
-                    </p>
+                      <div className="flex items-center gap-2 mt-3">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-8 w-8"
+                          onClick={() => handleQuantityChange(item._id, -1)}
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
 
-                    <div className="flex items-center gap-2 mt-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => handleQuantityChange(item._id, -1)}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
+                        <span className="w-8 text-center font-medium">
+                          {item.quantity}
+                        </span>
 
-                      <span className="font-medium">{item.quantity}</span>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-8 w-8"
+                          onClick={() => handleQuantityChange(item._id, +1)}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
 
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => handleQuantityChange(item._id, +1)}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 ml-auto text-destructive"
+                          onClick={() =>
+                            user
+                              ? removeItem.mutate(item._id)
+                              : guestCart.removeItem(item._id)
+                          }
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
 
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-destructive ml-auto"
-                        onClick={() =>
-                          user
-                            ? removeItem.mutate(item._id)
-                            : guestCart.removeItem(item._id)
-                        }
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div className="text-right">
+                      <p className="font-semibold">
+                        Rs. {(item.priceAtAdd * item.quantity).toFixed(2)}
+                      </p>
                     </div>
                   </div>
-
-                  <div className="text-right font-semibold">
-                    Rs. {(item.priceAtAdd * item.quantity).toFixed(2)}
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </ScrollArea>
 
-          {/* Footer */}
-          <div className="py-4 border-t space-y-3">
-            <div className="flex justify-between font-semibold text-lg">
-              <span>Total</span>
-              <span>Rs. {total.toFixed(2)}</span>
-            </div>
+          {/* Cart Footer */}
+          {cartCount > 0 && (
+            <div className="border-t pt-4 space-y-4">
+              <div className="flex justify-between text-lg font-bold">
+                <span>Total</span>
+                <span>Rs. {cartTotal.toFixed(2)}</span>
+              </div>
 
-            {cartCount > 0 && (
               <div className="grid grid-cols-2 gap-3">
                 <Button variant="outline" onClick={() => navigate("/cart")}>
                   View Cart
                 </Button>
-
                 <Button onClick={() => navigate("/checkout")}>
                   Checkout
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </SheetContent>
       </Sheet>
 
-      {/* AREA SELECTOR MODAL */}
+      {/* AREA MODAL */}
       <ServiceAreaModal
         isOpen={areaModalOpen}
         onClose={() => setAreaModalOpen(false)}

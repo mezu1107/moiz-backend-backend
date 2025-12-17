@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Users, Award, Heart, Target } from "lucide-react";
-import { Header } from "@/components/Header";
+
 import { Footer } from "@/components/Footer";
 
 export const About = () => {
@@ -51,7 +51,7 @@ export const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+  
 
       <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20">
         <div className="container mx-auto px-4">

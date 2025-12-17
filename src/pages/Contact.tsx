@@ -1,22 +1,24 @@
+// src/pages/Contact.tsx
+// FINAL PRODUCTION — DECEMBER 17, 2025
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Header } from "@/components/Header";
+
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
 import { contactInfo } from "@/utils/mockdata/contactInfo";
 import { Mail, Phone, MapPin, Clock, Send, MessageCircle } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
 const validateEmail = (email: string) => /^\S+@\S+\.\S+$/.test(email);
-const validateName = (name: string) => /^[\p{L}\s]{2,50}$/u.test(name);
-const validateSubject = (subject: string) =>
-  subject.length > 0 && subject.length <= 100;
-const validateMessage = (message: string) =>
-  message.length > 0 && message.length <= 1000;
+const validateName = (name: string) => /^[\p{L}\s'-]{2,50}$/u.test(name.trim());
+const validateSubject = (subject: string) => subject.trim().length >= 3 && subject.length <= 100;
+const validateMessage = (message: string) => message.trim().length >= 10 && message.length <= 2000;
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
@@ -27,127 +29,142 @@ export const Contact = () => {
   });
   const [loading, setLoading] = useState(false);
 
+  const handleChange = (field: keyof typeof formData) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const { name, email, subject, message } = formData;
 
     if (!validateName(name))
-      return toast.error("Name must be 2-50 letters only.");
-    if (!validateEmail(email)) return toast.error("Invalid email address.");
+      return toast.error("Please enter a valid name (2–50 letters).");
+    if (!validateEmail(email))
+      return toast.error("Please enter a valid email address.");
     if (!validateSubject(subject))
-      return toast.error("Subject is required (max 100 chars).");
+      return toast.error("Subject must be 3–100 characters.");
     if (!validateMessage(message))
-      return toast.error("Message is required (max 1000 chars).");
+      return toast.error("Message must be 10–2000 characters.");
 
     try {
       setLoading(true);
 
-      const res = await fetch(`${API_URL}/api/contact/submit`, {
+      const res = await fetch(`${API_URL}/contact/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, subject, message }),
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          subject: subject.trim(),
+          message: message.trim(),
+        }),
       });
 
       const data = await res.json();
-      setLoading(false);
 
       if (res.ok) {
-        toast.success(data.message || "Message sent successfully!");
+        toast.success(data.message || "Thank you! Your message has been sent.");
         setFormData({ name: "", email: "", subject: "", message: "" });
       } else {
-        toast.error(data.message || "Failed to send message");
+        toast.error(data.message || "Failed to send message. Please try again.");
       }
     } catch (err) {
+      console.error("Contact form error:", err);
+      toast.error("Network error. Please check your connection and try again.");
+    } finally {
       setLoading(false);
-      toast.error("Something went wrong. Please try again.");
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
 
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20">
-        <div className="container mx-auto px-4">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-orange-50 via-background to-green-50 py-20">
+        <div className="container mx-auto px-4 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-3xl mx-auto"
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto"
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-5xl md:text-7xl font-black text-gray-900 mb-6">
               Get in Touch
             </h1>
-            <p className="text-lg text-muted-foreground">
-              Have a question or feedback? We'd love to hear from you. Let's
-              build your digital future together!
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
+              Questions? Feedback? Craving something special? We're here to help!
             </p>
           </motion.div>
         </div>
       </section>
 
+      {/* Contact Info Cards */}
       <section className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {contactInfo.map((info, index) => (
             <motion.div
               key={info.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="bg-card rounded-xl p-6 shadow-sm border text-center hover:shadow-warm transition-all"
+              className="bg-card rounded-2xl p-8 text-center shadow-lg border hover:shadow-xl transition-all duration-300"
             >
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
-                <info.icon className="h-6 w-6 text-primary" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 mb-6">
+                <info.icon className="h-8 w-8 text-orange-600" />
               </div>
-              <h3 className="font-semibold mb-2">{info.title}</h3>
+              <h3 className="text-xl font-bold mb-3">{info.title}</h3>
               {info.link ? (
                 <a
                   href={info.link}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-orange-600 transition-colors break-all"
                 >
                   {info.content}
                 </a>
               ) : (
-                <p className="text-sm text-muted-foreground">{info.content}</p>
+                <p className="text-muted-foreground">{info.content}</p>
               )}
             </motion.div>
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        {/* Form + Service Areas */}
+        <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+          {/* Contact Form */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold mb-6">Send us a Message</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <h2 className="text-4xl font-black mb-8">Send us a Message</h2>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Your Name</Label>
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  placeholder="Your name"
-                  required
+                  onChange={handleChange("name")}
+                  placeholder="John Doe"
+                  disabled={loading}
                 />
               </div>
 
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  placeholder="your@email.com"
-                  required
+                  onChange={handleChange("email")}
+                  placeholder="john@example.com"
+                  disabled={loading}
                 />
               </div>
 
@@ -156,11 +173,9 @@ export const Contact = () => {
                 <Input
                   id="subject"
                   value={formData.subject}
-                  onChange={(e) =>
-                    setFormData({ ...formData, subject: e.target.value })
-                  }
-                  placeholder="How can we help?"
-                  required
+                  onChange={handleChange("subject")}
+                  placeholder="Order inquiry / Feedback / Other"
+                  disabled={loading}
                 />
               </div>
 
@@ -169,124 +184,117 @@ export const Contact = () => {
                 <Textarea
                   id="message"
                   value={formData.message}
-                  onChange={(e) =>
-                    setFormData({ ...formData, message: e.target.value })
-                  }
-                  placeholder="Tell us more..."
-                  rows={6}
-                  required
+                  onChange={handleChange("message")}
+                  placeholder="Tell us how we can help..."
+                  rows={7}
+                  disabled={loading}
                 />
               </div>
 
-              <Button type="submit" size="lg" className="w-full">
-                <Send className="mr-2 h-5 w-5" />
-                Send Message
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full bg-orange-600 hover:bg-orange-700"
+                disabled={loading}
+              >
+                {loading ? (
+                  "Sending..."
+                ) : (
+                  <>
+                    <Send className="mr-2 h-5 w-5" />
+                    Send Message
+                  </>
+                )}
               </Button>
             </form>
 
-            <div className="mt-6 p-6 bg-green-50 dark:bg-green-950/20 rounded-xl border border-green-200 dark:border-green-900">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                  <MessageCircle className="h-6 w-6 text-white" />
+            {/* WhatsApp CTA */}
+            <div className="mt-10 p-8 bg-green-50 dark:bg-green-950/30 rounded-2xl border border-green-200 dark:border-green-800">
+              <div className="flex items-start gap-5">
+                <div className="w-14 h-14 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
+                  <MessageCircle className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">
-                    Quick Response on WhatsApp
+                  <h3 className="text-xl font-bold mb-2">
+                    Instant Help on WhatsApp
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Need immediate assistance? Chat with us on WhatsApp for
-                    faster response!
+                  <p className="text-muted-foreground mb-4">
+                    Need quick assistance? Chat with us directly on WhatsApp — we usually reply within minutes!
                   </p>
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="border-green-500 text-green-600 hover:bg-green-50"
-                    onClick={() =>
-                      window.open("https://wa.me/923709447916", "_blank")
-                    }
+                    className="border-green-600 text-green-700 hover:bg-green-50"
+                    onClick={() => window.open("https://wa.me/923709447916", "_blank")}
                   >
-                    Chat on WhatsApp
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Message on WhatsApp
                   </Button>
                 </div>
               </div>
             </div>
           </motion.div>
 
+          {/* Service Areas */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            id="map"
+            transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold mb-6">Find Us</h2>
-            {/* <div className="rounded-xl overflow-hidden shadow-lg h-[500px] bg-muted">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13601.324489722636!2d74.34342!3d31.5204!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39190483e58107d9%3A0xc23abe6ccc7e2462!2sGulberg%2C%20Lahore%2C%20Punjab%2C%20Pakistan!5e0!3m2!1sen!2s!4v1234567890"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-              />
-            </div> */}
+            <h2 className="text-4xl font-black mb-8">We Deliver To</h2>
 
-            <div className="mt-6 p-6 bg-card rounded-xl shadow-sm border">
-              <h3 className="font-semibold mb-4">Service Areas</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  PWD
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  Khanna Pul
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  Navl Anchorage
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  Bahria Town - All Phases
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  Media Town
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  Gulberg
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  High Court{" "}
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  Gulzar-e-Qauid
-                </div>
+            <div className="bg-card rounded-2xl p-8 shadow-lg border">
+              <h3 className="text-xl font-semibold mb-6">Our Service Areas</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  "PWD",
+                  "Khanna Pul",
+                  "Naval Anchorage",
+                  "Bahria Town (All Phases)",
+                  "Media Town",
+                  "Gulberg",
+                  "High Court Society",
+                  "Gulzar-e-Quaid",
+                ].map((area) => (
+                  <div
+                    key={area}
+                    className="flex items-center gap-3 py-2"
+                  >
+                    <MapPin className="h-5 w-5 text-orange-600 flex-shrink-0" />
+                    <span className="text-muted-foreground">{area}</span>
+                  </div>
+                ))}
               </div>
+
+              <p className="mt-8 text-sm text-muted-foreground italic">
+                Not in these areas? Contact us — we're expanding fast!
+              </p>
             </div>
           </motion.div>
         </div>
       </section>
 
-      <section className="container mx-auto px-4 py-16">
+      {/* CTA Section */}
+      <section className="container mx-auto px-4 py-20">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="gradient-primary rounded-2xl p-12 text-center text-white"
+          className="bg-gradient-to-r from-orange-600 to-amber-600 rounded-3xl p-12 md:p-16 text-center text-white shadow-2xl"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Let's Build Your Digital Future Together
+          <h2 className="text-4xl md:text-5xl font-black mb-6">
+            Hungry? Let's Eat!
           </h2>
-          <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
-            Ready to experience authentic Pakistani cuisine? Order now and taste
-            the tradition!
+          <p className="text-xl md:text-2xl mb-10 opacity-90 max-w-3xl mx-auto">
+            Authentic Pakistani flavors delivered fresh to your door
           </p>
-          <Button size="lg" variant="secondary">
-            Start Ordering
+          <Button
+            size="lg"
+            variant="secondary"
+            className="text-orange-600 font-bold px-10 py-6 text-lg"
+            onClick={() => window.location.href = "/menu"}
+          >
+            Order Now
           </Button>
         </motion.div>
       </section>

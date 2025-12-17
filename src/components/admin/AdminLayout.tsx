@@ -1,4 +1,6 @@
 // src/components/admin/AdminLayout.tsx
+// FINAL PRODUCTION — DECEMBER 18, 2025
+
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -8,10 +10,13 @@ import {
   Tag,
   MapPin,
   UtensilsCrossed,
+  Monitor, // ← NEW: Icon for Kitchen Display
+  MessageSquare, // ← NEW: Icon for Contact Messages
   LogOut,
   Menu,
   X,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store";
 import { useState } from "react";
@@ -36,6 +41,8 @@ const AdminLayout = () => {
     { icon: Tag, label: "Deals & Offers", path: "/admin/deals" },
     { icon: MapPin, label: "Delivery Areas", path: "/admin/areas" },
     { icon: UtensilsCrossed, label: "Menu Items", path: "/admin/menu" },
+    { icon: MessageSquare, label: "Contact Messages", path: "/admin/contact" },
+    { icon: Monitor, label: "Kitchen Display", path: "/kitchen" }, // ← NEW: Direct link
   ];
 
   const currentPageTitle =
@@ -76,7 +83,7 @@ const AdminLayout = () => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-2 p-4 overflow-y-auto">
+          <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -91,10 +98,10 @@ const AdminLayout = () => {
                 >
                   <Button
                     variant={isActive ? "default" : "ghost"}
-                    className="w-full justify-start gap-3"
+                    className="w-full justify-start gap-3 text-left"
                   >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <span>{item.label}</span>
                   </Button>
                 </Link>
               );
@@ -106,7 +113,7 @@ const AdminLayout = () => {
                 className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
                 onClick={handleLogout}
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-5 w-5" />
                 Logout
               </Button>
             </div>
@@ -127,14 +134,14 @@ const AdminLayout = () => {
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <h2 className="text-xl font-semibold">{currentPageTitle}</h2>
+            <h2 className="text-2xl font-bold">{currentPageTitle}</h2>
           </div>
 
           <div className="flex items-center gap-4">
             <span className="hidden text-sm text-muted-foreground sm:block">
               Welcome, <strong>{currentUser?.name || "Admin"}</strong>
             </span>
-            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+            <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">
               {currentUser?.name?.charAt(0).toUpperCase() || "A"}
             </div>
           </div>
