@@ -16,7 +16,7 @@ const PDFDocument = require('pdfkit');
 const admin = require('firebase-admin');
 const mongoose = require('mongoose');
 const { debitWallet } = require('../wallet/walletController');
-
+const Wallet = require('../../models/wallet/Wallet');  // ← ADD THIS LINE
 const io = global.io;
 global.pendingOrderTimeouts = global.pendingOrderTimeouts || {};
 const AUTO_CANCEL_DELAY = 15 * 60 * 1000; // 15 minutes
@@ -1003,31 +1003,55 @@ const customerRejectOrder = async (req, res) => {
 };
 
 // ====================== PUBLIC TRACKING ======================
+// src/controllers/order/orderController.js
 const trackOrderById = async (req, res) => {
+  const { orderId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    return res.status(400).json({ success: false, message: 'Invalid order ID' });
+  }
+
   try {
-    const order = await Order.findById(req.params.orderId)
-      .select('_id status placedAt finalAmount estimatedDelivery paymentMethod paymentStatus guestInfo addressDetails items totalAmount deliveryFee discountApplied rider bankTransferReference instructions')
+    const order = await Order.findById(orderId)
+      .select('_id status placedAt finalAmount estimatedDelivery paymentMethod paymentStatus ' +
+              'guestInfo addressDetails items totalAmount deliveryFee discountApplied walletUsed ' +
+              'rider bankTransferReference instructions paymentIntentId shortId')
       .populate('items.menuItem', 'name image')
-      .populate('rider', 'name phone');
+      .populate('rider', 'name phone')
+      .populate('customer', '_id name phone') // ← Critical: populate customer _id
+      .lean();
 
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
 
-    const isGuest = order.guestInfo?.isGuest === true;
-    const isOwner = req.user && order.customer && order.customer.toString() === req.user.id;
+    // Determine access
+    const isGuestOrder = order.guestInfo?.isGuest === true;
     const isAdmin = req.user?.role === 'admin';
 
-    if (!isGuest && !isOwner && !isAdmin) {
+    let hasAccess = isGuestOrder || isAdmin;
+
+    if (!hasAccess && req.user && order.customer) {
+      const customerIdFromOrder = order.customer._id?.toString() || order.customer.toString();
+      const userId = req.user._id?.toString() || req.user.id?.toString();
+      hasAccess = customerIdFromOrder === userId;
+    }
+
+    if (!hasAccess) {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
+
+    // Add derived fields
+    const shortId = orderIdShort(order._id);
 
     res.json({
       success: true,
       order: {
-        ...order.toObject(),
-        shortId: orderIdShort(order._id),
+        ...order,
+        shortId,
         trackUrl: `${process.env.APP_URL || 'https://foodapp.pk'}/track/${order._id}`,
-        instructions: order.instructions || null
-      }
+        instructions: order.instructions || null,
+      },
     });
   } catch (err) {
     console.error('trackOrderById error:', err);
@@ -1035,8 +1059,10 @@ const trackOrderById = async (req, res) => {
   }
 };
 
+
 const trackOrdersByPhone = async (req, res) => {
   const { phone } = req.body;
+
   if (!phone || phone.length < 10) {
     return res.status(400).json({ success: false, message: 'Valid phone required' });
   }
@@ -1059,9 +1085,11 @@ const trackOrdersByPhone = async (req, res) => {
       }))
     });
   } catch (err) {
+    console.error('trackOrdersByPhone error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
 
 
 const paymentSuccess = async (req, res) => {
