@@ -1,8 +1,9 @@
 // src/features/orders/pages/CheckoutPage.tsx
-// FINAL PRODUCTION — DECEMBER 16, 2025
-// Fully synced with backend, useOrders hooks, and payment pages — ALL TS ERRORS FIXED
+// FINAL PRODUCTION — DECEMBER 18, 2025
+// ALL TS ERRORS FIXED — NO EXTERNAL SHALLOW PACKAGE NEEDED
+// Optimized performance with proper selectors and memoization
 
-import { useEffect, useState } from 'react'; // ← Added useState
+import { useEffect, useMemo, useState, memo } from 'react'; // ← Added useState
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,20 +24,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, AlertCircle, MapPin, User, Phone, CreditCard, Wallet, Building2, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useCartStore } from '@/features/cart/store/useCartStore';
 import { useAddresses } from '@/features/address/hooks/useAddresses';
-import { useAreas } from '@/hooks/useCheckArea'; // ← Correct path from your file
+import { useAreas } from '@/hooks/useCheckArea';
 import { useCreateOrder, useCreateGuestOrder } from '@/features/orders/hooks/useOrders';
 import type { CreateOrderPayload, CreateGuestOrderPayload } from '@/types/order.types';
+import type { CartItem } from '@/features/cart/store/useCartStore'; // ← Import proper type
 
-// Conditional schema
+// Schema (cleaned up — no fake isAuthenticated)
 const checkoutSchema = z.object({
   paymentMethod: z.enum(['cod', 'card', 'easypaisa', 'jazzcash', 'bank']),
   addressId: z.string().min(1, 'Please select an address').optional(),
+  useNewAddress: z.boolean().optional(),
   guestAddress: z
     .object({
       fullAddress: z.string().min(10, 'Enter your complete address'),
@@ -52,25 +56,50 @@ const checkoutSchema = z.object({
   instructions: z.string().max(300).optional(),
 }).refine(
   (data) => {
-    if (!data.addressId) {
-      return !!data.guestAddress?.areaId && !!data.name && !!data.phone;
+    if (data.useNewAddress) {
+      return !!data.guestAddress?.areaId && !!data.guestAddress?.fullAddress;
     }
-    return true;
+    return !!data.addressId;
   },
   {
-    message: 'Please complete all guest details',
+    message: 'Please complete all address details',
     path: ['guestAddress'],
   }
 );
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
 
+// Properly typed and memoized order items list
+const OrderItemsList = memo(({ items }: { items: CartItem[] }) => {
+  return (
+    <div className="space-y-3">
+      {items.map((item) => (
+        <div key={item._id} className="flex justify-between text-sm">
+          <span className="text-muted-foreground">
+            {item.quantity} × {item.menuItem.name}
+          </span>
+          <span>Rs. {(item.priceAtAdd * item.quantity).toLocaleString()}</span>
+        </div>
+      ))}
+    </div>
+  );
+});
+
+OrderItemsList.displayName = 'OrderItemsList';
+
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
-  const { items, subtotal, clearCart } = useCartStore();
+
+  // Auth
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  // Cart — selective + shallow comparison without external package
+  const items = useCartStore((state) => state.items);
+  const subtotal = useCartStore((state) => state.subtotal);
+  const clearCart = useCartStore((state) => state.clearCart);
+
   const { data: addresses = [] } = useAddresses();
-  const { data: areas = [] } = useAreas(); // ← Now resolves correctly
+  const { data: areas = [] } = useAreas();
 
   const createOrder = useCreateOrder();
   const createGuestOrder = useCreateGuestOrder();
@@ -90,15 +119,17 @@ export default function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       paymentMethod: 'cod',
+      useNewAddress: false,
     },
   });
 
   const selectedAddressId = watch('addressId');
-  const guestAreaId = watch('guestAddress.areaId'); // ← Correct nested field syntax (no ?.)
+  const useNewAddress = watch('useNewAddress');
+  const guestAreaId = watch('guestAddress.areaId');
 
-  // Auto-select default address for authenticated users
+  // Auto-select default address
   useEffect(() => {
-    if (isAuthenticated && addresses.length > 0 && !selectedAddressId) {
+    if (isAuthenticated && addresses.length > 0 && !selectedAddressId && !useNewAddress) {
       const defaultAddr = addresses.find((a) => a.isDefault) || addresses[0];
       if (defaultAddr) {
         setValue('addressId', defaultAddr._id);
@@ -111,9 +142,9 @@ export default function CheckoutPage() {
         }
       }
     }
-  }, [addresses, areas, isAuthenticated, selectedAddressId, setValue]);
+  }, [addresses, areas, isAuthenticated, selectedAddressId, useNewAddress, setValue]);
 
-  // Update delivery info when guest selects area
+  // Update delivery fee on area selection
   useEffect(() => {
     if (guestAreaId) {
       const area = areas.find((a) => a._id === guestAreaId);
@@ -125,8 +156,16 @@ export default function CheckoutPage() {
     }
   }, [guestAreaId, areas]);
 
-  const total = subtotal + deliveryFee;
+  // Clear saved address when using new one
+  useEffect(() => {
+    if (useNewAddress) {
+      setValue('addressId', undefined);
+    }
+  }, [useNewAddress, setValue]);
+
+  const total = useMemo(() => subtotal + deliveryFee, [subtotal, deliveryFee]);
   const isMinOrderMet = subtotal >= minOrderAmount;
+  const showGuestAddressFields = !isAuthenticated || useNewAddress;
 
   const onSubmit = async (data: CheckoutForm) => {
     if (!isMinOrderMet) {
@@ -142,16 +181,7 @@ export default function CheckoutPage() {
     try {
       let response;
 
-      if (isAuthenticated) {
-        response = await createOrder.mutateAsync({
-          items: itemsPayload,
-          addressId: data.addressId!,
-          paymentMethod: data.paymentMethod,
-          promoCode: data.promoCode?.trim().toUpperCase(),
-          instructions: data.instructions?.trim(),
-          // useWallet removed — backend handles wallet internally when finalAmount === 0
-        });
-      } else {
+      if (useNewAddress || !isAuthenticated) {
         response = await createGuestOrder.mutateAsync({
           items: itemsPayload,
           guestAddress: {
@@ -161,8 +191,16 @@ export default function CheckoutPage() {
             floor: data.guestAddress!.floor,
             instructions: data.guestAddress!.instructions,
           },
-          name: data.name!.trim(),
-          phone: data.phone!,
+          name: !isAuthenticated ? data.name!.trim() : undefined,
+          phone: !isAuthenticated ? data.phone : undefined,
+          paymentMethod: data.paymentMethod,
+          promoCode: data.promoCode?.trim().toUpperCase(),
+          instructions: data.instructions?.trim(),
+        });
+      } else {
+        response = await createOrder.mutateAsync({
+          items: itemsPayload,
+          addressId: data.addressId!,
           paymentMethod: data.paymentMethod,
           promoCode: data.promoCode?.trim().toUpperCase(),
           instructions: data.instructions?.trim(),
@@ -248,29 +286,54 @@ export default function CheckoutPage() {
                 )}
               </CardHeader>
               <CardContent className="space-y-5">
-                {isAuthenticated ? (
-                  <Controller
-                    control={control}
-                    name="addressId"
-                    render={({ field }) => (
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a saved address" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {addresses.map((addr) => (
-                            <SelectItem key={addr._id} value={addr._id}>
-                              <div className="space-y-1">
-                                <p className="font-medium">{addr.label}</p>
-                                <p className="text-sm text-muted-foreground">{addr.fullAddress}</p>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                {isAuthenticated && !showGuestAddressFields && (
+                  <>
+                    <Controller
+                      control={control}
+                      name="addressId"
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a saved address" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {addresses.map((addr) => (
+                              <SelectItem key={addr._id} value={addr._id}>
+                                <div className="space-y-1">
+                                  <p className="font-medium">{addr.label}</p>
+                                  <p className="text-sm text-muted-foreground">{addr.fullAddress}</p>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.addressId && (
+                      <p className="text-sm text-destructive mt-1">{errors.addressId.message}</p>
                     )}
-                  />
-                ) : (
+                  </>
+                )}
+
+                {isAuthenticated && (
+                  <div className="flex items-center space-x-2 pt-2">
+                    <Controller
+                      control={control}
+                      name="useNewAddress"
+                      render={({ field }) => (
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      )}
+                    />
+                    <Label className="text-sm font-normal cursor-pointer">
+                      Use a different delivery address
+                    </Label>
+                  </div>
+                )}
+
+                {showGuestAddressFields && (
                   <>
                     <div>
                       <Label>Delivery Area</Label>
@@ -394,16 +457,7 @@ export default function CheckoutPage() {
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  {items.map((item) => (
-                    <div key={item.menuItem._id} className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        {item.quantity} × {item.menuItem.name}
-                      </span>
-                      <span>Rs. {(item.menuItem.price * item.quantity).toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
+                <OrderItemsList items={items} />
 
                 <Separator />
 
