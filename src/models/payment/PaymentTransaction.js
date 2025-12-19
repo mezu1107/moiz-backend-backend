@@ -1,4 +1,5 @@
 // src/models/payment/PaymentTransaction.js
+// FINAL PRODUCTION — DECEMBER 19, 2025 — OPTIMIZED & INDEXED
 
 const mongoose = require('mongoose');
 
@@ -7,89 +8,75 @@ const paymentTransactionSchema = new mongoose.Schema(
     order: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Order',
-      required: true
+      required: true,
+      index: true
     },
 
     paymentMethod: {
       type: String,
-      enum: ['cash', 'card', 'easypaisa', 'jazzcash', 'bank'],
+      enum: ['cash', 'card', 'easypaisa', 'jazzcash', 'bank', 'wallet'],
       required: true
     },
 
     amount: {
       type: Number,
-      required: true
+      required: true,
+      min: 0
     },
 
     status: {
       type: String,
       enum: ['pending', 'paid', 'failed', 'refunded'],
-      default: 'pending'
+      default: 'pending',
+      index: true
     },
 
     transactionId: {
-      // Stripe PaymentIntent ID, Bank ref, Jazz/Easy ID, etc.
-      type: String
+      type: String,
+      sparse: true // allows null/undefined uniquely
     },
 
-    refundedAt: Date,
-    refundedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    refundReason: String,
+    metadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
+    },
 
-    metadata: mongoose.Schema.Types.Mixed,
-
-    // ======================================================
-    //                REFUND ENHANCED FIELDS
-    // ======================================================
-
+    // Refund Fields
     refundStatus: {
       type: String,
       enum: ['none', 'requested', 'processing', 'completed', 'rejected'],
-      default: 'none'
+      default: 'none',
+      index: true
     },
 
     refundAmount: {
       type: Number,
-      default: 0 // supports partial refunds
+      default: 0,
+      min: 0
     },
 
-    refundRequestedAt: {
-      type: Date
-    },
+    refundRequestedAt: Date,
+    refundRequestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
-    refundRequestedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User' // customer or admin
-    },
+    refundProcessedAt: Date,
+    refundProcessedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
-    refundProcessedAt: {
-      type: Date
-    },
+    refundReason: String,
+    refundNote: String,
 
-    refundProcessedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User' // admin only
-    },
+    stripeRefundId: String,
 
-    refundReason: {
-      type: String
-    },
-
-    stripeRefundId: {
-      type: String
-    },
-
-    refundNote: {
-      type: String
-    }
+    // Legacy fields (kept for backward compatibility)
+    refundedAt: Date,
+    refundedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );
 
-// Indexes — fast queries
-paymentTransactionSchema.index({ paymentMethod: 1 });
-paymentTransactionSchema.index({ status: 1 });
-paymentTransactionSchema.index({ createdAt: -1 });
-paymentTransactionSchema.index({ order: 1 });
+// Compound indexes for common queries
+paymentTransactionSchema.index({ refundStatus: 1, createdAt: -1 });
+paymentTransactionSchema.index({ paymentMethod: 1, status: 1 });
+paymentTransactionSchema.index({ transactionId: 1 }, { unique: true, sparse: true });
+paymentTransactionSchema.index({ status: 1, createdAt: -1 });
 
 module.exports = mongoose.model('PaymentTransaction', paymentTransactionSchema);

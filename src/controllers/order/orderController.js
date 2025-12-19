@@ -1,5 +1,5 @@
 // src/controllers/order/orderController.js
-// FINAL PRODUCTION — DECEMBER 15, 2025 — BULLETPROOF ORDER SYSTEM
+// FINAL PRODUCTION — DECEMBER 18, 2025 — BULLETPROOF ORDER SYSTEM
 
 const User = require('../../models/user/User');
 const Order = require('../../models/order/Order');
@@ -10,14 +10,15 @@ const Cart = require('../../models/cart/Cart');
 const Area = require('../../models/area/Area');
 const PaymentTransaction = require('../../models/payment/PaymentTransaction');
 const KitchenOrder = require('../../models/kitchen/KitchenOrder');
+const Wallet = require('../../models/wallet/Wallet');
 const stripe = require('../../config/stripe');
 const { applyAndTrackDeal } = require('../deal/dealController');
 const PDFDocument = require('pdfkit');
 const admin = require('firebase-admin');
 const mongoose = require('mongoose');
 const { debitWallet } = require('../wallet/walletController');
-const Wallet = require('../../models/wallet/Wallet');  // ← ADD THIS LINE
 const io = global.io;
+
 global.pendingOrderTimeouts = global.pendingOrderTimeouts || {};
 const AUTO_CANCEL_DELAY = 15 * 60 * 1000; // 15 minutes
 
@@ -31,13 +32,20 @@ const BANK_DETAILS = {
 
 const orderIdShort = (id) => id?.toString().slice(-6).toUpperCase() || 'TEMP';
 
+// Helper: Convert number → Decimal128 safely
+const toDecimal = (num) => new mongoose.Types.Decimal128(num.toString());
+
+// Helper: Convert Decimal128 → number for JSON
+const toNumber = (decimal) => decimal ? parseFloat(decimal.toString()) : 0;
+
 // ====================== FCM NOTIFICATION ======================
 const sendNotification = async (order, type) => {
   try {
-    const customerId = order.customer?._id || order.customer;
-    if (!customerId) return;
+    const customerId = order.customer?._id || order.customer || order.guestInfo;
+    if (!customerId?._id && !customerId) return;
 
-    const user = await User.findById(customerId).select('fcmToken').lean();
+    const userId = customerId._id || customerId;
+    const user = await User.findById(userId).select('fcmToken').lean();
     if (!user?.fcmToken) return;
 
     const shortId = orderIdShort(order._id);
@@ -54,7 +62,7 @@ const sendNotification = async (order, type) => {
     const msg = messages[type];
     if (!msg) return;
 
-    const message = {
+    await admin.messaging().send({
       token: user.fcmToken,
       notification: { title: msg.title, body: msg.body },
       data: {
@@ -63,9 +71,7 @@ const sendNotification = async (order, type) => {
         status: order.status,
         shortId,
       },
-    };
-
-    await admin.messaging().send(message);
+    });
   } catch (err) {
     console.error('FCM Notification Error:', err.message);
   }
@@ -76,7 +82,7 @@ const broadcastPaymentEvent = (order, event, extra = {}) => {
   if (!io || !order) return;
 
   const shortId = orderIdShort(order._id);
-  const amount = order.finalAmount + (order.walletUsed || 0);
+  const amount = toNumber(order.finalAmount) + (order.walletUsed ? toNumber(order.walletUsed) : 0);
 
   const payload = {
     event,
@@ -180,6 +186,7 @@ const createOrder = async (req, res) => {
       const menuItem = await MenuItem.findById(item.menuItem).lean();
       if (!menuItem?.isAvailable) continue;
       const qty = Math.max(1, Number(item.quantity) || 1);
+      const itemTotal = menuItem.price * qty;
       orderItems.push({
         menuItem: menuItem._id,
         name: menuItem.name,
@@ -187,7 +194,7 @@ const createOrder = async (req, res) => {
         priceAtOrder: menuItem.price,
         quantity: qty,
       });
-      subtotal += menuItem.price * qty;
+      subtotal += itemTotal;
     }
 
     if (orderItems.length === 0) return res.status(400).json({ success: false, message: 'No available items' });
@@ -209,22 +216,23 @@ const createOrder = async (req, res) => {
     let finalAmount = Math.max(0, subtotal + deliveryZone.deliveryFee - discount);
     let walletUsed = 0;
 
-    // === WALLET USAGE ===
+    // === WALLET USAGE (Decimal128 safe) ===
     if (!isGuest && (paymentMethod === 'wallet' || useWallet)) {
-      const wallet = await Wallet.findOne({ user: customerId }).lean();
-      if (wallet?.balance > 0) {
-        walletUsed = Math.min(wallet.balance, finalAmount);
+      const wallet = await Wallet.findOne({ user: customerId }).session(session).lean();
+      if (wallet && toNumber(wallet.balance) > 0) {
+        const available = toNumber(wallet.balance);
+        walletUsed = Math.min(available, finalAmount);
         finalAmount -= walletUsed;
       }
     }
 
     const baseData = {
       items: orderItems,
-      totalAmount: subtotal,
-      deliveryFee: deliveryZone.deliveryFee,
-      discountApplied: discount,
-      finalAmount,
-      walletUsed,
+      totalAmount: toDecimal(subtotal),
+      deliveryFee: toDecimal(deliveryZone.deliveryFee),
+      discountApplied: toDecimal(discount),
+      finalAmount: toDecimal(finalAmount),
+      walletUsed: toDecimal(walletUsed),
       area: areaId,
       deliveryZone: deliveryZone._id,
       estimatedDelivery: deliveryZone.estimatedTime || '40-55 min',
@@ -272,12 +280,11 @@ const createOrder = async (req, res) => {
       });
 
       await stripe.paymentIntents.update(paymentIntent.id, {
-        metadata: { orderId: order._id.toString(), ...paymentIntent.metadata },
+        metadata: { orderId: order._id.toString() },
       });
 
       clientSecret = paymentIntent.client_secret;
 
-      // Auto-cancel timer
       global.pendingOrderTimeouts[order._id.toString()] = setTimeout(async () => {
         try {
           const o = await Order.findById(order._id);
@@ -295,16 +302,21 @@ const createOrder = async (req, res) => {
 
     await order.save({ session });
 
-    // === WALLET DEDUCTION ===
+    // === WALLET DEDUCTION (Atomic via debitWallet) ===
     if (!isGuest && walletUsed > 0) {
-      await debitWallet(customerId, walletUsed, order._id, session);
+      await debitWallet(
+        customerId,
+        toDecimal(walletUsed),
+        order._id,
+        session
+      );
     }
 
     // === PAYMENT TRANSACTION RECORD ===
     await PaymentTransaction.create([{
       order: order._id,
       paymentMethod: baseData.paymentMethod,
-      amount: baseData.finalAmount + walletUsed,
+      amount: toDecimal(toNumber(baseData.finalAmount) + walletUsed),
       status: finalAmount === 0 || payment !== 'cash' ? 'paid' : 'pending',
       transactionId: order.paymentIntentId || order.bankTransferReference || null,
       paidAt: finalAmount === 0 || payment !== 'cash' ? new Date() : null,
@@ -345,7 +357,6 @@ const createOrder = async (req, res) => {
       ]);
     }
 
-    // === PAYMENT SUCCESS BROADCAST ===
     if (finalAmount === 0 || payment !== 'cash') {
       broadcastPaymentEvent(order, 'paymentSuccess', {
         walletUsed,
@@ -359,7 +370,19 @@ const createOrder = async (req, res) => {
     await order.populate('area items.menuItem customer rider');
     await sendNotification(order, 'new_order');
 
-    const response = { success: true, order, walletUsed };
+    const response = {
+      success: true,
+      order: {
+        ...order.toObject(),
+        finalAmount: toNumber(order.finalAmount),
+        walletUsed: toNumber(order.walletUsed),
+        totalAmount: toNumber(order.totalAmount),
+        discountApplied: toNumber(order.discountApplied),
+        deliveryFee: toNumber(order.deliveryFee),
+      },
+      walletUsed,
+    };
+
     if (clientSecret) response.clientSecret = clientSecret;
     if (payment === 'bank') {
       response.bankDetails = { ...BANK_DETAILS, amount: finalAmount, reference: order.bankTransferReference };
@@ -374,6 +397,8 @@ const createOrder = async (req, res) => {
     if (session) session.endSession();
   }
 };
+
+
 
 
 
@@ -1004,60 +1029,94 @@ const customerRejectOrder = async (req, res) => {
 
 // ====================== PUBLIC TRACKING ======================
 // src/controllers/order/orderController.js
+// ====================== PUBLIC TRACKING ======================
+// ====================== PUBLIC TRACKING (NO RESTRICTIONS) ======================
 const trackOrderById = async (req, res) => {
   const { orderId } = req.params;
 
+  // ================= VALIDATE ID =================
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
-    return res.status(400).json({ success: false, message: 'Invalid order ID' });
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid order ID',
+    });
   }
 
   try {
+    // ================= FETCH ORDER =================
     const order = await Order.findById(orderId)
-      .select('_id status placedAt finalAmount estimatedDelivery paymentMethod paymentStatus ' +
-              'guestInfo addressDetails items totalAmount deliveryFee discountApplied walletUsed ' +
-              'rider bankTransferReference instructions paymentIntentId shortId')
+      .select(
+        '_id status placedAt finalAmount estimatedDelivery paymentMethod paymentStatus ' +
+        'guestInfo addressDetails items totalAmount deliveryFee discountApplied walletUsed ' +
+        'rider instructions'
+      )
       .populate('items.menuItem', 'name image')
       .populate('rider', 'name phone')
-      .populate('customer', '_id name phone') // ← Critical: populate customer _id
       .lean();
 
     if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
     }
 
-    // Determine access
-    const isGuestOrder = order.guestInfo?.isGuest === true;
-    const isAdmin = req.user?.role === 'admin';
-
-    let hasAccess = isGuestOrder || isAdmin;
-
-    if (!hasAccess && req.user && order.customer) {
-      const customerIdFromOrder = order.customer._id?.toString() || order.customer.toString();
-      const userId = req.user._id?.toString() || req.user.id?.toString();
-      hasAccess = customerIdFromOrder === userId;
-    }
-
-    if (!hasAccess) {
-      return res.status(403).json({ success: false, message: 'Access denied' });
-    }
-
-    // Add derived fields
     const shortId = orderIdShort(order._id);
 
-    res.json({
-      success: true,
-      order: {
-        ...order,
-        shortId,
-        trackUrl: `${process.env.APP_URL || 'https://foodapp.pk'}/track/${order._id}`,
-        instructions: order.instructions || null,
+    // ================= SAFE PUBLIC RESPONSE =================
+    const safeOrder = {
+      _id: order._id,
+      shortId,
+      status: order.status,
+      placedAt: order.placedAt,
+      estimatedDelivery: order.estimatedDelivery,
+
+      payment: {
+        method: order.paymentMethod,
+        status: order.paymentStatus,
+        amount: toNumber(order.finalAmount),
       },
+
+      items: order.items.map(item => ({
+        name: item.menuItem?.name || item.name,
+        image: item.menuItem?.image || item.image || null,
+        quantity: item.quantity,
+        priceAtOrder: item.priceAtOrder,
+      })),
+
+      address: {
+        fullAddress: order.addressDetails?.fullAddress || '',
+        label: order.addressDetails?.label || '',
+        floor: order.addressDetails?.floor || '',
+      },
+
+      instructions: order.instructions || null,
+
+      rider: order.rider
+        ? {
+            name: order.rider.name,
+            phone: order.rider.phone,
+          }
+        : null,
+
+      trackUrl: `${process.env.APP_URL || 'https://foodapp.pk'}/track/${order._id}`,
+    };
+
+    // ================= RESPONSE =================
+    return res.json({
+      success: true,
+      order: safeOrder,
     });
+
   } catch (err) {
     console.error('trackOrderById error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(500).json({
+      success: false,
+      message: 'Server error',
+    });
   }
 };
+
 
 
 const trackOrdersByPhone = async (req, res) => {

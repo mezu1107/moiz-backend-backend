@@ -104,7 +104,7 @@ app.get('/health', async (req, res) => {
   try {
     await require('mongoose').connection.db.admin().ping();
     db = 'Connected';
-  } catch {}
+  } catch { }
   res.json({
     status: 'LIVE',
     message: 'AMFood Pakistan — FULL POWER',
@@ -135,6 +135,11 @@ const routes = [
   ['/api/admin/contact', './src/routes/admin/contactAdminRoutes'],
   ['/api/wallet', './src/routes/wallet/walletRoutes'],
   ['/api/kitchen', './src/routes/kitchen/kitchenRoutes'],
+  ['/api/payment', './src/routes/payment/paymentRoutes'],
+  ['/api/admin/payment', './src/routes/admin/paymentAdminRoutes'],
+  ['/api/admin/refunds', './src/routes/admin/refundAdminRoutes'],
+  ['/api/reviews', './src/routes/review/reviewRoutes'],
+  ['/api/inventory', './src/routes/inventory/inventoryRoutes'],
 ];
 
 routes.forEach(([path, file]) => {
