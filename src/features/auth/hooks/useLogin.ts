@@ -51,7 +51,7 @@ export const useLogin = () => {
           navigate("/rider");
           break;
         default:
-          navigate("/home");
+          navigate("/dashboard");
       }
     },
     onError: (error: any) => {
