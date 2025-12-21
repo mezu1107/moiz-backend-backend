@@ -1,44 +1,77 @@
-require('dotenv').config();
+/**
+ * AMFood Backend Server
+ * FINAL PRODUCTION VERSION — December 2025
+ */
+
+require('dotenv').config(); // MUST be first
+
 const express = require('express');
 const http = require('http');
 const path = require('path');
+
 const connectDB = require('./src/config/db');
 const logger = require('./src/utils/logger');
+
 const session = require('express-session');
 const MongoStore = require('connect-mongo').default;
+
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
+
 const admin = require('firebase-admin');
+const mongoose = require('mongoose');
 
 const app = express();
 const server = http.createServer(app);
 
-// ==================== FIREBASE ADMIN INIT ====================
-if (!admin.apps.length) {
+/* =========================================================
+   🔥 FIREBASE ADMIN INITIALIZATION (SAFE)
+========================================================= */
+const firebaseEnvReady =
+  process.env.FIREBASE_PROJECT_ID &&
+  process.env.FIREBASE_CLIENT_EMAIL &&
+  process.env.FIREBASE_PRIVATE_KEY;
+
+if (!admin.apps.length && firebaseEnvReady) {
   try {
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
       }),
     });
-    logger.info(`[${new Date().toISOString()}] Firebase Admin SDK initialized successfully`);
+
+    logger.info(`[${new Date().toISOString()}] Firebase Admin SDK initialized`);
   } catch (err) {
-    logger.warn(`[${new Date().toISOString()}] Firebase Admin not initialized (FCM disabled)`);
-    console.error(`[${new Date().toISOString()}]`, err.stack);
+    logger.warn(
+      `[${new Date().toISOString()}] Firebase Admin FAILED — Push disabled`
+    );
+    console.error(err.message);
   }
+} else {
+  logger.warn(
+    `[${new Date().toISOString()}] Firebase env missing — Push disabled`
+  );
 }
 
-// ==================== MIDDLEWARES ====================
+/* =========================================================
+   🧱 MIDDLEWARES
+========================================================= */
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cors({ origin: true, credentials: true }));
+
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'amfood-secret-guest-cart-2025',
+    secret: process.env.SESSION_SECRET || 'amfood-session-secret',
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
@@ -49,7 +82,7 @@ app.use(
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     },
   })
 );
@@ -57,39 +90,56 @@ app.use(
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
 
-// ==================== STATIC FILES ====================
+/* =========================================================
+   📁 STATIC FILES
+========================================================= */
 app.use('/uploads', express.static('uploads'));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// ==================== FAVICON ====================
-app.get('/favicon.ico', (req, res) => res.status(204).end());
-app.get('/favicon.png', (req, res) => res.sendFile(path.join(__dirname, 'public', 'favicon.png')));
+/* =========================================================
+   🖼️ FAVICON
+========================================================= */
+app.get('/favicon.ico', (_, res) => res.status(204).end());
+app.get('/favicon.png', (req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'favicon.png'))
+);
 
-// ==================== SOCKET.IO ====================
+/* =========================================================
+   🔌 SOCKET.IO
+========================================================= */
 const { Server } = require('socket.io');
+
 const io = new Server(server, {
   cors: { origin: '*', credentials: true },
   pingTimeout: 60000,
 });
+
 global.io = io;
 
 require('./src/sockets/order/orderSocket')(io);
 require('./src/sockets/contact/contactSocket')(io);
 
-// ==================== STRIPE WEBHOOK ====================
+/* =========================================================
+   💳 STRIPE WEBHOOK
+========================================================= */
 const stripeWebhookRoutes = require('./src/routes/webhook/stripeWebhookRoutes');
+
 if (process.env.TESTING_MODE === 'true') {
   app.use(
     '/api/webhook/stripe',
     express.raw({ type: 'application/json' }),
     (req, res, next) => {
-      req.stripeEvent = { id: 'test_evt', type: 'payment_intent.succeeded' };
+      req.stripeEvent = {
+        id: 'test_evt',
+        type: 'payment_intent.succeeded',
+      };
       next();
     },
     stripeWebhookRoutes
   );
 } else {
   const verifyStripeWebhook = require('./src/middleware/stripe/verifyStripeWebhook');
+
   app.use(
     '/api/webhook/stripe',
     express.raw({ type: 'application/json' }),
@@ -98,24 +148,32 @@ if (process.env.TESTING_MODE === 'true') {
   );
 }
 
-// ==================== HEALTH CHECK ====================
+/* =========================================================
+   ❤️ HEALTH CHECK
+========================================================= */
 app.get('/health', async (req, res) => {
-  let db = 'Disconnected';
+  let dbStatus = 'Disconnected';
+
   try {
-    await require('mongoose').connection.db.admin().ping();
-    db = 'Connected';
-  } catch { }
+    await mongoose.connection.db.admin().ping();
+    dbStatus = 'Connected';
+  } catch {}
+
   res.json({
     status: 'LIVE',
     message: 'AMFood Pakistan — FULL POWER',
-    dbStatus: db,
+    dbStatus,
     firebase: admin.apps.length ? 'Initialized' : 'Disabled',
-    time: new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' }),
+    time: new Date().toLocaleString('en-PK', {
+      timeZone: 'Asia/Karachi',
+    }),
     version: 'v3.0 — December 2025',
   });
 });
 
-// ==================== ROUTES LOADER ====================
+/* =========================================================
+   🚦 ROUTES LOADER
+========================================================= */
 const routes = [
   ['/api/auth', './src/routes/auth/authRoutes'],
   ['/api/upload', './src/routes/upload/uploadRoutes'],
@@ -140,52 +198,63 @@ const routes = [
   ['/api/admin/refunds', './src/routes/admin/refundAdminRoutes'],
   ['/api/reviews', './src/routes/review/reviewRoutes'],
   ['/api/inventory', './src/routes/inventory/inventoryRoutes'],
+    ['/api/orders/analytics', './src/routes/order/analyticsRoutes'],
+
 ];
 
-routes.forEach(([path, file]) => {
+routes.forEach(([routePath, file]) => {
   try {
-    const routeModule = require(file);
-    app.use(path, routeModule);
-    console.log(`[${new Date().toISOString()}] ROUTE LOADED: ${path}`);
+    app.use(routePath, require(file));
+    console.log(`[${new Date().toISOString()}] ROUTE LOADED: ${routePath}`);
   } catch (err) {
-    console.error(`[${new Date().toISOString()}] ROUTE FAILED: ${path}`);
-    console.error(err.stack);
+    console.error(
+      `[${new Date().toISOString()}] ROUTE FAILED: ${routePath}`
+    );
+    console.error(err.message);
   }
 });
 
-// ==================== ERROR HANDLING ====================
-app.use((req, res, next) => {
-  if (req.originalUrl.includes('favicon') || req.originalUrl === '/health') {
-    return res.status(204).end();
-  }
-  next();
-});
-
+/* =========================================================
+   ❌ ERROR HANDLING
+========================================================= */
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
 
 app.use((err, req, res, next) => {
-  console.error(`[${new Date().toISOString()}] UNHANDLED ERROR:`, err.stack);
+  console.error(`[${new Date().toISOString()}] UNHANDLED ERROR`);
+  console.error(err.stack);
+
   res.status(err.status || 500).json({
     success: false,
-    message: process.env.NODE_ENV === 'production' ? 'Server error' : err.message,
+    message:
+      process.env.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
   });
 });
 
-// ==================== START SERVER ====================
+/* =========================================================
+   🚀 START SERVER
+========================================================= */
 const startServer = async () => {
   try {
     await connectDB();
+
     const PORT = process.env.PORT || 5000;
+
     server.listen(PORT, '0.0.0.0', () => {
       console.log(`[${new Date().toISOString()}] SERVER LIVE`);
       console.log(` http://localhost:${PORT}`);
       console.log(` Health: http://localhost:${PORT}/health`);
-      console.log(` Time: ${new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' })}`);
+      console.log(
+        ` Time: ${new Date().toLocaleString('en-PK', {
+          timeZone: 'Asia/Karachi',
+        })}`
+      );
     });
   } catch (err) {
-    console.error(`[${new Date().toISOString()}] Server failed to start:`, err.stack);
+    console.error('Server failed to start:', err.message);
     setTimeout(startServer, 5000);
   }
 };

@@ -1,11 +1,14 @@
 // src/controllers/admin/customerController.js   ← FINAL CLEAN VERSION
 const User = require('../../models/user/User');
 
+// src/controllers/admin/customerController.js
 const getAllCustomers = async (req, res) => {
   try {
     const { search, page = 1, limit = 50 } = req.query;
 
-    const query = { role: 'customer', isActive: true };
+    // ← CHANGE: Remove isActive: true filter to show ALL customers
+    const query = { role: 'customer' };
+
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -16,7 +19,7 @@ const getAllCustomers = async (req, res) => {
 
     const [users, total] = await Promise.all([
       User.find(query)
-        .select('name phone email createdAt lastActiveAt')
+        .select('name phone email createdAt lastActiveAt isActive') // ← Add isActive
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(+limit)
@@ -32,6 +35,7 @@ const getAllCustomers = async (req, res) => {
       }
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };

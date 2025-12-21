@@ -1,13 +1,17 @@
 // src/validation/schemas/analyticsSchemas.js
+// FINAL PRODUCTION — DECEMBER 21, 2025
 
 const Joi = require('joi');
 
 // Allowed periods
-const validPeriods = ['24h', '7d', '30d', '90d', 'today', 'custom'];
+const validPeriods = ['24h', '7d', '30d', '90d', 'today', 'yesterday', 'custom'];
 
-// MAIN ANALYTICS QUERY VALIDATION
+// MAIN ANALYTICS QUERY SCHEMA
 const analyticsQuerySchema = Joi.object({
-  period: Joi.string().valid(...validPeriods).optional(),
+  period: Joi.string()
+    .valid(...validPeriods)
+    .optional()
+    .default('7d'),
 
   startDate: Joi.string()
     .pattern(/^\d{4}-\d{2}-\d{2}$/)
@@ -15,29 +19,35 @@ const analyticsQuerySchema = Joi.object({
 
   endDate: Joi.string()
     .pattern(/^\d{4}-\d{2}-\d{2}$/)
-    .optional()
-}).custom((value, helpers) => {
-  const { period, startDate, endDate } = value;
+    .optional(),
+})
+  // Prevent mixing predefined period with custom dates
+  .oxor('period', 'startDate')
 
-  // custom validation to match your logic
-  if (period === 'custom' || startDate || endDate) {
-    if (!startDate || !endDate) {
-      return helpers.error('any.custom', {
-        message: 'Both startDate and endDate are required for custom range'
-      });
-    }
-  }
+  // If any date is provided, both must be present
+  .when(Joi.object({ period: 'custom' }).unknown(), {
+    then: Joi.object({
+      startDate: Joi.required(),
+      endDate: Joi.required(),
+    }),
+  })
+  .when(Joi.object({ startDate: Joi.exist() }).unknown(), {
+    then: Joi.object({
+      endDate: Joi.required(),
+    }),
+  })
+  .when(Joi.object({ endDate: Joi.exist() }).unknown(), {
+    then: Joi.object({
+      startDate: Joi.required(),
+    }),
+  });
 
-  return value;
-}, 'Custom analytics validation');
-
-// REALTIME QUERY VALIDATION
+// REALTIME QUERY SCHEMA — strict, only allow future-proof params
 const realtimeQuerySchema = Joi.object({
-  refresh: Joi.string().optional(),
-  fast: Joi.string().optional()
-}).unknown(false); // reject extra params
+  mode: Joi.string().valid('fast', 'detailed').optional(), // future use
+}).unknown(false); // reject any unknown query params
 
 module.exports = {
   analyticsQuerySchema,
-  realtimeQuerySchema
+  realtimeQuerySchema,
 };

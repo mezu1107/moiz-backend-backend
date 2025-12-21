@@ -19,7 +19,7 @@ const {
 } = require('../../validation/schemas/cartSchemas');
 
 // GUESTS CAN USE CART — LOGGED-IN GET PERSISTENT CART
-router.use(auth); // ← pass reference, don't call
+
 
 // GET /api/cart
 router.get('/', getCart);

@@ -1,6 +1,7 @@
 // src/models/cart/Cart.js
 const mongoose = require('mongoose');
 
+// Subdocument schema with _id explicitly enabled
 const cartItemSchema = new mongoose.Schema({
   menuItem: {
     type: mongoose.Schema.Types.ObjectId,
@@ -22,6 +23,10 @@ const cartItemSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+}, {
+  _id: true, // ← CRITICAL: This ensures every cart item gets a MongoDB _id
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 const cartSchema = new mongoose.Schema(
@@ -30,12 +35,28 @@ const cartSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      unique: true   // creates { user: 1 } UNIQUE index automatically
+      unique: true
     },
     items: [cartItemSchema]
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
 );
 
-module.exports =
-  mongoose.models.Cart || mongoose.model('Cart', cartSchema);
+// Optional: Ensure _id is always stringified
+cartSchema.set('toJSON', {
+  transform: (doc, ret) => {
+    ret.items = ret.items.map(item => {
+      if (item._id) {
+        item._id = item._id.toString();
+      }
+      return item;
+    });
+    return ret;
+  }
+});
+
+module.exports = mongoose.models.Cart || mongoose.model('Cart', cartSchema);

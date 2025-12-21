@@ -12460,3 +12460,99 @@
 {"level":"warn","message":"[2025-12-19T15:06:08.711Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-19T15:06:08.714Z"}
 {"level":"warn","message":"[2025-12-19T15:06:33.093Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-19T15:06:33.094Z"}
 {"level":"warn","message":"[2025-12-19T15:11:46.676Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-19T15:11:46.679Z"}
+{"level":"warn","message":"[2025-12-19T19:56:49.374Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-19T19:56:49.376Z"}
+{"level":"warn","message":"[2025-12-19T19:57:45.924Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-19T19:57:45.925Z"}
+{"level":"warn","message":"[2025-12-19T20:05:50.943Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-19T20:05:50.945Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-19T20:28:25.104Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-19T20:28:50.976Z"}
+{"level":"warn","message":"[2025-12-19T20:32:51.648Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-19T20:32:51.651Z"}
+{"level":"warn","message":"[2025-12-19T20:33:23.992Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-19T20:33:23.995Z"}
+{"level":"warn","message":"[2025-12-19T20:34:03.183Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-19T20:34:03.184Z"}
+{"level":"warn","message":"[2025-12-19T20:36:54.016Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-19T20:36:54.017Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 692429d7b6fc153de98ecca1 (Admin User)","timestamp":"2025-12-19T20:40:27.277Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 692429d7b6fc153de98ecca1 (Admin User)","timestamp":"2025-12-19T20:43:10.099Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 692429d7b6fc153de98ecca1 (Admin User)","timestamp":"2025-12-19T21:09:16.286Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 692429d7b6fc153de98ecca1 (Admin User)","timestamp":"2025-12-19T21:13:10.577Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 692429d7b6fc153de98ecca1 (Admin User)","timestamp":"2025-12-19T21:13:12.931Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 692429d7b6fc153de98ecca1 (Admin User)","timestamp":"2025-12-19T21:14:52.023Z"}
+{"level":"warn","message":"[2025-12-20T13:04:32.823Z] Firebase Admin not initialized (FCM disabled)","timestamp":"2025-12-20T13:04:32.825Z"}
+{"level":"warn","message":"[2025-12-20T13:10:03.895Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T13:10:03.896Z"}
+{"level":"warn","message":"[2025-12-20T13:14:16.017Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T13:14:16.018Z"}
+{"level":"warn","message":"[2025-12-20T13:26:08.755Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T13:26:08.756Z"}
+{"level":"warn","message":"[2025-12-20T13:26:47.569Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T13:26:47.570Z"}
+{"level":"warn","message":"[2025-12-20T13:27:22.097Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T13:27:22.098Z"}
+{"level":"warn","message":"[2025-12-20T14:06:32.716Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T14:06:32.717Z"}
+{"level":"warn","message":"[2025-12-20T14:12:31.033Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T14:12:31.034Z"}
+{"level":"warn","message":"[2025-12-20T14:14:37.020Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T14:14:37.021Z"}
+{"level":"warn","message":"[2025-12-20T14:17:53.652Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T14:17:53.654Z"}
+{"level":"warn","message":"[2025-12-20T14:18:31.295Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T14:18:31.296Z"}
+{"level":"warn","message":"[2025-12-20T14:19:20.309Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T14:19:20.310Z"}
+{"level":"warn","message":"[2025-12-20T14:20:57.614Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T14:20:57.615Z"}
+{"level":"warn","message":"[2025-12-20T15:58:56.787Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T15:58:56.788Z"}
+{"level":"warn","message":"[2025-12-20T16:12:17.905Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T16:12:17.906Z"}
+{"level":"warn","message":"[2025-12-20T16:13:58.946Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T16:13:58.947Z"}
+{"level":"warn","message":"[2025-12-20T16:14:59.264Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T16:14:59.265Z"}
+{"level":"warn","message":"[2025-12-20T16:15:31.104Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T16:15:31.105Z"}
+{"level":"warn","message":"[2025-12-20T16:18:53.898Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T16:18:53.899Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:19:18.480Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:21:07.639Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:21:08.847Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:26:43.698Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:30:56.777Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:31:24.192Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:31:25.520Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:31:38.458Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:31:39.699Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:31:45.955Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:32:09.724Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:33:54.772Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:33:55.892Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:34:22.979Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:34:30.063Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:34:32.791Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:34:49.545Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:34:50.197Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:36:18.038Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:36:19.252Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:38:40.783Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T16:42:20.416Z"}
+{"level":"warn","message":"[2025-12-20T17:05:04.890Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T17:05:04.891Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T17:11:05.215Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-20T17:13:32.814Z"}
+{"level":"warn","message":"[2025-12-20T17:17:12.183Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-20T17:17:12.186Z"}
+{"level":"warn","message":"[2025-12-21T10:09:29.798Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T10:09:29.800Z"}
+{"level":"warn","message":"[2025-12-21T10:18:31.348Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T10:18:31.349Z"}
+{"level":"warn","message":"[2025-12-21T11:02:44.030Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T11:02:44.031Z"}
+{"level":"warn","message":"[2025-12-21T11:03:36.167Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T11:03:36.168Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-21T11:49:50.048Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-21T11:51:26.793Z"}
+{"level":"warn","message":"[2025-12-21T12:09:12.869Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T12:09:12.870Z"}
+{"level":"warn","message":"[2025-12-21T12:10:50.595Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T12:10:50.596Z"}
+{"level":"warn","message":"[2025-12-21T12:11:00.697Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T12:11:00.698Z"}
+{"level":"warn","message":"[2025-12-21T12:15:59.769Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T12:15:59.776Z"}
+{"level":"warn","message":"[2025-12-21T13:34:49.673Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T13:34:49.683Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-21T13:59:52.128Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-21T14:03:41.692Z"}
+{"level":"warn","message":"[2025-12-21T14:46:19.397Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T14:46:19.398Z"}
+{"level":"warn","message":"[2025-12-21T14:48:20.593Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T14:48:20.594Z"}
+{"level":"warn","message":"[2025-12-21T14:52:02.192Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T14:52:02.193Z"}
+{"level":"warn","message":"[2025-12-21T14:53:36.926Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T14:53:36.927Z"}
+{"level":"warn","message":"[2025-12-21T14:57:25.729Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T14:57:25.732Z"}
+{"level":"warn","message":"[2025-12-21T14:57:40.825Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T14:57:40.826Z"}
+{"level":"warn","message":"[2025-12-21T14:58:41.787Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T14:58:41.790Z"}
+{"level":"warn","message":"[2025-12-21T15:01:02.106Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:01:02.107Z"}
+{"level":"warn","message":"[2025-12-21T15:01:14.170Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:01:14.171Z"}
+{"level":"warn","message":"[2025-12-21T15:06:33.376Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:06:33.385Z"}
+{"level":"warn","message":"[2025-12-21T15:07:16.608Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:07:16.610Z"}
+{"level":"warn","message":"[2025-12-21T15:07:26.400Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:07:26.402Z"}
+{"level":"warn","message":"[2025-12-21T15:09:09.228Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:09:09.229Z"}
+{"level":"warn","message":"[2025-12-21T15:09:48.079Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:09:48.080Z"}
+{"level":"warn","message":"[2025-12-21T15:10:20.633Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:10:20.634Z"}
+{"level":"warn","message":"[2025-12-21T15:13:49.049Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:13:49.056Z"}
+{"level":"warn","message":"[2025-12-21T15:16:01.152Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:16:01.154Z"}
+{"level":"warn","message":"[2025-12-21T15:40:55.507Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:40:55.508Z"}
+{"level":"warn","message":"[2025-12-21T15:41:30.334Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-21T15:41:30.335Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-21T16:23:42.010Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-21T16:26:16.591Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-21T16:26:17.489Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-21T16:30:09.421Z"}

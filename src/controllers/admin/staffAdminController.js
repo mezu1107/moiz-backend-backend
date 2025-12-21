@@ -156,7 +156,57 @@ const demoteStaff = async (req, res) => {
   }
 };
 
+// src/controllers/admin/staffAdminController.js
+// ADD THIS FUNCTION TO YOUR EXISTING FILE
+
+const getAllStaffAndEligible = async (req, res) => {
+  try {
+    const { search, page = 1, limit = 50 } = req.query;
+
+    // Show: customers, riders, and all staff roles (exclude admins)
+    const query = {
+      role: { $in: ['customer', 'rider', 'kitchen', 'delivery_manager', 'support', 'finance'] }
+    };
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const [users, total] = await Promise.all([
+      User.find(query)
+        .select('name phone email role createdAt')
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(+limit)
+        .lean(),
+      User.countDocuments(query)
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        users,
+        pagination: {
+          total,
+          page: +page,
+          limit: +limit,
+          pages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Get Staff List Error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Export it along with others
 module.exports = {
   promoteUserToStaff,
-  demoteStaff
+  demoteStaff,
+  getAllStaffAndEligible   // ← NEW
 };

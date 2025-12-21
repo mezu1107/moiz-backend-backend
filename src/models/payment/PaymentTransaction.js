@@ -1,5 +1,5 @@
 // src/models/payment/PaymentTransaction.js
-// FINAL PRODUCTION — DECEMBER 19, 2025 — OPTIMIZED & INDEXED
+// FINAL PRODUCTION — DECEMBER 19, 2025 — CLEAN & WARNING-FREE
 
 const mongoose = require('mongoose');
 
@@ -9,74 +9,98 @@ const paymentTransactionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Order',
       required: true,
-      index: true
     },
 
     paymentMethod: {
       type: String,
       enum: ['cash', 'card', 'easypaisa', 'jazzcash', 'bank', 'wallet'],
-      required: true
+      required: true,
     },
 
     amount: {
       type: Number,
       required: true,
-      min: 0
+      min: 0,
     },
 
     status: {
       type: String,
       enum: ['pending', 'paid', 'failed', 'refunded'],
       default: 'pending',
-      index: true
     },
 
+    /**
+     * External gateway transaction ID
+     * (Stripe / Easypaisa / JazzCash / Bank)
+     */
     transactionId: {
       type: String,
-      sparse: true // allows null/undefined uniquely
+      default: null,
     },
 
     metadata: {
       type: mongoose.Schema.Types.Mixed,
-      default: {}
+      default: {},
     },
 
-    // Refund Fields
+    // ================= REFUND =================
     refundStatus: {
       type: String,
       enum: ['none', 'requested', 'processing', 'completed', 'rejected'],
       default: 'none',
-      index: true
     },
 
     refundAmount: {
       type: Number,
       default: 0,
-      min: 0
+      min: 0,
     },
 
     refundRequestedAt: Date,
-    refundRequestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    refundRequestedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
 
     refundProcessedAt: Date,
-    refundProcessedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    refundProcessedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
 
     refundReason: String,
     refundNote: String,
 
     stripeRefundId: String,
 
-    // Legacy fields (kept for backward compatibility)
+    // Legacy (kept intentionally)
     refundedAt: Date,
-    refundedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    refundedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   { timestamps: true }
 );
 
-// Compound indexes for common queries
-paymentTransactionSchema.index({ refundStatus: 1, createdAt: -1 });
+// ===================== INDEXES =====================
+
+// Order lookup
+paymentTransactionSchema.index({ order: 1 });
+
+// Payment state dashboards
 paymentTransactionSchema.index({ paymentMethod: 1, status: 1 });
-paymentTransactionSchema.index({ transactionId: 1 }, { unique: true, sparse: true });
 paymentTransactionSchema.index({ status: 1, createdAt: -1 });
 
-module.exports = mongoose.model('PaymentTransaction', paymentTransactionSchema);
+// Refund workflows
+paymentTransactionSchema.index({ refundStatus: 1, createdAt: -1 });
+
+// External transaction uniqueness (NULL allowed)
+paymentTransactionSchema.index(
+  { transactionId: 1 },
+  { unique: true, sparse: true }
+);
+
+module.exports =
+  mongoose.models.PaymentTransaction ||
+  mongoose.model('PaymentTransaction', paymentTransactionSchema);

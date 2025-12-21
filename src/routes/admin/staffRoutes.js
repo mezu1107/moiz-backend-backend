@@ -13,7 +13,8 @@ const {
 
 const {
   promoteUserToStaff,
-  demoteStaff
+  demoteStaff,
+  getAllStaffAndEligible
 } = require('../../controllers/admin/staffAdminController');
 
 // Only ADMIN can access
@@ -35,4 +36,5 @@ router.post(
   demoteStaff
 );
 
+router.get('/all', getAllStaffAndEligible);
 module.exports = router;

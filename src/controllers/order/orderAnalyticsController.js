@@ -1,9 +1,12 @@
 // src/controllers/order/orderAnalyticsController.js
-// FINAL PRODUCTION — DECEMBER 15, 2025 — ENHANCED ANALYTICS ENGINE
+// FINAL PRODUCTION — DECEMBER 21, 2025 — FULLY SYNCED WITH ORDER CONTROLLER
 
 const Order = require('../../models/order/Order');
 const moment = require('moment-timezone');
 moment.tz.setDefault('Asia/Karachi');
+
+// Helper: Convert Decimal128 → number safely
+const toNumber = (decimal) => decimal ? parseFloat(decimal.toString()) : 0;
 
 // ====================== INPUT VALIDATION ======================
 const validateAnalyticsQuery = (req, res, next) => {
@@ -115,7 +118,14 @@ const getOrderAnalytics = async (req, res) => {
       // Current period - success
       Order.aggregate([
         { $match: matchSuccess(successStatuses) },
-        { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' }, discount: { $sum: '$discountApplied' } } }
+        {
+          $group: {
+            _id: null,
+            orders: { $sum: 1 },
+            revenue: { $sum: '$finalAmount' },
+            discount: { $sum: '$discountApplied' }
+          }
+        }
       ]),
 
       // Current cancelled/rejected
@@ -124,7 +134,13 @@ const getOrderAnalytics = async (req, res) => {
       // Previous period - success (for growth)
       Order.aggregate([
         { $match: { ...matchPrev, status: { $in: successStatuses } } },
-        { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
+        {
+          $group: {
+            _id: null,
+            orders: { $sum: 1 },
+            revenue: { $sum: '$finalAmount' }
+          }
+        }
       ]),
 
       // Daily trend
@@ -145,7 +161,13 @@ const getOrderAnalytics = async (req, res) => {
       // Payment methods
       Order.aggregate([
         { $match: matchSuccess(successStatuses) },
-        { $group: { _id: '$paymentMethod', orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
+        {
+          $group: {
+            _id: '$paymentMethod',
+            orders: { $sum: 1 },
+            revenue: { $sum: '$finalAmount' }
+          }
+        }
       ]),
 
       // Top 10 areas
@@ -209,13 +231,25 @@ const getOrderAnalytics = async (req, res) => {
     // Extract values safely
     const current = currentSuccess[0] || { orders: 0, revenue: 0, discount: 0 };
     const prev = prevSuccess[0] || { orders: 0, revenue: 0 };
+
     const totalOrders = current.orders;
-    const totalRevenue = current.revenue;
-    const totalDiscount = current.discount;
+    const totalRevenueRaw = current.revenue;
+    const totalDiscountRaw = current.discount;
+
+    const totalRevenue = toNumber(totalRevenueRaw);
+    const totalDiscount = toNumber(totalDiscountRaw);
 
     // Growth calculations
-    const ordersGrowth = prev.orders > 0 ? ((totalOrders - prev.orders) / prev.orders * 100).toFixed(1) : totalOrders > 0 ? '100' : '0';
-    const revenueGrowth = prev.revenue > 0 ? ((totalRevenue - prev.revenue) / prev.revenue * 100).toFixed(1) : totalRevenue > 0 ? '100' : '0';
+    const prevOrders = prev.orders;
+    const prevRevenue = toNumber(prev.revenue);
+
+    const ordersGrowth = prevOrders > 0
+      ? ((totalOrders - prevOrders) / prevOrders * 100).toFixed(1)
+      : totalOrders > 0 ? '100' : '0';
+
+    const revenueGrowth = prevRevenue > 0
+      ? ((totalRevenue - prevRevenue) / prevRevenue * 100).toFixed(1)
+      : totalRevenue > 0 ? '100' : '0';
 
     const aov = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
     const cancellationRate = (totalOrders + currentCancelled) > 0
@@ -223,15 +257,16 @@ const getOrderAnalytics = async (req, res) => {
       : '0';
 
     const users = userType[0] || { registered: 0, guest: 0 };
-    const registeredPct = (users.registered + users.guest) > 0
-      ? ((users.registered / (users.registered + users.guest)) * 100).toFixed(1)
+    const totalUsers = users.registered + users.guest;
+    const registeredPct = totalUsers > 0
+      ? ((users.registered / totalUsers) * 100).toFixed(1)
       : '0';
 
     res.json({
       success: true,
       analytics: {
         period: {
-          label: req.query.period || 'custom',
+          label: req.query.period || (req.query.startDate ? 'custom' : '7d'),
           start: moment(startDate).format('YYYY-MM-DD'),
           end: moment(endDate).format('YYYY-MM-DD'),
           days: daysDiff
@@ -255,9 +290,9 @@ const getOrderAnalytics = async (req, res) => {
           dailyTrend: dailyTrend.map(d => ({
             date: d._id,
             orders: d.orders,
-            revenue: Math.round(d.revenue),
-            aov: Math.round(d.aov || 0),
-            discount: Math.round(d.discount || 0)
+            revenue: Math.round(toNumber(d.revenue)),
+            aov: Math.round(toNumber(d.aov) || 0),
+            discount: Math.round(toNumber(d.discount) || 0)
           })),
           paymentMethods: paymentMethods.map(p => {
             const label = {
@@ -271,14 +306,14 @@ const getOrderAnalytics = async (req, res) => {
             return {
               method: label,
               orders: p.orders,
-              revenue: Math.round(p.revenue),
+              revenue: Math.round(toNumber(p.revenue)),
               percentage: totalOrders > 0 ? ((p.orders / totalOrders) * 100).toFixed(1) + '%' : '0%'
             };
           }),
           topAreas: topAreas.map(a => ({
             area: a._id,
             orders: a.orders,
-            revenue: Math.round(a.revenue)
+            revenue: Math.round(toNumber(a.revenue))
           })),
           peakHours: peakHours.map(h => ({
             hour: h._id,
@@ -289,8 +324,8 @@ const getOrderAnalytics = async (req, res) => {
             code: d._id,
             title: d.title,
             uses: d.uses,
-            discountGiven: Math.round(d.discountGiven),
-            revenueGenerated: Math.round(d.revenue)
+            discountGiven: Math.round(toNumber(d.discountGiven)),
+            revenueGenerated: Math.round(toNumber(d.revenue))
           }))
         }
       }
@@ -302,7 +337,6 @@ const getOrderAnalytics = async (req, res) => {
   }
 };
 
-// ====================== REALTIME DASHBOARD STATS ======================
 const getRealtimeStats = async (req, res) => {
   try {
     const now = new Date();
@@ -314,42 +348,82 @@ const getRealtimeStats = async (req, res) => {
       {
         $facet: {
           todaySuccess: [
-            { $match: { placedAt: { $gte: todayStart }, status: { $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery'] } } },
-            { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
+            {
+              $match: {
+                placedAt: { $gte: todayStart },
+                status: { $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery'] }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                orders: { $sum: 1 },
+                revenue: { $sum: '$finalAmount' }
+              }
+            }
           ],
+
           yesterdaySuccess: [
-            { $match: { placedAt: { $gte: yesterdayStart, $lte: yesterdayEnd }, status: { $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery'] } } },
-            { $group: { _id: null, orders: { $sum: 1 }, revenue: { $sum: '$finalAmount' } } }
+            {
+              $match: {
+                placedAt: { $gte: yesterdayStart, $lte: yesterdayEnd },
+                status: { $in: ['delivered', 'confirmed', 'preparing', 'out_for_delivery'] }
+              }
+            },
+            {
+              $group: {
+                _id: null,
+                orders: { $sum: 1 },
+                revenue: { $sum: '$finalAmount' }
+              }
+            }
           ],
+
           liveStatus: [
-            { $group: {
+            {
+              $group: {
                 _id: '$status',
                 count: { $sum: 1 }
               }
             }
           ],
+
           cancelledToday: [
-            { $match: { placedAt: { $gte: todayStart }, status: { $in: ['cancelled', 'rejected'] } } },
+            {
+              $match: {
+                placedAt: { $gte: todayStart },
+                status: { $in: ['cancelled', 'rejected'] }
+              }
+            },
             { $count: 'count' }
           ]
         }
       }
     ];
 
-    const [result] = await Order.aggregate(pipeline);
-    const data = result[0];
+    // ✅ FIXED HERE
+    const [data] = await Order.aggregate(pipeline);
 
     const today = data.todaySuccess[0] || { orders: 0, revenue: 0 };
     const yesterday = data.yesterdaySuccess[0] || { orders: 0, revenue: 0 };
 
-    const ordersGrowth = yesterday.orders > 0
-      ? ((today.orders - yesterday.orders) / yesterday.orders * 100).toFixed(1)
-      : today.orders > 0 ? 100 : 0;
+    const todayRevenue = toNumber(today.revenue);
+    const yesterdayRevenue = toNumber(yesterday.revenue);
+
+    const ordersGrowth =
+      yesterday.orders > 0
+        ? ((today.orders - yesterday.orders) / yesterday.orders * 100).toFixed(1)
+        : today.orders > 0 ? 100 : 0;
 
     const statusMap = {};
-    data.liveStatus.forEach(s => statusMap[s._id] = s.count);
+    data.liveStatus.forEach(s => {
+      statusMap[s._id] = s.count;
+    });
 
-    const active = (statusMap.confirmed || 0) + (statusMap.preparing || 0) + (statusMap.out_for_delivery || 0);
+    const active =
+      (statusMap.confirmed || 0) +
+      (statusMap.preparing || 0) +
+      (statusMap.out_for_delivery || 0);
 
     res.json({
       success: true,
@@ -357,7 +431,7 @@ const getRealtimeStats = async (req, res) => {
         updatedAt: now.toISOString(),
         today: {
           orders: today.orders,
-          revenue: Math.round(today.revenue),
+          revenue: Math.round(todayRevenue),
           growth: (ordersGrowth > 0 ? '+' : '') + ordersGrowth + '%'
         },
         live: {
@@ -372,11 +446,16 @@ const getRealtimeStats = async (req, res) => {
         systemStatus: 'operational'
       }
     });
+
   } catch (err) {
     console.error('REALTIME STATS ERROR:', err);
-    res.status(500).json({ success: false, message: 'Live stats temporarily unavailable' });
+    res.status(500).json({
+      success: false,
+      message: 'Live stats temporarily unavailable'
+    });
   }
 };
+
 
 module.exports = {
   getOrderAnalytics,

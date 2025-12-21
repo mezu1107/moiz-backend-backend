@@ -1,4 +1,6 @@
 // src/models/review/Review.js
+// FINAL PRODUCTION — DECEMBER 2025 — CLEAN & WARNING-FREE
+
 const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema(
@@ -7,7 +9,7 @@ const reviewSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Order',
       required: true,
-      unique: true,
+      // ❌ removed 'unique: true' here
     },
     customer: {
       type: mongoose.Schema.Types.ObjectId,
@@ -64,19 +66,22 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
-// === INDEXES ===
+// ===================== INDEXES =====================
+
+// Unique order review
 reviewSchema.index({ order: 1 }, { unique: true });
+
+// Frequently queried combinations
 reviewSchema.index({ customer: 1, createdAt: -1 });
 reviewSchema.index({ isApproved: 1, createdAt: -1 });
 reviewSchema.index({ isFeatured: 1, createdAt: -1 });
 reviewSchema.index({ rating: -1 });
 reviewSchema.index({ isDeleted: 1, deletedAt: -1 });
 
-// === CORRECT MODERN PRE HOOKS FOR MONGOOSE 6+ (NO 'next' PARAMETER) ===
+// ===================== SOFT DELETE HOOKS =====================
 
 // Automatically exclude soft-deleted reviews from all find queries
 reviewSchema.pre(/^find/, function () {
-  // 'this' refers to the current query
   if (!this.getOptions().includeDeleted) {
     this.where({ isDeleted: { $ne: true } });
   }
@@ -87,7 +92,7 @@ reviewSchema.pre('countDocuments', function () {
   this.where({ isDeleted: { $ne: true } });
 });
 
-// Optional: Also apply to aggregate if you use it directly on the model
+// Apply soft delete to aggregate if used directly
 reviewSchema.pre('aggregate', function () {
   if (!this.options?.includeDeleted) {
     const match = this.pipeline().find(stage => stage.$match);
@@ -99,4 +104,5 @@ reviewSchema.pre('aggregate', function () {
   }
 });
 
-module.exports = mongoose.model('Review', reviewSchema);
+module.exports =
+  mongoose.models.Review || mongoose.model('Review', reviewSchema);
