@@ -23,12 +23,15 @@ global.pendingOrderTimeouts = global.pendingOrderTimeouts || {};
 const AUTO_CANCEL_DELAY = 15 * 60 * 1000; // 15 minutes
 
 const BANK_DETAILS = {
-  bankName: "Meezan Bank",
-  accountTitle: "FoodExpress Pvt Ltd",
-  accountNumber: "0211-0105678901",
-  iban: "PK36MEZN0002110105678901",
-  branch: "Gulberg Branch, Lahore",
+  bankName: process.env.REACT_APP_BANK_NAME,
+  accountTitle: process.env.REACT_APP_ACCOUNT_TITLE,
+  accountNumber: process.env.REACT_APP_ACCOUNT_NUMBER,
+  iban: process.env.REACT_APP_IBAN,
+  branch: process.env.REACT_APP_BRANCH,
 };
+
+console.log(BANK_DETAILS);
+
 
 const orderIdShort = (id) => id?.toString().slice(-6).toUpperCase() || 'TEMP';
 

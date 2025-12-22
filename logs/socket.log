@@ -12556,3 +12556,4 @@
 {"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-21T16:26:16.591Z"}
 {"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-21T16:26:17.489Z"}
 {"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-21T16:30:09.421Z"}
+{"level":"warn","message":"[2025-12-22T07:27:07.641Z] Firebase Admin FAILED — Push disabled","timestamp":"2025-12-22T07:27:07.642Z"}
