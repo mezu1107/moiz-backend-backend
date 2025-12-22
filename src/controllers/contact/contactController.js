@@ -24,10 +24,10 @@ const submitContactMessage = async (req, res) => {
     // Optional: Play sound + toast on admin dashboard
     global.io.to('admin-room').emit('play-notification-sound');
 
-    // Send email to admin (existing)
+    // Send email to admin
     try {
       await emailRotator.sendMail({
-        to: 'support@amfoods.com',
+        to: process.env.ADMIN_CONTACT_EMAIL, // <- now from .env
         subject: `New Contact Message - ${subject}`,
         html: `...your existing email template...`
       });

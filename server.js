@@ -71,7 +71,7 @@ app.use(
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'amfood-session-secret',
+    secret: process.env.SESSION_SECRET || ' Al-Tawakkalfoods-session-secret',
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
