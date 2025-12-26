@@ -352,7 +352,10 @@ const getAllMenuItemsWithFilters = async (req, res) => {
   }
 };
 
-// GET SINGLE MENU ITEM (PUBLIC)
+
+
+// In menuController.js → getSingleMenuItem
+
 const getSingleMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
@@ -361,7 +364,7 @@ const getSingleMenuItem = async (req, res) => {
     }
 
     const item = await MenuItem.findById(id)
-      .select('-cloudinaryId -__v')
+      .select('name price image description isVeg isSpicy pricedOptions isAvailable')
       .lean();
 
     if (!item || !item.isAvailable) {

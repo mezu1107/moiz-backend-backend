@@ -1,53 +1,60 @@
 // src/controllers/wallet/walletController.js
-// FINAL PRODUCTION — DECEMBER 19, 2025 — WALLET SYSTEM
+// FINAL PRODUCTION READY — December 2025
+// Modern, atomic, audit-friendly, Decimal128-safe wallet system
 
+const mongoose = require('mongoose');
 const Wallet = require('../../models/wallet/Wallet');
 const WalletTransaction = require('../../models/wallet/WalletTransaction');
-const mongoose = require('mongoose');
+const AuditLog = require('../../models/auditLog/AuditLog'); // ← recommended for admin actions
 const PDFDocument = require('pdfkit');
 const moment = require('moment');
-const { createObjectCsvWriter } = require('csv-writer'); // ← CORRECT IMPORT
-const io = global.io; // Socket.IO instance
+const { createObjectCsvWriter } = require('csv-writer');
 
-// Helper: Convert Decimal128 → number safely for JSON responses
-const toNumber = (decimal) => {
-  return decimal ? parseFloat(decimal.toString()) : 0;
-};
+const io = global.io; // Socket.IO namespace (may be undefined)
 
-// Helper: Convert number → Decimal128
-const toDecimal = (num) => new mongoose.Types.Decimal128(num.toString());
+// ────────────────────────────────────────────────
+// Helpers
+// ────────────────────────────────────────────────
+const toNumber = (decimal) => (decimal ? parseFloat(decimal.toString()) : 0);
+const toDecimal = (value) => new mongoose.Types.Decimal128(value.toString());
 
-// Helper: Short Order ID
 const orderIdShort = (id) => (id ? id.toString().slice(-6).toUpperCase() : 'N/A');
 
-// =============================
-// GET /me OR /user/:userId - Wallet Overview + Recent 50 Transactions
-// =============================
+const parsePositiveAmount = (val) => {
+  const num = Number(val);
+  if (isNaN(num) || num <= 0) {
+    throw new Error('Amount must be a positive number');
+  }
+  return toDecimal(num);
+};
+
+// ────────────────────────────────────────────────
+// 1. Get Wallet + Recent 50 transactions
+// ────────────────────────────────────────────────
 const getMyWallet = async (req, res) => {
   try {
     const targetUserId = req.targetUserId
       ? mongoose.Types.ObjectId.createFromHexString(req.targetUserId)
       : req.user._id;
 
-    const isOwnWallet = targetUserId.toString() === req.user._id.toString();
-    const hasElevatedAccess = ['admin', 'finance', 'support'].includes(req.user.role);
+    const isOwn = targetUserId.equals(req.user._id);
+    const canViewOthers = ['admin', 'finance', 'support'].includes(req.user.role);
 
-    if (!isOwnWallet && !hasElevatedAccess) {
+    if (!isOwn && !canViewOthers) {
       return res.status(403).json({
         success: false,
-        message: 'Forbidden: You can only view your own wallet',
+        message: 'You can only view your own wallet'
       });
     }
 
-    let wallet = await Wallet.findOne({ user: targetUserId });
-
+    let wallet = await Wallet.findOne({ user: targetUserId }).lean();
     if (!wallet) {
-      if (isOwnWallet) {
-        wallet = await Wallet.create({ user: req.user._id });
+      if (isOwn) {
+        wallet = await Wallet.create({ user: req.user._id }).lean();
       } else {
         return res.status(404).json({
           success: false,
-          message: 'Wallet not found for this user',
+          message: 'Wallet not found for this user'
         });
       }
     }
@@ -58,38 +65,40 @@ const getMyWallet = async (req, res) => {
       .limit(50)
       .lean();
 
-    const formattedTransactions = transactions.map((t) => ({
-      id: t._id.toString(),
-      type: t.type,
-      amount: toNumber(t.amount), // ← Positive for credit, negative for debit
-      balanceAfter: toNumber(t.balanceAfter),
-      description: t.description || `Wallet ${t.type}`,
-      orderShortId: t.order?._id ? orderIdShort(t.order._id) : null,
-      date: t.createdAt,
-      metadata: t.metadata || null,
+    const formatted = transactions.map(tx => ({
+      id: tx._id.toString(),
+      type: tx.type,
+      amount: toNumber(tx.amount),        // positive value + type tells direction
+      balanceAfter: toNumber(tx.balanceAfter),
+      description: tx.description || `Wallet ${tx.type}`,
+      orderShortId: tx.order ? orderIdShort(tx.order._id) : null,
+      date: tx.createdAt.toISOString(),
+      metadata: tx.metadata || null
     }));
 
     res.json({
       success: true,
       data: {
         userId: wallet.user.toString(),
+        currency: wallet.currency || 'PKR',
         balance: toNumber(wallet.balance),
         lifetimeCredits: toNumber(wallet.lifetimeCredits),
-        transactions: formattedTransactions,
-        viewedBy: !isOwnWallet && hasElevatedAccess
-          ? { role: req.user.role, viewerId: req.user._id.toString() }
-          : null,
-      },
+        totalWithdrawn: toNumber(wallet.totalWithdrawn || '0'),
+        status: wallet.status,
+        lastTransactionAt: wallet.lastTransactionAt?.toISOString() || null,
+        transactions: formatted,
+        accessedByAdmin: !isOwn ? { role: req.user.role } : null
+      }
     });
   } catch (err) {
     console.error('getMyWallet error:', err);
-    res.status(500).json({ success: false, message: 'Failed to load wallet' });
+    res.status(500).json({ success: false, message: 'Failed to load wallet data' });
   }
 };
 
-// =============================
-// GET /transactions - Paginated History (Own Wallet Only)
-// =============================
+// ────────────────────────────────────────────────
+// 2. Paginated transaction history (own wallet only)
+// ────────────────────────────────────────────────
 const getWalletTransactions = async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -108,18 +117,18 @@ const getWalletTransactions = async (req, res) => {
         .skip(skip)
         .limit(limit)
         .lean(),
-      WalletTransaction.countDocuments({ wallet: wallet._id }),
+      WalletTransaction.countDocuments({ wallet: wallet._id })
     ]);
 
-    const formatted = transactions.map((t) => ({
-      id: t._id.toString(),
-      type: t.type,
-      amount: toNumber(t.amount),
-      balanceAfter: toNumber(t.balanceAfter),
-      description: t.description || `Wallet ${t.type}`,
-      orderShortId: t.order?._id ? orderIdShort(t.order._id) : null,
-      date: t.createdAt,
-      metadata: t.metadata || null,
+    const formatted = transactions.map(tx => ({
+      id: tx._id.toString(),
+      type: tx.type,
+      amount: toNumber(tx.amount),
+      balanceAfter: toNumber(tx.balanceAfter),
+      description: tx.description || `Wallet ${tx.type}`,
+      orderShortId: tx.order ? orderIdShort(tx.order._id) : null,
+      date: tx.createdAt.toISOString(),
+      metadata: tx.metadata || null
     }));
 
     res.json({
@@ -130,9 +139,9 @@ const getWalletTransactions = async (req, res) => {
         limit,
         total,
         pages: Math.ceil(total / limit),
-        hasNext: page * limit < total,
-        hasPrev: page > 1,
-      },
+        hasNext: skip + transactions.length < total,
+        hasPrev: page > 1
+      }
     });
   } catch (err) {
     console.error('getWalletTransactions error:', err);
@@ -140,6 +149,205 @@ const getWalletTransactions = async (req, res) => {
   }
 };
 
+// ────────────────────────────────────────────────
+// 3. Credit wallet – atomic + audited
+// ────────────────────────────────────────────────
+const creditWallet = async ({
+  userId,
+  amount,               // number | string
+  type = 'credit',
+  description = '',
+  orderId = null,
+  metadata = {},
+  performedBy = null     // ObjectId — admin/user who triggered
+} = {}) => {
+  if (!userId) throw new Error('userId is required');
+
+  const amountDec = parsePositiveAmount(amount);
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    let wallet = await Wallet.findOne({ user: userId }).session(session);
+    if (!wallet) {
+      [wallet] = await Wallet.create([{ user: userId }], { session });
+    }
+
+    const updated = await Wallet.findOneAndUpdate(
+      { _id: wallet._id },
+      {
+        $inc: {
+          balance: amountDec,
+          lifetimeCredits: amountDec,
+          ...(type === 'adjustment' ? {} : { lifetimeCredits: amountDec })
+        },
+        $set: { lastTransactionAt: new Date() }
+      },
+      { new: true, session }
+    );
+
+    const transaction = (await WalletTransaction.create([{
+      wallet: wallet._id,
+      order: orderId,
+      type,
+      amount: amountDec,
+      balanceAfter: updated.balance,
+      description: description || `${type} transaction`,
+      metadata,
+      createdBy: performedBy || null
+    }], { session }))[0];
+
+    // Audit trail for sensitive operations
+    if (performedBy) {
+      await AuditLog.create([{
+        action: 'wallet_credit',
+        user: userId,
+        performedBy,
+        targetId: transaction._id,
+        targetModel: 'WalletTransaction',
+        amount: amountDec,
+        after: { balance: updated.balance },
+        description: `Credit (${type}): ${description || 'no description'}`,
+        metadata: { adminTriggered: true }
+      }], { session });
+    }
+
+    await session.commitTransaction();
+
+    // Real-time notification
+    const numeric = toNumber(amountDec);
+    io?.to(`user:${userId}`).emit('walletUpdate', {
+      event: 'balanceUpdated',
+      balance: toNumber(updated.balance),
+      change: numeric,
+      type,
+      description,
+      timestamp: new Date().toISOString()
+    });
+
+    return updated;
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
+  }
+};
+
+// ────────────────────────────────────────────────
+// 4. Debit wallet – atomic with balance check
+// ────────────────────────────────────────────────
+const debitWallet = async ({
+  userId,
+  amount,
+  orderId = null,
+  description = null,
+  session: providedSession = null
+} = {}) => {
+  if (!userId) throw new Error('userId is required');
+
+  const ownSession = !providedSession;
+  const session = providedSession || (await mongoose.startSession());
+
+  if (ownSession) session.startTransaction();
+
+  try {
+    const amountDec = parsePositiveAmount(amount);
+    const negative = toDecimal(-amount);
+
+    const wallet = await Wallet.findOneAndUpdate(
+      {
+        user: userId,
+        balance: { $gte: amountDec },
+        status: 'active'
+      },
+      {
+        $inc: { balance: negative },
+        $set: { lastTransactionAt: new Date() }
+      },
+      { new: true, session }
+    );
+
+    if (!wallet) {
+      throw new Error('Insufficient balance or wallet inactive');
+    }
+
+    await WalletTransaction.create([{
+      wallet: wallet._id,
+      order: orderId,
+      type: orderId ? 'debit' : 'adjustment',
+      amount: negative,
+      balanceAfter: wallet.balance,
+      description: description || (orderId ? `Order payment #${orderIdShort(orderId)}` : 'Manual debit'),
+      metadata: orderId ? { orderId: orderId.toString() } : { manualDebit: true },
+      createdBy: null // system
+    }], { session });
+
+    if (ownSession) await session.commitTransaction();
+
+    const numeric = toNumber(amountDec);
+    io?.to(`user:${userId}`).emit('walletUpdate', {
+      event: 'balanceUpdated',
+      balance: toNumber(wallet.balance),
+      change: -numeric,
+      type: orderId ? 'debit' : 'adjustment',
+      timestamp: new Date().toISOString()
+    });
+
+    return wallet;
+  } catch (err) {
+    if (ownSession) await session.abortTransaction();
+    throw err;
+  } finally {
+    if (ownSession) session.endSession();
+  }
+};
+
+// ────────────────────────────────────────────────
+// 5. Admin wrappers
+// ────────────────────────────────────────────────
+const adminCreditWallet = async (req, res) => {
+  try {
+    const { userId, amount, description = 'Admin credit' } = req.body;
+
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+    }
+
+    await creditWallet({
+      userId,
+      amount,
+      type: 'adjustment',
+      description,
+      performedBy: req.user._id
+    });
+
+    res.json({ success: true, message: `Successfully credited PKR ${amount}` });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+const adminDebitWallet = async (req, res) => {
+  try {
+    const { userId, amount, description = 'Admin debit' } = req.body;
+
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+    }
+
+    await debitWallet({
+      userId,
+      amount,
+      description
+    });
+
+    res.json({ success: true, message: `Successfully debited PKR ${amount}` });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
 // =============================
 // EXPORT: CSV Transactions
 // =============================
@@ -319,229 +527,18 @@ const exportWalletTransactionsPDF = async (req, res) => {
     }
   }
 };
-
-// =============================
-// Internal: Get Wallet Balance
-// =============================
-const getWalletBalance = async (userId) => {
-  try {
-    const wallet = await Wallet.findOne({ user: userId }).lean();
-    return wallet ? toNumber(wallet.balance) : 0;
-  } catch (err) {
-    console.error('getWalletBalance error:', err);
-    return 0;
-  }
-};
-
-// =============================
-// Credit Wallet (Internal + Admin)
-// =============================
-// =============================
-// Credit Wallet — PRECISION-SAFE (String-based math)
-// =============================
-// =============================
-// Credit Wallet — Decimal128 SAFE (NO BigInt)
-// =============================
-const creditWallet = async (
-  userId,
-  amountDecimal,
-  type = 'credit',
-  description = '',
-  orderId = null,
-  metadata = {}
-) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
-    // Ensure wallet exists
-    let wallet = await Wallet.findOne({ user: userId }).session(session);
-    if (!wallet) {
-      [wallet] = await Wallet.create([{ user: userId }], { session });
-    }
-
-    // Atomically increment balance + lifetimeCredits
-    wallet = await Wallet.findOneAndUpdate(
-      { user: userId },
-      {
-        $inc: {
-          balance: amountDecimal,
-          lifetimeCredits: amountDecimal,
-        },
-      },
-      { new: true, session }
-    );
-
-    await WalletTransaction.create(
-      [{
-        wallet: wallet._id,
-        order: orderId,
-        type,
-        amount: amountDecimal,
-        balanceAfter: wallet.balance,
-        description: description || `Wallet ${type}`,
-        metadata,
-      }],
-      { session }
-    );
-
-    await session.commitTransaction();
-
-    // Realtime socket
-    const numericAmount = toNumber(amountDecimal);
-    if (io) {
-      io.to(`user:${userId}`).emit('walletUpdate', {
-        event: 'balanceUpdated',
-        balance: toNumber(wallet.balance),
-        change: +numericAmount,
-        type,
-        description,
-        timestamp: new Date(),
-      });
-    }
-
-    return wallet;
-  } catch (err) {
-    await session.abortTransaction();
-    console.error('creditWallet error:', err);
-    throw err;
-  } finally {
-    session.endSession();
-  }
-};
-
-
-// =============================
-// Debit Wallet — SAFE FOR Decimal128
-// =============================
-const debitWallet = async (userId, amountDecimal, orderId = null, session = null) => {
-  const useSession = session || (await mongoose.startSession());
-  if (!session) useSession.startTransaction();
-
-  try {
-    const negativeIncrement = new mongoose.Types.Decimal128('-' + amountDecimal.toString());
-
-    const wallet = await Wallet.findOneAndUpdate(
-      { user: userId, balance: { $gte: amountDecimal } },
-      { $inc: { balance: negativeIncrement } },
-      { new: true, session: useSession }
-    );
-
-    if (!wallet) throw new Error('Insufficient wallet balance');
-
-    const transactionAmount = new mongoose.Types.Decimal128('-' + amountDecimal.toString());
-
-    const description = orderId
-      ? `Order payment #${orderIdShort(orderId)}`
-      : 'Manual debit';
-
-    await WalletTransaction.create([{
-      wallet: wallet._id,
-      order: orderId,
-      type: orderId ? 'debit' : 'adjustment',
-      amount: transactionAmount,
-      balanceAfter: wallet.balance,
-      description,
-      metadata: orderId ? { orderId: orderId.toString() } : { manualDebit: true },
-    }], { session: useSession });
-
-    const numericAmount = toNumber(amountDecimal);
-    if (io) {
-      io.to(`user:${userId}`).emit('walletUpdate', {
-        event: 'balanceUpdated',
-        balance: toNumber(wallet.balance),
-        change: -numericAmount,
-        type: orderId ? 'debit' : 'adjustment',
-        description,
-        timestamp: new Date(),
-      });
-    }
-
-    if (!session) await useSession.commitTransaction();
-    return wallet;
-  } catch (err) {
-    if (!session) await useSession.abortTransaction();
-    throw err;
-  } finally {
-    if (!session) useSession.endSession();
-  }
-};
-
-// =============================
-// ADMIN: Credit User's Wallet
-// =============================
-const adminCreditWallet = async (req, res) => {
-  const { userId, amount, type = 'adjustment', description = 'Admin adjustment', metadata = {} } = req.body;
-
-  if (!userId || !amount || amount <= 0) {
-    return res.status(400).json({ success: false, message: 'Valid userId and positive amount required' });
-  }
-
-  try {
-    const amountDecimal = toDecimal(amount);
-
-    await creditWallet(
-      userId,
-      amountDecimal,
-      type,
-      `${description} (by Admin ${req.user.name || req.user._id})`,
-      null,
-      { ...metadata, adminId: req.user._id.toString(), action: 'credit' }
-    );
-
-    res.json({ success: true, message: `PKR ${amount} credited to user ${userId}` });
-  } catch (err) {
-    console.error('adminCreditWallet error:', err);
-    res.status(500).json({ success: false, message: err.message || 'Failed to credit wallet' });
-  }
-};
-
-// =============================
-// ADMIN: Debit User's Wallet
-// =============================
-const adminDebitWallet = async (req, res) => {
-  const { userId, amount, description = 'Admin correction', metadata = {} } = req.body;
-
-  if (!userId || !amount || amount <= 0) {
-    return res.status(400).json({ success: false, message: 'Valid userId and positive amount required' });
-  }
-
-  try {
-    const amountDecimal = toDecimal(amount);
-
-    await debitWallet(userId, amountDecimal, null);
-
-    // Extra audit transaction
-    const wallet = await Wallet.findOne({ user: userId });
-    const negativeAmount = new mongoose.Types.Decimal128('-' + amountDecimal.toString());
-
-    await WalletTransaction.create({
-      wallet: wallet._id,
-      type: 'adjustment',
-      amount: negativeAmount,
-      balanceAfter: wallet.balance,
-      description: `${description} (manual debit by Admin ${req.user.name || req.user._id})`,
-      metadata: { ...metadata, adminId: req.user._id.toString(), manualDebit: true, action: 'debit' },
-    });
-
-    res.json({ success: true, message: `PKR ${amount} debited from user ${userId}` });
-  } catch (err) {
-    console.error('adminDebitWallet error:', err);
-    res.status(500).json({
-      success: false,
-      message: err.message || 'Insufficient balance or failed to debit',
-    });
-  }
-};
-
+// ────────────────────────────────────────────────
+// Exports
+// ────────────────────────────────────────────────
 module.exports = {
   getMyWallet,
   getWalletTransactions,
-  getWalletBalance,
   creditWallet,
   debitWallet,
   adminCreditWallet,
   adminDebitWallet,
   exportWalletTransactionsCSV,
   exportWalletTransactionsPDF,
+  toNumber,    // ✅ add this
+  toDecimal,   // ✅ add this
 };

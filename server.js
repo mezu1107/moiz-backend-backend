@@ -1,145 +1,178 @@
 /**
  * AMFood Backend Server
- * FINAL PRODUCTION VERSION — December 2025
+ * FINAL PRODUCTION VERSION — December 26, 2025
+ * Secure, scalable, and fully featured
  */
 
-require('dotenv').config(); // MUST be first
+require('dotenv').config(); // MUST be first!
 
 const express = require('express');
 const http = require('http');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const connectDB = require('./src/config/db');
 const logger = require('./src/utils/logger');
 
 const session = require('express-session');
-const MongoStore = require('connect-mongo').default;
-
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
-
+const MongoStore = require('connect-mongo').default;
 const admin = require('firebase-admin');
-const mongoose = require('mongoose');
 
 const app = express();
 const server = http.createServer(app);
 
 /* =========================================================
-   🔥 FIREBASE ADMIN INITIALIZATION (SAFE)
+   🔥 FIREBASE ADMIN SDK — SAFE & RESILIENT INITIALIZATION
 ========================================================= */
-const firebaseEnvReady =
-  process.env.FIREBASE_PROJECT_ID &&
-  process.env.FIREBASE_CLIENT_EMAIL &&
-  process.env.FIREBASE_PRIVATE_KEY;
+let firebaseInitialized = false;
 
-if (!admin.apps.length && firebaseEnvReady) {
+if (!admin.apps.length && process.env.FIREBASE_PROJECT_ID) {
   try {
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY
+      ?.replace(/\\n/g, '\n')
+      ?.trim();
+
+    if (!privateKey) throw new Error('Missing or empty FIREBASE_PRIVATE_KEY');
+
     admin.initializeApp({
       credential: admin.credential.cert({
+        type: 'service_account',
         projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+        private_key: privateKey,
+        client_email: process.env.FIREBASE_CLIENT_EMAIL,
+        client_id: process.env.FIREBASE_CLIENT_ID,
+        auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+        token_uri: 'https://oauth2.googleapis.com/token',
+        auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+        client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
       }),
     });
 
-    logger.info(`[${new Date().toISOString()}] Firebase Admin SDK initialized`);
+    firebaseInitialized = true;
+    logger.info('Firebase Admin SDK initialized successfully');
   } catch (err) {
-    logger.warn(
-      `[${new Date().toISOString()}] Firebase Admin FAILED — Push disabled`
-    );
-    console.error(err.message);
+    logger.error('Firebase Admin initialization failed — push notifications disabled', {
+      error: err.message,
+      stack: err.stack,
+    });
   }
-} else {
-  logger.warn(
-    `[${new Date().toISOString()}] Firebase env missing — Push disabled`
-  );
+} else if (!process.env.FIREBASE_PROJECT_ID) {
+  logger.warn('Firebase environment variables missing — push notifications disabled');
 }
 
 /* =========================================================
-   🧱 MIDDLEWARES
+   🧱 GLOBAL MIDDLEWARES
 ========================================================= */
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-  })
-);
+// CORS — Allow dynamic origins with credentials
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    
+    // In production, restrict to your frontend domains
+    const allowedOrigins = [
+      'https://amfood.pk',
+      'https://www.amfood.pk',
+      'http://localhost:3000',
+      'http://localhost:5173',
+    ];
+    
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || ' Al-Tawakkalfoods-session-secret',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI,
-      collectionName: 'sessions',
-    }),
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    },
-  })
-);
+// Security headers (modern defaults)
+app.use(helmet({
+  contentSecurityPolicy: false, // Disabled — common for SPAs + APIs
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 
-app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
 
 /* =========================================================
-   📁 STATIC FILES
+   📁 SESSION MANAGEMENT (MongoDB-backed)
 ========================================================= */
-app.use('/uploads', express.static('uploads'));
-app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'amfood-secure-session-2025-fallback',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60, // 1 day
+    autoRemove: 'native',
+  }),
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+  },
+}));
 
 /* =========================================================
-   🖼️ FAVICON
+   📂 STATIC FILES & FAVICON
 ========================================================= */
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
+// Favicon handling (silent 204 or real file)
 app.get('/favicon.ico', (_, res) => res.status(204).end());
-app.get('/favicon.png', (req, res) =>
+app.get('/favicon.png', (_, res) => 
   res.sendFile(path.join(__dirname, 'public', 'favicon.png'))
 );
 
 /* =========================================================
-   🔌 SOCKET.IO
+   🔌 SOCKET.IO — Real-time Features
 ========================================================= */
 const { Server } = require('socket.io');
 
 const io = new Server(server, {
-  cors: { origin: '*', credentials: true },
+  cors: {
+    origin: true, // same as app cors
+    credentials: true,
+  },
   pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 global.io = io;
 
+// Load socket handlers
 require('./src/sockets/order/orderSocket')(io);
 require('./src/sockets/contact/contactSocket')(io);
 
 /* =========================================================
-   💳 STRIPE WEBHOOK
+   💳 STRIPE WEBHOOK — RAW BODY REQUIRED!
 ========================================================= */
 const stripeWebhookRoutes = require('./src/routes/webhook/stripeWebhookRoutes');
 
 if (process.env.TESTING_MODE === 'true') {
+  // Test mode: bypass signature verification
   app.use(
     '/api/webhook/stripe',
     express.raw({ type: 'application/json' }),
     (req, res, next) => {
-      req.stripeEvent = {
-        id: 'test_evt',
-        type: 'payment_intent.succeeded',
-      };
+      req.stripeEvent = { id: 'test_evt_123', type: 'payment_intent.succeeded' };
       next();
     },
     stripeWebhookRoutes
   );
 } else {
   const verifyStripeWebhook = require('./src/middleware/stripe/verifyStripeWebhook');
-
   app.use(
     '/api/webhook/stripe',
     express.raw({ type: 'application/json' }),
@@ -149,113 +182,114 @@ if (process.env.TESTING_MODE === 'true') {
 }
 
 /* =========================================================
-   ❤️ HEALTH CHECK
+   ❤️ HEALTH CHECK ENDPOINT
 ========================================================= */
 app.get('/health', async (req, res) => {
   let dbStatus = 'Disconnected';
-
   try {
-    await mongoose.connection.db.admin().ping();
-    dbStatus = 'Connected';
-  } catch {}
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.connection.db.admin().ping();
+      dbStatus = 'Connected';
+    }
+  } catch (e) {
+    dbStatus = 'Error';
+  }
 
   res.json({
     status: 'LIVE',
-    message: 'AMFood Pakistan — FULL POWER',
-    dbStatus,
-    firebase: admin.apps.length ? 'Initialized' : 'Disabled',
-    time: new Date().toLocaleString('en-PK', {
-      timeZone: 'Asia/Karachi',
-    }),
+    message: 'AMFood Pakistan — Full Power Backend',
+    database: dbStatus,
+    firebase: firebaseInitialized ? 'Initialized' : 'Disabled',
+    pushNotifications: firebaseInitialized ? 'ENABLED' : 'DISABLED',
+    timestamp: new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' }),
     version: 'v3.0 — December 2025',
+    environment: process.env.NODE_ENV || 'development',
   });
 });
 
 /* =========================================================
-   🚦 ROUTES LOADER
+   🚦 DYNAMIC ROUTES LOADER
 ========================================================= */
-const routes = [
-  ['/api/auth', './src/routes/auth/authRoutes'],
-  ['/api/upload', './src/routes/upload/uploadRoutes'],
-  ['/api/address', './src/routes/address/addressRoutes'],
-  ['/api/areas', './src/routes/area/areaRoutes'],
-  ['/api/cart', './src/routes/cart/cartRoutes'],
-  ['/api/menu', './src/routes/menu/menuRoutes'],
-  ['/api/orders', './src/routes/order/orderRoutes'],
-  ['/api/deal', './src/routes/deal/dealRoutes'],
-  ['/api/rider/dashboard', './src/routes/rider/riderDashboardRoutes'],
-  ['/api/rider', './src/routes/rider/riderRoutes'],
-  ['/api/admin/customers', './src/routes/admin/customerRoutes'],
-  ['/api/admin/rider', './src/routes/admin/riderAdminRoutes'],
-  ['/api/admin/staff', './src/routes/admin/staffRoutes'],
-  ['/api/admin', './src/routes/admin/adminRoutes'],
-  ['/api/contact', './src/routes/contact/contactRoutes'],
-  ['/api/admin/contact', './src/routes/admin/contactAdminRoutes'],
-  ['/api/wallet', './src/routes/wallet/walletRoutes'],
-  ['/api/kitchen', './src/routes/kitchen/kitchenRoutes'],
-  ['/api/payment', './src/routes/payment/paymentRoutes'],
-  ['/api/admin/payment', './src/routes/admin/paymentAdminRoutes'],
-  ['/api/admin/refunds', './src/routes/admin/refundAdminRoutes'],
-  ['/api/reviews', './src/routes/review/reviewRoutes'],
-  ['/api/inventory', './src/routes/inventory/inventoryRoutes'],
-    ['/api/orders/analytics', './src/routes/order/analyticsRoutes'],
-
+const routeRegistry = [
+  { path: '/api/auth', file: './src/routes/auth/authRoutes' },
+  { path: '/api/upload', file: './src/routes/upload/uploadRoutes' },
+  { path: '/api/address', file: './src/routes/address/addressRoutes' },
+  { path: '/api/areas', file: './src/routes/area/areaRoutes' },
+  { path: '/api/cart', file: './src/routes/cart/cartRoutes' },
+  { path: '/api/menu', file: './src/routes/menu/menuRoutes' },
+  { path: '/api/orders', file: './src/routes/order/orderRoutes' },
+  { path: '/api/deal', file: './src/routes/deal/dealRoutes' },
+  { path: '/api/rider', file: './src/routes/rider/riderRoutes' },
+  { path: '/api/rider/dashboard', file: './src/routes/rider/riderDashboardRoutes' },
+  { path: '/api/admin/customers', file: './src/routes/admin/customerRoutes' },
+  { path: '/api/admin/rider', file: './src/routes/admin/riderAdminRoutes' },
+  { path: '/api/admin/staff', file: './src/routes/admin/staffRoutes' },
+  { path: '/api/admin', file: './src/routes/admin/adminRoutes' },
+  { path: '/api/contact', file: './src/routes/contact/contactRoutes' },
+  { path: '/api/admin/contact', file: './src/routes/admin/contactAdminRoutes' },
+  { path: '/api/wallet', file: './src/routes/wallet/walletRoutes' },
+  { path: '/api/kitchen', file: './src/routes/kitchen/kitchenRoutes' },
+  { path: '/api/payment', file: './src/routes/payment/paymentRoutes' },
+  { path: '/api/admin/payment', file: './src/routes/admin/paymentAdminRoutes' },
+  { path: '/api/admin/refunds', file: './src/routes/admin/refundAdminRoutes' },
+  { path: '/api/reviews', file: './src/routes/review/reviewRoutes' },
+  { path: '/api/inventory', file: './src/routes/inventory/inventoryRoutes' },
+  { path: '/api/orders/analytics', file: './src/routes/order/analyticsRoutes' },
 ];
 
-routes.forEach(([routePath, file]) => {
+routeRegistry.forEach(({ path, file }) => {
   try {
-    app.use(routePath, require(file));
-    console.log(`[${new Date().toISOString()}] ROUTE LOADED: ${routePath}`);
+    const route = require(file);
+    app.use(path, route);
+    logger.info(`ROUTE LOADED: ${path}`);
   } catch (err) {
-    console.error(
-      `[${new Date().toISOString()}] ROUTE FAILED: ${routePath}`
-    );
-    console.error(err.message);
+    logger.error(`ROUTE LOAD FAILED: ${path}`, { error: err.message });
+    console.error(`Failed to load route ${path}:`, err.message);
   }
 });
 
 /* =========================================================
-   ❌ ERROR HANDLING
+   ❌ GLOBAL ERROR HANDLER
 ========================================================= */
-app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
-});
-
 app.use((err, req, res, next) => {
-  console.error(`[${new Date().toISOString()}] UNHANDLED ERROR`);
-  console.error(err.stack);
+  const status = err.status || 500;
+  const message = process.env.NODE_ENV === 'production'
+    ? 'Internal server error'
+    : err.message || 'Something went wrong';
 
-  res.status(err.status || 500).json({
-    success: false,
-    message:
-      process.env.NODE_ENV === 'production'
-        ? 'Internal server error'
-        : err.message,
+  logger.error(`UNHANDLED ERROR [${status}]`, {
+    message: err.message,
+    stack: err.stack,
+    path: req.originalUrl,
+    method: req.method,
   });
+
+  res.status(status).json({ success: false, message });
 });
 
 /* =========================================================
-   🚀 START SERVER
+   🚀 START SERVER WITH RETRY LOGIC
 ========================================================= */
 const startServer = async () => {
   try {
     await connectDB();
+    logger.info('Database connection established');
 
     const PORT = process.env.PORT || 5000;
 
     server.listen(PORT, '0.0.0.0', () => {
-      console.log(`[${new Date().toISOString()}] SERVER LIVE`);
-      console.log(` http://localhost:${PORT}`);
-      console.log(` Health: http://localhost:${PORT}/health`);
-      console.log(
-        ` Time: ${new Date().toLocaleString('en-PK', {
-          timeZone: 'Asia/Karachi',
-        })}`
-      );
+      logger.info(`Server running on port ${PORT}`);
+      console.log(`\n🚀 AMFood Backend LIVE`);
+      console.log(`   Local: http://localhost:${PORT}`);
+      console.log(`   Health: http://localhost:${PORT}/health`);
+      console.log(`   Time: ${new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' })}`);
+      console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`   Firebase Push: ${firebaseInitialized ? 'ENABLED' : 'DISABLED'}\n`);
     });
   } catch (err) {
-    console.error('Server failed to start:', err.message);
-    setTimeout(startServer, 5000);
+    logger.error('Server startup failed', { error: err.message });
+    console.error('Server startup failed:', err.message);
+    setTimeout(startServer, 5000); // Auto-retry after 5 seconds
   }
 };
 

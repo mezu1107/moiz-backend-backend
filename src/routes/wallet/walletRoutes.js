@@ -1,7 +1,8 @@
 // src/routes/wallet/walletRoutes.js
-// FINAL PRODUCTION — DECEMBER 19, 2025
+// FINAL PRODUCTION READY — DECEMBER 26, 2025
 
-const router = require('express').Router();
+const express = require('express');
+const router = express.Router();
 const mongoose = require('mongoose');
 
 const { auth } = require('../../middleware/auth/auth');
@@ -15,6 +16,7 @@ const {
   adminDebitWallet,
   exportWalletTransactionsCSV,
   exportWalletTransactionsPDF,
+  // getWalletStatsDashboard, // implement later
 } = require('../../controllers/wallet/walletController');
 
 const {
@@ -23,125 +25,108 @@ const {
   exportTransactions: exportValidation,
 } = require('../../validation/schemas/walletSchemas');
 
-// ============================================================
-// 🔐 ALL ROUTES REQUIRE AUTHENTICATION
-// ============================================================
+// ────────────────────────────────────────────────
+// Helper: Validate MongoDB ObjectId
+// ────────────────────────────────────────────────
+const validateObjectId = (field = 'userId', location = 'params') => (req, res, next) => {
+  const id = location === 'body' ? req.body[field] : req.params[field];
+  if (id && !mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: `Invalid ${field}: must be a valid MongoDB ObjectId`,
+    });
+  }
+  next();
+};
+
+// All routes require authentication
 router.use(auth);
 
-// ============================================================
-// 👤 CUSTOMER ROUTES
-// ============================================================
+// ── USER ROUTES (own wallet) ──────────────────────────────────────────────
 
-// GET /api/wallet/me
-// → Get current balance + last 50 recent transactions
-router.get('/me', role('customer'), getMyWallet);
+// GET /api/wallet/me → own wallet + recent 50 transactions
+router.get('/me', getMyWallet);
 
-// GET /api/wallet/transactions?page=1&limit=20
-// → Paginated full transaction history
-router.get('/transactions', role('customer'), getWalletTransactions);
+// GET /api/wallet/transactions → paginated own transactions
+router.get('/transactions', getWalletTransactions);
 
-// GET /api/wallet/export/csv
-// → Export own transactions as CSV
+// GET /api/wallet/export/:format → export own transactions (csv | pdf)
 router.get(
-  '/export/csv',
-  role('customer'),
+  '/export/:format',
   exportValidation,
   validateRequest,
-  exportWalletTransactionsCSV
+  (req, res, next) => {
+    const format = req.params.format.toLowerCase();
+    if (!['csv', 'pdf'].includes(format)) {
+      return res.status(400).json({ success: false, message: 'Invalid export format' });
+    }
+    req.exportFormat = format;
+    next();
+  },
+  (req, res, next) => {
+    if (req.exportFormat === 'csv') return exportWalletTransactionsCSV(req, res, next);
+    if (req.exportFormat === 'pdf') return exportWalletTransactionsPDF(req, res, next);
+  }
 );
 
-// GET /api/wallet/export/pdf
-// → Export own transactions as PDF statement
-router.get(
-  '/export/pdf',
-  role('customer'),
-  exportValidation,
-  validateRequest,
-  exportWalletTransactionsPDF
-);
+// ── ADMIN / FINANCE / SUPPORT ROUTES ──────────────────────────────────────
 
-// ============================================================
-// 👑 ADMIN ONLY ROUTES
-// ============================================================
-
-// POST /api/wallet/admin/credit
-router.post(
-  '/admin/credit',
-  role('admin'),
-  creditValidation,
-  validateRequest,
-  adminCreditWallet
-);
-
-// POST /api/wallet/admin/debit
-router.post(
-  '/admin/debit',
-  role('admin'),
-  debitValidation,
-  validateRequest,
-  adminDebitWallet
-);
-
-// ============================================================
-// 💼 ADMIN / FINANCE / SUPPORT — View & Export Any User's Wallet
-// ============================================================
-
-// GET /api/wallet/user/:userId
-// → View any user's wallet balance & recent transactions
+// GET /api/wallet/user/:userId → view any user's wallet
 router.get(
   '/user/:userId',
   role(['admin', 'finance', 'support']),
+  validateObjectId('userId'),
   (req, res, next) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid userId parameter',
-      });
-    }
     req.targetUserId = req.params.userId;
     next();
   },
   getMyWallet
 );
 
-// GET /api/wallet/admin/export/:userId/csv
-// → Admin export any user's transactions as CSV
-router.get(
-  '/admin/export/:userId/csv',
-  role(['admin', 'finance', 'support']),
-  (req, res, next) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid userId parameter',
-      });
-    }
-    req.targetUserId = req.params.userId;
-    next();
-  },
-  exportValidation,
+// POST /api/wallet/admin/credit → credit any user
+router.post(
+  '/admin/credit',
+  role(['admin', 'finance']),
+  validateObjectId('userId', 'body'),
+  creditValidation,
   validateRequest,
-  exportWalletTransactionsCSV
+  adminCreditWallet
 );
 
-// GET /api/wallet/admin/export/:userId/pdf
-// → Admin export any user's transactions as PDF
+// POST /api/wallet/admin/debit → debit any user
+router.post(
+  '/admin/debit',
+  role(['admin', 'finance']),
+  validateObjectId('userId', 'body'),
+  debitValidation,
+  validateRequest,
+  adminDebitWallet
+);
+
+// GET /api/wallet/admin/export/:userId/:format → export any user's wallet (csv | pdf)
 router.get(
-  '/admin/export/:userId/pdf',
+  '/admin/export/:userId/:format',
   role(['admin', 'finance', 'support']),
+  validateObjectId('userId'),
   (req, res, next) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid userId parameter',
-      });
-    }
     req.targetUserId = req.params.userId;
+
+    const format = req.params.format.toLowerCase();
+    if (!['csv', 'pdf'].includes(format)) {
+      return res.status(400).json({ success: false, message: 'Invalid export format' });
+    }
+    req.exportFormat = format;
     next();
   },
   exportValidation,
   validateRequest,
-  exportWalletTransactionsPDF
+  (req, res, next) => {
+    if (req.exportFormat === 'csv') return exportWalletTransactionsCSV(req, res, next);
+    if (req.exportFormat === 'pdf') return exportWalletTransactionsPDF(req, res, next);
+  }
 );
+
+// Optional: Admin wallet dashboard stats (implement when needed)
+// router.get('/admin/stats', role(['admin', 'finance']), getWalletStatsDashboard);
 
 module.exports = router;

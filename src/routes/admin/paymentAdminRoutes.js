@@ -1,23 +1,41 @@
 // src/routes/admin/paymentAdminRoutes.js
-// FINAL PRODUCTION — DECEMBER 19, 2025
 
-const router = require('express').Router();
+const express = require('express');
+const router = express.Router();
 
 const { auth } = require('../../middleware/auth/auth');
 const { role } = require('../../middleware/role/role');
+const validateRequest = require('../../middleware/validate/validate');
 
 const {
   getPaymentsDashboard,
   exportPaymentsToExcel,
 } = require('../../controllers/admin/paymentAdminController');
 
-// Protect all routes: Auth + Admin only
-router.use(auth, role(['admin', 'finance'])); // Allow finance role too
+const {
+  getPaymentsDashboard: dashboardValidation,
+  exportPayments: exportValidation,
+} = require('../../validation/schemas/paymentAdminSchemas');
 
-// GET /api/admin/payments/dashboard?period=7d&method=card&status=paid
-router.get('/dashboard', getPaymentsDashboard);
+// ── ALL ROUTES REQUIRE AUTH + ADMIN/FINANCE ROLE ──────────────────────────
+router.use(auth, role(['admin', 'finance']));
+
+// GET /api/admin/payments/dashboard
+// Payments overview dashboard (summary, trends, methods, refunds)
+router.get(
+  '/dashboard',
+  dashboardValidation,
+  validateRequest,
+  getPaymentsDashboard
+);
 
 // GET /api/admin/payments/export-excel
-router.get('/export-excel', exportPaymentsToExcel);
+// Export all payments to Excel (full dataset)
+router.get(
+  '/export-excel',
+  exportValidation,
+  validateRequest,
+  exportPaymentsToExcel
+);
 
 module.exports = router;

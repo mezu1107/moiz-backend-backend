@@ -590,3 +590,42 @@
 {"level":"error","message":"Failed to load route /api/orders:","timestamp":"2025-12-12T09:55:09.272Z"}
 {"level":"error","message":"Failed to load route /api/deal:","timestamp":"2025-12-12T10:03:24.336Z"}
 {"level":"error","message":"Failed to load route /api/deal:","timestamp":"2025-12-12T10:03:43.015Z"}
+{"error":"Cannot find module '../../models/AuditLog'\nRequire stack:\n- C:\\amfood\\FoodWebsite-backend\\src\\controllers\\wallet\\walletController.js\n- C:\\amfood\\FoodWebsite-backend\\src\\controllers\\order\\orderController.js\n- C:\\amfood\\FoodWebsite-backend\\src\\routes\\order\\orderRoutes.js\n- C:\\amfood\\FoodWebsite-backend\\server.js","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:51:36.097Z"}
+{"error":"Cannot find module '../../models/AuditLog'\nRequire stack:\n- C:\\amfood\\FoodWebsite-backend\\src\\controllers\\wallet\\walletController.js\n- C:\\amfood\\FoodWebsite-backend\\src\\routes\\wallet\\walletRoutes.js\n- C:\\amfood\\FoodWebsite-backend\\server.js","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:51:36.199Z"}
+{"error":"Cannot find module '../../models/AuditLog'\nRequire stack:\n- C:\\amfood\\FoodWebsite-backend\\src\\controllers\\wallet\\walletController.js\n- C:\\amfood\\FoodWebsite-backend\\src\\controllers\\order\\orderController.js\n- C:\\amfood\\FoodWebsite-backend\\src\\routes\\order\\orderRoutes.js\n- C:\\amfood\\FoodWebsite-backend\\server.js","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:52:08.085Z"}
+{"error":"Cannot find module '../../models/AuditLog'\nRequire stack:\n- C:\\amfood\\FoodWebsite-backend\\src\\controllers\\wallet\\walletController.js\n- C:\\amfood\\FoodWebsite-backend\\src\\routes\\wallet\\walletRoutes.js\n- C:\\amfood\\FoodWebsite-backend\\server.js","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:52:08.138Z"}
+{"error":"getWalletTransactions is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:53:03.338Z"}
+{"error":"getWalletTransactions is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:53:03.430Z"}
+{"error":"getWalletTransactions is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:53:15.916Z"}
+{"error":"getWalletTransactions is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:53:15.981Z"}
+{"error":"getWalletTransactions is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:53:48.841Z"}
+{"error":"getWalletTransactions is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:53:48.888Z"}
+{"error":"getWalletTransactions is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:55:54.372Z"}
+{"error":"getWalletTransactions is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:55:54.427Z"}
+{"error":"getWalletTransactions is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:56:48.503Z"}
+{"error":"getWalletTransactions is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:56:48.569Z"}
+{"error":"customerRejectOrder is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:56:54.250Z"}
+{"error":"argument handler must be a function","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:56:54.301Z"}
+{"error":"exportWalletTransactionsCSV is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:57:56.368Z"}
+{"error":"exportWalletTransactionsCSV is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:57:56.442Z"}
+{"error":"argument handler must be a function","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:59:09.598Z"}
+{"error":"argument handler must be a function","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:59:09.670Z"}
+{"error":"exportWalletTransactionsCSV is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:59:24.294Z"}
+{"error":"exportWalletTransactionsCSV is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:59:24.365Z"}
+{"error":"exportWalletTransactionsCSV is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:59:32.748Z"}
+{"error":"exportWalletTransactionsCSV is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:59:32.942Z"}
+{"error":"exportWalletTransactionsCSV is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T14:59:51.545Z"}
+{"error":"exportWalletTransactionsCSV is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T14:59:51.653Z"}
+{"error":"customerRejectOrder is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T15:01:21.066Z"}
+{"error":"Unexpected ( at index 15, expected end: /export/:format(csv|pdf); visit https://git.new/pathToRegexpError for info","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-26T15:01:21.122Z"}
+{"error":"customerRejectOrder is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T15:03:22.116Z"}
+{"error":"customerRejectOrder is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T15:07:01.108Z"}
+{"error":"customerRejectOrder is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T15:07:20.874Z"}
+{"error":"customerRejectOrder is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T15:09:00.768Z"}
+{"level":"error","message":"UNHANDLED ERROR [500] mongoose is not defined","method":"GET","path":"/api/orders/693c4b1e4e30604b433478c8","stack":"ReferenceError: mongoose is not defined\n    at C:\\amfood\\FoodWebsite-backend\\src\\routes\\order\\orderRoutes.js:43:3\n    at Layer.handleRequest (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at next (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\lib\\route.js:157:13)\n    at Route.dispatch (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\lib\\route.js:117:3)\n    at handle (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:435:11)\n    at Layer.handleRequest (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:295:15\n    at param (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:600:14)\n    at param (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:610:14)\n    at processParams (C:\\amfood\\FoodWebsite-backend\\node_modules\\router\\index.js:664:3)","timestamp":"2025-12-26T15:16:13.518Z"}
+{"error":"asyncHandler is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T16:10:48.159Z"}
+{"error":"argument handler must be a function","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T16:11:13.491Z"}
+{"error":"argument handler must be a function","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-26T16:12:23.547Z"}
+{"error":"v is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/menu","timestamp":"2025-12-26T17:31:50.593Z"}
+{"error":"v is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/menu","timestamp":"2025-12-26T18:02:00.210Z"}
+{"error":"getSingleMenuItem is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/menu","timestamp":"2025-12-26T18:03:34.861Z"}

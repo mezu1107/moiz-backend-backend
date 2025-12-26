@@ -1,5 +1,5 @@
-// src/models/payment/PaymentTransaction.js
-// FINAL PRODUCTION — DECEMBER 19, 2025 — CLEAN & WARNING-FREE
+// 1. PaymentTransaction.js
+// Updated: Decimal128 for money, better refund fields, version for optimistic concurrency
 
 const mongoose = require('mongoose');
 
@@ -9,6 +9,7 @@ const paymentTransactionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Order',
       required: true,
+      index: true,
     },
 
     paymentMethod: {
@@ -17,43 +18,45 @@ const paymentTransactionSchema = new mongoose.Schema(
       required: true,
     },
 
+    // All monetary fields → Decimal128 !!!
     amount: {
-      type: Number,
+      type: mongoose.Schema.Types.Decimal128,
       required: true,
       min: 0,
     },
 
     status: {
       type: String,
-      enum: ['pending', 'paid', 'failed', 'refunded'],
+      enum: ['pending', 'paid', 'failed', 'refunded', 'partially_refunded'],
       default: 'pending',
+      index: true,
     },
 
-    /**
-     * External gateway transaction ID
-     * (Stripe / Easypaisa / JazzCash / Bank)
-     */
     transactionId: {
       type: String,
-      default: null,
+      sparse: true,
+      index: { unique: true, sparse: true },
     },
+
+    stripePaymentIntentId: String,     // explicit field (better than generic transactionId)
+    stripeChargeId: String,            // sometimes useful for disputes
 
     metadata: {
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
 
-    // ================= REFUND =================
+    // ── Refund Fields ───────────────────────────────────────────────
     refundStatus: {
       type: String,
-      enum: ['none', 'requested', 'processing', 'completed', 'rejected'],
+      enum: ['none', 'requested', 'processing', 'partial', 'completed', 'rejected'],
       default: 'none',
+      index: true,
     },
 
     refundAmount: {
-      type: Number,
-      default: 0,
-      min: 0,
+      type: mongoose.Schema.Types.Decimal128,
+      default: () => new mongoose.Types.Decimal128('0'),
     },
 
     refundRequestedAt: Date,
@@ -70,37 +73,26 @@ const paymentTransactionSchema = new mongoose.Schema(
 
     refundReason: String,
     refundNote: String,
+    stripeRefundId: String,           // only for card refunds
 
-    stripeRefundId: String,
-
-    // Legacy (kept intentionally)
-    refundedAt: Date,
-    refundedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
+    // For optimistic concurrency control (very important for money!)
+    __v: { type: Number, select: false }, // mongoose version key
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { transform: (doc, ret) => {
+      // Convert Decimal128 to string/number for clients
+      if (ret.amount) ret.amount = Number(ret.amount.toString());
+      if (ret.refundAmount) ret.refundAmount = Number(ret.refundAmount.toString());
+      return ret;
+    }}
+  }
 );
 
-// ===================== INDEXES =====================
+// Important compound indexes
+paymentTransactionSchema.index({ order: 1, createdAt: -1 });
+paymentTransactionSchema.index({ refundStatus: 1, refundRequestedAt: -1 });
+paymentTransactionSchema.index({ status: 1, paymentMethod: 1 });
 
-// Order lookup
-paymentTransactionSchema.index({ order: 1 });
-
-// Payment state dashboards
-paymentTransactionSchema.index({ paymentMethod: 1, status: 1 });
-paymentTransactionSchema.index({ status: 1, createdAt: -1 });
-
-// Refund workflows
-paymentTransactionSchema.index({ refundStatus: 1, createdAt: -1 });
-
-// External transaction uniqueness (NULL allowed)
-paymentTransactionSchema.index(
-  { transactionId: 1 },
-  { unique: true, sparse: true }
-);
-
-module.exports =
-  mongoose.models.PaymentTransaction ||
+module.exports = mongoose.models.PaymentTransaction ||
   mongoose.model('PaymentTransaction', paymentTransactionSchema);

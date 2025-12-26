@@ -1,5 +1,5 @@
 // src/controllers/admin/paymentAdminController.js
-// FINAL PRODUCTION — DECEMBER 19, 2025 — ADMIN PAYMENTS DASHBOARD
+
 
 const PaymentTransaction = require('../../models/payment/PaymentTransaction');
 const Order = require('../../models/order/Order');
@@ -8,7 +8,7 @@ const XLSX = require('xlsx');
 
 moment.tz.setDefault('Asia/Karachi');
 
-// Helper: Round to nearest integer (for display)
+const toNumber = (decimal) => decimal ? parseFloat(decimal.toString()) : 0;
 const round = (num) => Math.round(num || 0);
 
 // =============================
@@ -29,9 +29,9 @@ const getPaymentsDashboard = async (req, res) => {
       startDate = moment().subtract(90, 'days').startOf('day').toDate();
     }
 
-    let match = { createdAt: { $gte: startDate, $lte: endDate } };
-    if (method && method !== 'all') match.paymentMethod = method;
-    if (status && status !== 'all') match.status = status;
+    const baseMatch = { createdAt: { $gte: startDate, $lte: endDate } };
+    if (method && method !== 'all') baseMatch.paymentMethod = method;
+    if (status && status !== 'all') baseMatch.status = status;
 
     const [
       summary,
@@ -40,49 +40,57 @@ const getPaymentsDashboard = async (req, res) => {
       refundStats,
       recentTransactions,
     ] = await Promise.all([
-      // Overall Summary
+      // Summary
       PaymentTransaction.aggregate([
-        { $match: match },
+        { $match: baseMatch },
         {
           $group: {
             _id: null,
             totalTransactions: { $sum: 1 },
-            totalAmount: { $sum: '$amount' },
+            totalAmount: { $sum: { $toDouble: '$amount' } },
             paidAmount: {
-              $sum: { $cond: [{ $eq: ['$status', 'paid'] }, '$amount', 0] }
+              $sum: {
+                $cond: [{ $eq: ['$status', 'paid'] }, { $toDouble: '$amount' }, 0]
+              }
             },
             refundedAmount: {
-              $sum: { $cond: [{ $eq: ['$status', 'refunded'] }, '$amount', 0] }
+              $sum: {
+                $cond: [{ $eq: ['$status', 'refunded'] }, { $toDouble: '$amount' }, 0]
+              }
             },
-            partialRefunded: { $sum: '$refundAmount' },
+            partialRefunded: { $sum: { $toDouble: '$refundAmount' } },
           }
         }
       ]),
 
-      // Payment Methods Breakdown
+      // Methods breakdown
       PaymentTransaction.aggregate([
-        { $match: match },
+        { $match: baseMatch },
         {
           $group: {
             _id: '$paymentMethod',
             count: { $sum: 1 },
-            amount: { $sum: '$amount' },
+            amount: { $sum: { $toDouble: '$amount' } },
             paid: {
-              $sum: { $cond: [{ $eq: ['$status', 'paid'] }, '$amount', 0] }
+              $sum: {
+                $cond: [{ $eq: ['$status', 'paid'] }, { $toDouble: '$amount' }, 0]
+              }
             }
           }
         },
         { $sort: { amount: -1 } }
       ]),
 
-      // Daily Revenue Trend
+      // Daily trend
       PaymentTransaction.aggregate([
-        { $match: match },
+        { $match: baseMatch },
         {
           $group: {
             _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: 'Asia/Karachi' } },
             revenue: {
-              $sum: { $cond: [{ $eq: ['$status', 'paid'] }, '$amount', 0] }
+              $sum: {
+                $cond: [{ $eq: ['$status', 'paid'] }, { $toDouble: '$amount' }, 0]
+              }
             },
             transactions: { $sum: 1 }
           }
@@ -90,23 +98,23 @@ const getPaymentsDashboard = async (req, res) => {
         { $sort: { _id: 1 } }
       ]),
 
-      // Refund Statistics
+      // Refund stats
       PaymentTransaction.aggregate([
-        { $match: { ...match, refundStatus: { $ne: 'none' } } },
+        { $match: { ...baseMatch, refundStatus: { $ne: 'none' } } },
         {
           $group: {
             _id: '$refundStatus',
             count: { $sum: 1 },
-            amount: { $sum: '$refundAmount' }
+            amount: { $sum: { $toDouble: '$refundAmount' } }
           }
         }
       ]),
 
-      // Recent Transactions (with order & customer info)
-      PaymentTransaction.find(match)
+      // Recent transactions
+      PaymentTransaction.find(baseMatch)
         .populate({
           path: 'order',
-          select: '_id customer guestInfo finalAmount status',
+          select: '_id customer guestInfo finalAmount status placedAt',
           populate: { path: 'customer', select: 'name phone' }
         })
         .sort({ createdAt: -1 })
@@ -119,7 +127,7 @@ const getPaymentsDashboard = async (req, res) => {
       totalAmount: 0,
       paidAmount: 0,
       refundedAmount: 0,
-      partialRefunded: 0
+      partialRefunded: 0,
     };
 
     const methodLabels = {
@@ -128,7 +136,7 @@ const getPaymentsDashboard = async (req, res) => {
       wallet: 'Wallet',
       easypaisa: 'Easypaisa',
       jazzcash: 'JazzCash',
-      bank: 'Bank Transfer'
+      bank: 'Bank Transfer',
     };
 
     res.json({
@@ -157,27 +165,24 @@ const getPaymentsDashboard = async (req, res) => {
         transactions: d.transactions,
       })),
       refunds: Object.fromEntries(
-        refundStats.map(r => [
-          r._id,
-          { count: r.count, amount: round(r.amount) }
-        ])
+        refundStats.map(r => [r._id, { count: r.count, amount: round(r.amount) }])
       ),
       recent: recentTransactions.map(t => ({
         id: t._id.toString(),
-        orderId: t.order?._id?.toString().slice(-6).toUpperCase() || 'N/A',
+        orderId: t.order?._id ? orderIdShort(t.order._id) : 'N/A',
         customer: t.order?.customer?.name || t.order?.guestInfo?.name || 'Guest',
         phone: t.order?.customer?.phone || t.order?.guestInfo?.phone || '-',
-        amount: t.amount,
+        amount: toNumber(t.amount).toFixed(2),
         method: methodLabels[t.paymentMethod] || t.paymentMethod,
         status: t.status,
-        refundStatus: t.refundStatus,
-        refundAmount: t.refundAmount || 0,
+        refundStatus: t.refundStatus || 'none',
+        refundAmount: toNumber(t.refundAmount).toFixed(2),
         date: moment(t.createdAt).format('DD MMM YYYY, HH:mm'),
       })),
     });
   } catch (err) {
     console.error('getPaymentsDashboard error:', err);
-    res.status(500).json({ success: false, message: 'Failed to load dashboard' });
+    res.status(500).json({ success: false, message: 'Failed to load payment dashboard' });
   }
 };
 
@@ -197,49 +202,33 @@ const exportPaymentsToExcel = async (req, res) => {
 
     const data = transactions.map(t => ({
       'Date': moment(t.createdAt).format('DD/MM/YYYY HH:mm'),
-      'Order ID': t.order?._id?.toString().slice(-6).toUpperCase() || 'N/A',
+      'Order ID': t.order?._id ? orderIdShort(t.order._id) : 'N/A',
       'Customer Name': t.order?.customer?.name || t.order?.guestInfo?.name || 'Guest',
       'Phone': t.order?.customer?.phone || t.order?.guestInfo?.phone || '-',
-      'Amount (PKR)': t.amount.toFixed(2),
+      'Amount (PKR)': toNumber(t.amount).toFixed(2),
       'Method': {
         cash: 'Cash on Delivery',
         card: 'Card',
         wallet: 'Wallet',
         easypaisa: 'Easypaisa',
         jazzcash: 'JazzCash',
-        bank: 'Bank Transfer'
+        bank: 'Bank Transfer',
       }[t.paymentMethod] || t.paymentMethod,
       'Status': t.status.charAt(0).toUpperCase() + t.status.slice(1),
       'Refund Status': t.refundStatus === 'none' ? '-' : t.refundStatus,
-      'Refund Amount': t.refundAmount ? t.refundAmount.toFixed(2) : '0.00',
+      'Refund Amount': toNumber(t.refundAmount).toFixed(2),
       'Transaction ID': t.transactionId || '-',
       'Refund Reason': t.refundReason || '-',
     }));
 
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(data, {
-      header: [
-        'Date', 'Order ID', 'Customer Name', 'Phone', 'Amount (PKR)',
-        'Method', 'Status', 'Refund Status', 'Refund Amount',
-        'Transaction ID', 'Refund Reason'
-      ]
-    });
+    const ws = XLSX.utils.json_to_sheet(data);
 
-    // Auto-size columns
-    const colWidths = [
-      { wch: 18 }, // Date
-      { wch: 12 }, // Order ID
-      { wch: 20 }, // Customer Name
-      { wch: 15 }, // Phone
-      { wch: 12 }, // Amount
-      { wch: 18 }, // Method
-      { wch: 10 }, // Status
-      { wch: 15 }, // Refund Status
-      { wch: 15 }, // Refund Amount
-      { wch: 25 }, // Transaction ID
-      { wch: 30 }, // Refund Reason
+    ws['!cols'] = [
+      { wch: 18 }, { wch: 12 }, { wch: 20 }, { wch: 15 },
+      { wch: 14 }, { wch: 18 }, { wch: 12 }, { wch: 15 },
+      { wch: 15 }, { wch: 30 }, { wch: 30 }
     ];
-    ws['!cols'] = colWidths;
 
     XLSX.utils.book_append_sheet(wb, ws, 'Payments');
 
@@ -249,14 +238,11 @@ const exportPaymentsToExcel = async (req, res) => {
       'Content-Disposition',
       `attachment; filename="FoodExpress-Payments-${moment().format('YYYYMMDD-HHmm')}.xlsx"`
     );
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    );
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.send(buffer);
   } catch (err) {
     console.error('exportPaymentsToExcel error:', err);
-    res.status(500).json({ success: false, message: 'Failed to export Excel' });
+    res.status(500).json({ success: false, message: 'Failed to export payments' });
   }
 };
 

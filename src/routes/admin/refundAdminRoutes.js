@@ -1,7 +1,8 @@
 // src/routes/admin/refundAdminRoutes.js
-// FINAL PRODUCTION — DECEMBER 19, 2025
 
-const router = require('express').Router();
+
+const express = require('express');
+const router = express.Router();
 
 const { auth } = require('../../middleware/auth/auth');
 const { role } = require('../../middleware/role/role');
@@ -15,12 +16,13 @@ const {
 const {
   getRefundRequests: getValidation,
   processRefund: processValidation,
-} = require('../../validation/schemas/refundSchemas');
+} = require('../../validation/schemas/refundAdminSchemas');
 
-// Protect all routes: Auth + Admin only
-router.use(auth, role(['admin', 'finance'])); // Allow finance team too
+// Protect all routes: Auth + Admin/Finance role only
+router.use(auth, role(['admin', 'finance']));
 
-// GET /api/admin/refunds/requests?status=requested&page=1&limit=20
+// GET /api/admin/refunds/requests
+// List all refund requests (paginated + filtered)
 router.get(
   '/requests',
   getValidation,
@@ -29,7 +31,7 @@ router.get(
 );
 
 // POST /api/admin/refunds/process/:transactionId
-// Body: { "action": "approve" | "reject", "note": "optional note" }
+// Process refund: approve or reject
 router.post(
   '/process/:transactionId',
   processValidation,

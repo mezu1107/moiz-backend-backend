@@ -1,7 +1,8 @@
 // src/routes/payment/paymentRoutes.js
-// FINAL PRODUCTION — DECEMBER 19, 2025
 
-const router = require('express').Router();
+
+const express = require('express');
+const router = express.Router();
 const mongoose = require('mongoose');
 
 const { auth } = require('../../middleware/auth/auth');
@@ -9,27 +10,46 @@ const { role } = require('../../middleware/role/role');
 const validateRequest = require('../../middleware/validate/validate');
 
 const {
-  handlePaymentFailure,
   retryPayment,
   getTransactionHistory,
+  handlePaymentFailure, // Exposed only for admin/testing
 } = require('../../controllers/payment/paymentController');
 
 const {
-  getTransactionHistory: historyValidation,
   retryPayment: retryValidation,
+  getTransactionHistory: historyValidation,
 } = require('../../validation/schemas/paymentSchemas');
 
-// ============================================================
-// 🔐 ALL ROUTES REQUIRE AUTHENTICATION
-// ============================================================
+// Custom middleware: Validate MongoDB ObjectId in params
+const validateObjectId = (paramName = 'orderId') => (req, res, next) => {
+  const id = req.params[paramName];
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: `Invalid ${paramName}: must be a valid MongoDB ObjectId`,
+    });
+  }
+  next();
+};
+
+// ── ALL ROUTES REQUIRE AUTHENTICATION ─────────────────────────────────────
 router.use(auth);
 
-// ============================================================
-// 👤 CUSTOMER ROUTES
-// ============================================================
+// ── CUSTOMER ROUTES ───────────────────────────────────────────────────────
+
+// POST /api/payment/retry/:orderId
+// Retry failed/pending card payment
+router.post(
+  '/retry/:orderId',
+  validateObjectId(),
+  role('customer'),
+  retryValidation,
+  validateRequest,
+  retryPayment
+);
 
 // GET /api/payment/history
-// → Get own payment transaction history with pagination & filters
+// Customer's own payment transaction history
 router.get(
   '/history',
   role('customer'),
@@ -38,22 +58,10 @@ router.get(
   getTransactionHistory
 );
 
-// POST /api/payment/retry/:orderId
-// → Retry a failed/pending card payment
-router.post(
-  '/retry/:orderId',
-  role('customer'),
-  retryValidation,
-  validateRequest,
-  retryPayment
-);
+// ── ADMIN / FINANCE / SUPPORT ROUTES ──────────────────────────────────────
 
-// ============================================================
-// 👑 ADMIN / FINANCE / SUPPORT ROUTES
-// ============================================================
-
-// GET /api/payment/history (Admin sees all)
-// → Admins can view all transactions (no customer filter)
+// GET /api/payment/admin/history
+// Admin view of all payment transactions (no customer filter)
 router.get(
   '/admin/history',
   role(['admin', 'finance', 'support']),
@@ -62,20 +70,19 @@ router.get(
   getTransactionHistory
 );
 
-// Optional: Admin manual failure trigger (for testing/webhook fallback)
+// POST /api/payment/admin/failure/:orderId
+// Manual trigger payment failure (admin/testing only)
 router.post(
   '/admin/failure/:orderId',
+  validateObjectId(),
   role('admin'),
-  (req, res, next) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.orderId)) {
-      return res.status(400).json({ success: false, message: 'Invalid orderId' });
-    }
-    next();
-  },
   async (req, res) => {
     const { reason = 'manual_failure', metadata = {} } = req.body;
     await handlePaymentFailure(req.params.orderId, reason, metadata);
-    res.json({ success: true, message: 'Payment failure handled manually' });
+    res.json({
+      success: true,
+      message: 'Payment failure handled successfully (manual trigger)',
+    });
   }
 );
 

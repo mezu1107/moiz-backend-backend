@@ -1,92 +1,96 @@
 // src/validation/schemas/walletSchemas.js
-// FINAL PRODUCTION — DECEMBER 19, 2025
+const { body, query } = require('express-validator');
+const mongoose = require('mongoose');
 
-const { body } = require('express-validator');
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 
-/**
- * Validation for admin wallet credit
- */
+// ── ADMIN CREDIT VALIDATION ──────────────────────────────────────────────
 exports.adminCreditWallet = [
   body('userId')
     .trim()
     .notEmpty().withMessage('userId is required')
-    .isMongoId().withMessage('userId must be a valid MongoDB ObjectId'),
+    .custom(isValidObjectId).withMessage('userId must be a valid MongoDB ObjectId'),
 
   body('amount')
     .trim()
     .notEmpty().withMessage('amount is required')
-    .isFloat({ gt: 0 }).withMessage('amount must be a positive number')
+    .isFloat({ min: 0.01 }).withMessage('amount must be a positive number ≥ 0.01')
     .toFloat(),
 
   body('type')
     .optional()
     .trim()
-    .isIn(['credit', 'bonus', 'referral', 'refund', 'adjustment'])
-    .withMessage('Invalid type. Allowed: credit, bonus, referral, refund, adjustment'),
+    .isIn(['adjustment', 'bonus', 'referral', 'refund', 'cashback'])
+    .withMessage('Invalid type'),
 
   body('description')
     .optional()
     .trim()
     .isString()
-    .isLength({ max: 500 }).withMessage('description cannot exceed 500 characters'),
+    .isLength({ max: 500 }).withMessage('description max 500 characters'),
 
   body('metadata')
     .optional()
-    .isObject().withMessage('metadata must be a valid JSON object'),
+    .isObject().withMessage('metadata must be an object')
 ];
 
-/**
- * Validation for admin wallet debit
- */
+// ── ADMIN DEBIT VALIDATION ───────────────────────────────────────────────
 exports.adminDebitWallet = [
   body('userId')
     .trim()
     .notEmpty().withMessage('userId is required')
-    .isMongoId().withMessage('userId must be a valid MongoDB ObjectId'),
+    .custom(isValidObjectId).withMessage('userId must be a valid MongoDB ObjectId'),
 
   body('amount')
     .trim()
     .notEmpty().withMessage('amount is required')
-    .isFloat({ gt: 0 }).withMessage('amount must be a positive number')
+    .isFloat({ min: 0.01 }).withMessage('amount must be a positive number ≥ 0.01')
     .toFloat(),
 
   body('description')
     .optional()
     .trim()
     .isString()
-    .isLength({ max: 500 }).withMessage('description cannot exceed 500 characters'),
+    .isLength({ max: 500 }).withMessage('description max 500 characters'),
 
   body('metadata')
     .optional()
-    .isObject().withMessage('metadata must be a valid JSON object'),
+    .isObject().withMessage('metadata must be an object')
 ];
 
-/**
- * Validation for wallet transaction export (CSV/PDF)
- * Used in query params: ?fromDate=...&toDate=...&type=...
- */
+// ── EXPORT TRANSACTIONS VALIDATION (CSV & PDF) ────────────────────────────
 exports.exportTransactions = [
-  body('fromDate')
+  query('fromDate')
     .optional()
-    .isISO8601({ strict: true }).withMessage('fromDate must be a valid ISO date (e.g., 2025-01-01)')
+    .isISO8601({ strict: true }).withMessage('fromDate must be valid ISO date')
     .toDate(),
 
-  body('toDate')
+  query('toDate')
     .optional()
-    .isISO8601({ strict: true }).withMessage('toDate must be a valid ISO date')
+    .isISO8601({ strict: true }).withMessage('toDate must be valid ISO date')
     .toDate()
     .custom((value, { req }) => {
-      if (req.body.fromDate && value < req.body.fromDate) {
-        throw new Error('toDate cannot be earlier than fromDate');
+      if (req.query.fromDate && new Date(value) <= new Date(req.query.fromDate)) {
+        throw new Error('toDate must be after fromDate');
       }
       return true;
     }),
 
-  body('type')
+  query('type')
     .optional()
     .trim()
-    .isIn(['credit', 'debit', 'refund', 'bonus', 'referral', 'adjustment'])
-    .withMessage('Invalid transaction type'),
+    .isIn([
+      'credit', 'debit', 'adjustment', 'refund', 'bonus',
+      'referral', 'withdrawal', 'cashback'
+    ]).withMessage('Invalid transaction type'),
+
+  query('page')
+    .optional()
+    .isInt({ min: 1 }).withMessage('page must be positive integer'),
+
+  query('limit')
+    .optional()
+    .isInt({ min: 10, max: 500 }).withMessage('limit must be between 10 and 500')
 ];
 
 module.exports = {

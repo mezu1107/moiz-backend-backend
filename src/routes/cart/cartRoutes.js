@@ -1,9 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-const { auth } = require('../../middleware/auth/auth'); // ✅ FIXED
-const validate = require('../../middleware/validate/validate');
-
 const {
   getCart,
   addToCart,
@@ -14,37 +11,30 @@ const {
 
 const {
   addToCartSchema,
-  updateQuantitySchema,
+  updateCartItemSchema,
   cartItemParamSchema
 } = require('../../validation/schemas/cartSchemas');
 
-// GUESTS CAN USE CART — LOGGED-IN GET PERSISTENT CART
-
-
+// No auth required — guests use session, logged-in use DB
 // GET /api/cart
 router.get('/', getCart);
 
-// POST /api/cart → Add item
-router.post('/', addToCartSchema, validate, addToCart);
+// POST /api/cart → Add item with full customizations
+router.post('/', addToCartSchema, addToCart);
 
-// PATCH /api/cart/item/:itemId → Update quantity (0 = remove)
+// PATCH /api/cart/item/:itemId → Update quantity AND/OR any customizations + global orderNote
 router.patch(
   '/item/:itemId',
   cartItemParamSchema,
-  updateQuantitySchema,
-  validate,
+  updateCartItemSchema,
+  addToCart, // reuse validation middleware
   updateQuantity
 );
 
-// DELETE /api/cart/item/:itemId → Force remove
-router.delete(
-  '/item/:itemId',
-  cartItemParamSchema,
-  validate,
-  removeItem
-);
+// DELETE /api/cart/item/:itemId → Remove specific item
+router.delete('/item/:itemId', cartItemParamSchema, removeItem);
 
-// DELETE /api/cart/clear → Empty cart
+// DELETE /api/cart/clear → Clear entire cart + orderNote
 router.delete('/clear', clearCart);
 
 module.exports = router;

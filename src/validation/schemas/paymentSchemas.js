@@ -1,17 +1,20 @@
-
 // src/validation/schemas/paymentSchemas.js
-// FINAL PRODUCTION — DECEMBER 19, 2025
-
-const { query, param, body} = require('express-validator');
 
 
-exports.createPaymentIntent = [
-  body('orderId').isMongoId()
+const { query, param } = require('express-validator');
+const mongoose = require('mongoose');
+
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
+
+// ── RETRY PAYMENT (POST /payment/retry/:orderId) ──────────────────────────
+exports.retryPayment = [
+  param('orderId')
+    .trim()
+    .notEmpty().withMessage('orderId is required')
+    .custom(isValidObjectId).withMessage('orderId must be a valid MongoDB ObjectId'),
 ];
 
-/**
- * Validation for getTransactionHistory
- */
+// ── GET TRANSACTION HISTORY (GET /payment/history or /admin/history) ──────
 exports.getTransactionHistory = [
   query('page')
     .optional()
@@ -25,26 +28,16 @@ exports.getTransactionHistory = [
 
   query('status')
     .optional()
-    .isIn(['pending', 'paid', 'failed', 'refunded'])
-    .withMessage('Invalid status'),
+    .isIn(['pending', 'paid', 'failed', 'refunded', 'partially_refunded'])
+    .withMessage('Invalid status filter'),
 
   query('method')
     .optional()
     .isIn(['cash', 'card', 'easypaisa', 'jazzcash', 'bank', 'wallet'])
-    .withMessage('Invalid payment method'),
-];
-
-/**
- * Validation for retryPayment param
- */
-exports.retryPayment = [
-  param('orderId')
-    .trim()
-    .notEmpty().withMessage('orderId is required')
-    .isMongoId().withMessage('orderId must be a valid MongoDB ObjectId'),
+    .withMessage('Invalid payment method filter'),
 ];
 
 module.exports = {
-  getTransactionHistory: exports.getTransactionHistory,
   retryPayment: exports.retryPayment,
+  getTransactionHistory: exports.getTransactionHistory,
 };
