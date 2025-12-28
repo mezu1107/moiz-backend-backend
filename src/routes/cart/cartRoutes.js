@@ -1,3 +1,6 @@
+// src/routes/cart/cartRoutes.js
+// PRODUCTION-READY — DECEMBER 27, 2025
+
 const express = require('express');
 const router = express.Router();
 
@@ -6,35 +9,36 @@ const {
   addToCart,
   updateQuantity,
   removeItem,
-  clearCart
+  clearCart,
 } = require('../../controllers/cart/cartController');
 
 const {
   addToCartSchema,
   updateCartItemSchema,
-  cartItemParamSchema
+  cartItemParamSchema,
 } = require('../../validation/schemas/cartSchemas');
 
-// No auth required — guests use session, logged-in use DB
+const validateRequest = require('../../middleware/validate/validate'); 
+
 // GET /api/cart
 router.get('/', getCart);
 
-// POST /api/cart → Add item with full customizations
-router.post('/', addToCartSchema, addToCart);
+// POST /api/cart
+router.post('/', addToCartSchema, validateRequest, addToCart);
 
-// PATCH /api/cart/item/:itemId → Update quantity AND/OR any customizations + global orderNote
+// PATCH /api/cart/item/:itemId — Update quantity or customizations
 router.patch(
   '/item/:itemId',
   cartItemParamSchema,
   updateCartItemSchema,
-  addToCart, // reuse validation middleware
+  validateRequest, // ← Critical: runs validation
   updateQuantity
 );
 
-// DELETE /api/cart/item/:itemId → Remove specific item
-router.delete('/item/:itemId', cartItemParamSchema, removeItem);
+// DELETE /api/cart/item/:itemId
+router.delete('/item/:itemId', cartItemParamSchema, validateRequest, removeItem);
 
-// DELETE /api/cart/clear → Clear entire cart + orderNote
+// DELETE /api/cart/clear
 router.delete('/clear', clearCart);
 
 module.exports = router;

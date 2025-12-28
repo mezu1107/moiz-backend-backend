@@ -297,11 +297,78 @@ const updateQuantity = async (req, res) => {
   }
 };
 
-// REMOVE ITEM (unchanged, just uses _id)
+// REMOVE ITEM FROM CART (by cart item _id)
 const removeItem = async (req, res) => {
-  // ... (same as your previous version)
-};
+  const { itemId } = req.params;
+  const userId = req.user?.id;
 
+  try {
+    if (!itemId) {
+      return res.status(400).json({ success: false, message: 'itemId is required' });
+    }
+
+    let updated = false;
+    let cartResponse = { items: [], total: 0, orderNote: '' };
+
+    if (userId) {
+      // === AUTHENTICATED USER (MongoDB Cart) ===
+      const cart = await Cart.findOne({ user: userId });
+      if (!cart) {
+        return res.status(404).json({ success: false, message: 'Cart not found' });
+      }
+
+      const initialLength = cart.items.length;
+      cart.items = cart.items.filter((item) => item._id.toString() !== itemId);
+
+      if (cart.items.length < initialLength) {
+        updated = true;
+        await cart.save();
+
+        // Populate menu item details
+        await cart.populate('items.menuItem', 'name price image isAvailable');
+
+        cartResponse = {
+          items: cart.items,
+          total: calculateTotal(cart.items),
+          orderNote: cart.orderNote || '',
+        };
+      }
+    } else {
+      // === GUEST USER (Session Cart) ===
+      if (!req.session.cart || !Array.isArray(req.session.cart)) {
+        return res.status(404).json({ success: false, message: 'Cart is empty' });
+      }
+
+      const initialLength = req.session.cart.length;
+      req.session.cart = req.session.cart.filter((item) => item._id !== itemId);
+
+      if (req.session.cart.length < initialLength) {
+        updated = true;
+        const populatedItems = await populateItems(req.session.cart);
+
+        cartResponse = {
+          items: populatedItems,
+          total: calculateTotal(req.session.cart),
+          orderNote: req.session.orderNote || '',
+        };
+      }
+    }
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Item not found in cart' });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Item removed from cart',
+      cart: cartResponse,
+      isGuest: !userId,
+    });
+  } catch (err) {
+    console.error('removeItem error:', err);
+    return res.status(500).json({ success: false, message: 'Failed to remove item from cart' });
+  }
+};
 // CLEAR CART (unchanged, just clears orderNote too)
 const clearCart = async (req, res) => {
   try {

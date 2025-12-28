@@ -629,3 +629,8 @@
 {"error":"v is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/menu","timestamp":"2025-12-26T17:31:50.593Z"}
 {"error":"v is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/menu","timestamp":"2025-12-26T18:02:00.210Z"}
 {"error":"getSingleMenuItem is not defined","level":"error","message":"ROUTE LOAD FAILED: /api/menu","timestamp":"2025-12-26T18:03:34.861Z"}
+{"error":"argument handler must be a function","level":"error","message":"ROUTE LOAD FAILED: /api/cart","timestamp":"2025-12-27T14:40:26.750Z"}
+{"error":"Cannot find module '../../middleware/validate/validateRequest'\nRequire stack:\n- C:\\amfood\\FoodWebsite-backend\\src\\routes\\cart\\cartRoutes.js\n- C:\\amfood\\FoodWebsite-backend\\server.js","level":"error","message":"ROUTE LOAD FAILED: /api/cart","timestamp":"2025-12-27T14:41:17.544Z"}
+{"error":"Cannot find module '../../middleware/validate/validateRequest'\nRequire stack:\n- C:\\amfood\\FoodWebsite-backend\\src\\routes\\cart\\cartRoutes.js\n- C:\\amfood\\FoodWebsite-backend\\server.js","level":"error","message":"ROUTE LOAD FAILED: /api/cart","timestamp":"2025-12-27T14:41:30.040Z"}
+{"error":"Identifier 'Cart' has already been declared","level":"error","message":"ROUTE LOAD FAILED: /api/cart","timestamp":"2025-12-27T14:44:13.083Z"}
+{"error":"Identifier 'Area' has already been declared","level":"error","message":"ROUTE LOAD FAILED: /api/areas","timestamp":"2025-12-28T18:48:10.523Z"}

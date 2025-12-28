@@ -383,50 +383,63 @@ const createOrder = async (req, res) => {
   }
 };
 
-// [All other functions remain unchanged: requestRefund, getCustomerOrders, getOrderById, cancelOrder, updateOrderStatus, assignRider, getAllOrders, generateReceipt, adminRejectOrder, customerRejectOrder, trackOrderById, trackOrdersByPhone, paymentSuccess, getOrderTimeline]
 
-// ── REORDER ORDER (FIXED & SAFE) ────────────────────────────────────────
 const reorderOrder = async (req, res) => {
   try {
     const orderId = req.params.orderId;
-    const userId = req.user._id;
 
     if (!mongoose.isValidObjectId(orderId)) {
       return res.status(400).json({ success: false, message: 'Invalid order ID' });
     }
 
-    const original = await Order.findOne({
-      _id: orderId,
-      $or: [{ customer: userId }, { 'guestInfo.phone': req.user.phone }],
-    })
-      .populate('items.menuItem', 'isAvailable')
+    const query = { _id: orderId };
+    if (req.user) {
+      query.$or = [
+        { customer: req.user._id },
+        { 'guestInfo.phone': req.user.phone, 'guestInfo.isGuest': true }
+      ];
+    } else {
+      query['guestInfo.isGuest'] = true;
+    }
+
+    const original = await Order.findOne(query)
+      .populate('items.menuItem', 'name price image isAvailable')
       .lean();
 
     if (!original) {
-      return res.status(404).json({ success: false, message: 'Order not found or not accessible' });
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found or you do not have permission to reorder it',
+      });
     }
 
-    let cart = await Cart.findOne({ user: userId });
-    if (!cart) cart = new Cart({ user: userId, items: [] });
-
     const validItems = [];
+    let skippedCount = 0;
+
     for (const item of original.items) {
-      // Robust check: skip if menuItem missing, not an object, or unavailable
-      if (
-        !item.menuItem ||
-        typeof item.menuItem !== 'object' ||
-        !item.menuItem._id ||
-        !item.menuItem.isAvailable
-      ) {
-        console.warn(`Reordering: Skipping unavailable/deleted item "${item.name || 'Unknown'}" (Order #${orderIdShort(orderId)})`);
+      const menuItem = item.menuItem;
+
+      if (!menuItem || !menuItem.isAvailable) {
+        skippedCount++;
         continue;
       }
 
       validItems.push({
-        menuItem: item.menuItem._id,
+        _id: crypto.randomUUID(), // Important: generate client-side ID
+        menuItem: {
+          _id: menuItem._id.toString(),
+          name: menuItem.name,
+          price: menuItem.price,
+          image: menuItem.image || null,
+          isAvailable: true,
+        },
         quantity: item.quantity,
         priceAtAdd: item.priceAtOrder,
-        addedAt: new Date(),
+        sides: item.sides || [],
+        drinks: item.drinks || [],
+        addOns: item.addOns || [],
+        specialInstructions: item.specialInstructions || '',
+        addedAt: new Date().toISOString(),
       });
     }
 
@@ -437,20 +450,52 @@ const reorderOrder = async (req, res) => {
       });
     }
 
-    cart.items = validItems;
-    await cart.save();
+    if (req.user) {
+      // Authenticated: save to MongoDB
+      let cart = await Cart.findOne({ user: req.user._id });
+      if (!cart) cart = new Cart({ user: req.user._id, items: [] });
 
+      cart.items = validItems.map(item => ({
+        menuItem: item.menuItem._id,
+        quantity: item.quantity,
+        priceAtAdd: item.priceAtAdd,
+        sides: item.sides,
+        drinks: item.drinks,
+        addOns: item.addOns,
+        specialInstructions: item.specialInstructions,
+      }));
+      await cart.save();
+
+      await cart.populate('items.menuItem', 'name price image isAvailable');
+
+      return res.json({
+        success: true,
+        message: `Added ${validItems.length} item(s) to your cart`,
+        cart: {
+          items: cart.items,
+          total: calculateTotal(cart.items),
+          orderNote: cart.orderNote || '',
+        },
+        isGuest: false,
+        skippedItems: skippedCount || undefined,
+      });
+    }
+
+    // Guest: return fully populated items for Zustand
     return res.json({
       success: true,
-      message: `Cart updated with ${validItems.length} item(s) from order #${orderIdShort(orderId)}`,
-      cart,
+      message: `Added ${validItems.length} item(s) to your cart`,
+      cart: {
+        items: validItems,
+        isGuest: true,
+      },
+      skippedItems: skippedCount || undefined,
     });
   } catch (err) {
     console.error('reorderOrder error:', err);
     return res.status(500).json({ success: false, message: 'Failed to reorder' });
   }
 };
-
 
 
 // ====================== CUSTOMER REFUND REQUEST ======================

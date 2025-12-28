@@ -65,9 +65,13 @@ router.route('/success/:orderId')
 // Create new order (guest or authenticated)
 router.post('/', optionalAuth, createOrderSchema, validateRequest, createOrder);
 
-// Reorder from previous order (guest or authenticated)
-router.post('/:orderId/reorder', validateOrderIdParam, optionalAuth, reorderOrder);
-
+// Reorder from previous order (guest or authenticated) — PUBLIC ACCESS
+router.post(
+  '/:orderId/reorder',
+  validateOrderIdParam,
+  optionalAuth,     // Allows guests via tracking link
+  reorderOrder
+);
 // ============================================================
 // 🔐 AUTH REQUIRED FROM HERE
 // ============================================================
