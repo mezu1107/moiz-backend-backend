@@ -1,4 +1,6 @@
 // src/pages/ForgotPassword.tsx
+// PRODUCTION-READY — FULLY RESPONSIVE (320px → 4K)
+// Mobile-first forgot password with clean input
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -6,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api";
 
 interface ForgotPasswordResponse {
   success: boolean;
   message: string;
-  debug_otp?: string; // Only in development
+  debug_otp?: string;
 }
 
 export default function ForgotPassword() {
@@ -42,54 +45,69 @@ export default function ForgotPassword() {
 
       window.location.href = `/verify-otp?identifier=${encodeURIComponent(identifier.trim())}`;
     } catch (err: any) {
-      toast.error(err?.message || "Failed to send OTP. Please try again.");
+      toast.error(err?.response?.data?.message || "Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-green-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-2xl">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-3xl font-bold text-center">
+    <main className="min-h-screen bg-gradient-to-br from-orange-50 to-green-50 flex items-center justify-center p-4 py-12">
+      <Card className="w-full max-w-md shadow-2xl border-0">
+        <CardHeader className="text-center pb-8">
+          <CardTitle className="text-3xl md:text-4xl font-black">
             Forgot Password
           </CardTitle>
-          <p className="text-center text-muted-foreground">
+          <p className="mt-3 text-base md:text-lg text-muted-foreground">
             We'll send a 6-digit OTP to your email or phone
           </p>
         </CardHeader>
-        <CardContent>
+
+        <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="identifier">Email or Phone Number</Label>
-              <Input
-                id="identifier"
-                type="text"
-                placeholder="john@example.com or 03123456789"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                disabled={loading}
-                required
-              />
+            <div className="space-y-3">
+              <Label htmlFor="identifier" className="text-base md:text-lg font-medium">
+                Email or Phone Number
+              </Label>
+              <div className="relative">
+                {identifier.includes("@") ? (
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-orange-600" />
+                ) : (
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-orange-600" />
+                )}
+                <Input
+                  id="identifier"
+                  type="text"
+                  placeholder="john@example.com or 03123456789"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  className="pl-12 h-12 md:h-14 text-base md:text-lg"
+                  disabled={loading}
+                  required
+                />
+              </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full bg-orange-600 hover:bg-orange-700"
+              size="lg"
               disabled={loading}
+              className="w-full h-14 text-base md:text-lg font-bold bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
             >
               {loading ? "Sending..." : "Send OTP"}
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <Link to="/login" className="text-sm text-primary hover:underline">
+          <div className="text-center pt-4">
+            <Link
+              to="/login"
+              className="text-sm md:text-base font-medium text-primary hover:underline"
+            >
               Back to Login
             </Link>
           </div>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

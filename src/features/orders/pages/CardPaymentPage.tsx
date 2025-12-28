@@ -1,44 +1,29 @@
 // src/features/orders/pages/CardPaymentPage.tsx
-// FINAL PRODUCTION — DECEMBER 16, 2025
-// Fully synced with backend orderController.js, paymentSuccess route, and Stripe best practices
+// PRODUCTION-READY — FULLY RESPONSIVE, DEC 28, 2025
 
 import { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import {
-  Elements,
-  PaymentElement,
-  useStripe,
-  useElements,
-} from '@stripe/react-stripe-js';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Card, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CreditCard, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCartStore } from '@/features/cart/hooks/useCartStore';
-import { api } from '@/lib/api'; // your axios instance
+import { api } from '@/lib/api';
 import type { CreateOrderResponse } from '@/types/order.types';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-function CardForm({
-  clientSecret,
-  orderId,
-  amount,
-  shortId,
-}: {
+interface CardFormProps {
   clientSecret: string;
   orderId: string;
   amount: number;
   shortId: string;
-}) {
+}
+
+function CardForm({ clientSecret, orderId, amount, shortId }: CardFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
@@ -48,7 +33,7 @@ function CardForm({
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Handle return from 3D Secure / redirect flow
+  // Handle redirect flow for 3DS
   useEffect(() => {
     if (!stripe || !clientSecret) return;
 
@@ -77,13 +62,10 @@ function CardForm({
   const confirmPaymentOnBackend = async (paymentIntentId: string) => {
     try {
       await api.post(`/orders/success/${orderId}`, { paymentIntentId });
-
       clearCart();
       setIsSuccess(true);
       toast.success('Payment successful! 🎉');
-      setTimeout(() => {
-        navigate(`/track/${orderId}`, { replace: true });
-      }, 2000);
+      setTimeout(() => navigate(`/track/${orderId}`, { replace: true }), 2000);
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Failed to confirm payment';
       setErrorMessage(msg);
@@ -100,7 +82,6 @@ function CardForm({
     setIsProcessing(true);
     setErrorMessage(null);
 
-    // Required for latest Stripe compliance
     const { error: submitError } = await elements.submit();
     if (submitError) {
       setErrorMessage(submitError.message ?? 'Invalid card details');
@@ -111,7 +92,7 @@ function CardForm({
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/payment/card/${orderId}`, // self-redirect for 3DS
+        return_url: `${window.location.origin}/payment/card/${orderId}`,
       },
       redirect: 'if_required',
     });
@@ -134,23 +115,24 @@ function CardForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 w-full">
       <PaymentElement
         options={{
           layout: 'tabs',
           wallets: { applePay: 'auto', googlePay: 'auto' },
         }}
+        className="w-full"
       />
 
       {errorMessage && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="text-sm">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 
       {isSuccess && (
-        <Alert className="border-green-200 bg-green-50">
+        <Alert className="border-green-200 bg-green-50 text-sm">
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">
             Payment successful! Redirecting to your order...
@@ -161,7 +143,7 @@ function CardForm({
       <Button
         type="submit"
         size="lg"
-        className="w-full"
+        className="w-full py-4 text-base sm:text-lg md:text-xl"
         disabled={!stripe || isProcessing || isSuccess}
       >
         {isProcessing ? (
@@ -182,7 +164,7 @@ function CardForm({
         )}
       </Button>
 
-      <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
+      <p className="text-center text-xs sm:text-sm text-muted-foreground flex items-center justify-center gap-1">
         <Lock className="h-3 w-3" />
         Secured by Stripe • End-to-end encrypted
       </p>
@@ -196,23 +178,25 @@ export default function CardPaymentPage() {
 
   const response = location.state as CreateOrderResponse | null;
 
-  // Guard: Must come from successful order creation with clientSecret
   if (!response?.clientSecret || !response?.order) {
     return (
-      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full text-center p-10">
-          <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-6" />
-          <h2 className="text-2xl font-bold mb-3">Invalid Payment Session</h2>
-          <p className="text-muted-foreground mb-6">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+        <Card className="max-w-md w-full text-center p-8 sm:p-10">
+          <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">Invalid Payment Session</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mb-4">
             This payment link is no longer valid. Please place your order again.
           </p>
-          <Button onClick={() => navigate('/cart')}>Back to Cart</Button>
+          <Button onClick={() => navigate('/cart')} size="lg" className="w-full sm:w-auto">
+            Back to Cart
+          </Button>
         </Card>
       </div>
     );
   }
 
-  const { clientSecret, order, walletUsed } = response;
+  const { clientSecret, order } = response;
+  const walletUsed = order.walletUsed ?? 0;
   const shortId = order.shortId;
 
   const appearance = {
@@ -234,14 +218,14 @@ export default function CardPaymentPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="text-center">
-          <div className="w-20 h-20 rounded-full bg-rose-100 mx-auto mb-6 flex items-center justify-center">
-            <CreditCard className="h-10 w-10 text-rose-600" />
+        <div className="text-center space-y-2 sm:space-y-3">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-rose-100 mx-auto flex items-center justify-center">
+            <CreditCard className="h-8 w-8 sm:h-10 sm:w-10 text-rose-600" />
           </div>
-          <h1 className="text-3xl font-bold">Complete Payment</h1>
-          <CardDescription className="mt-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Complete Payment</h1>
+          <CardDescription className="text-sm sm:text-base">
             Order <span className="font-mono font-bold text-rose-600">#{shortId}</span>
           </CardDescription>
         </div>
@@ -249,14 +233,14 @@ export default function CardPaymentPage() {
         {/* Amount Card */}
         <Card className="border-2 border-rose-200 shadow-xl">
           <CardHeader className="text-center pb-4">
-            <p className="text-sm uppercase tracking-wider text-muted-foreground">
+            <p className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground">
               Amount Due
             </p>
-            <p className="text-5xl font-bold text-rose-600">
+            <p className="text-3xl sm:text-4xl md:text-5xl font-bold text-rose-600">
               Rs. {order.finalAmount.toLocaleString()}
             </p>
             {walletUsed > 0 && (
-              <p className="text-sm text-muted-foreground mt-2">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">
                 (Rs. {walletUsed.toLocaleString()} paid via wallet)
               </p>
             )}
@@ -274,7 +258,7 @@ export default function CardPaymentPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-xs sm:text-sm text-muted-foreground">
           Powered by Stripe • PCI DSS Compliant
         </p>
       </div>

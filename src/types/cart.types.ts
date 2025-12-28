@@ -1,5 +1,4 @@
 // src/types/cart.types.ts
-
 export interface PricedOption {
   name: string;
   price: number;
@@ -11,7 +10,6 @@ export interface PricedOptions {
   addOns: PricedOption[];
 }
 
-// The menu item as received from API (e.g. getSingleMenuItem)
 export interface MenuItem {
   _id: string;
   name: string;
@@ -21,25 +19,23 @@ export interface MenuItem {
   isVeg?: boolean;
   isSpicy?: boolean;
   isAvailable: boolean;
-  pricedOptions?: PricedOptions; // Optional — defaults to empty arrays
+  pricedOptions?: PricedOptions;
 }
 
-// Populated menu item inside cart items
 export interface MenuItemInCart {
   _id: string;
   name: string;
   price: number;
   image?: string;
-  isAvailable?: boolean;
+  isAvailable: boolean;
 }
 
-// Extended cart item with full customization support
 export interface CartItem {
   _id: string;
   menuItem: MenuItemInCart;
   quantity: number;
-  priceAtAdd: number;           // Includes base price + paid extras
-  sides?: string[];             // e.g. ["Raita", "Custom: extra garlic"]
+  priceAtAdd: number;
+  sides?: string[];
   drinks?: string[];
   addOns?: string[];
   specialInstructions?: string;
@@ -52,7 +48,6 @@ export interface CartData {
   orderNote: string;
 }
 
-// Full response from all cart endpoints
 export interface CartResponse {
   success: boolean;
   message?: string;

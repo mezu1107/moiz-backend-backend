@@ -1,5 +1,6 @@
 // src/components/menu/MenuItemCard.tsx
-// PRODUCTION-READY — Integrates with AddToCartModal for full customization
+// PRODUCTION-READY — DECEMBER 27, 2025
+// Full integration with AddToCartModal + accessibility + UX polish
 
 import { useState } from 'react';
 import { Leaf, Flame } from 'lucide-react';
@@ -20,75 +21,97 @@ interface MenuItemCardProps {
 export function MenuItemCard({ item, className = '' }: MenuItemCardProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Safe rendering helpers
-  const safeName = String(item.name || 'Unnamed Item');
-  const safeDescription = String(item.description || 'Delicious item from our menu');
-  const safePrice = Number(item.price || 0);
-  const safeImage = item.image || '/placeholder-food.jpg';
+  const isAvailable = item.isAvailable !== false; // defaults to true if undefined
 
-  const handleOpenCustomization = () => {
-    if (!item.isAvailable) return;
-    setModalOpen(true);
+  const handleCardClick = () => {
+    if (isAvailable) {
+      setModalOpen(true);
+    }
+  };
+
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when button is clicked
+    if (isAvailable) {
+      setModalOpen(true);
+    }
   };
 
   return (
     <>
       <Card
-        className={`group overflow-hidden bg-card border-border/50 cursor-pointer transition-all hover:shadow-lg ${className} ${
-          !item.isAvailable ? 'opacity-60' : ''
-        }`}
-        onClick={handleOpenCustomization}
+        className={`group relative overflow-hidden bg-card border transition-all hover:shadow-xl ${
+          !isAvailable ? 'opacity-60 grayscale' : 'cursor-pointer'
+        } ${className}`}
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={isAvailable ? 0 : -1}
+        aria-disabled={!isAvailable}
+        aria-label={`View details for ${item.name}${!isAvailable ? ' (unavailable)' : ''}`}
+        onKeyDown={(e) => {
+          if (isAvailable && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            setModalOpen(true);
+          }
+        }}
       >
+        {/* Image Section */}
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           <img
-            src={safeImage}
-            alt={safeName}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            src={item.image || '/placeholder-food.jpg'}
+            alt={item.name}
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading="lazy"
           />
 
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2">
+          {/* Badges: Veg, Spicy, Unavailable */}
+          <div className="absolute top-4 left-4 flex flex-col gap-2">
             {item.isVeg && (
-              <Badge variant="secondary" className="text-xs px-2.5 py-1 shadow-md">
+              <Badge variant="secondary" className="px-3 py-1.5 text-xs font-medium shadow-md">
                 <Leaf className="h-3.5 w-3.5 mr-1" />
                 Veg
               </Badge>
             )}
             {item.isSpicy && (
-              <Badge variant="destructive" className="text-xs px-2.5 py-1 shadow-md">
+              <Badge variant="destructive" className="px-3 py-1.5 text-xs font-medium shadow-md">
                 <Flame className="h-3.5 w-3.5 mr-1" />
                 Spicy
               </Badge>
             )}
-            {!item.isAvailable && (
-              <Badge variant="secondary" className="bg-gray-600 text-white text-xs px-3 py-1 shadow-md">
+            {!isAvailable && (
+              <Badge className="bg-black/80 text-white px-3 py-1.5 text-xs font-medium shadow-md">
                 Unavailable
               </Badge>
             )}
           </div>
 
-          {/* Price tag */}
-          <div className="absolute bottom-3 right-3">
-            <Badge variant="default" className="text-base font-bold px-4 py-2 shadow-lg">
-              Rs. {safePrice.toLocaleString()}
+          {/* Price Badge */}
+          <div className="absolute bottom-4 right-4">
+            <Badge
+              variant="default"
+              className="text-lg font-bold px-5 py-2.5 shadow-2xl backdrop-blur-sm bg-primary/90"
+            >
+              Rs. {Number(item.price).toLocaleString('en-IN')}
             </Badge>
           </div>
         </div>
 
-        <CardContent className="p-5">
-          <h3 className="font-bold text-xl mb-2 line-clamp-1">{safeName}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-            {safeDescription}
-          </p>
+        {/* Content */}
+        <CardContent className="p-6">
+          <h3 className="font-bold text-xl mb-2 line-clamp-2">{item.name}</h3>
+          {item.description && (
+            <p className="text-sm text-muted-foreground line-clamp-3 mb-6">
+              {item.description}
+            </p>
+          )}
 
           <Button
             className="w-full"
             size="lg"
-            disabled={!item.isAvailable}
-            variant={item.isAvailable ? "default" : "secondary"}
+            variant={isAvailable ? 'default' : 'secondary'}
+            disabled={!isAvailable}
+            onClick={handleButtonClick}
           >
-            {item.isAvailable ? 'Customize & Add' : 'Currently Unavailable'}
+            {isAvailable ? 'Customize & Add to Cart' : 'Currently Unavailable'}
           </Button>
         </CardContent>
       </Card>

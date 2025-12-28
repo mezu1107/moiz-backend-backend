@@ -1,8 +1,10 @@
-// src/features/orders/pages/OrderTrackingPage.tsx
-// FINAL PRODUCTION — DECEMBER 26, 2025
-// Live tracking + Reorder + Review CTA + ZERO TypeScript errors
+// src/features/orders/pages/OrderSuccessPage.tsx
+// PRODUCTION-READY — DECEMBER 28, 2025
+// Reorder now works for BOTH authenticated and guest users
+// Fully consistent with OrderTrackingPage
+// Real-time socket, confetti, proper toasts
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import {
@@ -27,7 +29,6 @@ import {
   MapPin,
   Phone,
   RotateCcw,
-  Star,
   Loader2,
 } from 'lucide-react';
 
@@ -41,8 +42,6 @@ import {
   ORDER_STATUS_COLORS,
 } from '@/types/order.types';
 
-import SubmitReviewModal from '@/features/reviews/components/SubmitReviewModal';
-
 const STEPS = [
   { status: 'pending', icon: Clock, label: 'Order Received' },
   { status: 'confirmed', icon: CheckCircle, label: 'Confirmed' },
@@ -51,19 +50,21 @@ const STEPS = [
   { status: 'delivered', icon: Package, label: 'Delivered' },
 ] as const;
 
-export default function OrderTrackingPage() {
+const formatPrice = (amount: number | undefined): string => {
+  if (typeof amount !== 'number' || isNaN(amount)) return '0';
+  return amount.toLocaleString('en-PK');
+};
+
+export default function OrderSuccessPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
 
   const { data: order, isLoading, error } = useTrackOrder(orderId);
   const reorderMutation = useReorder();
 
-  const [reviewModalOpen, setReviewModalOpen] = useState(false);
-
-  // Real-time socket updates
   useOrderSocket(orderId);
 
-  // Confetti celebration on delivery
+  // Confetti on delivery
   useEffect(() => {
     if (order?.status === 'delivered') {
       confetti({
@@ -74,40 +75,55 @@ export default function OrderTrackingPage() {
     }
   }, [order?.status]);
 
+  const handleReorder = async () => {
+    if (!orderId) return;
+
+    try {
+      await reorderMutation.mutateAsync(orderId);
+      toast.success('Items added to your cart!');
+      setTimeout(() => navigate('/cart'), 800);
+    } catch {
+      // Error toast already handled in useReorder hook
+    }
+  };
+
   if (!orderId) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="max-w-md w-full text-center p-10">
-          <XCircle className="h-16 w-16 text-destructive mx-auto mb-6" />
-          <h2 className="text-2xl font-bold mb-4">Invalid Order Link</h2>
-          <Button asChild>
-            <Link to="/orders">Go to My Orders</Link>
+      <main className="min-h-screen flex items-center justify-center px-4 py-12 bg-muted/20">
+        <Card className="w-full max-w-md text-center p-8 md:p-10">
+          <XCircle className="h-14 w-14 md:h-16 md:w-16 text-destructive mx-auto mb-6" />
+          <h2 className="text-2xl font-bold md:text-3xl mb-4">Invalid Order</h2>
+          <Button size="lg" asChild>
+            <Link to="/orders">View Orders</Link>
           </Button>
         </Card>
-      </div>
+      </main>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <Skeleton className="h-96 rounded-2xl mb-6" />
-        <Skeleton className="h-64 rounded-2xl" />
-      </div>
+      <main className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
+        <div className="space-y-8">
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-96 rounded-2xl" />
+          <Skeleton className="h-64 rounded-2xl" />
+        </div>
+      </main>
     );
   }
 
   if (error || !order) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="max-w-md w-full text-center p-10">
-          <XCircle className="h-16 w-16 text-destructive mx-auto mb-6" />
-          <h2 className="text-2xl font-bold mb-4">Order Not Found</h2>
-          <Button asChild>
-            <Link to="/orders">My Orders</Link>
+      <main className="min-h-screen flex items-center justify-center px-4 py-12 bg-muted/20">
+        <Card className="w-full max-w-md text-center p-8 md:p-10">
+          <XCircle className="h-14 w-14 md:h-16 md:w-16 text-destructive mx-auto mb-6" />
+          <h2 className="text-2xl font-bold md:text-3xl mb-4">Order Not Found</h2>
+          <Button size="lg" asChild>
+            <Link to="/orders">View Orders</Link>
           </Button>
         </Card>
-      </div>
+      </main>
     );
   }
 
@@ -117,23 +133,13 @@ export default function OrderTrackingPage() {
   const isCancelled = ['cancelled', 'rejected'].includes(order.status);
   const shortId = order.shortId || order._id.slice(-6).toUpperCase();
 
-  const handleReorder = async () => {
-    try {
-      await reorderMutation.mutateAsync(order._id);
-      toast.success('Items added back to your cart!');
-      setTimeout(() => navigate('/checkout'), 1200);
-    } catch {
-      // Error toast already handled in hook
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/20 to-background py-8">
-      <div className="container mx-auto px-4 max-w-4xl space-y-8">
-        {/* Header */}
-        <div className="text-center">
+    <main className="min-h-screen bg-gradient-to-b from-muted/20 to-background py-8 md:py-12">
+      <div className="container mx-auto px-4 max-w-4xl space-y-8 md:space-y-10">
+        {/* Header Status */}
+        <header className="text-center">
           <div
-            className={`inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 shadow-lg ${
+            className={`inline-flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full mb-6 shadow-xl ${
               isCancelled
                 ? 'bg-red-100'
                 : isDelivered
@@ -142,86 +148,62 @@ export default function OrderTrackingPage() {
             }`}
           >
             {isCancelled ? (
-              <XCircle className="h-14 w-14 text-red-600" />
+              <XCircle className="h-12 w-12 md:h-14 md:w-14 text-red-600" />
             ) : isDelivered ? (
-              <CheckCircle className="h-14 w-14 text-green-600" />
+              <CheckCircle className="h-12 w-12 md:h-14 md:w-14 text-green-600" />
             ) : (
-              <CheckCircle className="h-14 w-14 text-rose-600" />
+              <CheckCircle className="h-12 w-12 md:h-14 md:w-14 text-rose-600" />
             )}
           </div>
 
-          <h1 className="text-4xl font-bold mb-3">
+          <h1 className="text-3xl font-bold mb-3 md:text-4xl lg:text-5xl">
             {isCancelled
               ? 'Order Cancelled'
               : isDelivered
               ? 'Order Delivered!'
-              : 'Order In Progress'}
+              : 'Order Confirmed!'}
           </h1>
 
-          <p className="text-xl text-muted-foreground mb-4">
+          <p className="text-lg text-muted-foreground mb-4 md:text-xl">
             Order <span className="font-mono font-bold text-rose-600">#{shortId}</span>
           </p>
 
           <Badge
-            className={`text-lg px-6 py-2 ${ORDER_STATUS_COLORS[order.status]} text-white`}
+            className={`text-base md:text-lg px-6 py-2 ${ORDER_STATUS_COLORS[order.status]} text-white`}
           >
             {ORDER_STATUS_LABELS[order.status]}
           </Badge>
-        </div>
-
-        {/* Review CTA — only when delivered and no review yet */}
-        {isDelivered && !order.review && (
-          <Card className="border-orange-500 bg-orange-50 shadow-lg">
-            <CardContent className="p-8 text-center space-y-4">
-              <Star className="h-16 w-16 text-orange-600 mx-auto" />
-              <h3 className="text-2xl font-bold">How Was Your Order?</h3>
-              <p className="text-muted-foreground">
-                Your feedback helps us improve and earns you loyalty points!
-              </p>
-              <Button
-                size="lg"
-                className="bg-orange-600 hover:bg-orange-700"
-                onClick={() => setReviewModalOpen(true)}
-              >
-                <Star className="mr-2 h-5 w-5" />
-                Write a Review
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+        </header>
 
         {/* Progress Timeline */}
         {!isTerminal && (
           <Card className="overflow-hidden shadow-xl">
-            <CardHeader>
-              <CardTitle>Order Progress</CardTitle>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl md:text-2xl">Order Progress</CardTitle>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-6 md:p-8">
               <div className="relative">
-                <div className="flex justify-between items-center">
+                <div className="grid grid-cols-5 gap-4">
                   {STEPS.map((step, i) => {
                     const Icon = step.icon;
                     const isActive = i <= currentStepIndex;
                     const isCompleted = i < currentStepIndex;
 
                     return (
-                      <div
-                        key={step.status}
-                        className="flex-1 flex flex-col items-center relative z-10"
-                      >
+                      <div key={step.status} className="flex flex-col items-center">
                         <div
-                          className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 ${
+                          className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all duration-500 shadow-md ${
                             isCompleted
                               ? 'bg-green-500 text-white'
                               : isActive
-                              ? 'bg-rose-600 text-white scale-110 shadow-lg'
+                              ? 'bg-rose-600 text-white scale-110'
                               : 'bg-muted text-muted-foreground'
                           }`}
                         >
-                          <Icon className="h-8 w-8" />
+                          <Icon className="h-7 w-7 md:h-8 md:w-8" />
                         </div>
                         <p
-                          className={`text-sm mt-3 font-medium text-center ${
+                          className={`mt-3 text-xs md:text-sm font-medium text-center ${
                             isActive || isCompleted ? 'text-foreground' : 'text-muted-foreground'
                           }`}
                         >
@@ -232,8 +214,7 @@ export default function OrderTrackingPage() {
                   })}
                 </div>
 
-                {/* Progress bar */}
-                <div className="absolute top-8 left-0 right-0 h-2 bg-muted -z-10">
+                <div className="absolute top-7 md:top-8 left-0 right-0 h-2 bg-muted -z-10">
                   <div
                     className="h-full bg-rose-600 transition-all duration-700 ease-out rounded-full"
                     style={{
@@ -242,32 +223,39 @@ export default function OrderTrackingPage() {
                   />
                 </div>
               </div>
+
+              {order.estimatedDelivery && currentStepIndex < STEPS.length - 1 && (
+                <p className="text-center mt-6 text-base md:text-lg">
+                  Estimated Delivery:{' '}
+                  <strong className="text-rose-600">{order.estimatedDelivery}</strong>
+                </p>
+              )}
             </CardContent>
           </Card>
         )}
 
-        {/* Order Items + Summary */}
+        {/* Order Items & Summary */}
         <Card className="shadow-xl">
           <CardHeader>
-            <CardTitle>Order Details</CardTitle>
+            <CardTitle className="text-xl md:text-2xl">Order Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-4">
+            <div className="space-y-5">
               {order.items.map((item, index) => (
                 <div
                   key={item._id || index}
-                  className="flex justify-between items-center py-3 border-b last:border-0"
+                  className="flex items-center justify-between py-4 border-b last:border-0"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold">
+                    <div className="w-12 h-12 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600 font-bold text-sm md:text-base">
                       {item.quantity}
                     </div>
-                    <div>
-                      <p className="font-medium">{item.menuItem.name}</p>
-                    </div>
+                    <p className="font-medium text-base md:text-lg">
+                      {item.menuItem?.name || item.name || 'Item Unavailable'}
+                    </p>
                   </div>
-                  <p className="font-medium">
-                    Rs. {(item.priceAtOrder * item.quantity).toLocaleString()}
+                  <p className="font-medium text-base md:text-lg">
+                    Rs. {formatPrice((item.priceAtOrder ?? 0) * item.quantity)}
                   </p>
                 </div>
               ))}
@@ -275,32 +263,32 @@ export default function OrderTrackingPage() {
 
             <Separator />
 
-            <div className="space-y-3">
-              <div className="flex justify-between text-lg">
+            <div className="space-y-4 text-base md:text-lg">
+              <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>Rs. {order.totalAmount.toLocaleString()}</span>
+                <span>Rs. {formatPrice(order.totals?.totalAmount ?? 0)}</span>
               </div>
-              <div className="flex justify-between text-lg">
+              <div className="flex justify-between">
                 <span>Delivery Fee</span>
-                <span>Rs. {order.deliveryFee.toLocaleString()}</span>
+                <span>Rs. {formatPrice(order.totals?.deliveryFee ?? 0)}</span>
               </div>
-              {order.discountApplied > 0 && (
+              {order.totals?.discountApplied > 0 && (
                 <div className="flex justify-between text-green-600 font-medium">
                   <span>Discount</span>
-                  <span>-Rs. {order.discountApplied.toLocaleString()}</span>
+                  <span>-Rs. {formatPrice(order.totals.discountApplied)}</span>
                 </div>
               )}
-              {order.walletUsed > 0 && (
+              {order.totals?.walletUsed > 0 && (
                 <div className="flex justify-between text-blue-600 font-medium">
                   <span>Wallet Used</span>
-                  <span>-Rs. {order.walletUsed.toLocaleString()}</span>
+                  <span>-Rs. {formatPrice(order.totals.walletUsed)}</span>
                 </div>
               )}
               <Separator />
-              <div className="flex justify-between text-2xl font-bold">
-                <span>Total</span>
+              <div className="flex justify-between text-2xl font-bold md:text-3xl">
+                <span>Total Paid</span>
                 <span className="text-rose-600">
-                  Rs. {order.finalAmount.toLocaleString()}
+                  Rs. {formatPrice(order.totals?.finalAmount ?? 0)}
                 </span>
               </div>
             </div>
@@ -310,30 +298,28 @@ export default function OrderTrackingPage() {
         {/* Delivery Info */}
         <Card className="shadow-xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-3 text-xl md:text-2xl">
+              <MapPin className="h-6 w-6" />
               Delivery Address
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-lg">
+          <CardContent className="space-y-5">
+            <p className="text-base md:text-lg leading-relaxed">
               {order.addressDetails?.fullAddress ||
                 order.address?.fullAddress ||
-                'N/A'}
+                'Address not available'}
             </p>
 
-            {/* Floor — only exists in addressDetails (guest orders) */}
             {order.addressDetails?.floor && (
               <p className="text-muted-foreground">
                 Floor: {order.addressDetails.floor}
               </p>
             )}
 
-            {/* Instructions — prefer order-level, then addressDetails, then address */}
             {(order.instructions ||
               order.addressDetails?.instructions ||
               order.address?.instructions) && (
-              <p className="italic text-muted-foreground">
+              <p className="italic text-muted-foreground text-sm md:text-base">
                 Note: "
                 {order.instructions ||
                   order.addressDetails?.instructions ||
@@ -342,24 +328,23 @@ export default function OrderTrackingPage() {
               </p>
             )}
 
-            {/* Rider Info */}
             {order.rider && (
               <>
-                <Separator />
+                <Separator className="my-6" />
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Truck className="h-8 w-8 text-primary" />
+                    <div className="w-16 h-16 rounded-full bg-rose-100 flex items-center justify-center">
+                      <Truck className="h-8 w-8 md:h-10 md:w-10 text-rose-600" />
                     </div>
                     <div>
-                      <p className="font-bold text-lg">{order.rider.name}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-bold text-lg md:text-xl">{order.rider.name}</p>
+                      <p className="text-sm text-muted-foreground md:text-base">
                         Your Delivery Partner
                       </p>
                     </div>
                   </div>
 
-                  <Button size="lg" variant="secondary" asChild>
+                  <Button size="lg" variant="secondary" asChild className="h-12">
                     <a href={`tel:${order.rider.phone}`}>
                       <Phone className="mr-2 h-5 w-5" />
                       Call Rider
@@ -371,22 +356,22 @@ export default function OrderTrackingPage() {
           </CardContent>
         </Card>
 
-        {/* Action Buttons */}
-        <div className="grid sm:grid-cols-2 gap-4 pb-12">
-          <Button variant="outline" size="lg" asChild>
-            <Link to="/orders">My Orders</Link>
+        {/* Action Buttons — Reorder available to ALL users */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-8">
+          <Button variant="outline" size="lg" asChild className="h-12">
+            <Link to="/orders">View All Orders</Link>
           </Button>
 
           <Button
             size="lg"
             onClick={handleReorder}
-            disabled={reorderMutation.isPending}
-            className="bg-rose-600 hover:bg-rose-700"
+            disabled={reorderMutation.isPending || isCancelled}
+            className="h-12 bg-rose-600 hover:bg-rose-700 text-base md:text-lg"
           >
             {reorderMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Reordering...
+                Adding to Cart...
               </>
             ) : (
               <>
@@ -396,14 +381,7 @@ export default function OrderTrackingPage() {
             )}
           </Button>
         </div>
-
-        {/* Review Modal */}
-        <SubmitReviewModal
-          orderId={order._id}
-          open={reviewModalOpen}
-          onOpenChange={setReviewModalOpen}
-        />
       </div>
-    </div>
+    </main>
   );
 }

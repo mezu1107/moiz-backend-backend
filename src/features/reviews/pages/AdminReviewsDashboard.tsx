@@ -1,47 +1,44 @@
-// src/pages/CustomerReviewsPage.tsx
-// Public Customer Reviews Page — Production Ready (December 21, 2025)
+// src/pages/AdminReviewsDashboard.tsx
+// PRODUCTION-READY — FULLY RESPONSIVE (320px → 4K)
+// Mobile-first admin dashboard with tabs, fluid layout
 
-import ReviewList from '@/features/reviews/components/ReviewList';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AdminReviewTable from '@/features/reviews/components/AdminReviewTable';
 import ReviewAnalytics from '@/features/reviews/components/ReviewAnalytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Star } from 'lucide-react';
 
-export default function CustomerReviewsPage() {
+export default function AdminReviewsDashboard() {
   return (
-    <div className="container mx-auto px-4 py-12 max-w-7xl">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Customer Reviews</h1>
-        <p className="text-xl text-muted-foreground">
-          See what our customers are saying about their experience
-        </p>
-      </div>
+    <main className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
+      <header className="mb-10">
+        <h1 className="text-3xl font-bold md:text-4xl lg:text-5xl">Reviews Dashboard</h1>
+      </header>
 
-      {/* Featured Reviews Section */}
-      <section className="mb-16">
-        <div className="flex items-center gap-3 mb-8">
-          <Star className="h-8 w-8 text-yellow-500" />
-          <h2 className="text-3xl font-semibold">Featured Reviews</h2>
-        </div>
-        <ReviewList featuredOnly limit={6} />
-      </section>
+      <Tabs defaultValue="analytics" className="space-y-8">
+        <TabsList className="grid w-full grid-cols-2 md:w-auto md:inline-flex">
+          <TabsTrigger value="analytics" className="text-sm md:text-base">
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="management" className="text-sm md:text-base">
+            Review Management
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Analytics Summary */}
-      <section className="mb-16">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Review Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ReviewAnalytics />
-          </CardContent>
-        </Card>
-      </section>
+        <TabsContent value="analytics" className="space-y-8">
+          <Card className="shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl md:text-2xl">Review Analytics Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ReviewAnalytics />
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* All Approved Reviews */}
-      <section>
-        <h2 className="text-3xl font-semibold mb-8">All Reviews</h2>
-        <ReviewList />
-      </section>
-    </div>
+        <TabsContent value="management" className="space-y-8">
+          <AdminReviewTable />
+        </TabsContent>
+      </Tabs>
+    </main>
   );
 }

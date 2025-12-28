@@ -1,6 +1,10 @@
 // src/features/cart/hooks/useCartStore.ts
+// PRODUCTION-READY — DECEMBER 28, 2025
+// Added: addMultipleItems() for fast bulk reorder (guest + authenticated)
+// Fixed: Immediate persist + TypeScript-safe
+
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { CartItem, MenuItemInCart } from '@/types/cart.types';
 
 interface CartState {
@@ -16,72 +20,112 @@ interface CartState {
       addOns?: string[];
       specialInstructions?: string;
     },
-    priceAtAdd?: number // important: pass final price including extras
+    priceAtAdd?: number
   ) => void;
+
+  // NEW: Bulk add for reorder — replaces current cart
+  addMultipleItems: (items: CartItem[]) => void;
 
   updateItem: (
     cartItemId: string,
-    updates: Partial<Pick<CartItem, 'quantity' | 'sides' | 'drinks' | 'addOns' | 'specialInstructions'> & { orderNote?: string }>
+    updates: Partial<
+      Pick<CartItem, 'quantity' | 'sides' | 'drinks' | 'addOns' | 'specialInstructions'>
+    > & { orderNote?: string }
   ) => void;
 
   removeItem: (cartItemId: string) => void;
   setOrderNote: (note: string) => void;
   clearCart: () => void;
-
   getTotal: () => number;
   getItemCount: () => number;
   syncWithServer: (serverCart: { items: CartItem[]; orderNote: string }) => void;
 }
 
-const calculateTotal = (items: CartItem[]): number =>
+// ---------------- Helpers ----------------
+const calculateTotal = (items: CartItem[]) =>
   items.reduce((sum, item) => sum + item.priceAtAdd * item.quantity, 0);
 
+const arraysEqual = (a: string[] = [], b: string[] = []) => {
+  if (a.length !== b.length) return false;
+  const sortedA = [...a].sort();
+  const sortedB = [...b].sort();
+  return sortedA.every((val, i) => val === sortedB[i]);
+};
+
+// ---------------- Store ----------------
 export const useCartStore = create<CartState>()(
   persist(
-    (set, get) => ({
-      items: [],
-      orderNote: '',
+    (set, get) => {
+      // Helper to immediately persist state
+      const persistState = (partial: Partial<CartState>) => {
+        set(partial);
+        // Force immediate flush to localStorage
+        localStorage.setItem(
+          'amfood-cart-v6',
+          JSON.stringify({ ...get(), version: 6 })
+        );
+      };
 
-      addItem: (menuItem, quantity = 1, customizations = {}, priceAtAdd = menuItem.price) =>
-        set((state) => {
-          // Try to find exact match including customizations
+      return {
+        items: [],
+        orderNote: '',
+
+        addItem: (menuItem, quantity = 1, customizations = {}, priceAtAdd = menuItem.price) => {
+          const state = get();
           const existingIndex = state.items.findIndex((i) => {
             if (i.menuItem._id !== menuItem._id) return false;
-            if (i.specialInstructions !== (customizations.specialInstructions || '')) return false;
+            if (i.specialInstructions !== (customizations.specialInstructions ?? '')) return false;
             return (
-              arraysEqual(i.sides || [], customizations.sides || []) &&
-              arraysEqual(i.drinks || [], customizations.drinks || []) &&
-              arraysEqual(i.addOns || [], customizations.addOns || [])
+              arraysEqual(i.sides ?? [], customizations.sides ?? []) &&
+              arraysEqual(i.drinks ?? [], customizations.drinks ?? []) &&
+              arraysEqual(i.addOns ?? [], customizations.addOns ?? [])
             );
           });
 
+          let newItems: CartItem[];
+
           if (existingIndex > -1) {
-            const updated = [...state.items];
-            updated[existingIndex].quantity = Math.min(updated[existingIndex].quantity + quantity, 50);
-            return { items: updated };
+            newItems = [...state.items];
+            newItems[existingIndex].quantity = Math.min(
+              newItems[existingIndex].quantity + quantity,
+              50
+            );
+          } else {
+            const newItem: CartItem = {
+              _id: crypto.randomUUID(),
+              menuItem,
+              quantity,
+              priceAtAdd,
+              sides: customizations.sides,
+              drinks: customizations.drinks,
+              addOns: customizations.addOns,
+              specialInstructions: customizations.specialInstructions,
+              addedAt: new Date().toISOString(),
+            };
+            newItems = [...state.items, newItem];
           }
 
-          const newItem: CartItem = {
-            _id: crypto.randomUUID(),
-            menuItem,
-            quantity,
-            priceAtAdd,
-            sides: customizations.sides,
-            drinks: customizations.drinks,
-            addOns: customizations.addOns,
-            specialInstructions: customizations.specialInstructions,
-            addedAt: new Date().toISOString(),
-          };
+          persistState({ items: newItems });
+        },
 
-          return { items: [...state.items, newItem] };
-        }),
+        // NEW: Bulk add — used by reorder (replaces current cart)
+        addMultipleItems: (newItems: CartItem[]) => {
+          if (!Array.isArray(newItems)) {
+            persistState({ items: [] });
+            return;
+          }
 
-      updateItem: (cartItemId, updates) =>
-        set((state) => {
+          // Reorder replaces the entire cart — clean and expected behavior
+          persistState({ items: newItems });
+        },
+
+        updateItem: (cartItemId, updates) => {
+          const state = get();
           const idx = state.items.findIndex((i) => i._id === cartItemId);
-          if (idx === -1) return state;
+          if (idx === -1) return;
 
           const updatedItems = [...state.items];
+
           if (updates.quantity !== undefined) {
             if (updates.quantity <= 0) {
               updatedItems.splice(idx, 1);
@@ -89,52 +133,50 @@ export const useCartStore = create<CartState>()(
               updatedItems[idx].quantity = Math.min(updates.quantity, 50);
             }
           }
-
-          if (updates.sides) updatedItems[idx].sides = updates.sides;
-          if (updates.drinks) updatedItems[idx].drinks = updates.drinks;
-          if (updates.addOns) updatedItems[idx].addOns = updates.addOns;
+          if (updates.sides !== undefined) updatedItems[idx].sides = updates.sides;
+          if (updates.drinks !== undefined) updatedItems[idx].drinks = updates.drinks;
+          if (updates.addOns !== undefined) updatedItems[idx].addOns = updates.addOns;
           if (updates.specialInstructions !== undefined)
             updatedItems[idx].specialInstructions = updates.specialInstructions;
 
-          return {
+          persistState({
             items: updatedItems,
             orderNote: updates.orderNote ?? state.orderNote,
-          };
-        }),
+          });
+        },
 
-      removeItem: (cartItemId) =>
-        set((state) => ({
-          items: state.items.filter((i) => i._id !== cartItemId),
-        })),
+        removeItem: (cartItemId) => {
+          const newItems = get().items.filter((i) => i._id !== cartItemId);
+          persistState({ items: newItems });
+        },
 
-      setOrderNote: (note) => set({ orderNote: note }),
+        setOrderNote: (note) => {
+          persistState({ orderNote: note });
+        },
 
-      clearCart: () => set({ items: [], orderNote: '' }),
+        clearCart: () => {
+          persistState({ items: [], orderNote: '' });
+        },
 
-      getTotal: () => calculateTotal(get().items),
+        getTotal: () => calculateTotal(get().items),
+        getItemCount: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
 
-      getItemCount: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
-
-      syncWithServer: ({ items, orderNote }) => set({ items, orderNote }),
-    }),
+        syncWithServer: ({ items, orderNote }) => {
+          persistState({ items, orderNote });
+        },
+      };
+    },
     {
-      name: 'amfood-cart-v4',
-      version: 4,
-      migrate: (persisted: any, version) => {
-        if (version < 4) {
-          console.log('Migrating cart to v4 – clearing old data');
+      name: 'amfood-cart-v6',
+      version: 6,
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ items: state.items, orderNote: state.orderNote }),
+      migrate: (persistedState: any, version) => {
+        if (version < 6) {
           return { items: [], orderNote: '' };
         }
-        return persisted;
+        return persistedState as CartState;
       },
     }
   )
 );
-
-// Helper: order-insensitive array equality
-const arraysEqual = (a: string[] = [], b: string[] = []) => {
-  if (a.length !== b.length) return false;
-  const sortedA = [...a].sort();
-  const sortedB = [...b].sort();
-  return sortedA.every((val, i) => val === sortedB[i]);
-};

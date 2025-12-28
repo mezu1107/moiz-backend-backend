@@ -1,5 +1,5 @@
 // src/features/kitchen/pages/KitchenDisplay.tsx
-// FINAL PRODUCTION — DECEMBER 27, 2025
+// FINAL PRODUCTION — DECEMBER 28, 2025 (Responsive Only)
 
 import { useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
@@ -59,31 +59,34 @@ export default function KitchenDisplay() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-200">
         <Loader2 className="h-16 w-16 animate-spin text-rose-600" />
+        <span className="sr-only">Loading orders...</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <header className="text-center mb-10">
-          <h1 className="text-5xl font-bold text-slate-900 flex items-center justify-center gap-4">
-            <ChefHat className="h-12 w-12 text-rose-600" />
-            Kitchen Display
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200">
+      {/* Mobile-first padding & max-width container */}
+      <div className="mx-auto px-4 py-8 sm:px-6 lg:px-8 max-w-7xl">
+        {/* Header - responsive typography & spacing */}
+        <header className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+            <ChefHat className="h-10 w-10 sm:h-12 sm:w-12 text-rose-600 flex-shrink-0" />
+            <span>Kitchen Display</span>
           </h1>
-          <p className="text-xl text-slate-700 mt-2">
+          <p className="mt-3 text-lg sm:text-xl lg:text-2xl text-slate-700">
             Live orders • Real-time updates
           </p>
         </header>
 
-        <div className="grid lg:grid-cols-2 gap-10">
+        {/* Responsive grid: 1 column on small screens, 2 columns from lg+ */}
+        <div className="grid gap-8 lg:gap-12 lg:grid-cols-2">
           {/* NEW ORDERS */}
           <Section
             title={`New Orders (${newOrders.length})`}
-            icon={<Clock className="h-8 w-8 text-orange-600" />}
+            icon={<Clock className="h-7 w-7 sm:h-8 sm:w-8 text-orange-600" />}
             emptyTitle="No new orders"
             emptySub="Waiting for customers..."
           >
@@ -94,9 +97,7 @@ export default function KitchenDisplay() {
                 headerBg="bg-orange-100"
                 actionLabel="Start Preparing"
                 actionColor="bg-orange-600 hover:bg-orange-700"
-                onAction={() =>
-                  handleStatusChange(order._id, 'preparing')
-                }
+                onAction={() => handleStatusChange(order._id, 'preparing')}
                 loading={updateStatus.isPending}
               />
             ))}
@@ -105,7 +106,7 @@ export default function KitchenDisplay() {
           {/* PREPARING */}
           <Section
             title={`Preparing (${preparingOrders.length})`}
-            icon={<ChefHat className="h-8 w-8 text-purple-700" />}
+            icon={<ChefHat className="h-7 w-7 sm:h-8 sm:w-8 text-purple-700" />}
             emptyTitle="Nothing preparing"
             emptySub="All caught up!"
           >
@@ -116,9 +117,7 @@ export default function KitchenDisplay() {
                 headerBg="bg-purple-100"
                 actionLabel="Ready for Pickup / Delivery"
                 variant="secondary"
-                onAction={() =>
-                  handleStatusChange(order._id, 'out_for_delivery')
-                }
+                onAction={() => handleStatusChange(order._id, 'out_for_delivery')}
                 loading={updateStatus.isPending}
               />
             ))}
@@ -139,23 +138,29 @@ function Section({
   emptyTitle,
   emptySub,
   children,
-}: any) {
-  const isEmpty = !children || children.length === 0;
+}: {
+  title: string;
+  icon: React.ReactNode;
+  emptyTitle: string;
+  emptySub: string;
+  children?: React.ReactNode;
+}) {
+  const isEmpty = !children || (Array.isArray(children) && children.length === 0);
 
   return (
     <section>
-      <h2 className="text-3xl font-bold mb-6 flex items-center gap-3 text-slate-900">
+      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 flex items-center gap-3 text-slate-900">
         {icon}
         {title}
       </h2>
 
       {isEmpty ? (
-        <Card className="border-2 border-dashed bg-white">
-          <CardContent className="py-20 text-center">
-            <p className="text-2xl font-semibold text-slate-700">
+        <Card className="border-2 border-dashed border-slate-300 bg-white/80">
+          <CardContent className="py-16 sm:py-20 text-center">
+            <p className="text-xl sm:text-2xl font-semibold text-slate-700">
               {emptyTitle}
             </p>
-            <p className="text-lg mt-2 text-slate-600">{emptySub}</p>
+            <p className="mt-3 text-base sm:text-lg text-slate-600">{emptySub}</p>
           </CardContent>
         </Card>
       ) : (
@@ -173,36 +178,44 @@ function OrderCard({
   variant,
   onAction,
   loading,
-}: any) {
+}: {
+  order: Order;
+  headerBg: string;
+  actionLabel: string;
+  actionColor?: string;
+  variant?: 'default' | 'secondary';
+  onAction: () => void;
+  loading: boolean;
+}) {
   return (
-    <Card className="rounded-xl overflow-hidden border shadow-sm hover:shadow-md transition bg-gradient-to-br from-white via-slate-50 to-slate-200">
-      <CardHeader className={`${headerBg} text-slate-900`}>
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-2xl font-bold text-slate-900">
+    <Card className="overflow-hidden border shadow-sm hover:shadow-lg transition-shadow duration-300 bg-white/90">
+      <CardHeader className={`p-4 sm:p-6 ${headerBg}`}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-slate-900">
             #{order._id.slice(-6).toUpperCase()}
           </CardTitle>
-          <Badge className="text-lg px-4 py-1 bg-slate-800 text-white">
+          <Badge className="text-base sm:text-lg px-3 py-1 bg-slate-800 text-white">
             {order.items.length} items
           </Badge>
         </div>
 
         {(order.guestInfo || order.customer) && (
-          <p className="text-sm text-slate-700 mt-1">
+          <p className="text-sm sm:text-base text-slate-700 mt-2">
             {order.guestInfo?.name || order.customer?.name} •{' '}
             {order.guestInfo?.phone || order.customer?.phone}
           </p>
         )}
       </CardHeader>
 
-      <CardContent className="pt-6">
+      <CardContent className="p-4 sm:p-6 pt-5">
         <div className="space-y-3 mb-6">
           {order.items.map((item: any, idx: number) => (
             <div
               key={item._id || idx}
-              className="flex justify-between text-lg text-slate-900 border-b border-slate-300 pb-2"
+              className="flex justify-between items-center text-base sm:text-lg text-slate-900 pb-2 border-b border-slate-200 last:border-0"
             >
               <span>
-                <strong>{item.quantity}×</strong>{' '}
+                <strong className="text-rose-600">{item.quantity}×</strong>{' '}
                 {item.menuItem?.name || item.name}
               </span>
             </div>
@@ -210,26 +223,27 @@ function OrderCard({
         </div>
 
         {order.instructions && (
-          <div className="bg-yellow-100 border border-yellow-300 p-4 rounded-lg mb-6">
-            <p className="font-semibold text-slate-900">
+          <div className="bg-yellow-50 border border-yellow-300 p-4 rounded-lg mb-6">
+            <p className="font-semibold text-slate-900 text-sm sm:text-base">
               Special Instructions
             </p>
-            <p className="italic text-slate-800">
+            <p className="italic text-slate-800 mt-1 text-sm sm:text-base">
               "{order.instructions}"
             </p>
           </div>
         )}
 
+        {/* Large touch-friendly button */}
         <Button
           size="lg"
           variant={variant}
-          className={`w-full text-xl py-6 ${actionColor || ''}`}
+          className={`w-full h-14 text-lg sm:text-xl font-medium ${actionColor || ''}`}
           onClick={onAction}
           disabled={loading}
         >
           {loading ? (
             <>
-              <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+              <Loader2 className="mr-2 h-6 w-6 animate-spin" />
               Processing...
             </>
           ) : (

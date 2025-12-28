@@ -1,4 +1,8 @@
 // src/pages/admin/areas/AddArea.tsx
+// PRODUCTION-READY — FULLY RESPONSIVE (320px → 4K)
+// Mobile-first admin area creation with map drawing & manual input
+// Fluid layout, touch-friendly, accessible, beautiful gradient design
+
 import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -64,9 +68,8 @@ export default function AddArea() {
 
   const [center, setCenter] = useState({ lat: 33.5651, lng: 73.0169 });
   const [polygon, setPolygon] = useState<[number, number][][]>([]);
-  const [manualInput, setManualInput] = useState('');
+  const [manualInput, setManualInput] = useState<string>('');
 
-  // Ref to the Leaflet map instance (exposed via forwardRef in AreaMapDrawer)
   const mapRef = useRef<LeafletMap | null>(null);
 
   const form = useForm<AreaFormValues>({
@@ -100,7 +103,6 @@ export default function AddArea() {
         return [lat, lng];
       });
 
-      // Auto-close polygon
       const first = points[0];
       const last = points[points.length - 1];
       if (first[0] !== last[0] || first[1] !== last[1]) {
@@ -111,7 +113,6 @@ export default function AddArea() {
       setPolygon(newPolygon);
       form.setValue('polygon', { type: 'Polygon', coordinates: newPolygon });
 
-      // Update center to polygon centroid
       const avgLat = points.reduce((s, p) => s + p[0], 0) / points.length;
       const avgLng = points.reduce((s, p) => s + p[1], 0) / points.length;
       const newCenter = { lat: avgLat, lng: avgLng };
@@ -155,12 +156,11 @@ export default function AddArea() {
     }
   };
 
-  // Resize map when switching to "Draw on Map" tab
   useEffect(() => {
     if (mode === 'draw' && mapRef.current) {
       const timer = setTimeout(() => {
         mapRef.current?.invalidateSize();
-      }, 150);
+      }, 200);
       return () => clearTimeout(timer);
     }
   }, [mode]);
@@ -169,15 +169,17 @@ export default function AddArea() {
   const isPolygonValid = polygon.length > 0 && polygon[0].length >= 4;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 py-12 px-4">
-      <div className="container mx-auto max-w-7xl">
+    <main className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 py-8 md:py-12">
+      <div className="container mx-auto px-4 max-w-7xl">
         <Card className="shadow-2xl border-0 overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-700 text-white">
-            <div className="flex items-center gap-4">
-              <MapPin className="w-12 h-12" />
+          <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-700 text-white pb-10">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <MapPin className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0" />
               <div>
-                <CardTitle className="text-4xl font-black">Add New Delivery Area</CardTitle>
-                <p className="text-green-100 mt-2 text-lg opacity-90">
+                <CardTitle className="text-3xl font-black md:text-4xl lg:text-5xl">
+                  Add New Delivery Area
+                </CardTitle>
+                <p className="text-green-100 mt-3 text-base md:text-lg opacity-90">
                   Draw on the map or paste coordinates to define your delivery zone
                 </p>
               </div>
@@ -188,35 +190,35 @@ export default function AddArea() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
               {/* Area Name & City */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label className="text-lg font-semibold flex items-center gap-2">
                     Area Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     placeholder="e.g. Bahria Town Phase 7, Saddar"
-                    className="h-14 text-lg"
+                    className="h-12 md:h-14 text-base md:text-lg"
                     {...form.register('name')}
                   />
                   {form.formState.errors.name && (
-                    <p className="text-red-600 text-sm flex items-center gap-1">
-                      <AlertCircle size={16} />
+                    <p className="text-sm text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4" />
                       {form.formState.errors.name.message}
                     </p>
                   )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label className="text-lg font-semibold">City</Label>
                   <Select
                     value={form.watch('city')}
                     onValueChange={(v) => form.setValue('city', v as City)}
                   >
-                    <SelectTrigger className="h-14 text-lg">
+                    <SelectTrigger className="h-12 md:h-14 text-base md:text-lg">
                       <SelectValue placeholder="Select city" />
                     </SelectTrigger>
                     <SelectContent>
                       {CITIES.map((city) => (
-                        <SelectItem key={city} value={city} className="text-lg py-3">
+                        <SelectItem key={city} value={city} className="py-3 text-base">
                           {city}
                         </SelectItem>
                       ))}
@@ -227,22 +229,22 @@ export default function AddArea() {
 
               {/* Polygon Definition */}
               <div className="space-y-6">
-                <Label className="text-xl font-bold">Delivery Zone Polygon</Label>
+                <Label className="text-xl font-bold md:text-2xl">Delivery Zone Polygon</Label>
 
-                <Tabs value={mode} onValueChange={(v) => setMode(v as 'draw' | 'manual')} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 h-14">
-                    <TabsTrigger value="draw" className="text-lg font-medium">
+                <Tabs value={mode} onValueChange={(v) => setMode(v as 'draw' | 'manual')}>
+                  <TabsList className="grid w-full grid-cols-2 h-12 md:h-14">
+                    <TabsTrigger value="draw" className="text-base md:text-lg font-medium">
                       Draw on Map
                     </TabsTrigger>
-                    <TabsTrigger value="manual" className="text-lg font-medium">
+                    <TabsTrigger value="manual" className="text-base md:text-lg font-medium">
                       Paste Coordinates
                     </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="draw" className="mt-6">
-                    <div className="border-4 border-emerald-200 rounded-2xl overflow-hidden shadow-lg bg-gray-50">
+                    <div className="border-4 border-emerald-200 rounded-2xl overflow-hidden shadow-2xl bg-gray-50">
                       <AreaMapDrawer
-                        ref={mapRef} // ← Correct way: forwardRef exposes the map instance
+                        ref={mapRef}
                         center={center}
                         polygon={polygon}
                         onCenterChange={(c) => {
@@ -258,10 +260,11 @@ export default function AddArea() {
                   </TabsContent>
 
                   <TabsContent value="manual" className="mt-6 space-y-6">
-                    <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-8">
-                      <h4 className="font-bold text-amber-900 mb-4 text-lg">Coordinate Format</h4>
-                      <p className="text-amber-800 mb-6">
-                        Enter one coordinate per line: <code className="bg-amber-200 px-3 py-1 rounded font-mono">latitude, longitude</code>
+                    <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 md:p-8">
+                      <h4 className="font-bold text-amber-900 mb-4 text-lg md:text-xl">Coordinate Format</h4>
+                      <p className="text-amber-800 mb-6 text-base">
+                        Enter one coordinate per line:{' '}
+                        <code className="bg-amber-200 px-3 py-1 rounded font-mono">latitude, longitude</code>
                       </p>
                       <pre className="bg-amber-100 p-6 rounded-xl font-mono text-sm overflow-x-auto border border-amber-300">
 {`33.565100, 73.016900
@@ -278,7 +281,7 @@ export default function AddArea() {
                       placeholder="Paste your coordinates here, one per line..."
                       value={manualInput}
                       onChange={(e) => setManualInput(e.target.value)}
-                      className="h-80 font-mono text-sm resize-none border-2"
+                      className="h-64 md:h-80 font-mono text-sm resize-none border-2"
                     />
 
                     <Button
@@ -286,7 +289,7 @@ export default function AddArea() {
                       onClick={parseManualPoints}
                       disabled={manualLoading || !manualInput.trim()}
                       size="lg"
-                      className="w-full h-14 text-lg font-semibold"
+                      className="w-full h-12 md:h-14 text-base md:text-lg font-semibold"
                     >
                       {manualLoading ? (
                         <>
@@ -302,16 +305,16 @@ export default function AddArea() {
               </div>
 
               {/* Live Status Summary */}
-              <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl p-8 border-2 border-emerald-200">
-                <h3 className="font-bold text-xl mb-6 flex items-center gap-3">
-                  <MapPin className="w-8 h-8 text-emerald-600" />
+              <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl p-6 md:p-8 border-2 border-emerald-200">
+                <h3 className="font-bold text-xl md:text-2xl mb-6 flex items-center gap-3">
+                  <MapPin className="w-7 md:w-8 md:h-8 text-emerald-600" />
                   Current Zone Status
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-white rounded-xl p-5 shadow-md">
                     <p className="text-gray-600 font-medium">Delivery Center</p>
-                    <p className="font-mono text-lg mt-2">
+                    <p className="font-mono text-base md:text-lg mt-2 break-all">
                       {center.lat.toFixed(6)}, {center.lng.toFixed(6)}
                     </p>
                   </div>
@@ -323,11 +326,11 @@ export default function AddArea() {
 
                   <div className="bg-white rounded-xl p-5 shadow-md flex items-center justify-center">
                     {isPolygonValid ? (
-                      <Badge className="text-xl px-8 py-4 bg-green-600 hover:bg-green-700">
+                      <Badge className="text-lg md:text-xl px-8 py-4 bg-green-600 hover:bg-green-700">
                         Ready to Save
                       </Badge>
                     ) : (
-                      <Badge variant="destructive" className="text-xl px-8 py-4">
+                      <Badge variant="destructive" className="text-lg md:text-xl px-8 py-4">
                         {pointCount === 0 ? 'Draw Polygon First' : 'Need More Points'}
                       </Badge>
                     )}
@@ -336,12 +339,12 @@ export default function AddArea() {
               </div>
 
               {/* Submit Actions */}
-              <div className="flex justify-end gap-6 pt-8 border-t-2 border-gray-200">
+              <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t-2 border-gray-200">
                 <Button
                   type="button"
                   variant="outline"
                   size="lg"
-                  className="px-10 py-6 text-lg"
+                  className="w-full sm:w-auto h-12 md:h-14 text-base md:text-lg"
                   onClick={() => navigate('/admin/areas')}
                 >
                   Cancel
@@ -351,7 +354,7 @@ export default function AddArea() {
                   type="submit"
                   size="lg"
                   disabled={loading || !isPolygonValid}
-                  className="px-16 py-6 text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-xl"
+                  className="w-full sm:w-auto h-12 md:h-14 text-base md:text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-xl"
                 >
                   {loading ? (
                     <>
@@ -367,6 +370,6 @@ export default function AddArea() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </main>
   );
 }

@@ -1,7 +1,7 @@
 // src/features/orders/hooks/useOrders.ts
 // FINAL PRODUCTION — DECEMBER 27, 2025
-// 100% synced with backend + ZERO TypeScript errors
-// FIXED: Cart fully cleared (including localStorage) after successful order placement
+// Fixed: TypeScript overload error in useOrderTimeline
+// Improved: Consistent typing, proper generics, reliable cart clearing
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -15,7 +15,24 @@ import type {
   CreateOrderPayload,
   CreateGuestOrderPayload,
   CreateOrderResponse,
+  ReorderResponse,
 } from '@/types/order.types';
+
+// ============================================================
+// TIMELINE RESPONSE TYPE (moved here for clarity)
+// ============================================================
+
+interface OrderTimelineResponse {
+  success: true;
+  timeline: Array<{
+    event: string;
+    timestamp: string;
+    status: string;
+    cancelledBy?: string;
+  }>;
+  currentStatus: string;
+  shortId: string;
+}
 
 // ============================================================
 // CUSTOMER HOOKS (Authenticated)
@@ -32,6 +49,7 @@ export const useMyOrders = () => {
     },
     enabled: isAuthenticated,
     staleTime: 30_000,
+    gcTime: 5 * 60_000,
     refetchOnWindowFocus: true,
   });
 };
@@ -45,39 +63,23 @@ export const useOrder = (orderId: string | undefined) => {
       return data.order;
     },
     enabled: !!orderId,
+    staleTime: 30_000,
+    gcTime: 10 * 60_000,
   });
 };
 
+// FIXED: Proper generic typing on api.get()
 export const useOrderTimeline = (orderId: string | undefined) => {
-  return useQuery<{
-    success: true;
-    timeline: Array<{
-      event: string;
-      timestamp: string;
-      status: string;
-      cancelledBy?: string;
-    }>;
-    currentStatus: string;
-    shortId: string;
-  }>({
+  return useQuery<OrderTimelineResponse>({
     queryKey: ['order-timeline', orderId],
     queryFn: async () => {
       if (!orderId) throw new Error('Order ID required');
-      const { data } = await api.get<{
-        success: true;
-        timeline: Array<{
-          event: string;
-          timestamp: string;
-          status: string;
-          cancelledBy?: string;
-        }>;
-        currentStatus: string;
-        shortId: string;
-      }>(`/orders/${orderId}/timeline`);
+      const { data } = await api.get<OrderTimelineResponse>(`/orders/${orderId}/timeline`);
       return data;
     },
     enabled: !!orderId,
     staleTime: 30_000,
+    gcTime: 5 * 60_000,
   });
 };
 
@@ -97,7 +99,7 @@ export const useTrackOrder = (orderId: string | undefined) => {
     },
     enabled: !!orderId,
     staleTime: 30_000,
-    gcTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
     refetchOnWindowFocus: true,
     retry: (count, error: any) => !(error.response?.status === 400 || error.response?.status === 404),
   });
@@ -127,12 +129,19 @@ export const useTrackOrdersByPhone = () => {
 };
 
 // ============================================================
-// ORDER CREATION — FULLY CLEARS CART (MEMORY + PERSISTENCE)
+// ORDER CREATION — RELIABLE CART CLEARING
 // ============================================================
+
+const CART_STORAGE_KEY = 'amfood-cart-v5';
+
+const clearCartCompletely = () => {
+  const { clearCart } = useCartStore.getState();
+  clearCart(); // Clears in-memory state
+  localStorage.removeItem(CART_STORAGE_KEY); // Permanently removes persisted cart
+};
 
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();
-  const { clearCart } = useCartStore();
 
   return useMutation<CreateOrderResponse, Error, CreateOrderPayload>({
     mutationFn: async (payload) => {
@@ -143,11 +152,7 @@ export const useCreateOrder = () => {
       queryClient.invalidateQueries({ queryKey: ['my-orders'] });
       queryClient.invalidateQueries({ queryKey: ['cart'] });
 
-      // Clear in-memory state
-      clearCart();
-
-      // CRITICAL: Remove persisted cart from localStorage to prevent reload restore
-      localStorage.removeItem('amfood-cart-v4');
+      clearCartCompletely();
 
       toast.success('Order placed successfully!');
 
@@ -165,7 +170,6 @@ export const useCreateOrder = () => {
 
 export const useCreateGuestOrder = () => {
   const queryClient = useQueryClient();
-  const { clearCart } = useCartStore();
 
   return useMutation<CreateOrderResponse, Error, CreateGuestOrderPayload>({
     mutationFn: async (payload) => {
@@ -175,11 +179,7 @@ export const useCreateGuestOrder = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
 
-      // Clear in-memory state
-      clearCart();
-
-      // CRITICAL: Remove persisted cart from localStorage
-      localStorage.removeItem('amfood-cart-v4');
+      clearCartCompletely();
 
       toast.success('Order placed successfully!');
 
@@ -269,28 +269,46 @@ export const useRequestRefund = () => {
 
 export const useReorder = () => {
   const queryClient = useQueryClient();
+  const { clearCart, addMultipleItems } = useCartStore();
 
-  return useMutation<
-    { success: true; message: string; cart: any },
-    Error,
-    string
-  >({
+  return useMutation<ReorderResponse, Error, string>({
     mutationFn: async (orderId) => {
-      const { data } = await api.post<{ success: true; message: string; cart: any }>(
-        `/orders/${orderId}/reorder`
-      );
+      const { data } = await api.post<ReorderResponse>(`/orders/${orderId}/reorder`);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const itemCount = data.cart.items.length;
+
+      // Always clear first — reorder replaces the cart
+      clearCart();
+
+      if (itemCount > 0) {
+        addMultipleItems(data.cart.items);
+      }
+
+      // Invalidate server cart for logged-in users
       queryClient.invalidateQueries({ queryKey: ['cart'] });
-      toast.success('Items added to cart!');
+
+      // User feedback
+      if (itemCount === 0) {
+        toast.warning('No items available to reorder');
+      } else {
+        const base = `Added ${itemCount} item${itemCount > 1 ? 's' : ''} to cart!`;
+        if (data.skippedItems && data.skippedItems > 0) {
+          toast.success(`${base} (${data.skippedItems} unavailable)`);
+        } else {
+          toast.success(base);
+        }
+      }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to reorder');
+      toast.error(
+        error.response?.data?.message ||
+        'Failed to reorder items'
+      );
     },
   });
 };
-
 // ============================================================
 // UTILITIES
 // ============================================================
@@ -302,7 +320,7 @@ export const downloadReceipt = async (orderId: string) => {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `FoodExpress-Receipt-#${orderId.slice(-6).toUpperCase()}.pdf`;
+    link.download = `AMFoods-Receipt-#${orderId.slice(-6).toUpperCase()}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -313,9 +331,8 @@ export const downloadReceipt = async (orderId: string) => {
   }
 };
 
-
 // ============================================================
-// ADMIN / KITCHEN / RIDER / DELIVERY MANAGER — STATUS UPDATE
+// ADMIN / KITCHEN / RIDER
 // ============================================================
 
 export const useUpdateOrderStatus = () => {
@@ -333,11 +350,9 @@ export const useUpdateOrderStatus = () => {
     onSuccess: (data, variables) => {
       const orderId = variables.orderId;
 
-      // Update single order caches
       queryClient.setQueryData(['order', orderId], data);
       queryClient.setQueryData(['track-order', orderId], data);
 
-      // Invalidate lists
       queryClient.invalidateQueries({ queryKey: ['my-orders'] });
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       queryClient.invalidateQueries({ queryKey: ['order-timeline', orderId] });
@@ -349,10 +364,6 @@ export const useUpdateOrderStatus = () => {
     },
   });
 };
-
-// ============================================================
-// ADMIN / DELIVERY MANAGER — ASSIGN RIDER
-// ============================================================
 
 export const useAssignRider = () => {
   const queryClient = useQueryClient();
@@ -369,21 +380,20 @@ export const useAssignRider = () => {
     onSuccess: (data, variables) => {
       const orderId = variables.orderId;
 
-      // Update caches
       queryClient.setQueryData(['order', orderId], data);
       queryClient.setQueryData(['track-order', orderId], data);
 
-      // Invalidate lists
       queryClient.invalidateQueries({ queryKey: ['my-orders'] });
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
 
-      toast.success(`Rider assigned successfully`);
+      toast.success('Rider assigned successfully');
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to assign rider');
     },
   });
 };
+
 // ============================================================
 // ADMIN HOOKS
 // ============================================================
@@ -409,6 +419,7 @@ export const useAdminOrders = (filters?: { status?: string; page?: number; limit
       return data;
     },
     staleTime: 30_000,
+    gcTime: 5 * 60_000,
   });
 };
 

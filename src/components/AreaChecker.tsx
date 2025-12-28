@@ -1,14 +1,23 @@
 // src/components/AreaChecker.tsx
+// FINAL PRODUCTION — DECEMBER 28, 2025
+// Google Places Autocomplete: Optional & safe (works without key)
+// Fallback: Current location button always available
+// Fixed: Navigation, error handling, loading UX
+
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, MapPin, Navigation, X, Search } from "lucide-react";
+import { Loader2, MapPin, Navigation, X, Search, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { useCheckArea } from "@/hooks/useCheckArea";
 import { useDeliveryStore } from "@/lib/deliveryStore";
 import { useNavigate } from "react-router-dom";
+
+// Load Google Maps script only if key exists
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+const isGooglePlacesEnabled = !!GOOGLE_API_KEY && GOOGLE_API_KEY.trim() !== "";
 
 interface AreaCheckerProps {
   onConfirmed?: (data: { area: any; delivery: any }) => void;
@@ -25,17 +34,78 @@ export default function AreaChecker({
 }: AreaCheckerProps) {
   const [detecting, setDetecting] = useState(false);
   const [searchCoords, setSearchCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [googleLoaded, setGoogleLoaded] = useState(false);
+  const [googleError, setGoogleError] = useState(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
   const navigate = useNavigate();
   const setDeliveryArea = useDeliveryStore((state) => state.setDeliveryArea);
 
-  // Trigger area check when we have coordinates
+  // Area check based on coordinates
   const { data, isLoading, error } = useCheckArea(
     searchCoords?.lat ?? null,
     searchCoords?.lng ?? null
   );
+
+  // Load Google Places script (only if key provided)
+  useEffect(() => {
+    if (!isGooglePlacesEnabled) {
+      setGoogleLoaded(false);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`;
+    script.async = true;
+    script.onload = () => setGoogleLoaded(true);
+    script.onerror = () => {
+      setGoogleError(true);
+      toast.error("Google Maps failed to load. Using location button only.");
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  // Initialize Google Places Autocomplete (only when loaded)
+  useEffect(() => {
+    if (!googleLoaded || !inputRef.current) return;
+
+    try {
+      const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ["geocode"],
+        componentRestrictions: { country: "pk" },
+        fields: ["formatted_address", "geometry"],
+      });
+
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (place.geometry?.location) {
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+          setSearchCoords({ lat, lng });
+          toast.success(`Searching: ${place.formatted_address}`);
+        } else {
+          toast.error("No location found for that address");
+        }
+      });
+
+      autocompleteRef.current = autocomplete;
+    } catch (err) {
+      console.warn("Google Autocomplete init failed:", err);
+      toast.error("Address search unavailable");
+    }
+
+    return () => {
+      if (autocompleteRef.current) {
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
+    };
+  }, [googleLoaded]);
 
   // Auto-detect location on mount
   useEffect(() => {
@@ -43,16 +113,16 @@ export default function AreaChecker({
       setDetecting(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const coords = {
+          setSearchCoords({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-          };
-          setSearchCoords(coords);
+          });
+          toast.success("Location detected!");
           setDetecting(false);
         },
         (err) => {
           console.warn("Geolocation error:", err);
-          toast.error("Unable to get your location. Please search manually.");
+          toast.error("Location access denied. Please search manually.");
           setDetecting(false);
         },
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
@@ -60,36 +130,7 @@ export default function AreaChecker({
     }
   }, [searchCoords]);
 
-  // Initialize Google Places Autocomplete
-  useEffect(() => {
-    if (!inputRef.current || !window.google?.maps?.places) return;
-
-    const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ["geocode"],
-      componentRestrictions: { country: "pk" }, // Pakistan only
-      fields: ["formatted_address", "geometry"],
-    });
-
-    autocomplete.addListener("place_changed", () => {
-      const place = autocomplete.getPlace();
-      if (place.geometry?.location) {
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        setSearchCoords({ lat, lng });
-        toast.success(`Searching: ${place.formatted_address}`);
-      }
-    });
-
-    autocompleteRef.current = autocomplete;
-
-    return () => {
-      if (autocompleteRef.current) {
-        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
-      }
-    };
-  }, []);
-
-  // Handle successful delivery check
+  // Handle delivery check result
   useEffect(() => {
     if (isLoading || error || !data) return;
 
@@ -109,10 +150,8 @@ export default function AreaChecker({
           }
         : null;
 
-      // Update Zustand store
       setDeliveryArea(area, delivery);
 
-      // Persist for page refresh
       sessionStorage.setItem(
         "deliveryState",
         JSON.stringify({
@@ -123,18 +162,18 @@ export default function AreaChecker({
       );
 
       const message = delivery
-        ? `Delivery available! Rs.${delivery.deliveryFee} fee`
-        : "We serve your area! Delivery coming soon";
+        ? `Rs. ${delivery.deliveryFee} delivery fee • ${delivery.estimatedTime}`
+        : "Delivery coming soon!";
 
-      toast.success(`✅ ${data.area.name} — ${message}`);
+      toast.success(`✅ ${area.name} — ${message}`);
 
       onConfirmed?.({ area, delivery });
 
       if (!disableAutoNavigate) {
-        navigate("/menu/area/${defaultAreaId}", { replace: true });
+        navigate("/menu", { replace: true }); // Modern route
       }
     } else {
-      toast.info(data.message || "Sorry, we don't deliver to this location yet");
+      toast.info(data.message || "Sorry, we don't deliver here yet");
       onNotInService?.();
     }
   }, [data, isLoading, error, navigate, onConfirmed, onNotInService, disableAutoNavigate, setDeliveryArea]);
@@ -148,14 +187,17 @@ export default function AreaChecker({
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
           });
-          setDetecting(false);
           toast.success("Location detected!");
+          setDetecting(false);
         },
         () => {
           toast.error("Location access denied");
           setDetecting(false);
-        }
+        },
+        { enableHighAccuracy: true }
       );
+    } else {
+      toast.error("Geolocation not supported");
     }
   };
 
@@ -179,6 +221,7 @@ export default function AreaChecker({
               variant="ghost"
               size="icon"
               className="text-white hover:bg-white/20 rounded-full"
+              aria-label="Close"
             >
               <X className="h-6 w-6" />
             </Button>
@@ -194,10 +237,10 @@ export default function AreaChecker({
           disabled={detecting || isLoading}
           className="w-full h-16 text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xl"
         >
-          {detecting || isLoading ? (
+          {detecting ? (
             <>
               <Loader2 className="mr-4 h-8 w-8 animate-spin" />
-              Detecting your location...
+              Detecting location...
             </>
           ) : (
             <>
@@ -223,16 +266,27 @@ export default function AreaChecker({
           <Input
             ref={inputRef}
             type="text"
-            placeholder="Search address in Pakistan..."
+            placeholder={
+              isGooglePlacesEnabled
+                ? "Search address in Pakistan..."
+                : "Address search unavailable (no API key)"
+            }
             className="pl-14 pr-5 py-8 text-lg rounded-2xl border-2 focus:border-green-500 shadow-inner"
+            disabled={!isGooglePlacesEnabled || googleError}
           />
+          {googleError && (
+            <div className="mt-3 flex items-center gap-2 text-sm text-orange-600">
+              <AlertCircle className="h-5 w-5" />
+              <span>Google Maps not available</span>
+            </div>
+          )}
         </div>
 
         {/* Status */}
         {isLoading && searchCoords && (
           <div className="text-center py-6">
             <Loader2 className="h-12 w-12 animate-spin text-green-600 mx-auto mb-4" />
-            <p className="text-lg font-medium text-gray-700">Checking delivery availability...</p>
+            <p className="text-lg font-medium text-gray-700">Checking delivery...</p>
           </div>
         )}
 

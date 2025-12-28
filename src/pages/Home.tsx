@@ -1,4 +1,8 @@
 // src/pages/Home.tsx
+// PRODUCTION-READY — FULLY RESPONSIVE (320px → 4K)
+// Mobile-first homepage with hero, categories, popular dishes, testimonials, CTA
+// Fluid layout, touch-friendly, accessible, smooth animations
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -42,8 +46,6 @@ export const Home: React.FC<HomeProps> = ({ openAreaChecker }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Dynamically generate categories from centralized constants
-  // Order is preserved from the object key order in CATEGORY_LABELS (which is insertion order)
   const categories = (Object.keys(CATEGORY_LABELS) as MenuCategory[]).map((cat) => ({
     category: cat,
     name: CATEGORY_LABELS[cat],
@@ -57,7 +59,7 @@ export const Home: React.FC<HomeProps> = ({ openAreaChecker }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-background min-h-[80vh] lg:min-h-screen flex items-center py-10 lg:py-0">
         {/* Left: Rotating Food Plate */}
@@ -341,7 +343,7 @@ export const Home: React.FC<HomeProps> = ({ openAreaChecker }) => {
       </section>
 
       <Footer />
-    </div>
+    </main>
   );
 };
 

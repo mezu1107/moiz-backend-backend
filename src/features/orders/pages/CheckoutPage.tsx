@@ -1,8 +1,8 @@
 // src/features/orders/pages/CheckoutPage.tsx
-// FINAL PRODUCTION — DECEMBER 26, 2025
-// Fully synced with backend: sends priceAtAdd + full customizations
-// Uses low-level hooks from useOrders.ts correctly
-// Zero TypeScript errors
+// FINAL PRODUCTION — DECEMBER 28, 2025
+// Now fully dynamic delivery fee/minOrder/estimatedTime from /api/areas
+// Removed hardcoded 149 fallback everywhere
+// Improved UX + type safety
 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Loader2,
   AlertCircle,
@@ -40,6 +40,7 @@ import {
   Wallet,
   Building2,
   Smartphone,
+  Package,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -48,49 +49,52 @@ import { useCartStore } from '@/features/cart/hooks/useCartStore';
 import { useAddresses } from '@/features/address/hooks/useAddresses';
 import { useAreas } from '@/hooks/useCheckArea';
 import { useCreateOrder, useCreateGuestOrder } from '@/features/orders/hooks/useOrders';
+import type { PublicArea } from '@/types/area';
 
-const checkoutSchema = z.object({
+const baseSchema = z.object({
   paymentMethod: z.enum(['cash', 'card', 'easypaisa', 'jazzcash', 'bank', 'wallet'], {
     required_error: 'Please select a payment method',
   }),
-  useWallet: z.boolean().optional().default(true),
+  useWallet: z.boolean().default(true),
   promoCode: z.string().optional(),
-  instructions: z.string().max(300).optional(),
-
-  // Authenticated
-  addressId: z.string().optional(),
-
-  // Guest only
-  name: z.string().min(2, 'Name is required').optional(),
-  phone: z.string().regex(/^03\d{9}$/, 'Invalid format: 03XXXXXXXXX').optional(),
-  guestAddress: z
-    .object({
-      fullAddress: z.string().min(10, 'Full address required'),
-      areaId: z.string({ required_error: 'Select delivery area' }),
-      label: z.string().optional(),
-      floor: z.string().optional(),
-      instructions: z.string().max(150).optional(),
-    })
-    .optional(),
+  instructions: z.string().max(300, 'Max 300 characters').optional(),
 });
 
-type CheckoutForm = z.infer<typeof checkoutSchema>;
+const authenticatedSchema = baseSchema.extend({
+  addressId: z.string({ required_error: 'Please select a delivery address' }),
+});
+
+const guestSchema = baseSchema.extend({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  phone: z.string().regex(/^03\d{9}$/, 'Invalid format: use 03XXXXXXXXX'),
+  guestAddress: z.object({
+    fullAddress: z.string().min(10, 'Full address is required (min 10 chars)'),
+    areaId: z.string({ required_error: 'Please select a delivery area' }),
+    label: z.string().optional(),
+    floor: z.string().optional(),
+    instructions: z.string().max(150).optional(),
+  }),
+});
+
+type CheckoutForm = z.infer<typeof authenticatedSchema> & z.infer<typeof guestSchema>;
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-
   const { isAuthenticated } = useAuthStore();
   const { items, getTotal, orderNote } = useCartStore();
 
   const { data: addresses = [], isLoading: addressesLoading } = useAddresses();
-  const { data: areas = [] } = useAreas();
+  const { data: areas = [], isLoading: areasLoading } = useAreas();
 
   const createOrder = useCreateOrder();
   const createGuestOrder = useCreateGuestOrder();
 
-  const [deliveryFee, setDeliveryFee] = useState(0);
-  const [minOrderAmount, setMinOrderAmount] = useState(0);
-  const [estimatedTime, setEstimatedTime] = useState('35-50 min');
+  // Dynamic delivery state
+  const [deliveryFee, setDeliveryFee] = useState<number>(0);
+  const [minOrderAmount, setMinOrderAmount] = useState<number>(0);
+  const [estimatedTime, setEstimatedTime] = useState<string>('—');
+
+  const schema = isAuthenticated ? authenticatedSchema : guestSchema;
 
   const {
     register,
@@ -98,87 +102,83 @@ export default function CheckoutPage() {
     handleSubmit,
     watch,
     setValue,
-    resetField,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<CheckoutForm>({
-    resolver: zodResolver(checkoutSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       paymentMethod: 'cash',
       useWallet: true,
       instructions: orderNote || '',
+      name: '',
+      phone: '',
     },
   });
 
   const subtotal = getTotal();
   const total = useMemo(() => subtotal + deliveryFee, [subtotal, deliveryFee]);
-  const isMinOrderMet = subtotal >= minOrderAmount;
+  const isMinOrderMet = subtotal >= minOrderAmount || minOrderAmount === 0;
 
   const selectedAddressId = watch('addressId');
   const guestAreaId = watch('guestAddress.areaId');
   const guestFullAddress = watch('guestAddress.fullAddress');
-  const guestLabel = watch('guestAddress.label') || 'Home';
-  const guestFloor = watch('guestAddress.floor');
-  const guestInstructions = watch('guestAddress.instructions');
 
-  // Redirect if cart empty
+  // Clear cart toast only on initial load
   useEffect(() => {
-    if (items.length === 0) {
+    if (items.length === 0 && !createOrder.isPending && !createGuestOrder.isPending) {
       toast.info('Your cart is empty');
       navigate('/cart', { replace: true });
     }
-  }, [items.length, navigate]);
+  }, [items.length, navigate, createOrder.isPending, createGuestOrder.isPending]);
 
-  // Auto-select default address + delivery info (authenticated)
+  // Update delivery info for authenticated users (default / selected address)
   useEffect(() => {
-    if (!isAuthenticated || addresses.length === 0) return;
+    if (!isAuthenticated || addressesLoading || areasLoading || addresses.length === 0) return;
 
-    const defaultAddr = addresses.find((a) => a.isDefault) || addresses[0];
-    if (defaultAddr && !selectedAddressId) {
-      setValue('addressId', defaultAddr._id);
+    const selectedAddr = addresses.find((a) => a._id === selectedAddressId) ||
+                        (addresses.find((a) => a.isDefault) || addresses[0]);
 
-      const area = areas.find((a) => a._id === defaultAddr.area?._id);
-      if (area?.deliveryZone) {
-        setDeliveryFee(area.deliveryZone.deliveryFee ?? 149);
-        setMinOrderAmount(area.deliveryZone.minOrderAmount ?? 0);
-        setEstimatedTime(area.deliveryZone.estimatedTime || '35-50 min');
-      }
+    if (selectedAddr?.area?._id) {
+      const area = areas.find((a) => a._id === selectedAddr.area?._id);
+      updateDeliveryInfo(area);
     }
-  }, [addresses, areas, isAuthenticated, selectedAddressId, setValue]);
+  }, [selectedAddressId, addresses, areas, isAuthenticated, addressesLoading, areasLoading]);
 
-  // Guest area selection update
+  // Update delivery info for guest users
   useEffect(() => {
-    if (isAuthenticated || !guestAreaId) return;
+    if (isAuthenticated || !guestAreaId || areasLoading) return;
 
     const area = areas.find((a) => a._id === guestAreaId);
-    if (area?.deliveryZone) {
-      setDeliveryFee(area.deliveryZone.deliveryFee ?? 149);
-      setMinOrderAmount(area.deliveryZone.minOrderAmount ?? 0);
-      setEstimatedTime(area.deliveryZone.estimatedTime || '35-50 min');
-    }
-  }, [guestAreaId, areas, isAuthenticated]);
+    updateDeliveryInfo(area);
+  }, [guestAreaId, areas, isAuthenticated, areasLoading]);
 
-  // Clear addressId when in guest mode
-  useEffect(() => {
-    if (!isAuthenticated) {
-      resetField('addressId');
+  // Centralized function to update delivery state
+  const updateDeliveryInfo = (area?: PublicArea) => {
+    if (area?.deliveryZone) {
+      setDeliveryFee(area.deliveryZone.deliveryFee ?? 0);
+      setMinOrderAmount(area.deliveryZone.minOrderAmount ?? 0);
+      setEstimatedTime(area.deliveryZone.estimatedTime || '—');
+    } else {
+      // Fallback only when no zone exists (rare after backend fix)
+      setDeliveryFee(0);
+      setMinOrderAmount(0);
+      setEstimatedTime('—');
     }
-  }, [isAuthenticated, resetField]);
+  };
 
   const canProceed =
-    isMinOrderMet &&
+    (minOrderAmount === 0 || isMinOrderMet) &&
     (isAuthenticated ? !!selectedAddressId : !!guestAreaId && !!guestFullAddress?.trim());
 
   const onSubmit = async (data: CheckoutForm) => {
     if (!canProceed) {
-      toast.error('Please complete all required fields and meet minimum order amount');
+      toast.error('Please complete all required fields');
       return;
     }
 
-    // Build full items payload from cart store — includes priceAtAdd + customizations
     const itemsPayload = items.map((item) => ({
       menuItem: item.menuItem._id,
       quantity: item.quantity,
-      priceAtAdd: item.priceAtAdd, // ← REQUIRED: includes extras
+      priceAtAdd: item.priceAtAdd,
       sides: item.sides || [],
       drinks: item.drinks || [],
       addOns: item.addOns || [],
@@ -189,39 +189,32 @@ export default function CheckoutPage() {
       let response;
 
       if (isAuthenticated) {
-        if (!selectedAddressId) throw new Error('Please select a delivery address');
-
         response = await createOrder.mutateAsync({
           items: itemsPayload,
-          addressId: selectedAddressId,
+          addressId: data.addressId!,
           paymentMethod: data.paymentMethod,
-          useWallet: data.useWallet ?? true,
+          useWallet: data.useWallet,
           promoCode: data.promoCode?.trim().toUpperCase() || undefined,
           instructions: data.instructions?.trim() || undefined,
         });
       } else {
-        if (!data.guestAddress || !data.name || !data.phone) {
-          throw new Error('Please fill all contact and address details');
-        }
-
         response = await createGuestOrder.mutateAsync({
           items: itemsPayload,
+          name: data.name!.trim(),
+          phone: data.phone!.trim(),
           guestAddress: {
-            fullAddress: data.guestAddress.fullAddress.trim(),
-            areaId: data.guestAddress.areaId,
-            label: data.guestAddress.label?.trim() || 'Home',
-            floor: data.guestAddress.floor?.trim(),
-            instructions: data.guestAddress.instructions?.trim(),
+            fullAddress: data.guestAddress!.fullAddress.trim(),
+            areaId: data.guestAddress!.areaId,
+            label: data.guestAddress!.label?.trim() || 'Home',
+            floor: data.guestAddress!.floor?.trim(),
+            instructions: data.guestAddress!.instructions?.trim(),
           },
-          name: data.name.trim(),
-          phone: data.phone.trim(),
           paymentMethod: data.paymentMethod,
           promoCode: data.promoCode?.trim().toUpperCase() || undefined,
           instructions: data.instructions?.trim() || undefined,
         });
       }
 
-      // Handle payment flows
       if (response.clientSecret) {
         navigate('/checkout/card', {
           state: {
@@ -240,45 +233,46 @@ export default function CheckoutPage() {
           replace: true,
         });
       } else {
-        toast.success('Order placed successfully! 🎉');
         navigate(`/track/${response.order._id}`, { replace: true });
       }
     } catch (error: any) {
       toast.error(
         error.response?.data?.message ||
-          error.message ||
-          'Failed to place order. Please try again.'
+        error.message ||
+        'Failed to place order. Please try again.'
       );
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background py-8 pb-20">
-      <div className="container mx-auto max-w-6xl px-4">
-        <h1 className="text-4xl font-bold text-center mb-10">Checkout</h1>
+    <main className="min-h-screen bg-background py-6 md:py-8 lg:py-10">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <h1 className="text-3xl font-bold text-center mb-8 md:text-4xl lg:text-5xl">
+          Checkout
+        </h1>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Guest Contact */}
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-8 lg:grid-cols-3">
+          {/* Form Section */}
+          <section className="space-y-6 lg:col-span-2">
+            {/* Guest Contact Info */}
             {!isAuthenticated && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Contact Information
+                  <CardTitle className="flex items-center gap-3 text-xl md:text-2xl">
+                    <User className="h-6 w-6" />
+                    Your Details
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid sm:grid-cols-2 gap-6">
+                <CardContent className="grid gap-6 sm:grid-cols-2">
                   <div>
                     <Label htmlFor="name">Full Name *</Label>
-                    <Input {...register('name')} placeholder="Ahmad Khan" />
-                    {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
+                    <Input id="name" {...register('name')} placeholder="Ahmad Khan" />
+                    {errors.name && <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>}
                   </div>
                   <div>
                     <Label htmlFor="phone">Phone Number *</Label>
-                    <Input {...register('phone')} placeholder="03451234567" />
-                    {errors.phone && <p className="text-sm text-destructive mt-1">{errors.phone.message}</p>}
+                    <Input id="phone" {...register('phone')} placeholder="03451234567" />
+                    {errors.phone && <p className="mt-1 text-sm text-destructive">{errors.phone.message}</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -287,22 +281,21 @@ export default function CheckoutPage() {
             {/* Delivery Address */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-3 text-xl md:text-2xl">
+                  <MapPin className="h-6 w-6" />
                   Delivery Address
                 </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {estimatedTime && (
-                  <CardDescription className="text-base">
-                    Estimated delivery: <strong>{estimatedTime}</strong>
+                {estimatedTime !== '—' && (
+                  <CardDescription className="mt-2 text-base md:text-lg">
+                    Estimated delivery: <span className="font-semibold text-primary">{estimatedTime}</span>
                   </CardDescription>
                 )}
-
+              </CardHeader>
+              <CardContent className="space-y-6">
                 {isAuthenticated ? (
-                  addressesLoading ? (
-                    <div className="flex justify-center py-12">
-                      <Loader2 className="h-8 w-8 animate-spin" />
+                  addressesLoading || areasLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="h-10 w-10 animate-spin text-primary" />
                     </div>
                   ) : addresses.length > 0 ? (
                     <Controller
@@ -310,14 +303,14 @@ export default function CheckoutPage() {
                       control={control}
                       render={({ field }) => (
                         <Select onValueChange={field.onChange} value={field.value}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select saved address" />
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Choose a saved address" />
                           </SelectTrigger>
                           <SelectContent>
                             {addresses.map((addr) => (
                               <SelectItem key={addr._id} value={addr._id}>
                                 <div className="space-y-1">
-                                  <div className="font-medium">{addr.label}</div>
+                                  <div className="font-semibold">{addr.label}</div>
                                   <div className="text-sm text-muted-foreground">{addr.fullAddress}</div>
                                 </div>
                               </SelectItem>
@@ -329,100 +322,88 @@ export default function CheckoutPage() {
                   ) : (
                     <Alert>
                       <AlertCircle className="h-4 w-4" />
-                      <AlertTitle>No saved addresses</AlertTitle>
                       <AlertDescription>
-                        Add an address to continue.
-                        <Button variant="link" className="p-0 ml-2" onClick={() => navigate('/addresses')}>
-                          Add now
+                        No saved addresses found.{' '}
+                        <Button variant="link" className="p-0 h-auto inline" onClick={() => navigate('/addresses')}>
+                          Add one now
                         </Button>
                       </AlertDescription>
                     </Alert>
                   )
                 ) : (
-                  <div className="space-y-6">
+                  <>
                     <div>
                       <Label>Delivery Area *</Label>
-                      <Controller
-                        name="guestAddress.areaId"
-                        control={control}
-                        render={({ field }) => (
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select area" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {areas.map((area) => (
-                                <SelectItem key={area._id} value={area._id}>
-                                  <div>
-                                    <div className="font-medium">{area.name}</div>
-                                    <div className="text-sm text-muted-foreground">
-                                      Fee: Rs. {area.deliveryZone?.deliveryFee || 149}
+                      {areasLoading ? (
+                        <div className="h-12 flex items-center justify-center">
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        </div>
+                      ) : (
+                        <Controller
+                          name="guestAddress.areaId"
+                          control={control}
+                          render={({ field }) => (
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger className="h-12">
+                                <SelectValue placeholder="Select your area" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {areas.map((area) => (
+                                  <SelectItem key={area._id} value={area._id}>
+                                    <div>
+                                      <div className="font-medium">{area.name}</div>
+                                      <div className="text-sm text-muted-foreground">
+                                        Delivery: Rs. {area.deliveryZone?.deliveryFee ?? '—'}
+                                      </div>
                                     </div>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      )}
                       {errors.guestAddress?.areaId && (
-                        <p className="text-sm text-destructive mt-1">
-                          {errors.guestAddress.areaId.message}
-                        </p>
+                        <p className="mt-1 text-sm text-destructive">{errors.guestAddress.areaId.message}</p>
                       )}
                     </div>
-
-                    {/* Live Preview */}
-                    {guestAreaId && guestFullAddress && (
-                      <div className="p-5 border rounded-xl bg-card shadow-sm">
-                        <div className="font-semibold text-lg mb-1">{guestLabel}</div>
-                        <div className="text-base">{guestFullAddress}</div>
-                        {guestFloor && <div className="text-sm text-muted-foreground mt-1">Floor: {guestFloor}</div>}
-                        {guestInstructions && (
-                          <div className="text-sm italic text-muted-foreground mt-3 border-t pt-3">
-                            Note: "{guestInstructions}"
-                          </div>
-                        )}
-                      </div>
-                    )}
 
                     <div className="space-y-5">
                       <div>
                         <Label htmlFor="guest-fullAddress">Full Address *</Label>
                         <Textarea
+                          id="guest-fullAddress"
                           {...register('guestAddress.fullAddress')}
-                          placeholder="House #, Street, Sector, Landmark..."
+                          placeholder="House #, Street, Sector, Nearby landmark..."
                           rows={4}
                           className="resize-none"
                         />
                         {errors.guestAddress?.fullAddress && (
-                          <p className="text-sm text-destructive mt-1">
-                            {errors.guestAddress.fullAddress.message}
-                          </p>
+                          <p className="mt-1 text-sm text-destructive">{errors.guestAddress.fullAddress.message}</p>
                         )}
                       </div>
 
-                      <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="grid gap-4 sm:grid-cols-2">
                         <div>
-                          <Label htmlFor="guest-label">Label</Label>
+                          <Label>Label (e.g. Home, Work)</Label>
                           <Input {...register('guestAddress.label')} placeholder="Home" />
                         </div>
                         <div>
-                          <Label htmlFor="guest-floor">Floor / Apartment</Label>
+                          <Label>Floor / Apartment</Label>
                           <Input {...register('guestAddress.floor')} placeholder="2nd Floor, Flat B-3" />
                         </div>
                       </div>
 
                       <div>
-                        <Label htmlFor="guest-instructions">Delivery Instructions</Label>
+                        <Label>Delivery Instructions</Label>
                         <Textarea
                           {...register('guestAddress.instructions')}
-                          placeholder="Ring twice, leave at security..."
+                          placeholder="Ring bell twice, leave with guard..."
                           rows={3}
                         />
                       </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -430,29 +411,32 @@ export default function CheckoutPage() {
             {/* Payment Method */}
             <Card>
               <CardHeader>
-                <CardTitle>Payment Method</CardTitle>
+                <CardTitle className="flex items-center gap-3 text-xl md:text-2xl">
+                  <CreditCard className="h-6 w-6" />
+                  Payment Method
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <Controller
                   name="paymentMethod"
                   control={control}
                   render={({ field }) => (
-                    <RadioGroup onValueChange={field.onChange} value={field.value} className="space-y-3">
+                    <RadioGroup onValueChange={field.onChange} value={field.value}>
                       {[
-                        { value: 'cash', label: 'Cash on Delivery', icon: Wallet, color: 'text-green-600' },
-                        { value: 'card', label: 'Credit/Debit Card', icon: CreditCard, color: 'text-blue-600' },
-                        { value: 'easypaisa', label: 'EasyPaisa', icon: Smartphone, color: 'text-green-600' },
-                        { value: 'jazzcash', label: 'JazzCash', icon: Smartphone, color: 'text-red-600' },
-                        { value: 'bank', label: 'Bank Transfer', icon: Building2, color: 'text-orange-600' },
-                        { value: 'wallet', label: 'Wallet', icon: Wallet, color: 'text-purple-600' },
+                        { value: 'cash', label: 'Cash on Delivery', icon: Wallet },
+                        { value: 'card', label: 'Credit/Debit Card', icon: CreditCard },
+                        { value: 'easypaisa', label: 'EasyPaisa', icon: Smartphone },
+                        { value: 'jazzcash', label: 'JazzCash', icon: Smartphone },
+                        { value: 'bank', label: 'Bank Transfer', icon: Building2 },
+                        { value: 'wallet', label: 'AMFoods Wallet', icon: Wallet },
                       ].map((opt) => (
                         <Label
                           key={opt.value}
-                          className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-muted/50"
+                          className="flex items-center gap-4 p-4 md:p-5 border rounded-xl cursor-pointer hover:bg-muted/50 transition mb-3 last:mb-0"
                         >
                           <RadioGroupItem value={opt.value} />
-                          <opt.icon className={`h-6 w-6 ${opt.color}`} />
-                          <span className="font-medium">{opt.label}</span>
+                          <opt.icon className="h-7 w-7 text-primary flex-shrink-0" />
+                          <span className="font-medium text-base md:text-lg">{opt.label}</span>
                         </Label>
                       ))}
                     </RadioGroup>
@@ -461,43 +445,62 @@ export default function CheckoutPage() {
               </CardContent>
             </Card>
 
-            {/* Order Note */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Order Note (optional)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Textarea
-                  {...register('instructions')}
-                  placeholder="Extra spicy, no onions, etc... (max 300 chars)"
-                  rows={3}
-                />
-                {errors.instructions && (
-                  <p className="text-sm text-destructive mt-1">{errors.instructions.message}</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+            {/* Promo & Note */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg md:text-xl">Promo Code</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Input {...register('promoCode')} placeholder="Enter code (optional)" className="uppercase h-12" />
+                </CardContent>
+              </Card>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-8 shadow-lg">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg md:text-xl">Order Note</CardTitle>
+                  <CardDescription>Any special requests?</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    {...register('instructions')}
+                    placeholder="Less spicy, extra sauce, no onions..."
+                    rows={4}
+                  />
+                  {errors.instructions && (
+                    <p className="mt-1 text-sm text-destructive">{errors.instructions.message}</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+
+          {/* Order Summary Sidebar */}
+          <aside className="lg:col-span-1">
+            <Card className="sticky top-6 shadow-xl">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle className="flex items-center gap-3 text-xl md:text-2xl">
+                  <Package className="h-6 w-6 md:h-7 md:w-7" />
+                  Order Summary
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-5">
-                <div className="space-y-3 max-h-60 overflow-y-auto">
+              <CardContent className="space-y-6">
+                <div className="max-h-64 space-y-3 overflow-y-auto pr-2 text-sm md:text-base">
                   {items.map((item) => (
-                    <div key={item._id} className="flex justify-between text-sm">
-                      <span>{item.quantity} × {item.menuItem.name}</span>
-                      <span>Rs. {(item.priceAtAdd * item.quantity).toLocaleString()}</span>
+                    <div key={item._id} className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        {item.quantity} × {item.menuItem.name}
+                      </span>
+                      <span className="font-medium">
+                        Rs. {(item.priceAtAdd * item.quantity).toLocaleString()}
+                      </span>
                     </div>
                   ))}
                 </div>
 
                 <Separator />
 
-                <div className="space-y-2">
+                <div className="space-y-3 text-base md:text-lg">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
                     <span>Rs. {subtotal.toLocaleString()}</span>
@@ -510,16 +513,16 @@ export default function CheckoutPage() {
 
                 <Separator />
 
-                <div className="flex justify-between text-xl font-bold">
+                <div className="flex justify-between text-2xl font-bold md:text-3xl">
                   <span>Total</span>
                   <span className="text-primary">Rs. {total.toLocaleString()}</span>
                 </div>
 
-                {!isMinOrderMet && (
+                {!isMinOrderMet && minOrderAmount > 0 && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      Minimum order amount: Rs. {minOrderAmount.toLocaleString()}
+                    <AlertDescription className="text-sm md:text-base">
+                      Minimum order for your area: Rs. {minOrderAmount.toLocaleString()}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -527,12 +530,17 @@ export default function CheckoutPage() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full"
-                  disabled={isSubmitting || !canProceed || createOrder.isPending || createGuestOrder.isPending}
+                  className="w-full h-14 text-base md:text-lg font-semibold shadow-lg"
+                  disabled={
+                    createOrder.isPending ||
+                    createGuestOrder.isPending ||
+                    !canProceed ||
+                    areasLoading
+                  }
                 >
-                  {createOrder.isPending || createGuestOrder.isPending ? (
+                  {(createOrder.isPending || createGuestOrder.isPending) ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      <Loader2 className="mr-3 h-6 w-6 animate-spin" />
                       Placing Order...
                     </>
                   ) : (
@@ -541,9 +549,9 @@ export default function CheckoutPage() {
                 </Button>
               </CardContent>
             </Card>
-          </div>
+          </aside>
         </form>
       </div>
-    </div>
+    </main>
   );
 }

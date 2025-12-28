@@ -1,4 +1,6 @@
 // src/pages/Index.tsx
+// Updated: December 28, 2025 — Fully Responsive & Mobile-Optimized
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -13,13 +15,13 @@ import { useAreaStore } from "@/lib/areaStore";
 import { Button } from "@/components/ui/button";
 import { apiClient } from "@/lib/api";
 import { Area } from "@/types/area";
+
 interface SelectedArea {
   id: string;
   fullAddress: string;
   name: string;
   city: string;
   centerLatLng: { lat: number; lng: number };
-  // Add more fields if needed by your store
 }
 
 export default function Index() {
@@ -52,8 +54,6 @@ export default function Index() {
     setShowAreaList(false);
   };
 
-
-
   const handleAreaConfirmed = (areaData: any) => {
     const selectedAreaData: SelectedArea = {
       id: areaData._id,
@@ -62,13 +62,12 @@ export default function Index() {
       city: areaData.city,
       centerLatLng: areaData.centerLatLng || areaData.center,
     };
-    
+
     setSelectedArea(selectedAreaData);
     sessionStorage.setItem("areaChecked", "true");
     setShowChecker(false);
     toast.success(`Delivering to ${areaData.name}!`);
-    
-    // FIXED: Now goes to the correct area menu!
+
     navigate(`/menu/area/${areaData._id}`);
   };
 
@@ -79,62 +78,65 @@ export default function Index() {
 
   return (
     <>
-      {/* Area Checker Modal */}
+      {/* Area Checker Modal — Full-screen on mobile, centered card on larger */}
       <AnimatePresence>
         {showChecker && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-4 pb-4 sm:p-0"
           >
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg"
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="relative w-full max-w-lg sm:max-w-xl bg-card rounded-3xl shadow-2xl border border-border overflow-hidden"
             >
+              {/* Close Button — Larger tap area on mobile */}
               <button
                 onClick={() => setShowChecker(false)}
-                className="absolute -top-12 right-0 text-white hover:text-gray-300 transition"
+                className="absolute top-4 right-4 z-10 text-white sm:text-foreground bg-black/20 sm:bg-transparent rounded-full p-2 hover:bg-black/40 sm:hover:bg-muted transition"
                 aria-label="Close Area Checker"
               >
-                <X className="h-8 w-8" />
+                <X className="h-7 w-7 sm:h-6 sm:w-6" />
               </button>
 
-              <div className="bg-card rounded-3xl shadow-2xl border border-border overflow-hidden">
-                <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6 text-white">
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-10 w-10" />
-                    <div>
-                      <h2 className="text-2xl font-bold">Where should we deliver?</h2>
-                      <p className="text-green-100">Let us know your location</p>
-                    </div>
+              {/* Header */}
+              <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6 sm:p-8 text-white">
+                <div className="flex items-center gap-4">
+                  <MapPin className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0" />
+                  <div>
+                    <h2 className="text-2xl sm:text-3xl font-bold">Where should we deliver?</h2>
+                    <p className="text-green-100 mt-1 text-base sm:text-lg">Let us know your location</p>
                   </div>
                 </div>
+              </div>
 
-                <div className="p-6 space-y-6">
-                  <AreaChecker
-                    onConfirmed={handleAreaConfirmed}
-                    onNotInService={handleNotInService}
-                    onClose={() => setShowChecker(false)}
-                  />
+              {/* Body */}
+              <div className="p-6 sm:p-8 space-y-8">
+                <AreaChecker
+                  onConfirmed={handleAreaConfirmed}
+                  onNotInService={handleNotInService}
+                  onClose={() => setShowChecker(false)}
+                />
 
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground mb-4">
-                      or choose from available areas
-                    </p>
-                    <Button
-                      onClick={() => {
-                        setShowChecker(false);
-                        setShowAreaList(true);
-                      }}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      View All Delivery Areas
-                    </Button>
-                  </div>
+                <div className="text-center">
+                  <p className="text-sm sm:text-base text-muted-foreground mb-4">
+                    or choose from available areas
+                  </p>
+                  <Button
+                    onClick={() => {
+                      setShowChecker(false);
+                      setShowAreaList(true);
+                    }}
+                    variant="outline"
+                    size="lg"
+                    className="w-full h-12 text-base"
+                  >
+                    View All Delivery Areas
+                  </Button>
                 </div>
               </div>
             </motion.div>
@@ -151,26 +153,29 @@ export default function Index() {
         }}
       />
 
-      {/* Main Content */}
-      <div className={showChecker || showAreaList ? "pointer-events-none select-none" : ""}>
+      {/* Main Content — Blur & disable interaction when modal open */}
+      <div className={showChecker || showAreaList ? "pointer-events-none select-none blur-sm sm:blur-none" : ""}>
         <Home openAreaChecker={openChecker} />
       </div>
 
-      {/* Floating Change Location Button */}
+      {/* Floating Change Location Button — Responsive & Touch-Friendly */}
       {selectedArea && (
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40"
+          transition={{ delay: 0.3 }}
+          className="fixed bottom-4 sm:bottom-6 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 z-40 max-w-md mx-auto sm:max-w-none"
         >
           <Button
             onClick={openChecker}
             size="lg"
-            className="shadow-2xl rounded-full px-6 h-14 text-lg font-medium bg-white hover:bg-gray-100 text-gray-800 border-2 border-gray-200"
+            className="w-full h-14 sm:h-16 shadow-2xl rounded-full px-6 sm:px-8 text-base sm:text-lg font-medium bg-white hover:bg-gray-100 text-gray-800 border-2 border-gray-200 flex items-center justify-center gap-2"
           >
-            <MapPin className="mr-2 h-6 w-6 text-green-600" />
-            {selectedArea.name}, {selectedArea.city}
-            <span className="ml-2 text-green-600">Change</span>
+            <MapPin className="h-6 w-6 sm:h-7 sm:w-7 text-green-600 flex-shrink-0" />
+            <span className="truncate max-w-[180px] sm:max-w-none">
+              {selectedArea.name}, {selectedArea.city}
+            </span>
+            <span className="text-green-600 font-semibold">Change</span>
           </Button>
         </motion.div>
       )}

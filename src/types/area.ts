@@ -33,7 +33,19 @@ export interface Area {
   createdAt: string;
   updatedAt: string;
 }
-
+export interface PublicArea {
+  _id: string;
+  name: string;
+  city: string;
+  center: { type: 'Point'; coordinates: [number, number] };
+  deliveryZone?: {
+    deliveryFee: number;
+    minOrderAmount: number;
+    estimatedTime: string;
+    isActive?: boolean;
+  } | null;
+  hasDeliveryZone?: boolean;
+}
 export interface AreaWithCenter {
   _id: string;
   name: string;

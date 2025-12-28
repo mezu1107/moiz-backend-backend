@@ -1,4 +1,7 @@
 // src/pages/kitchen/KitchenDashboard.tsx
+// PRODUCTION-READY — FULLY RESPONSIVE (320px → 4K)
+// Mobile-first kitchen display optimized for wall-mounted screens & tablets
+// Fluid grid, large touch targets, high contrast for kitchen environment
 
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
@@ -91,7 +94,6 @@ export default function KitchenDashboard() {
     setPrevNewCount(currentNew);
   }, [data?.stats.new]);
 
-  // ← NOW SHOWS ACTIVE + READY ORDERS
   const ordersToDisplay: KitchenOrderPopulated[] = [
     ...(data?.active ?? []),
     ...(data?.ready ?? [])
@@ -99,46 +101,59 @@ export default function KitchenDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-8">
-        <ChefHat className="w-32 h-32 text-orange-500 animate-pulse" />
-        <p className="text-4xl font-bold text-gray-300">Loading Kitchen Dashboard...</p>
-      </div>
+      <main className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-10 px-4">
+        <ChefHat className="w-32 h-32 md:w-40 md:h-40 text-orange-500 animate-pulse" />
+        <p className="text-3xl md:text-5xl font-bold text-gray-300 text-center">
+          Loading Kitchen Dashboard...
+        </p>
+      </main>
     );
   }
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <p className="text-4xl text-red-500 font-bold">Failed to load kitchen data</p>
-      </div>
+      <main className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+        <p className="text-3xl md:text-5xl text-red-500 font-bold text-center">
+          Failed to load kitchen data
+        </p>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <header className="bg-gradient-to-r from-orange-600 to-amber-600 py-10 text-center shadow-2xl">
-        <h1 className="text-6xl md:text-8xl font-black flex items-center justify-center gap-10">
-          <ChefHat className="w-24 h-24 md:w-32 md:h-32" />
-          KITCHEN DISPLAY
-        </h1>
-        <p className="text-3xl md:text-4xl mt-6 opacity-90 font-medium">
-          {format(new Date(), "EEEE, MMMM d, yyyy")}
-        </p>
+    <main className="min-h-screen bg-gray-950 text-white">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-orange-600 to-amber-600 py-12 md:py-16 text-center shadow-2xl">
+        <div className="container mx-auto px-4">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10">
+            <ChefHat className="w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36" />
+            KITCHEN DISPLAY
+          </h1>
+          <p className="text-2xl md:text-3xl lg:text-4xl mt-6 opacity-90 font-medium">
+            {format(new Date(), "EEEE, MMMM d, yyyy")}
+          </p>
+        </div>
       </header>
 
+      {/* Stats Bar */}
       <StatsBar stats={data!.stats} />
 
-      <section className="px-6 py-12 md:px-10">
+      {/* Orders Grid */}
+      <section className="container mx-auto px-4 py-12 lg:py-16">
         {ordersToDisplay.length === 0 ? (
-          <div className="text-center py-32">
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-16 inline-block">
-              <ChefHat className="w-40 h-40 mx-auto text-gray-600 mb-8" />
-              <h2 className="text-6xl font-black text-gray-400">All Caught Up!</h2>
-              <p className="text-4xl mt-6 text-gray-500">No active orders right now</p>
+          <div className="text-center py-20 lg:py-32">
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-12 md:p-20 inline-block max-w-4xl mx-auto">
+              <ChefHat className="w-32 h-32 md:w-48 md:h-48 mx-auto text-gray-600 mb-8" />
+              <h2 className="text-5xl md:text-7xl font-black text-gray-400">
+                All Caught Up!
+              </h2>
+              <p className="text-3xl md:text-5xl mt-6 text-gray-500">
+                No active orders right now
+              </p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 gap-10 max-w-screen-2xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8 lg:gap-12 max-w-screen-2xl mx-auto">
             {ordersToDisplay.map((order) => (
               <KitchenOrderCard
                 key={order._id}
@@ -158,9 +173,10 @@ export default function KitchenDashboard() {
         )}
       </section>
 
-      <footer className="text-center py-8 text-gray-500 text-xl">
+      {/* Footer */}
+      <footer className="text-center py-8 text-gray-500 text-lg md:text-xl lg:text-2xl">
         Real-time updates • Last refreshed: {format(new Date(), "h:mm:ss a")}
       </footer>
-    </div>
+    </main>
   );
 }

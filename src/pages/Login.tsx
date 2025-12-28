@@ -1,5 +1,6 @@
 // src/pages/Login.tsx
-// FINAL PRODUCTION — DECEMBER 18, 2025
+// PRODUCTION-READY — FULLY RESPONSIVE (320px → 4K)
+// Mobile-first login page with fluid layout, touch-friendly inputs
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -46,18 +47,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-green-50 flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Subtle background decoration */}
+    <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-green-50 flex items-center justify-center p-4 md:p-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-tr from-orange-100/30 via-transparent to-green-100/30" />
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: "easeOut" }}
-        className="w-full max-w-lg relative z-10"
+        className="w-full max-w-md relative z-10"
       >
         {/* Logo & Title */}
-        <div className="text-center mb-10">
+        <header className="text-center mb-8 md:mb-10">
           <motion.div
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
@@ -67,24 +67,24 @@ export default function Login() {
             <span className="text-white text-4xl font-black">AM</span>
           </motion.div>
 
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900">
             Welcome Back
           </h1>
-          <p className="mt-3 text-lg text-muted-foreground">
+          <p className="mt-3 text-base md:text-lg text-muted-foreground">
             Login to your AM Foods account
           </p>
-        </div>
+        </header>
 
         {/* Login Card */}
         <Card className="shadow-2xl border-0 overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-600 text-white py-8">
-            <CardTitle className="text-3xl font-bold text-center">
+            <CardTitle className="text-2xl md:text-3xl font-bold text-center">
               Sign In
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="pt-10 pb-12 px-8 md:px-12">
-            <form onSubmit={handleSubmit} className="space-y-7">
+          <CardContent className="pt-8 pb-10 px-6 md:px-10">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email/Phone Field */}
               <div className="space-y-3">
                 <Label htmlFor="emailOrPhone" className="text-base font-medium">
@@ -100,7 +100,7 @@ export default function Login() {
                     id="emailOrPhone"
                     type="text"
                     placeholder="john@example.com or 03123456789"
-                    className="pl-12 h-14 text-lg border-2 border-orange-200 focus:border-orange-500 transition-all"
+                    className="pl-12 h-12 md:h-14 text-base md:text-lg border-2 border-orange-200 focus:border-orange-500 transition-all"
                     value={credentials.emailOrPhone}
                     onChange={(e) =>
                       setCredentials({ ...credentials, emailOrPhone: e.target.value })
@@ -122,7 +122,7 @@ export default function Login() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="pl-12 pr-14 h-14 text-lg border-2 border-orange-200 focus:border-orange-500 transition-all"
+                    className="pl-12 pr-14 h-12 md:h-14 text-base md:text-lg border-2 border-orange-200 focus:border-orange-500 transition-all"
                     value={credentials.password}
                     onChange={(e) =>
                       setCredentials({ ...credentials, password: e.target.value })
@@ -134,6 +134,7 @@ export default function Login() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-orange-600 hover:text-orange-700 transition-colors"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -153,7 +154,7 @@ export default function Login() {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200"
+                className="w-full h-12 md:h-14 text-base md:text-lg font-bold bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-lg"
                 disabled={loginMutation.isPending}
               >
                 {loginMutation.isPending ? "Logging in..." : "Login to Account"}
@@ -161,7 +162,7 @@ export default function Login() {
             </form>
 
             {/* Register Link */}
-            <div className="mt-10 text-center">
+            <div className="mt-8 text-center">
               <p className="text-base text-muted-foreground">
                 Don't have an account?{" "}
                 <Link
@@ -180,6 +181,6 @@ export default function Login() {
           © 2025 AM Foods Pakistan • Authentic Pakistani Cuisine Delivered
         </p>
       </motion.div>
-    </div>
+    </main>
   );
 }

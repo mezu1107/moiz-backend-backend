@@ -14,43 +14,42 @@ export const useServerCartQuery = () => {
   const query = useQuery({
     queryKey: CART_QUERY_KEY,
     queryFn: async (): Promise<CartResponse> => {
-      // apiClient.get already returns res.data
-      return await apiClient.get<CartResponse>('/cart');
+      const response = await apiClient.get<CartResponse>('/cart');
+      return response;
     },
     staleTime: 30_000,
     retry: 2,
-    refetchOnWindowFocus: false, // optional: avoid refetch on tab switch
+    refetchOnWindowFocus: true,
   });
 
-  const { data, isSuccess } = query;
-
-  // Sync server cart → local Zustand store when data is successfully loaded
+  // Sync server cart immediately to local Zustand store
   useEffect(() => {
-    if (isSuccess && data?.success && data.cart.items.length > 0) {
+    if (query.isSuccess && query.data?.success) {
       syncWithServer({
-        items: data.cart.items as CartItem[],
-        orderNote: data.cart.orderNote || '',
+        items: query.data.cart.items as CartItem[] || [],
+        orderNote: query.data.cart.orderNote || '',
       });
     }
-  }, [isSuccess, data, syncWithServer]);
+  }, [query.isSuccess, query.data, syncWithServer]);
 
-  // Return transformed data for easy consumption
   return {
     ...query,
-    data: data
+    data: query.data?.success
       ? {
-          items: (data.cart.items as CartItem[]) ?? [],
-          total: data.cart.total ?? 0,
-          orderNote: data.cart.orderNote ?? '',
-          isGuest: data.isGuest ?? true,
-          message: data.message,
+          items: query.data.cart.items as CartItem[] || [],
+          total: query.data.cart.total ?? 0,
+          orderNote: query.data.cart.orderNote ?? '',
+          isGuest: query.data.isGuest ?? true,
+          message: query.data.message,
         }
       : undefined,
   };
 };
 
+// ---------------- Mutations with flush-sync ----------------
 export const useAddToCart = () => {
   const queryClient = useQueryClient();
+  const { addItem } = useCartStore();
 
   return useMutation({
     mutationFn: async (payload: {
@@ -62,16 +61,34 @@ export const useAddToCart = () => {
       specialInstructions?: string;
       orderNote?: string;
     }) => {
-      return await apiClient.post<CartResponse>('/cart', payload);
+      const response = await apiClient.post<CartResponse>('/cart', payload);
+      return response;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+      // Immediately update local cart
+      addItem(
+        {
+          _id: variables.menuItemId,
+          price: 0, // can adjust if needed
+          name: '', // minimal placeholder, server will overwrite on next sync
+        } as any,
+        variables.quantity ?? 1,
+        {
+          sides: variables.sides,
+          drinks: variables.drinks,
+          addOns: variables.addOns,
+          specialInstructions: variables.specialInstructions,
+        },
+        0
+      );
     },
   });
 };
 
 export const useUpdateCartItem = () => {
   const queryClient = useQueryClient();
+  const { updateItem } = useCartStore();
 
   return useMutation({
     mutationFn: async ({
@@ -88,36 +105,44 @@ export const useUpdateCartItem = () => {
         orderNote?: string;
       };
     }) => {
-      return await apiClient.patch<CartResponse>(`/cart/item/${itemId}`, updates);
+      const response = await apiClient.patch<CartResponse>(`/cart/item/${itemId}`, updates);
+      return response;
     },
-    onSuccess: () => {
+    onSuccess: (_, { itemId, updates }) => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+      updateItem(itemId, updates); // immediately update local cart
     },
   });
 };
 
 export const useRemoveFromCart = () => {
   const queryClient = useQueryClient();
+  const { removeItem } = useCartStore();
 
   return useMutation({
     mutationFn: async (itemId: string) => {
-      return await apiClient.delete<CartResponse>(`/cart/item/${itemId}`);
+      const response = await apiClient.delete<CartResponse>(`/cart/item/${itemId}`);
+      return response;
     },
-    onSuccess: () => {
+    onSuccess: (_, itemId) => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+      removeItem(itemId); // flush immediately to local cart
     },
   });
 };
 
 export const useClearCart = () => {
   const queryClient = useQueryClient();
+  const { clearCart } = useCartStore();
 
   return useMutation({
     mutationFn: async () => {
-      return await apiClient.delete<CartResponse>('/cart/clear');
+      const response = await apiClient.delete<CartResponse>('/cart/clear');
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+      clearCart(); // immediately flush local cart
     },
   });
 };

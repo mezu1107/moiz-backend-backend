@@ -1,46 +1,55 @@
 // src/pages/Profile.tsx
-// FINAL PRODUCTION — DECEMBER 18, 2025
+// PRODUCTION-READY — FULLY RESPONSIVE (320px → 4K)
+// Mobile-first profile page with fluid layout, touch-friendly controls
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { apiClient } from "@/lib/api";
+
+interface User {
+  _id: string;
+  name: string;
+  phone: string;
+  email?: string | null;
+  role: string;
+  city?: string | null;
+}
 
 export default function Profile() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState<string>(user?.name || "");
+  const [email, setEmail] = useState<string>(user?.email || "");
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const updates: { name?: string; email?: string } = {};
+      const updates: Partial<{ name: string; email: string }> = {};
       if (name.trim() !== user?.name) updates.name = name.trim();
       if (email.trim().toLowerCase() !== (user?.email || "")) updates.email = email.trim().toLowerCase();
 
       if (Object.keys(updates).length === 0) {
         toast.info("No changes to save");
-        setLoading(false);
         return;
       }
 
       await apiClient.patch("/auth/me", updates);
 
       toast.success("Profile updated successfully!");
-      // Optionally refetch user or update store
-      window.location.reload(); // Simple way to refresh user data
+      window.location.reload(); // Refresh to get updated user data
     } catch (err: any) {
-      toast.error(err?.message || "Failed to update profile");
+      toast.error(err?.response?.data?.message || "Failed to update profile");
     } finally {
       setLoading(false);
     }
@@ -59,87 +68,110 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-green-50 p-4">
-      <div className="max-w-2xl mx-auto mt-10">
-        <Card className="shadow-2xl">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold text-center">
-              My Profile
-            </CardTitle>
-            <p className="text-center text-muted-foreground">
-              Manage your account information
-            </p>
+    <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-green-50 py-8 px-4 sm:py-12">
+      <div className="container mx-auto max-w-3xl">
+        <Card className="shadow-2xl border-0 overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-600 text-white py-10 md:py-12">
+            <div className="text-center">
+              <CardTitle className="text-3xl md:text-4xl lg:text-5xl font-black">
+                My Profile
+              </CardTitle>
+              <p className="mt-3 text-base md:text-lg text-white/90">
+                Manage your account information
+              </p>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-8">
-            {/* Profile Info */}
-            <div className="text-center space-y-2">
-              <div className="w-24 h-24 mx-auto rounded-full bg-orange-200 flex items-center justify-center text-4xl font-bold text-orange-700">
+
+          <CardContent className="pt-10 pb-12 px-6 md:px-10 lg:px-12">
+            {/* Avatar & User Info */}
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center justify-center w-24 h-24 md:w-32 md:h-32 rounded-full bg-orange-200 text-4xl md:text-6xl font-black text-orange-700 shadow-lg">
                 {user.name.charAt(0).toUpperCase()}
               </div>
-              <h2 className="text-2xl font-bold">{user.name}</h2>
-              <p className="text-muted-foreground">{user.role.toUpperCase()}</p>
-              <p className="text-sm">{user.city}</p>
+              <h2 className="mt-6 text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
+                {user.name}
+              </h2>
+              <p className="mt-2 text-base md:text-lg text-muted-foreground">
+                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+              </p>
+              {user.city && (
+                <p className="mt-1 text-sm md:text-base text-muted-foreground">{user.city}</p>
+              )}
             </div>
 
             {/* Update Form */}
-            <form onSubmit={handleUpdateProfile} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+            <form onSubmit={handleUpdateProfile} className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="name" className="text-base md:text-lg font-medium">
+                  Full Name
+                </Label>
                 <Input
                   id="name"
+                  type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={loading}
+                  className="h-12 md:h-14 text-base md:text-lg"
+                  placeholder="Your full name"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+              <div className="space-y-3">
+                <Label htmlFor="phone" className="text-base md:text-lg font-medium">
+                  Phone Number
+                </Label>
                 <Input
                   id="phone"
+                  type="text"
                   value={user.phone}
                   disabled
-                  className="bg-muted"
+                  className="h-12 md:h-14 text-base md:text-lg bg-muted"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs md:text-sm text-muted-foreground">
                   Phone number cannot be changed
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-base md:text-lg font-medium">
+                  Email Address <span className="font-normal text-muted-foreground">(Optional)</span>
+                </Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Optional"
                   disabled={loading}
+                  className="h-12 md:h-14 text-base md:text-lg"
+                  placeholder="your@email.com"
                 />
               </div>
 
               <Button
                 type="submit"
-                className="w-full bg-orange-600 hover:bg-orange-700"
+                size="lg"
                 disabled={loading}
+                className="w-full h-12 md:h-14 text-base md:text-lg font-bold bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 shadow-lg"
               >
-                {loading ? "Saving..." : "Update Profile"}
+                {loading ? "Saving Changes..." : "Update Profile"}
               </Button>
             </form>
 
-            {/* Actions */}
-            <div className="space-y-4 pt-6 border-t">
+            {/* Action Buttons */}
+            <div className="mt-10 pt-8 border-t space-y-4">
               <Button
                 variant="outline"
-                className="w-full"
-                onClick={() => navigate("/change-password")}
+                size="lg"
+                className="w-full h-12 md:h-14 text-base md:text-lg"
+                asChild
               >
-                Change Password
+                <Link to="/change-password">Change Password</Link>
               </Button>
 
               <Button
                 variant="destructive"
-                className="w-full"
+                size="lg"
+                className="w-full h-12 md:h-14 text-base md:text-lg"
                 onClick={handleLogout}
               >
                 Logout
@@ -147,7 +179,12 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Footer Note */}
+        <p className="text-center text-sm text-muted-foreground mt-10">
+          © 2025 AM Foods Pakistan • Authentic Pakistani Cuisine Delivered
+        </p>
       </div>
-    </div>
+    </main>
   );
 }

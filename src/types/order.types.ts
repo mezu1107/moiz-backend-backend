@@ -4,6 +4,7 @@
 
 import type { Address } from '@/features/address/types/address.types';
 import type { Review } from '@/features/reviews/types/review.types';
+import { CartItem, MenuItemInCart } from '@/types/cart.types';
 
 export type PaymentMethod =
   | 'cash'
@@ -210,6 +211,17 @@ export interface OrderResponse {
   order: Order;
 }
 
+export interface ReorderResponse {
+  success: true;
+  message: string;
+  cart: {
+    items: CartItem[];
+    isGuest?: boolean;
+    total?: number;
+    orderNote?: string;
+  };
+  skippedItems?: number;
+}
 // ====================== CONSTANTS & HELPERS ======================
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
