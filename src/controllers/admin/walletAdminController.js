@@ -3,6 +3,9 @@
 
 const Wallet = require('../../models/wallet/Wallet');
 const WalletTransaction = require('../../models/wallet/WalletTransaction');
+// Add at the top of walletAdminController.js
+const WithdrawalRequest = require('../../models/wallet/WithdrawalRequest');
+
 const AuditLog = require('../../models/auditLog/AuditLog');
 const mongoose = require('mongoose');
 const io = global.io;

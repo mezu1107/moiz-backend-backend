@@ -232,6 +232,8 @@ const routeRegistry = [
   { path: '/api/kitchen', file: './src/routes/kitchen/kitchenRoutes' },
   { path: '/api/payment', file: './src/routes/payment/paymentRoutes' },
   { path: '/api/admin/payment', file: './src/routes/admin/paymentAdminRoutes' },
+    { path: '/api/admin/wallet', file: './src/routes/admin/walletAdminRoutes' },
+
   { path: '/api/admin/refunds', file: './src/routes/admin/refundAdminRoutes' },
   { path: '/api/reviews', file: './src/routes/review/reviewRoutes' },
   { path: '/api/inventory', file: './src/routes/inventory/inventoryRoutes' },
