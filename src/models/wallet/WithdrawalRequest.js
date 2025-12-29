@@ -49,10 +49,9 @@ const withdrawalRequestSchema = new mongoose.Schema({
 
   paymentMethod: {
     type: String,
-    enum: ['bank_transfer', 'easypaisa', 'jazzcash', 'cash_pickup'],
+    enum: ['cash','card','easypaisa','jazzcash','bank','wallet'],
     required: true
-  },
-
+  }, 
   // Sensitive fields - should be encrypted in real production
   bankDetails: {
     bankName: String,

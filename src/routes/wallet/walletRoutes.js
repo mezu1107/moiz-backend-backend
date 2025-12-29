@@ -1,5 +1,5 @@
 // src/routes/wallet/walletRoutes.js
-// FINAL PRODUCTION READY — DECEMBER 26, 2025
+// FINAL PRODUCTION READY — DECEMBER 29, 2025
 
 const express = require('express');
 const router = express.Router();
@@ -14,11 +14,12 @@ const {
   getWalletTransactions,
   adminCreditWallet,
   adminDebitWallet,
+  creditWallet,
+  debitWallet,
   exportWalletTransactionsCSV,
   exportWalletTransactionsPDF,
   initializeWalletAdmin,
   activateWalletAdmin,
-  // getWalletStatsDashboard, // implement later
 } = require('../../controllers/wallet/walletController');
 
 const {
@@ -51,6 +52,46 @@ router.get('/me', getMyWallet);
 
 // GET /api/wallet/transactions → paginated own transactions
 router.get('/transactions', getWalletTransactions);
+
+// POST /api/wallet/credit → self credit/top-up
+router.post(
+  '/credit',
+  validateRequest,
+  async (req, res) => {
+    try {
+      const userId = req.user._id;
+      const { amount, description } = req.body;
+      const wallet = await creditWallet({ userId, amount, description });
+      res.json({
+        success: true,
+        message: `Wallet credited PKR ${Number(amount).toFixed(2)}`,
+        balance: wallet.balance.toString()
+      });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+);
+
+// POST /api/wallet/debit → self debit
+router.post(
+  '/debit',
+  validateRequest,
+  async (req, res) => {
+    try {
+      const userId = req.user._id;
+      const { amount, description } = req.body;
+      const wallet = await debitWallet({ userId, amount, description });
+      res.json({
+        success: true,
+        message: `Wallet debited PKR ${Number(amount).toFixed(2)}`,
+        balance: wallet.balance.toString()
+      });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+);
 
 // GET /api/wallet/export/:format → export own transactions (csv | pdf)
 router.get(
@@ -104,20 +145,23 @@ router.post(
   validateRequest,
   adminDebitWallet
 );
-// POST /api/wallet/admin/activate/:userId → activate wallet (set status to active)
+
+// POST /api/wallet/admin/activate/:userId → activate wallet
 router.post(
   '/admin/activate/:userId',
   role(['admin', 'finance']),
   validateObjectId('userId'),
   activateWalletAdmin
 );
-// src/routes/wallet/walletRoutes.js
+
+// POST /api/wallet/admin/initialize/:userId → initialize wallet
 router.post(
   '/admin/initialize/:userId',
   role(['admin', 'finance']),
   validateObjectId('userId'),
   initializeWalletAdmin
 );
+
 // GET /api/wallet/admin/export/:userId/:format → export any user's wallet (csv | pdf)
 router.get(
   '/admin/export/:userId/:format',
@@ -140,7 +184,5 @@ router.get(
     if (req.exportFormat === 'pdf') return exportWalletTransactionsPDF(req, res, next);
   }
 );
-
-
 
 module.exports = router;

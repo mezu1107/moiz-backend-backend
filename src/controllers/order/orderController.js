@@ -119,7 +119,6 @@ const createOrder = async (req, res) => {
     const isGuest = !req.user;
     const customerId = req.user?._id || null;
 
-    // Validation
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, message: 'At least one item required' });
     }
@@ -163,7 +162,7 @@ const createOrder = async (req, res) => {
     const zone = await DeliveryZone.findOne({ area: areaId, isActive: true }).lean();
     if (!zone) return res.status(400).json({ success: false, message: 'Delivery not available in this area' });
 
-    // Process items — using priceAtAdd from cart (includes extras)
+    // Process items
     const orderItems = [];
     let subtotal = 0;
 
@@ -310,15 +309,22 @@ const createOrder = async (req, res) => {
       await order.save({ session });
     }
 
+    // ✅ Correct debitWallet call using object syntax
     if (!isGuest && walletUsed > 0) {
-      await debitWallet(customerId, toDecimal(walletUsed), order._id, session);
+      await debitWallet({
+        userId: customerId,
+        amount: toDecimal(walletUsed),
+        orderId: order._id,
+        description: `Payment for order #${orderIdShort(order._id)}`,
+        session,
+      });
     }
 
     await PaymentTransaction.create([{
       order: order._id,
       paymentMethod: order.paymentMethod,
       amount: toDecimal(finalAmount + walletUsed),
-      status: finalAmount === 0 || paymentMethod !== 'cash' ? 'paid' : 'pending',
+      status: finalAmount === 0 || paymentMethod !== 'cash' ? 'succeeded' : 'pending',
       transactionId: order.paymentIntentId || order.bankTransferReference || null,
       paidAt: finalAmount === 0 || paymentMethod !== 'cash' ? new Date() : null,
     }], { session });
@@ -342,7 +348,6 @@ const createOrder = async (req, res) => {
 
     if (session) await session.commitTransaction();
 
-    // Clear cart after successful order (logged-in users only)
     if (!isGuest) {
       await Cart.deleteOne({ user: customerId });
     }
@@ -382,6 +387,7 @@ const createOrder = async (req, res) => {
     if (session) session.endSession();
   }
 };
+
 
 
 const reorderOrder = async (req, res) => {

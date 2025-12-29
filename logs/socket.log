@@ -18351,3 +18351,1058 @@
 {"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T07:37:24.506Z"}
 {"level":"info","message":"Database connection established","timestamp":"2025-12-29T07:37:25.462Z"}
 {"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T07:37:25.469Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T07:41:54.634Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T07:41:55.360Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T07:41:55.644Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T07:41:55.651Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T07:41:55.657Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T07:41:55.664Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T07:41:55.674Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T07:41:55.682Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T07:41:55.708Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T07:41:55.717Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T07:41:55.751Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T07:41:55.755Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T07:41:55.766Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T07:41:55.771Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T07:41:55.774Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T07:41:55.783Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T07:41:55.785Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T07:41:55.789Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T07:41:55.799Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T07:41:55.803Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T07:41:55.807Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T07:41:55.979Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T07:41:55.987Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T07:41:56.003Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T07:41:56.023Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T07:41:56.029Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T07:41:57.105Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T07:41:57.118Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-29T07:56:41.744Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:03:30.655Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:03:31.699Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:03:32.009Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:03:32.017Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:03:32.032Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:03:32.061Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:03:32.090Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:03:32.110Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:03:32.168Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:03:32.179Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:03:32.214Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:03:32.223Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:03:32.232Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:03:32.240Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:03:32.244Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:03:32.255Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:03:32.259Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:03:32.266Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:03:32.279Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:03:32.294Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:03:32.307Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:03:32.509Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:03:32.514Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:03:32.535Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:03:32.552Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:03:32.558Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:03:33.732Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:03:33.741Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:03:58.188Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:03:59.181Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:03:59.436Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:03:59.444Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:03:59.456Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:03:59.464Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:03:59.483Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:03:59.495Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:03:59.533Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:03:59.547Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:03:59.580Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:03:59.587Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:03:59.593Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:03:59.598Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:03:59.605Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:03:59.612Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:03:59.619Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:03:59.626Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:03:59.637Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:03:59.642Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:03:59.650Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:03:59.838Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:03:59.843Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:03:59.856Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:03:59.868Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:03:59.872Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:04:00.778Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:04:00.784Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-29T08:04:09.348Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 693c493c4e30604b43347880 (Javeria Tareen)","timestamp":"2025-12-29T08:05:30.781Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:09:43.396Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:13:28.530Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:13:29.591Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:13:29.794Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:13:29.803Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:13:29.826Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:13:29.833Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:13:29.848Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:13:29.861Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:13:29.891Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:13:29.900Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:13:29.938Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:13:29.953Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:13:29.964Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:13:29.981Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:13:29.991Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:13:30.025Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:13:30.034Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:13:30.057Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:13:30.093Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:13:30.110Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:13:30.147Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:13:30.529Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:13:30.540Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:13:30.572Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:13:30.609Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:13:30.617Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:13:32.010Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:13:32.031Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:13:34.062Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:14:22.581Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:14:23.665Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:16:47.913Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:16:48.781Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:16:48.950Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:16:48.958Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:16:48.968Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:16:48.978Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:16:48.999Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:16:49.023Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:16:49.096Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:16:49.111Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:16:49.147Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:16:49.154Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:16:49.158Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:16:49.162Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:16:49.170Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:16:49.176Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:16:49.189Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:16:49.194Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:16:49.205Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:16:49.209Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:16:49.214Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:16:49.387Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:16:49.390Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:16:49.397Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:16:49.426Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:16:49.430Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:16:50.392Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:16:50.407Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:16:52.153Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:17:31.257Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:17:32.105Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:17:32.421Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:17:32.428Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:17:32.437Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:17:32.449Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:17:32.460Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:17:32.469Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:17:32.495Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:17:32.506Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:17:32.571Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:17:32.580Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:17:32.594Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:17:32.605Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:17:32.613Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:17:32.635Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:17:32.650Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:17:32.660Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:17:32.694Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:17:32.725Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:17:32.749Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:17:33.083Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:17:33.093Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:17:33.129Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:17:33.157Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:17:33.167Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:17:34.150Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:17:34.169Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:17:37.062Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:18:17.236Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:18:17.990Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:18:18.222Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:18:18.237Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:18:18.254Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:18:18.272Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:18:18.284Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:18:18.292Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:18:18.333Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:18:18.352Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:18:18.397Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:18:18.403Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:18:18.414Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:18:18.418Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:18:18.421Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:18:18.436Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:18:18.445Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:18:18.458Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:18:18.469Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:18:18.476Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:18:18.486Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:18:18.673Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:18:18.678Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:18:18.699Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:18:18.715Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:18:18.719Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:18:19.879Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:18:19.905Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:18:20.818Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:21:47.520Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:22:28.330Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:24:26.205Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:24:26.693Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:24:26.831Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:24:26.836Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:24:26.845Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:24:26.849Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:24:26.862Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:24:26.871Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:24:26.893Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:24:26.900Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:24:26.918Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:24:26.926Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:24:26.931Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:24:26.934Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:24:26.938Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:24:26.947Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:24:26.949Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:24:26.958Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:24:26.966Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:24:26.970Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:24:26.977Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:24:27.090Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:24:27.095Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:24:27.108Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:24:27.116Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:24:27.118Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:24:27.970Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:24:27.974Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:25:00.079Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:25:00.462Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:25:00.556Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:25:00.560Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:25:00.563Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:25:00.567Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:25:00.573Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:25:00.581Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:25:00.597Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:25:00.608Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:25:00.624Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:25:00.629Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:25:00.634Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:25:00.638Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:25:00.640Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:25:00.646Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:25:00.648Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:25:00.651Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:25:00.657Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:25:00.662Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:25:00.665Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:25:00.764Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:25:00.767Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:25:00.772Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:25:00.778Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:25:00.782Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:25:01.535Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:25:01.540Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:25:13.936Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:32:39.886Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:32:40.695Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:32:40.938Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:32:40.942Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:32:40.946Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:32:40.952Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:32:40.959Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:32:40.964Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:32:40.987Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:32:41.008Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:32:41.037Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:32:41.042Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:32:41.055Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:32:41.059Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:32:41.062Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:32:41.073Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:32:41.075Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:32:41.079Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:32:41.096Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:32:41.108Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:32:41.112Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:32:41.263Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:32:41.266Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:32:41.279Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:32:41.295Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:32:41.302Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:32:42.471Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:32:42.486Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:33:10.200Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:33:11.052Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:33:11.953Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:33:50.850Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:33:51.606Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:33:51.823Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:33:51.832Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:33:51.838Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:33:51.843Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:33:51.854Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:33:51.858Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:33:51.881Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:33:51.891Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:33:51.922Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:33:51.935Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:33:51.941Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:33:51.948Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:33:51.953Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:33:51.958Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:33:51.964Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:33:51.971Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:33:51.981Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:33:51.987Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:33:51.990Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:33:52.118Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:33:52.122Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:33:52.131Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:33:52.140Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:33:52.143Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:33:53.183Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:33:53.187Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:33:54.010Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:33:56.191Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:33:57.570Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:36:06.193Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:36:07.148Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:36:07.350Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:36:07.366Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:36:07.371Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:36:07.383Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:36:07.390Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:36:07.398Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:36:07.430Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:36:07.443Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:36:07.505Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:36:07.524Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:36:07.530Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:36:07.532Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:36:07.534Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:36:07.545Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:36:07.547Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:36:07.550Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:36:07.564Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:36:07.567Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:36:07.574Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:36:07.711Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:36:07.714Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:36:07.719Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:36:07.729Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:36:07.731Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:36:08.827Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:36:08.834Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:36:09.686Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:40:04.062Z"}
+{"level":"error","message":"UNHANDLED ERROR [400] Unexpected non-whitespace character after JSON at position 446","method":"POST","path":"/api/orders","stack":"SyntaxError: Unexpected non-whitespace character after JSON at position 446\n    at JSON.parse (<anonymous>)\n    at parse (C:\\amfood\\FoodWebsite-backend\\node_modules\\body-parser\\lib\\types\\json.js:74:19)\n    at C:\\amfood\\FoodWebsite-backend\\node_modules\\body-parser\\lib\\read.js:163:18\n    at AsyncResource.runInAsyncScope (node:async_hooks:206:9)\n    at invokeCallback (C:\\amfood\\FoodWebsite-backend\\node_modules\\raw-body\\index.js:238:16)\n    at done (C:\\amfood\\FoodWebsite-backend\\node_modules\\raw-body\\index.js:227:7)\n    at IncomingMessage.onEnd (C:\\amfood\\FoodWebsite-backend\\node_modules\\raw-body\\index.js:287:7)\n    at IncomingMessage.emit (node:events:524:28)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","timestamp":"2025-12-29T08:40:59.135Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:46:37.717Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:46:38.441Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:46:38.580Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:46:38.585Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:46:38.592Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:46:38.597Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:46:38.605Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:46:38.609Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:46:38.626Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:46:38.632Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:46:38.650Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:46:38.656Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:46:38.662Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:46:38.666Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:46:38.669Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:46:38.673Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:46:38.678Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:46:38.684Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:46:38.689Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:46:38.698Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:46:38.702Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:46:38.820Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:46:38.823Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:46:38.832Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:46:38.839Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:46:38.842Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:46:40.052Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:46:40.063Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:46:52.907Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:46:53.807Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:46:54.096Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:46:54.103Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:46:54.115Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:46:54.121Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:46:54.136Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:46:54.150Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:46:54.166Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:46:54.180Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:46:54.207Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:46:54.217Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:46:54.224Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:46:54.231Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:46:54.238Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:46:54.249Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:46:54.251Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:46:54.256Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:46:54.270Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:46:54.275Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:46:54.282Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:46:54.515Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:46:54.525Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:46:54.536Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:46:54.557Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:46:54.560Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:46:55.436Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:46:55.443Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:47:38.140Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:47:38.970Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:47:39.129Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:47:39.134Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:47:39.138Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:47:39.152Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:47:39.164Z"}
+{"error":"Identifier 'debitWallet' has already been declared","level":"error","message":"ROUTE LOAD FAILED: /api/orders","timestamp":"2025-12-29T08:47:39.171Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:47:39.201Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:47:39.211Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:47:39.243Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:47:39.248Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:47:39.253Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:47:39.260Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:47:39.264Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:47:39.268Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:47:39.270Z"}
+{"error":"Identifier 'debitWallet' has already been declared","level":"error","message":"ROUTE LOAD FAILED: /api/wallet","timestamp":"2025-12-29T08:47:39.276Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:47:39.285Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:47:39.290Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:47:39.297Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:47:39.430Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:47:39.434Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:47:39.442Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:47:39.448Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:47:39.451Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:47:40.463Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:47:40.466Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:48:22.254Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:48:22.727Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:48:22.896Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:48:22.900Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:48:22.904Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:48:22.908Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:48:22.914Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:48:22.919Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:48:22.936Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:48:22.946Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:48:22.957Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:48:22.960Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:48:22.964Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:48:22.966Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:48:22.968Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:48:22.972Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:48:22.974Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:48:22.978Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:48:22.984Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:48:22.987Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:48:22.991Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:48:23.104Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:48:23.107Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:48:23.115Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:48:23.126Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:48:23.128Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:48:23.986Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:48:23.990Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:48:25.476Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:48:26.251Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:48:27.894Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T08:50:22.334Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T08:50:22.816Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T08:50:23.097Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T08:50:23.102Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T08:50:23.125Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T08:50:23.138Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T08:50:23.145Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T08:50:23.155Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T08:50:23.175Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T08:50:23.183Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T08:50:23.201Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T08:50:23.206Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T08:50:23.208Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T08:50:23.211Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T08:50:23.213Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T08:50:23.219Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T08:50:23.222Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T08:50:23.225Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T08:50:23.230Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T08:50:23.237Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T08:50:23.240Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T08:50:23.352Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T08:50:23.355Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T08:50:23.361Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T08:50:23.368Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T08:50:23.371Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T08:50:24.470Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T08:50:24.473Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:50:25.494Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T08:57:40.113Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:02:01.466Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:02:02.202Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:02:02.358Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:02:02.365Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:02:02.378Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:02:02.385Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:02:02.396Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:02:02.408Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:02:02.425Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:02:02.431Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:02:02.457Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:02:02.462Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:02:02.468Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:02:02.473Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:02:02.475Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:02:02.483Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:02:02.488Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:02:02.492Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:02:02.498Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:02:02.505Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:02:02.508Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:02:02.627Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:02:02.630Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:02:02.639Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:02:02.649Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:02:02.657Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:02:03.604Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:02:03.609Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:03:41.157Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:03:41.615Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:03:41.788Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:03:41.792Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:03:41.797Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:03:41.801Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:03:41.811Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:03:41.818Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:03:41.834Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:03:41.839Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:03:41.861Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:03:41.870Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:03:41.877Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:03:41.882Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:03:41.885Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:03:41.889Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:03:41.891Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:03:41.898Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:03:41.906Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:03:41.909Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:03:41.917Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:03:42.065Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:03:42.071Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:03:42.078Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:03:42.084Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:03:42.086Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:03:43.108Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:03:43.112Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:07:27.027Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:07:39.509Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:07:39.938Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:07:40.093Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:07:40.102Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:07:40.109Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:07:40.117Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:07:40.131Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:07:40.140Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:07:40.181Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:07:40.195Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:07:40.212Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:07:40.218Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:07:40.235Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:07:40.243Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:07:40.248Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:07:40.263Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:07:40.272Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:07:40.278Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:07:40.293Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:07:40.307Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:07:40.312Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:07:40.443Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:07:40.446Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:07:40.453Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:07:40.458Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:07:40.460Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:07:41.461Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:07:41.467Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:07:42.875Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:09:02.631Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:09:03.390Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:09:03.550Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:09:03.554Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:09:03.562Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:09:03.570Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:09:03.587Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:09:03.593Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:09:03.624Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:09:03.636Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:09:03.655Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:09:03.662Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:09:03.671Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:09:03.674Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:09:03.677Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:09:03.688Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:09:03.690Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:09:03.705Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:09:03.718Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:09:03.723Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:09:03.727Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:09:03.878Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:09:03.885Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:09:03.892Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:09:03.905Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:09:03.908Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:09:04.961Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:09:04.965Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:09:07.036Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:09:09.568Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:09:11.111Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:10:31.208Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:10:31.758Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:10:31.881Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:10:31.885Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:10:31.891Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:10:31.896Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:10:31.902Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:10:31.905Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:10:31.920Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:10:31.926Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:10:31.939Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:10:31.949Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:10:31.953Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:10:31.956Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:10:31.959Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:10:31.965Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:10:31.967Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:10:31.969Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:10:31.975Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:10:31.981Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:10:31.983Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:10:32.093Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:10:32.096Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:10:32.102Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:10:32.109Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:10:32.114Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:10:33.239Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:10:33.244Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:10:34.075Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:10:54.403Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:10:54.756Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:10:54.863Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:10:54.866Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:10:54.870Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:10:54.873Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:10:54.880Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:10:54.884Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:10:54.896Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:10:54.901Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:10:54.915Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:10:54.918Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:10:54.921Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:10:54.923Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:10:54.927Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:10:54.931Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:10:54.934Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:10:54.937Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:10:54.944Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:10:54.947Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:10:54.950Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:10:55.064Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:10:55.068Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:10:55.077Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:10:55.083Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:10:55.084Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:10:55.864Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:10:55.868Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:10:56.645Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:11:23.619Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:11:24.230Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:11:24.332Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:11:24.335Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:11:24.341Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:11:24.347Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:11:24.355Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:11:24.362Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:11:24.373Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:11:24.384Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:11:24.398Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:11:24.402Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:11:24.406Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:11:24.409Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:11:24.414Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:11:24.418Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:11:24.419Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:11:24.432Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:11:24.437Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:11:24.441Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:11:24.452Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:11:24.581Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:11:24.584Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:11:24.590Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:11:24.598Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:11:24.600Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:11:25.364Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:11:25.367Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:11:26.242Z"}
+{"context":"socket","level":"info","message":"CUSTOMER disconnected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:11:27.648Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:11:28.935Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:12:01.104Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:12:01.685Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:12:01.829Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:12:01.833Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:12:01.838Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:12:01.844Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:12:01.850Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:12:01.856Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:12:01.872Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:12:01.880Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:12:01.900Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:12:01.907Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:12:01.913Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:12:01.916Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:12:01.918Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:12:01.928Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:12:01.931Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:12:01.938Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:12:01.946Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:12:01.950Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:12:01.956Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:12:02.082Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:12:02.085Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:12:02.092Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:12:02.099Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:12:02.102Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:12:02.904Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:12:02.909Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:12:03.783Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:13:56.373Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:13:56.733Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:13:56.816Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:13:56.821Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:13:56.825Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:13:56.828Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:13:56.835Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:13:56.839Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:13:56.849Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:13:56.855Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:13:56.870Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:13:56.874Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:13:56.877Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:13:56.883Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:13:56.886Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:13:56.889Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:13:56.891Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:13:56.893Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:13:56.898Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:13:56.902Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:13:56.905Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:13:56.999Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:13:57.001Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:13:57.008Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:13:57.021Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:13:57.026Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:13:58.082Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:13:58.086Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:13:58.975Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:14:10.609Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:14:11.216Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:14:11.385Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:14:11.389Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:14:11.393Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:14:11.398Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:14:11.408Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:14:11.412Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:14:11.433Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:14:11.447Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:14:11.467Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:14:11.472Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:14:11.476Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:14:11.478Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:14:11.482Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:14:11.489Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:14:11.494Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:14:11.504Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:14:11.509Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:14:11.513Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:14:11.521Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:14:11.658Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:14:11.661Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:14:11.671Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:14:11.677Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:14:11.678Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:14:12.436Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:14:12.442Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:14:13.398Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:16:49.720Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:16:50.161Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:16:50.286Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:16:50.293Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:16:50.300Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:16:50.310Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:16:50.321Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:16:50.330Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:16:50.353Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:16:50.377Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:16:50.418Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:16:50.424Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:16:50.430Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:16:50.434Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:16:50.438Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:16:50.448Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:16:50.452Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:16:50.460Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:16:50.468Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:16:50.472Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:16:50.478Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:16:50.606Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:16:50.610Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:16:50.618Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:16:50.626Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:16:50.628Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:16:51.537Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:16:51.544Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:16:52.425Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:18:10.837Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:18:11.458Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:18:11.571Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:18:11.582Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:18:11.591Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:18:11.599Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:18:11.609Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:18:11.621Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:18:11.648Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:18:11.663Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:18:11.697Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:18:11.704Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:18:11.719Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:18:11.730Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:18:11.734Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:18:11.746Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:18:11.749Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:18:11.757Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:18:11.762Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:18:11.765Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:18:11.768Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:18:11.899Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:18:11.903Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:18:11.909Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:18:11.916Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:18:11.919Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:18:12.833Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:18:12.840Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:18:13.793Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:18:51.317Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:18:51.748Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:18:51.992Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:18:52.000Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:18:52.016Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:18:52.033Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:18:52.061Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:18:52.067Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:18:52.083Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:18:52.104Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:18:52.116Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:18:52.123Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:18:52.128Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:18:52.130Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:18:52.131Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:18:52.138Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:18:52.140Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:18:52.144Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:18:52.152Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:18:52.156Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:18:52.163Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:18:52.304Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:18:52.308Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:18:52.314Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:18:52.325Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:18:52.326Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:18:53.154Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:18:53.159Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:18:54.004Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:19:35.552Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:19:35.933Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:19:36.026Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:19:36.031Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:19:36.044Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:19:36.048Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:19:36.057Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:19:36.066Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:19:36.080Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:19:36.097Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:19:36.143Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:19:36.146Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:19:36.152Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:19:36.158Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:19:36.164Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:19:36.173Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:19:36.174Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:19:36.177Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:19:36.190Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:19:36.195Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:19:36.206Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:19:36.408Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:19:36.411Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:19:36.416Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:19:36.422Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:19:36.423Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:19:37.514Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:19:37.518Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:19:38.463Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:20:30.538Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:20:30.906Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:20:30.982Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:20:30.987Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:20:30.993Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:20:30.997Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:20:31.003Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:20:31.007Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:20:31.022Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:20:31.026Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:20:31.042Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:20:31.046Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:20:31.049Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:20:31.053Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:20:31.054Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:20:31.058Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:20:31.059Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:20:31.063Z"}
+{"error":"Unexpected string","level":"error","message":"ROUTE LOAD FAILED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:20:31.068Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:20:31.071Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:20:31.074Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:20:31.181Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:20:31.185Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:20:31.192Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:20:31.204Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:20:31.209Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:20:32.021Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:20:32.024Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:20:34.439Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:20:34.789Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:20:34.868Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:20:34.872Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:20:34.877Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:20:34.881Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:20:34.885Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:20:34.889Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:20:34.899Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:20:34.904Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:20:34.919Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:20:34.922Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:20:34.924Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:20:34.926Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:20:34.928Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:20:34.933Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:20:34.935Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:20:34.937Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:20:34.942Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:20:34.944Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:20:34.948Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:20:35.054Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:20:35.057Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:20:35.062Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:20:35.070Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:20:35.071Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:20:35.930Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:20:35.934Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:21:21.327Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:21:21.686Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:21:21.829Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:21:21.832Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:21:21.838Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:21:21.843Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:21:21.849Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:21:21.853Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:21:21.865Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:21:21.870Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:21:21.886Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:21:21.889Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:21:21.892Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:21:21.897Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:21:21.900Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:21:21.903Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:21:21.904Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:21:21.907Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:21:21.915Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:21:21.918Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:21:21.920Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:21:22.023Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:21:22.026Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:21:22.030Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:21:22.036Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:21:22.037Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:21:22.862Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:21:22.866Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:21:37.937Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:25:08.644Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:25:09.228Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:25:09.367Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:25:09.374Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:25:09.381Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:25:09.387Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:25:09.394Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:25:09.399Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:25:09.414Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:25:09.421Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:25:09.444Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:25:09.449Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:25:09.457Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:25:09.463Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:25:09.466Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:25:09.474Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:25:09.476Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:25:09.479Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:25:09.487Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:25:09.491Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:25:09.494Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:25:09.608Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:25:09.614Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:25:09.624Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:25:09.632Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:25:09.638Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:25:10.606Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:25:10.609Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:25:11.528Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2025-12-29T09:28:41.364Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2025-12-29T09:28:41.973Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2025-12-29T09:28:42.087Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2025-12-29T09:28:42.091Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2025-12-29T09:28:42.098Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2025-12-29T09:28:42.102Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2025-12-29T09:28:42.108Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2025-12-29T09:28:42.113Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2025-12-29T09:28:42.127Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2025-12-29T09:28:42.133Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2025-12-29T09:28:42.150Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2025-12-29T09:28:42.154Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2025-12-29T09:28:42.160Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2025-12-29T09:28:42.164Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2025-12-29T09:28:42.166Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2025-12-29T09:28:42.170Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2025-12-29T09:28:42.172Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2025-12-29T09:28:42.177Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2025-12-29T09:28:42.182Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2025-12-29T09:28:42.185Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2025-12-29T09:28:42.189Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2025-12-29T09:28:42.321Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2025-12-29T09:28:42.324Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2025-12-29T09:28:42.329Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2025-12-29T09:28:42.336Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2025-12-29T09:28:42.340Z"}
+{"level":"info","message":"Database connection established","timestamp":"2025-12-29T09:28:43.376Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-12-29T09:28:43.379Z"}
+{"context":"socket","level":"info","message":"CUSTOMER connected → 693d6adddbc691bec8de12f4 (Nicole Nikolaus)","timestamp":"2025-12-29T09:28:44.250Z"}

@@ -88,7 +88,7 @@ const createWithdrawalRequest = async (req, res) => {
         wallet: wallet._id,
         amount: amountDecimal,
         paymentMethod,
-        bankDetails: paymentMethod === 'bank_transfer' ? bankDetails : undefined,
+        bankDetails: paymentMethod === 'bank' ? bankDetails : undefined,
         mobileWalletNumber: ['easypaisa', 'jazzcash'].includes(paymentMethod) ? mobileWalletNumber : undefined,
         requestedBy: userId,
         status: 'pending'

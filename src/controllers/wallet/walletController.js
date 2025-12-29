@@ -258,21 +258,25 @@ const creditWallet = async ({
   orderId = null,
   metadata = {},
   performedBy = null,
+  session: providedSession = null, // optional external session
 } = {}) => {
   if (!userId) throw new Error('userId required');
+  if (!amount) throw new Error('amount required');
 
   const amountDec = parsePositiveAmount(amount);
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  const session = providedSession || await mongoose.startSession();
+  const ownSession = !providedSession;
+
+  if (ownSession) session.startTransaction();
 
   try {
     let wallet = await Wallet.findOne({ user: userId }).session(session);
 
     if (!wallet) {
-      // Auto-create with explicit status
+      // Auto-create wallet with explicit active status
       [wallet] = await Wallet.create([{
         user: userId,
-        status: 'active',                    // Explicitly stored – critical!
+        status: 'active',
         currency: 'PKR',
         balance: toDecimal('0.00'),
         lifetimeCredits: toDecimal('0.00'),
@@ -280,12 +284,13 @@ const creditWallet = async ({
         totalWithdrawn: toDecimal('0.00'),
       }], { session });
     } else {
-      // Reject if exists but non-active (consistency with debit)
+      // Reject if wallet exists but is inactive
       if (wallet.status !== 'active') {
-        throw new Error('Cannot credit to a non-active wallet. Please activate it first.');
+        throw new Error('Cannot credit a non-active wallet. Please activate it first.');
       }
     }
 
+    // Update wallet balances atomically
     const updated = await Wallet.findOneAndUpdate(
       { _id: wallet._id },
       {
@@ -295,6 +300,7 @@ const creditWallet = async ({
       { new: true, session }
     );
 
+    // Record wallet transaction
     const transaction = (await WalletTransaction.create([{
       wallet: wallet._id,
       order: orderId,
@@ -306,6 +312,7 @@ const creditWallet = async ({
       createdBy: performedBy || null,
     }], { session }))[0];
 
+    // Audit log if performed by admin/support
     if (performedBy) {
       await AuditLog.create([{
         action: 'wallet_credit',
@@ -318,8 +325,9 @@ const creditWallet = async ({
       }], { session });
     }
 
-    await session.commitTransaction();
+    if (ownSession) await session.commitTransaction();
 
+    // Emit real-time wallet update via Socket.IO
     io?.to(`user:${userId}`).emit('walletUpdate', {
       event: 'balanceUpdated',
       balance: toNumber(updated.balance),
@@ -331,10 +339,31 @@ const creditWallet = async ({
 
     return updated;
   } catch (err) {
-    await session.abortTransaction();
+    if (ownSession) await session.abortTransaction();
     throw err;
   } finally {
-    session.endSession();
+    if (ownSession) session.endSession();
+  }
+};
+
+
+
+const adminDebitWallet = async (req, res) => {
+  try {
+    const { userId, amount, description = 'Admin debit' } = req.body;
+
+  await debitWallet({
+  userId: customerId,
+  amount: toDecimal(walletUsed),
+  orderId: order._id,
+  description: `Payment for order #${orderIdShort(order._id)}`,
+  session,
+});
+
+
+    res.json({ success: true, message: `Debited PKR ${Number(amount).toFixed(2)}` });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
   }
 };
 
@@ -443,23 +472,6 @@ const adminCreditWallet = async (req, res) => {
   }
 };
 
-const adminDebitWallet = async (req, res) => {
-  try {
-    const { userId, amount, description = 'Admin debit' } = req.body;
-
-    await debitWallet({
-      userId,
-      amount,
-      type: 'adjustment_debit',
-      description,
-      performedBy: req.user._id,
-    });
-
-    res.json({ success: true, message: `Debited PKR ${Number(amount).toFixed(2)}` });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
-  }
-};
 
 
 
