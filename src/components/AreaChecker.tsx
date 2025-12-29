@@ -1,69 +1,107 @@
 // src/components/AreaChecker.tsx
-// FINAL PRODUCTION — DECEMBER 28, 2025
-// Google Places Autocomplete: Optional & safe (works without key)
-// Fallback: Current location button always available
-// Fixed: Navigation, error handling, loading UX
 
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Loader2,
+  MapPin,
+  Navigation,
+  X,
+  Search,
+  AlertCircle,
+} from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, MapPin, Navigation, X, Search, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
 
 import { useCheckArea } from "@/hooks/useCheckArea";
 import { useDeliveryStore } from "@/lib/deliveryStore";
-import { useNavigate } from "react-router-dom";
 
-// Load Google Maps script only if key exists
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
-const isGooglePlacesEnabled = !!GOOGLE_API_KEY && GOOGLE_API_KEY.trim() !== "";
+/* ---------------------------------------------------------
+   Google Maps config (safe + optional)
+---------------------------------------------------------- */
+const GOOGLE_API_KEY: string | undefined =
+  import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+
+const isGooglePlacesEnabled: boolean =
+  typeof GOOGLE_API_KEY === "string" && GOOGLE_API_KEY.trim().length > 0;
+
+/* ---------------------------------------------------------
+   Types
+---------------------------------------------------------- */
+interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+interface ConfirmedPayload {
+  area: {
+    _id: string;
+    name: string;
+    city: string;
+    center: Coordinates;
+  };
+  delivery: {
+    deliveryFee: number;
+    minOrderAmount: number;
+    estimatedTime: string;
+  } | null;
+}
 
 interface AreaCheckerProps {
-  onConfirmed?: (data: { area: any; delivery: any }) => void;
+  onConfirmed?: (data: ConfirmedPayload) => void;
   onNotInService?: () => void;
   onClose?: () => void;
   disableAutoNavigate?: boolean;
 }
 
+/* ---------------------------------------------------------
+   Component
+---------------------------------------------------------- */
 export default function AreaChecker({
   onConfirmed,
   onNotInService,
   onClose,
   disableAutoNavigate = false,
 }: AreaCheckerProps) {
-  const [detecting, setDetecting] = useState(false);
-  const [searchCoords, setSearchCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [googleLoaded, setGoogleLoaded] = useState(false);
-  const [googleError, setGoogleError] = useState(false);
-
-  const inputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-
   const navigate = useNavigate();
   const setDeliveryArea = useDeliveryStore((state) => state.setDeliveryArea);
 
-  // Area check based on coordinates
+  const [detecting, setDetecting] = useState<boolean>(false);
+  const [searchCoords, setSearchCoords] = useState<Coordinates | null>(null);
+  const [googleLoaded, setGoogleLoaded] = useState<boolean>(false);
+  const [googleError, setGoogleError] = useState<boolean>(false);
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const autocompleteRef =
+    useRef<google.maps.places.Autocomplete | null>(null);
+
+  /* ---------------------------------------------------------
+     API Hook
+  ---------------------------------------------------------- */
   const { data, isLoading, error } = useCheckArea(
     searchCoords?.lat ?? null,
     searchCoords?.lng ?? null
   );
 
-  // Load Google Places script (only if key provided)
+  /* ---------------------------------------------------------
+     Load Google Places Script (optional)
+  ---------------------------------------------------------- */
   useEffect(() => {
-    if (!isGooglePlacesEnabled) {
-      setGoogleLoaded(false);
-      return;
-    }
+    if (!isGooglePlacesEnabled) return;
 
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`;
     script.async = true;
+
     script.onload = () => setGoogleLoaded(true);
     script.onerror = () => {
       setGoogleError(true);
-      toast.error("Google Maps failed to load. Using location button only.");
+      toast.error("Google Maps failed to load");
     };
+
     document.head.appendChild(script);
 
     return () => {
@@ -71,235 +109,240 @@ export default function AreaChecker({
     };
   }, []);
 
-  // Initialize Google Places Autocomplete (only when loaded)
+  /* ---------------------------------------------------------
+     Init Autocomplete
+  ---------------------------------------------------------- */
   useEffect(() => {
     if (!googleLoaded || !inputRef.current) return;
 
-    try {
-      const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+    const autocomplete = new window.google.maps.places.Autocomplete(
+      inputRef.current,
+      {
         types: ["geocode"],
         componentRestrictions: { country: "pk" },
         fields: ["formatted_address", "geometry"],
+      }
+    );
+
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      const location = place.geometry?.location;
+
+      if (!location) {
+        toast.error("No location found");
+        return;
+      }
+
+      setSearchCoords({
+        lat: location.lat(),
+        lng: location.lng(),
       });
 
-      autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
-        if (place.geometry?.location) {
-          const lat = place.geometry.location.lat();
-          const lng = place.geometry.location.lng();
-          setSearchCoords({ lat, lng });
-          toast.success(`Searching: ${place.formatted_address}`);
-        } else {
-          toast.error("No location found for that address");
-        }
-      });
+      toast.success(place.formatted_address ?? "Searching area");
+    });
 
-      autocompleteRef.current = autocomplete;
-    } catch (err) {
-      console.warn("Google Autocomplete init failed:", err);
-      toast.error("Address search unavailable");
-    }
+    autocompleteRef.current = autocomplete;
 
     return () => {
       if (autocompleteRef.current) {
-        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        window.google.maps.event.clearInstanceListeners(
+          autocompleteRef.current
+        );
       }
     };
   }, [googleLoaded]);
 
-  // Auto-detect location on mount
+  /* ---------------------------------------------------------
+     Auto Detect Location (Mobile First)
+  ---------------------------------------------------------- */
   useEffect(() => {
-    if ("geolocation" in navigator && !searchCoords) {
-      setDetecting(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setSearchCoords({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          toast.success("Location detected!");
-          setDetecting(false);
-        },
-        (err) => {
-          console.warn("Geolocation error:", err);
-          toast.error("Location access denied. Please search manually.");
-          setDetecting(false);
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
-      );
-    }
+    if (!("geolocation" in navigator) || searchCoords) return;
+
+    setDetecting(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setSearchCoords({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+        setDetecting(false);
+      },
+      () => {
+        setDetecting(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000 }
+    );
   }, [searchCoords]);
 
-  // Handle delivery check result
+  /* ---------------------------------------------------------
+     Handle API Result
+  ---------------------------------------------------------- */
   useEffect(() => {
     if (isLoading || error || !data) return;
 
-    if (data.inService && data.area) {
-      const area = {
-        _id: data.area._id,
-        name: data.area.name,
-        city: data.area.city,
-        center: data.area.center,
-      };
-
-      const delivery = data.delivery
-        ? {
-            deliveryFee: data.delivery.fee,
-            minOrderAmount: data.delivery.minOrder,
-            estimatedTime: data.delivery.estimatedTime,
-          }
-        : null;
-
-      setDeliveryArea(area, delivery);
-
-      sessionStorage.setItem(
-        "deliveryState",
-        JSON.stringify({
-          area,
-          delivery,
-          checkedAt: Date.now(),
-        })
-      );
-
-      const message = delivery
-        ? `Rs. ${delivery.deliveryFee} delivery fee • ${delivery.estimatedTime}`
-        : "Delivery coming soon!";
-
-      toast.success(`✅ ${area.name} — ${message}`);
-
-      onConfirmed?.({ area, delivery });
-
-      if (!disableAutoNavigate) {
-        navigate("/menu", { replace: true }); // Modern route
-      }
-    } else {
-      toast.info(data.message || "Sorry, we don't deliver here yet");
+    if (!data.inService || !data.area) {
+      toast.info(data.message ?? "Not in service");
       onNotInService?.();
+      return;
     }
-  }, [data, isLoading, error, navigate, onConfirmed, onNotInService, disableAutoNavigate, setDeliveryArea]);
 
-  const handleManualLocation = () => {
-    if ("geolocation" in navigator) {
-      setDetecting(true);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setSearchCoords({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          });
-          toast.success("Location detected!");
-          setDetecting(false);
-        },
-        () => {
-          toast.error("Location access denied");
-          setDetecting(false);
-        },
-        { enableHighAccuracy: true }
-      );
-    } else {
-      toast.error("Geolocation not supported");
+    const area = {
+      _id: data.area._id,
+      name: data.area.name,
+      city: data.area.city,
+      center: data.area.center,
+    };
+
+    const delivery = data.delivery
+      ? {
+          deliveryFee: data.delivery.fee,
+          minOrderAmount: data.delivery.minOrder,
+          estimatedTime: data.delivery.estimatedTime,
+        }
+      : null;
+
+    setDeliveryArea(area, delivery);
+
+    onConfirmed?.({ area, delivery });
+
+    if (!disableAutoNavigate) {
+      navigate("/menu", { replace: true });
     }
+  }, [
+    data,
+    isLoading,
+    error,
+    navigate,
+    onConfirmed,
+    onNotInService,
+    disableAutoNavigate,
+    setDeliveryArea,
+  ]);
+
+  /* ---------------------------------------------------------
+     Manual Location
+  ---------------------------------------------------------- */
+  const handleManualLocation = (): void => {
+    if (!("geolocation" in navigator)) {
+      toast.error("Geolocation not supported");
+      return;
+    }
+
+    setDetecting(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setSearchCoords({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+        setDetecting(false);
+      },
+      () => {
+        toast.error("Location permission denied");
+        setDetecting(false);
+      }
+    );
   };
 
+  /* ---------------------------------------------------------
+     UI
+     Responsive Notes:
+     - Mobile-first spacing
+     - clamp() typography
+     - Fluid width, no fixed pixels
+     - Touch friendly (min-h)
+  ---------------------------------------------------------- */
   return (
-    <Card className="w-full max-w-md mx-auto shadow-3xl rounded-3xl overflow-hidden border-0">
+    <Card className="mx-auto w-full max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg overflow-hidden rounded-3xl border-0 shadow-xl">
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-8 text-white">
-        <div className="flex justify-between items-start">
+      <header className="bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-6 sm:px-6 md:px-8">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-3xl font-black flex items-center gap-4">
-              <MapPin className="h-10 w-10" />
+            <h1 className="flex items-center gap-3 font-black text-white [font-size:clamp(1.4rem,3vw,2.2rem)]">
+              <MapPin className="h-7 w-7 sm:h-9 sm:w-9" />
               Check Delivery Area
-            </h3>
-            <p className="text-green-100 mt-3 text-lg">
-              Enter your address to see if we deliver there
+            </h1>
+            <p className="mt-2 text-green-100 [font-size:clamp(0.95rem,2.5vw,1.1rem)]">
+              Enter your address to see availability
             </p>
           </div>
+
           {onClose && (
             <Button
               onClick={onClose}
               variant="ghost"
               size="icon"
-              className="text-white hover:bg-white/20 rounded-full"
               aria-label="Close"
+              className="rounded-full text-white hover:bg-white/20"
             >
-              <X className="h-6 w-6" />
+              <X />
             </Button>
           )}
         </div>
-      </div>
+      </header>
 
       {/* Body */}
-      <div className="p-8 space-y-8 bg-gray-50">
-        {/* Current Location Button */}
+      <main className="space-y-6 bg-gray-50 px-4 py-6 sm:px-6 md:px-8">
+        {/* Current Location */}
         <Button
           onClick={handleManualLocation}
           disabled={detecting || isLoading}
-          className="w-full h-16 text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xl"
+          className="flex min-h-[3.5rem] w-full items-center justify-center gap-3 text-base font-semibold sm:text-lg"
         >
           {detecting ? (
             <>
-              <Loader2 className="mr-4 h-8 w-8 animate-spin" />
-              Detecting location...
+              <Loader2 className="animate-spin" />
+              Detecting…
             </>
           ) : (
             <>
-              <Navigation className="mr-4 h-8 w-8" />
-              Use My Current Location
+              <Navigation />
+              Use Current Location
             </>
           )}
         </Button>
 
-        {/* OR Separator */}
+        {/* Separator */}
         <div className="relative text-center">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative inline-block bg-gray-50 px-6">
-            <span className="text-gray-500 font-medium">OR</span>
-          </div>
+          <span className="relative z-10 bg-gray-50 px-4 text-sm text-gray-500">
+            OR
+          </span>
+          <div className="absolute inset-0 top-1/2 border-t" />
         </div>
 
-        {/* Address Search */}
+        {/* Search */}
         <div className="relative">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400" />
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
             ref={inputRef}
-            type="text"
-            placeholder={
-              isGooglePlacesEnabled
-                ? "Search address in Pakistan..."
-                : "Address search unavailable (no API key)"
-            }
-            className="pl-14 pr-5 py-8 text-lg rounded-2xl border-2 focus:border-green-500 shadow-inner"
             disabled={!isGooglePlacesEnabled || googleError}
+            placeholder="Search address in Pakistan"
+            className="min-h-[3.5rem] pl-12 text-base"
           />
           {googleError && (
-            <div className="mt-3 flex items-center gap-2 text-sm text-orange-600">
-              <AlertCircle className="h-5 w-5" />
-              <span>Google Maps not available</span>
-            </div>
+            <p className="mt-2 flex items-center gap-2 text-sm text-orange-600">
+              <AlertCircle className="h-4 w-4" />
+              Google Maps unavailable
+            </p>
           )}
         </div>
 
-        {/* Status */}
-        {isLoading && searchCoords && (
-          <div className="text-center py-6">
-            <Loader2 className="h-12 w-12 animate-spin text-green-600 mx-auto mb-4" />
-            <p className="text-lg font-medium text-gray-700">Checking delivery...</p>
+        {/* Loading */}
+        {isLoading && (
+          <div className="py-4 text-center">
+            <Loader2 className="mx-auto mb-2 animate-spin text-green-600" />
+            <p className="text-gray-600">Checking delivery area…</p>
           </div>
         )}
 
         {/* Info */}
-        <div className="text-center space-y-3">
-          <p className="text-gray-600">
-            Currently delivering in select areas of <strong>Rawalpindi</strong> & <strong>Islamabad</strong>
-          </p>
-          <p className="text-sm text-gray-500">
-            More areas coming soon!
-          </p>
-        </div>
-      </div>
+        <footer className="text-center text-sm text-gray-500">
+          Delivering in <strong>Islamabad</strong> &{" "}
+          <strong>Rawalpindi</strong>
+        </footer>
+      </main>
     </Card>
   );
 }

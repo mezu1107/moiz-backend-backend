@@ -1,6 +1,6 @@
 // src/components/menu/MenuItemCard.tsx
-// PRODUCTION-READY — DECEMBER 27, 2025
-// Full integration with AddToCartModal + accessibility + UX polish
+// RESPONSIVE & PRODUCTION-READY — DECEMBER 29, 2025
+// Mobile-first, fluid, accessible, fully typed
 
 import { useState } from 'react';
 import { Leaf, Flame } from 'lucide-react';
@@ -19,29 +19,28 @@ interface MenuItemCardProps {
 }
 
 export function MenuItemCard({ item, className = '' }: MenuItemCardProps) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-  const isAvailable = item.isAvailable !== false; // defaults to true if undefined
+  const isAvailable = item.isAvailable !== false; // default true
 
   const handleCardClick = () => {
-    if (isAvailable) {
-      setModalOpen(true);
-    }
+    if (isAvailable) setModalOpen(true);
   };
 
-  const handleButtonClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click when button is clicked
-    if (isAvailable) {
-      setModalOpen(true);
-    }
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation(); // Prevent card click when button clicked
+    if (isAvailable) setModalOpen(true);
   };
 
   return (
     <>
       <Card
-        className={`group relative overflow-hidden bg-card border transition-all hover:shadow-xl ${
-          !isAvailable ? 'opacity-60 grayscale' : 'cursor-pointer'
-        } ${className}`}
+        className={`
+          group relative overflow-hidden bg-card border transition-all
+          hover:shadow-xl
+          ${!isAvailable ? 'opacity-60 grayscale' : 'cursor-pointer'}
+          ${className}
+        `}
         onClick={handleCardClick}
         role="button"
         tabIndex={isAvailable ? 0 : -1}
@@ -55,25 +54,25 @@ export function MenuItemCard({ item, className = '' }: MenuItemCardProps) {
         }}
       >
         {/* Image Section */}
-        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        <div className="relative w-full overflow-hidden rounded-lg bg-muted aspect-[4/3] md:aspect-[16/9] lg:aspect-[4/3]">
           <img
             src={item.image || '/placeholder-food.jpg'}
             alt={item.name}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading="lazy"
           />
 
-          {/* Badges: Veg, Spicy, Unavailable */}
+          {/* Badges */}
           <div className="absolute top-4 left-4 flex flex-col gap-2">
             {item.isVeg && (
-              <Badge variant="secondary" className="px-3 py-1.5 text-xs font-medium shadow-md">
-                <Leaf className="h-3.5 w-3.5 mr-1" />
+              <Badge variant="secondary" className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium shadow-md">
+                <Leaf className="h-3.5 w-3.5" />
                 Veg
               </Badge>
             )}
             {item.isSpicy && (
-              <Badge variant="destructive" className="px-3 py-1.5 text-xs font-medium shadow-md">
-                <Flame className="h-3.5 w-3.5 mr-1" />
+              <Badge variant="destructive" className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium shadow-md">
+                <Flame className="h-3.5 w-3.5" />
                 Spicy
               </Badge>
             )}
@@ -88,7 +87,7 @@ export function MenuItemCard({ item, className = '' }: MenuItemCardProps) {
           <div className="absolute bottom-4 right-4">
             <Badge
               variant="default"
-              className="text-lg font-bold px-5 py-2.5 shadow-2xl backdrop-blur-sm bg-primary/90"
+              className="text-base sm:text-lg md:text-xl font-bold px-4 sm:px-5 py-2 sm:py-2.5 shadow-2xl backdrop-blur-sm bg-primary/90"
             >
               Rs. {Number(item.price).toLocaleString('en-IN')}
             </Badge>
@@ -96,16 +95,19 @@ export function MenuItemCard({ item, className = '' }: MenuItemCardProps) {
         </div>
 
         {/* Content */}
-        <CardContent className="p-6">
-          <h3 className="font-bold text-xl mb-2 line-clamp-2">{item.name}</h3>
+        <CardContent className="p-4 sm:p-6">
+          <h3 className="font-bold text-[clamp(1rem,2.5vw,1.25rem)] sm:text-[clamp(1.125rem,2.5vw,1.5rem)] mb-2 line-clamp-2">
+            {item.name}
+          </h3>
+
           {item.description && (
-            <p className="text-sm text-muted-foreground line-clamp-3 mb-6">
+            <p className="text-[clamp(0.75rem,2vw,0.875rem)] sm:text-[clamp(0.875rem,2vw,1rem)] text-muted-foreground line-clamp-3 mb-4 sm:mb-6">
               {item.description}
             </p>
           )}
 
           <Button
-            className="w-full"
+            className="w-full touch-manipulation"
             size="lg"
             variant={isAvailable ? 'default' : 'secondary'}
             disabled={!isAvailable}
@@ -116,7 +118,7 @@ export function MenuItemCard({ item, className = '' }: MenuItemCardProps) {
         </CardContent>
       </Card>
 
-      {/* Customization Modal */}
+      {/* Add to Cart Modal */}
       <AddToCartModal
         menuItemId={item._id}
         open={modalOpen}

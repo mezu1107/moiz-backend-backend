@@ -1,9 +1,8 @@
 // src/features/cart/components/AddToCartModal.tsx
 // PRODUCTION-READY — DECEMBER 2025
-// Full customization modal (Foodpanda-style)
-// Item-level customization ONLY — cart-level notes handled on /cart
+// Mobile-first, scrollable, sticky footer with smooth shadow on scroll
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { Plus, Minus, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,7 +14,6 @@ import {
   SheetTitle,
   SheetClose,
 } from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -58,13 +56,14 @@ export const AddToCartModal = ({
   const addToCart = useAddToCart();
 
   const [quantity, setQuantity] = useState(1);
-  const [selectedOptions, setSelectedOptions] =
-    useState<Record<CustomizationSection, string[]>>(EMPTY_OPTIONS);
-  const [customInputs, setCustomInputs] =
-    useState<Record<CustomizationSection, string>>(EMPTY_CUSTOM_INPUTS);
+  const [selectedOptions, setSelectedOptions] = useState<Record<CustomizationSection, string[]>>(EMPTY_OPTIONS);
+  const [customInputs, setCustomInputs] = useState<Record<CustomizationSection, string>>(EMPTY_CUSTOM_INPUTS);
   const [specialInstructions, setSpecialInstructions] = useState('');
+  const [showFooterShadow, setShowFooterShadow] = useState(false);
 
-  /** Reset state every time modal opens */
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Reset state when modal opens
   useEffect(() => {
     if (open) {
       setQuantity(1);
@@ -74,27 +73,31 @@ export const AddToCartModal = ({
     }
   }, [open]);
 
-  /** Real-time extras total */
+  // Handle scroll shadow for footer
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollRef.current) return;
+      setShowFooterShadow(scrollRef.current.scrollTop > 5);
+    };
+    const current = scrollRef.current;
+    current?.addEventListener('scroll', handleScroll);
+    return () => current?.removeEventListener('scroll', handleScroll);
+  }, [scrollRef]);
+
+  // Compute extras total
   const extrasTotal = useMemo(() => {
     if (!menuItem?.pricedOptions) return 0;
-
     let total = 0;
-    (Object.keys(selectedOptions) as CustomizationSection[]).forEach(
-      (section) => {
-        selectedOptions[section].forEach((name) => {
-          const opt = menuItem.pricedOptions?.[section]?.find(
-            (o) => o.name === name
-          );
-          if (opt) total += opt.price;
-        });
-      }
-    );
-
+    (Object.keys(selectedOptions) as CustomizationSection[]).forEach((section) => {
+      selectedOptions[section].forEach((name) => {
+        const opt = menuItem.pricedOptions?.[section]?.find((o) => o.name === name);
+        if (opt) total += opt.price;
+      });
+    });
     return total;
   }, [menuItem?.pricedOptions, selectedOptions]);
 
-  const itemTotal =
-    ((menuItem?.price ?? 0) + extrasTotal) * quantity;
+  const itemTotal = ((menuItem?.price ?? 0) + extrasTotal) * quantity;
 
   const toggleOption = (section: CustomizationSection, name: string) => {
     setSelectedOptions((prev) => ({
@@ -108,7 +111,6 @@ export const AddToCartModal = ({
   const addCustom = (section: CustomizationSection) => {
     const text = customInputs[section].trim();
     if (!text) return;
-
     setSelectedOptions((prev) => ({
       ...prev,
       [section]: [...prev[section], `Custom: ${text}`],
@@ -122,7 +124,6 @@ export const AddToCartModal = ({
       toast.error('Quantity must be at least 1');
       return;
     }
-
     addToCart.mutate(
       {
         menuItemId,
@@ -130,14 +131,13 @@ export const AddToCartModal = ({
         sides: selectedOptions.sides,
         drinks: selectedOptions.drinks,
         addOns: selectedOptions.addOns,
-        specialInstructions:
-          specialInstructions.trim() || undefined,
+        specialInstructions: specialInstructions.trim() || undefined,
       },
       {
         onSuccess: () => {
           toast.success(`${menuItem?.name} added to cart`);
           onOpenChange(false);
-          navigate('/cart'); // Foodpanda-style flow
+          navigate('/cart');
         },
         onError: () => {
           toast.error('Failed to add item. Please try again.');
@@ -165,24 +165,22 @@ export const AddToCartModal = ({
 
   if (!menuItem) return null;
 
-  const pricedOptions: PricedOptions =
-    menuItem.pricedOptions ?? {
-      sides: [],
-      drinks: [],
-      addOns: [],
-    };
+  const pricedOptions: PricedOptions = menuItem.pricedOptions ?? {
+    sides: [],
+    drinks: [],
+    addOns: [],
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="h-[90vh] sm:h-auto sm:max-h-[90vh] sm:max-w-2xl sm:mx-auto sm:rounded-t-3xl"
+        className="h-[90vh] sm:h-auto sm:max-h-[90vh] sm:max-w-2xl sm:mx-auto sm:rounded-t-3xl flex flex-col"
       >
+        {/* Header */}
         <SheetHeader className="border-b pb-4">
           <div className="flex items-center justify-between">
-            <SheetTitle className="text-xl font-bold">
-              {menuItem.name}
-            </SheetTitle>
+            <SheetTitle className="text-xl font-bold">{menuItem.name}</SheetTitle>
             <SheetClose asChild>
               <Button variant="ghost" size="icon">
                 <X className="h-5 w-5" />
@@ -191,136 +189,104 @@ export const AddToCartModal = ({
           </div>
         </SheetHeader>
 
-        <ScrollArea className="flex-1 px-6 py-6">
-          <div className="space-y-8 pb-24">
-            {/* Quantity */}
-            <div className="bg-card rounded-xl p-4 border">
-              <Label className="text-base font-semibold">
-                Quantity
-              </Label>
-              <div className="flex items-center justify-center gap-6 mt-4">
-                <Button
-                  size="icon"
-                  variant="outline"
-                  onClick={() =>
-                    setQuantity((q) => Math.max(1, q - 1))
-                  }
-                  disabled={quantity <= 1}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="text-3xl font-bold w-20 text-center">
-                  {quantity}
-                </span>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  onClick={() =>
-                    setQuantity((q) => Math.min(50, q + 1))
-                  }
-                  disabled={quantity >= 50}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Customization Sections */}
-            {(Object.keys(pricedOptions) as CustomizationSection[]).map(
-              (section) => (
-                <div
-                  key={section}
-                  className="bg-card rounded-xl p-6 border"
-                >
-                  <Label className="text-base font-semibold capitalize">
-                    {section === 'addOns' ? 'Add-ons' : section}
-                  </Label>
-
-                  <div className="space-y-3 mt-4">
-                    {pricedOptions[section].map((opt) => (
-                      <div
-                        key={opt.name}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Checkbox
-                            checked={selectedOptions[section].includes(
-                              opt.name
-                            )}
-                            onCheckedChange={() =>
-                              toggleOption(section, opt.name)
-                            }
-                          />
-                          <span>{opt.name}</span>
-                        </div>
-                        {opt.price > 0 && (
-                          <span className="text-sm font-medium">
-                            +Rs. {opt.price}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <Separator className="my-4" />
-
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Type your own (free)"
-                      value={customInputs[section]}
-                      onChange={(e) =>
-                        setCustomInputs((p) => ({
-                          ...p,
-                          [section]: e.target.value,
-                        }))
-                      }
-                      onKeyDown={(e) =>
-                        e.key === 'Enter' && addCustom(section)
-                      }
-                    />
-                    <Button onClick={() => addCustom(section)}>
-                      Add
-                    </Button>
-                  </div>
-                </div>
-              )
-            )}
-
-            {/* Special Instructions */}
-            <div className="bg-card rounded-xl p-6 border">
-              <Label className="text-base font-semibold">
-                Special instructions
-              </Label>
-              <Textarea
-                placeholder="Less spicy, no onions, extra sauce…"
-                className="mt-3"
-                rows={3}
-                value={specialInstructions}
-                onChange={(e) =>
-                  setSpecialInstructions(e.target.value.slice(0, 300))
-                }
-              />
-              <p className="text-xs text-muted-foreground mt-2 text-right">
-                {specialInstructions.length}/300
-              </p>
+        {/* Scrollable content */}
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto px-6 py-6 space-y-8 pb-24"
+        >
+          {/* Quantity */}
+          <div className="bg-card rounded-xl p-4 border">
+            <Label className="text-base font-semibold">Quantity</Label>
+            <div className="flex items-center justify-center gap-6 mt-4">
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                disabled={quantity <= 1}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <span className="text-3xl font-bold w-20 text-center">{quantity}</span>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => setQuantity((q) => Math.min(50, q + 1))}
+                disabled={quantity >= 50}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
           </div>
-        </ScrollArea>
+
+          {/* Customization Sections */}
+          {(Object.keys(pricedOptions) as CustomizationSection[]).map((section) => (
+            <div key={section} className="bg-card rounded-xl p-6 border">
+              <Label className="text-base font-semibold capitalize">
+                {section === 'addOns' ? 'Add-ons' : section}
+              </Label>
+
+              <div className="space-y-3 mt-4">
+                {pricedOptions[section].map((opt) => (
+                  <div key={opt.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        checked={selectedOptions[section].includes(opt.name)}
+                        onCheckedChange={() => toggleOption(section, opt.name)}
+                      />
+                      <span>{opt.name}</span>
+                    </div>
+                    {opt.price > 0 && (
+                      <span className="text-sm font-medium">+Rs. {opt.price}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <Separator className="my-4" />
+
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Type your own (free)"
+                  value={customInputs[section]}
+                  onChange={(e) =>
+                    setCustomInputs((p) => ({ ...p, [section]: e.target.value }))
+                  }
+                  onKeyDown={(e) => e.key === 'Enter' && addCustom(section)}
+                />
+                <Button onClick={() => addCustom(section)}>Add</Button>
+              </div>
+            </div>
+          ))}
+
+          {/* Special Instructions */}
+          <div className="bg-card rounded-xl p-6 border">
+            <Label className="text-base font-semibold">Special instructions</Label>
+            <Textarea
+              placeholder="Less spicy, no onions, extra sauce…"
+              className="mt-3"
+              rows={3}
+              value={specialInstructions}
+              onChange={(e) => setSpecialInstructions(e.target.value.slice(0, 300))}
+            />
+            <p className="text-xs text-muted-foreground mt-2 text-right">
+              {specialInstructions.length}/300
+            </p>
+          </div>
+        </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-background border-t p-6 space-y-4">
+        <div
+          className={`bg-background border-t p-6 space-y-4 z-10 transition-shadow duration-300 ${
+            showFooterShadow ? 'shadow-t-lg' : ''
+          }`}
+        >
           <div className="flex justify-between items-center">
             <span className="text-xl font-bold">Total</span>
             <span className="text-2xl font-bold text-primary">
               Rs. {itemTotal.toFixed(2)}
             </span>
           </div>
-
-          <Button
-            size="lg"
-            onClick={handleAddToCart}
-            disabled={addToCart.isPending}
-          >
+          <Button size="lg" onClick={handleAddToCart} disabled={addToCart.isPending}>
             {addToCart.isPending ? 'Adding…' : 'Add to Cart'}
           </Button>
         </div>

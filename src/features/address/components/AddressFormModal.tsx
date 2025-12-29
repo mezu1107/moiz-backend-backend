@@ -43,7 +43,6 @@ export const AddressFormModal = ({ open, onClose, address }: Props) => {
 
   const { control, handleSubmit, setValue, watch, formState: { errors } } = form;
 
-  // Reset form when modal opens
   useEffect(() => {
     if (open && address) {
       setCity(address.area.city);
@@ -68,7 +67,6 @@ export const AddressFormModal = ({ open, onClose, address }: Props) => {
     }
   }, [open, address, form]);
 
-  // Keep form areaId in sync with selected area
   useEffect(() => {
     setValue('areaId', selectedAreaId);
   }, [selectedAreaId, setValue]);
@@ -78,7 +76,6 @@ export const AddressFormModal = ({ open, onClose, address }: Props) => {
 
   const onSubmit = handleSubmit(async (data) => {
     if (!data.areaId) return;
-
     try {
       if (address) {
         await update.mutateAsync({ id: address._id, data });
@@ -94,132 +91,130 @@ export const AddressFormModal = ({ open, onClose, address }: Props) => {
   const isPending = create.isPending || update.isPending;
 
   const Content = (
-    <form onSubmit={onSubmit} className="space-y-5">
-      {/* Label */}
-      <div className="space-y-2">
-        <Label>Label *</Label>
-        <Controller
-          control={control}
-          name="label"
-          render={({ field }) => (
-            <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ADDRESS_LABELS.map((l) => (
-                  <SelectItem key={l} value={l}>{l}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <div className="overflow-y-auto max-h-[70vh] px-2"> {/* <-- SCROLLER */}
+      <form onSubmit={onSubmit} className="space-y-5">
+        {/* Label */}
+        <div className="space-y-2">
+          <Label>Label *</Label>
+          <Controller
+            control={control}
+            name="label"
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ADDRESS_LABELS.map((l) => (
+                    <SelectItem key={l} value={l}>{l}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </div>
+
+        {/* Full Address */}
+        <div className="space-y-2">
+          <Label>Full Address *</Label>
+          <Textarea
+            placeholder="House no, street, apartment, landmark..."
+            rows={3}
+            {...form.register('fullAddress')}
+          />
+          <p className="text-xs text-muted-foreground">
+            {(watch('fullAddress')?.length || 0)}/200
+          </p>
+          {errors.fullAddress && (
+            <p className="text-sm text-destructive">{errors.fullAddress.message}</p>
           )}
-        />
-      </div>
+        </div>
 
-      {/* Full Address */}
-      <div className="space-y-2">
-        <Label>Full Address *</Label>
-        <Textarea
-          placeholder="House no, street, apartment, landmark..."
-          rows={3}
-          {...form.register('fullAddress')}
-        />
-        <p className="text-xs text-muted-foreground">
-          {(watch('fullAddress')?.length || 0)}/200
-        </p>
-        {errors.fullAddress && (
-          <p className="text-sm text-destructive">{errors.fullAddress.message}</p>
-        )}
-      </div>
+        {/* City */}
+        <div className="space-y-2">
+          <Label>City *</Label>
+          <Select value={city} onValueChange={(v) => { setCity(v); setSelectedAreaId(''); }}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select city" />
+            </SelectTrigger>
+            <SelectContent>
+              {CITIES.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      {/* City */}
-      <div className="space-y-2">
-        <Label>City *</Label>
-        <Select value={city} onValueChange={(v) => { setCity(v); setSelectedAreaId(''); }}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select city" />
-          </SelectTrigger>
-          <SelectContent>
-            {CITIES.map((c) => (
-              <SelectItem key={c} value={c}>{c}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        {/* Area */}
+        <div className="space-y-2">
+          <Label>Area *</Label>
+          <Select
+            value={selectedAreaId}
+            onValueChange={setSelectedAreaId}
+            disabled={loadingAreas || !city}
+          >
+            <SelectTrigger>
+              <SelectValue
+                placeholder={
+                  loadingAreas
+                    ? 'Loading areas...'
+                    : !city
+                    ? 'Select city first'
+                    : 'Choose your area'
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {areas.map((area) => (
+                <SelectItem key={area._id} value={area._id}>
+                  {area.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.areaId && (
+            <p className="text-sm text-destructive mt-1">{errors.areaId.message}</p>
+          )}
+        </div>
 
-      {/* Area */}
-      <div className="space-y-2">
-        <Label>Area *</Label>
-        <Select
-          value={selectedAreaId}
-          onValueChange={setSelectedAreaId}
-          disabled={loadingAreas || !city}
+        {/* Delivery Instructions */}
+        <div className="space-y-2">
+          <Label>Delivery Instructions (optional)</Label>
+          <Textarea
+            placeholder="Gate code, floor, bell name..."
+            rows={2}
+            {...form.register('instructions')}
+          />
+        </div>
+
+        {/* Default Address */}
+        <div className="flex items-center space-x-3">
+          <Controller
+            control={control}
+            name="isDefault"
+            render={({ field }) => (
+              <Checkbox
+                id="default"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            )}
+          />
+          <Label htmlFor="default" className="cursor-pointer">
+            Set as default address
+          </Label>
+        </div>
+
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isPending || !selectedAreaId}
         >
-          <SelectTrigger>
-            <SelectValue
-              placeholder={
-                loadingAreas
-                  ? 'Loading areas...'
-                  : !city
-                  ? 'Select city first'
-                  : 'Choose your area'
-              }
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {areas.map((area) => (
-              <SelectItem key={area._id} value={area._id}>
-                {area.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.areaId && (
-          <p className="text-sm text-destructive mt-1">{errors.areaId.message}</p>
-        )}
-      </div>
-
-      {/* Delivery Instructions */}
-      <div className="space-y-2">
-        <Label>Delivery Instructions (optional)</Label>
-        <Textarea
-          placeholder="Gate code, floor, bell name..."
-          rows={2}
-          {...form.register('instructions')}
-        />
-      </div>
-
-      {/* Default Address */}
-      <div className="flex items-center space-x-3">
-        <Controller
-          control={control}
-          name="isDefault"
-          render={({ field }) => (
-            <Checkbox
-              id="default"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-          )}
-        />
-        <Label htmlFor="default" className="cursor-pointer">
-          Set as default address
-        </Label>
-      </div>
-
-      {/* Submit Button */}
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={isPending || !selectedAreaId}
-      >
-        {isPending ? (
-          <>Saving...</>
-        ) : (
-          <>{address ? 'Update' : 'Save'} Address</>
-        )}
-      </Button>
-    </form>
+          {isPending ? <>Saving...</> : <>{address ? 'Update' : 'Save'} Address</>}
+        </Button>
+      </form>
+    </div>
   );
 
   if (isMobile) {
@@ -229,7 +224,7 @@ export const AddressFormModal = ({ open, onClose, address }: Props) => {
           <DrawerHeader>
             <DrawerTitle>{address ? 'Edit' : 'Add New'} Address</DrawerTitle>
           </DrawerHeader>
-          <div className="p-4 overflow-y-auto max-h-[70vh]">{Content}</div>
+          {Content}
         </DrawerContent>
       </Drawer>
     );
