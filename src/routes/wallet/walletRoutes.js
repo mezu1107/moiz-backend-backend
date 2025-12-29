@@ -16,6 +16,8 @@ const {
   adminDebitWallet,
   exportWalletTransactionsCSV,
   exportWalletTransactionsPDF,
+  initializeWalletAdmin,
+  activateWalletAdmin,
   // getWalletStatsDashboard, // implement later
 } = require('../../controllers/wallet/walletController');
 
@@ -102,7 +104,20 @@ router.post(
   validateRequest,
   adminDebitWallet
 );
-
+// POST /api/wallet/admin/activate/:userId → activate wallet (set status to active)
+router.post(
+  '/admin/activate/:userId',
+  role(['admin', 'finance']),
+  validateObjectId('userId'),
+  activateWalletAdmin
+);
+// src/routes/wallet/walletRoutes.js
+router.post(
+  '/admin/initialize/:userId',
+  role(['admin', 'finance']),
+  validateObjectId('userId'),
+  initializeWalletAdmin
+);
 // GET /api/wallet/admin/export/:userId/:format → export any user's wallet (csv | pdf)
 router.get(
   '/admin/export/:userId/:format',
@@ -126,7 +141,6 @@ router.get(
   }
 );
 
-// Optional: Admin wallet dashboard stats (implement when needed)
-// router.get('/admin/stats', role(['admin', 'finance']), getWalletStatsDashboard);
+
 
 module.exports = router;

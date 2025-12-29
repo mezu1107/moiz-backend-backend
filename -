@@ -1,11 +1,4 @@
 Date,Type,Amount,Balance After,Description,Order ID,Metadata
-2025-12-19 17:11:12,ADJUSTMENT,-100.00,,Test correction (manual debit by Admin Javeria Tareen),,"{""adminId"":""693c493c4e30604b43347880"",""manualDebit"":true,""action"":""debit""}"
-2025-12-19 17:11:12,ADJUSTMENT,-100.00,,Manual debit,,"{""manualDebit"":true}"
-2025-12-19 17:11:02,BONUS,500.00,,Test bonus (by Admin Javeria Tareen),,"{""adminId"":""693c493c4e30604b43347880"",""action"":""credit""}"
-2025-12-19 16:55:55,ADJUSTMENT,-100.00,,Correction for over-credit (manual debit by Admin Javeria Tareen),,"{""adminId"":""693c493c4e30604b43347880"",""manualDebit"":true,""action"":""debit""}"
-2025-12-19 16:55:54,ADJUSTMENT,-100.00,,Manual debit,,"{""manualDebit"":true}"
-2025-12-19 16:55:41,BONUS,500.00,,Loyalty bonus for December (by Admin Javeria Tareen),,"{""adminId"":""693c493c4e30604b43347880"",""action"":""credit""}"
-2025-12-19 16:51:57,BONUS,500.00,,Loyalty bonus for December (by Admin Javeria Tareen),,"{""adminId"":""693c493c4e30604b43347880"",""action"":""credit""}"
-2025-12-19 16:51:14,BONUS,500.00,,Loyalty bonus for December (by Admin Javeria Tareen),,"{""adminId"":""693c493c4e30604b43347880"",""action"":""credit""}"
-2025-12-19 16:49:07,BONUS,500.00,,Loyalty bonus for December (by Admin Javeria Tareen),,"{""adminId"":""693c493c4e30604b43347880"",""action"":""credit""}"
-2025-12-19 16:44:32,BONUS,500.00,,Loyalty bonus for December (by Admin Javeria Tareen),,"{""adminId"":""693c493c4e30604b43347880"",""action"":""credit""}"
+2025-12-29 02:11:54,ADJUSTMENT_DEBIT,100.00,,Test small debit,,-
+2025-12-29 02:11:26,ADJUSTMENT_DEBIT,200.00,,Correction for over-credit,,-
+2025-12-29 02:10:15,ADJUSTMENT_CREDIT,500.00,,Test credit - onboarding bonus,,-

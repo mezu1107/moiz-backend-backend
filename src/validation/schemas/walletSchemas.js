@@ -1,5 +1,5 @@
 // src/validation/schemas/walletSchemas.js
-const { body, query } = require('express-validator');
+const { body, query, param } = require('express-validator');
 const mongoose = require('mongoose');
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
@@ -16,12 +16,6 @@ exports.adminCreditWallet = [
     .notEmpty().withMessage('amount is required')
     .isFloat({ min: 0.01 }).withMessage('amount must be a positive number ≥ 0.01')
     .toFloat(),
-
-  body('type')
-    .optional()
-    .trim()
-    .isIn(['adjustment', 'bonus', 'referral', 'refund', 'cashback'])
-    .withMessage('Invalid type'),
 
   body('description')
     .optional()
@@ -82,15 +76,7 @@ exports.exportTransactions = [
     .isIn([
       'credit', 'debit', 'adjustment', 'refund', 'bonus',
       'referral', 'withdrawal', 'cashback'
-    ]).withMessage('Invalid transaction type'),
-
-  query('page')
-    .optional()
-    .isInt({ min: 1 }).withMessage('page must be positive integer'),
-
-  query('limit')
-    .optional()
-    .isInt({ min: 10, max: 500 }).withMessage('limit must be between 10 and 500')
+    ]).withMessage('Invalid transaction type')
 ];
 
 module.exports = {

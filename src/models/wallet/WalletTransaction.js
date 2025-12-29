@@ -1,5 +1,5 @@
-// 3. WalletTransaction.js
-// Recommended: time-series collection + better categorization
+// models/wallet/WalletTransaction.js
+// FINAL PRODUCTION VERSION — December 29, 2025
 
 const mongoose = require('mongoose');
 
@@ -16,26 +16,31 @@ const walletTransactionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Order',
       sparse: true,
+      index: true,
     },
 
     type: {
       type: String,
       enum: [
-        'credit',           // normal top-up, refund to wallet
-        'debit',            // order payment
-        'refund',           // order cancelled/refunded to wallet
-        'bonus',            // promo/referral
-        'referral',         // referral reward
-        'adjustment',       // admin manual
-        'withdrawal',       // rider cash out (future)
-        'cashback',         // future loyalty
+        'credit',
+        'debit',
+        'refund',
+        'bonus',
+        'referral',
+        'adjustment',
+        'adjustment_credit',
+        'adjustment_debit',
+        'withdrawal',
+        'cashback',
       ],
       required: true,
+      index: true,
     },
 
     amount: {
       type: mongoose.Schema.Types.Decimal128,
       required: true,
+      min: 0,
     },
 
     balanceAfter: {
@@ -43,35 +48,47 @@ const walletTransactionSchema = new mongoose.Schema(
       required: true,
     },
 
-    description: String,
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 500,
+    },
 
-    metadata: mongoose.Schema.Types.Mixed,
-
-    // Who triggered (very important for audit)
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      sparse: true, // can be system
+      sparse: true,
+      index: true,
     },
 
-    // For time-series optimization (MongoDB 7+ recommended)
+    metadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
   },
   {
     timestamps: true,
-    // If you use MongoDB 7+ → change to time-series collection:
-    // timeseries: {
-    //   timeField: 'createdAt',
-    //   metaField: 'wallet',
-    //   granularity: 'minutes'
-    // }
+    // toJSON cleanup
+    toJSON: {
+      transform: (doc, ret) => {
+        if (ret.amount) ret.amount = Number(ret.amount.toString());
+        if (ret.balanceAfter) ret.balanceAfter = Number(ret.balanceAfter.toString());
+        delete ret.__v;
+        return ret;
+      },
+    },
   }
 );
 
-// Indexes
+// Optimized indexes
 walletTransactionSchema.index({ wallet: 1, createdAt: -1 });
+walletTransactionSchema.index({ wallet: 1, type: 1, createdAt: -1 });
 walletTransactionSchema.index({ order: 1 });
+walletTransactionSchema.index({ createdBy: 1, createdAt: -1 });
 walletTransactionSchema.index({ type: 1, createdAt: -1 });
-walletTransactionSchema.index({ createdBy: 1, createdAt: -1 }); // audit
 
-module.exports = mongoose.models.WalletTransaction ||
+// Export the MODEL
+module.exports =
+  mongoose.models.WalletTransaction ||
   mongoose.model('WalletTransaction', walletTransactionSchema);

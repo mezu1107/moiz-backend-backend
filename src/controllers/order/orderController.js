@@ -952,16 +952,26 @@ const assignRider = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
+    const { status, page = 1, limit = 20, search = '' } = req.query;
 
-    let query = {};
+    const query = {};
 
-    // Handle comma-separated status values (e.g. "pending,confirmed,preparing")
+    // Status filter (support comma separated)
     if (status) {
       const statuses = status.split(',').map(s => s.trim()).filter(Boolean);
-      if (statuses.length > 0) {
-        query.status = { $in: statuses };
-      }
+      if (statuses.length) query.status = { $in: statuses };
+    }
+
+    // Search by shortId, customer name, phone, guest name/phone
+    if (search && typeof search === 'string' && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      query.$or = [
+        { shortId: searchRegex },
+        { 'customer.name': searchRegex },
+        { 'customer.phone': searchRegex },
+        { 'guestInfo.name': searchRegex },
+        { 'guestInfo.phone': searchRegex },
+      ];
     }
 
     const orders = await Order.find(query)
@@ -969,15 +979,15 @@ const getAllOrders = async (req, res) => {
       .populate('rider', 'name phone')
       .populate('area', 'name')
       .sort({ placedAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(+limit);
+      .skip((page - 1) * Number(limit))
+      .limit(Number(limit));
 
     const total = await Order.countDocuments(query);
 
     res.json({
       success: true,
       orders,
-      pagination: { page: +page, limit: +limit, total }
+      pagination: { page: Number(page), limit: Number(limit), total }
     });
   } catch (err) {
     console.error('getAllOrders error:', err);

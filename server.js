@@ -75,7 +75,7 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
-    
+
     // In production, restrict to your frontend domains
     const allowedOrigins = [
       'https://amfood.pk',
@@ -83,7 +83,7 @@ app.use(cors({
       'http://localhost:3000',
       'http://localhost:5173',
     ];
-    
+
     if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
       callback(null, true);
     } else {
@@ -131,7 +131,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Favicon handling (silent 204 or real file)
 app.get('/favicon.ico', (_, res) => res.status(204).end());
-app.get('/favicon.png', (_, res) => 
+app.get('/favicon.png', (_, res) =>
   res.sendFile(path.join(__dirname, 'public', 'favicon.png'))
 );
 
@@ -228,6 +228,7 @@ const routeRegistry = [
   { path: '/api/contact', file: './src/routes/contact/contactRoutes' },
   { path: '/api/admin/contact', file: './src/routes/admin/contactAdminRoutes' },
   { path: '/api/wallet', file: './src/routes/wallet/walletRoutes' },
+  { path: '/api/wallet/withdrawals', file: './src/routes/wallet/withdrawalRoutes' },
   { path: '/api/kitchen', file: './src/routes/kitchen/kitchenRoutes' },
   { path: '/api/payment', file: './src/routes/payment/paymentRoutes' },
   { path: '/api/admin/payment', file: './src/routes/admin/paymentAdminRoutes' },

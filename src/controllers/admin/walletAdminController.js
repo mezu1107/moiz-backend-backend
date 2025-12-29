@@ -1,16 +1,17 @@
 // src/controllers/admin/walletAdminController.js
-// LAST UPDATED: DECEMBER 26, 2025 — IMPROVED, SECURE & AUDIT-READY
+// LAST UPDATED: DECEMBER 29, 2025 — FIXED, ATOMIC, AUDIT-SECURE
 
 const Wallet = require('../../models/wallet/Wallet');
 const WalletTransaction = require('../../models/wallet/WalletTransaction');
-const AuditLog = require('../../models/AuditLog');
+const AuditLog = require('../../models/auditLog/AuditLog');
 const mongoose = require('mongoose');
 const io = global.io;
 const { creditWallet, debitWallet, toNumber, toDecimal } = require('../wallet/walletController');
 
-// =============================
-// Get Customer/Rider Wallet + Recent Transactions (Admin/Finance/Support)
-// =============================
+// =============================================
+// Get Customer/Rider Wallet + Recent Transactions
+// Accessible to admin, finance, support
+// =============================================
 const getCustomerWallet = async (req, res) => {
   const { customerId } = req.params;
 
@@ -19,12 +20,15 @@ const getCustomerWallet = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid user ID' });
     }
 
-    const wallet = await Wallet.findOne({ user: customerId })
+    const wallet = await Wallet.findOne({ user: customerId, status: 'active' })
       .populate('user', 'name phone role')
       .lean();
 
     if (!wallet) {
-      return res.status(404).json({ success: false, message: 'Wallet not found for this user' });
+      return res.status(404).json({
+        success: false,
+        message: 'Active wallet not found for this user'
+      });
     }
 
     const recentTransactions = await WalletTransaction.find({ wallet: wallet._id })
@@ -35,11 +39,13 @@ const getCustomerWallet = async (req, res) => {
     const formattedTx = recentTransactions.map(tx => ({
       id: tx._id.toString(),
       type: tx.type,
-      amount: toNumber(tx.amount),
+      amount: toNumber(tx.amount), // Always positive value
+      direction: ['debit', 'withdrawal', 'adjustment'].includes(tx.type) && tx.amount.toString().startsWith('-') ? 'debit' : 'credit',
       balanceAfter: toNumber(tx.balanceAfter),
       description: tx.description || `${tx.type} transaction`,
-      date: tx.createdAt,
-      metadata: tx.metadata || null
+      date: tx.createdAt.toISOString(),
+      metadata: tx.metadata || null,
+      createdBy: tx.createdBy ? tx.createdBy.toString() : null
     }));
 
     res.json({
@@ -48,22 +54,29 @@ const getCustomerWallet = async (req, res) => {
         user: wallet.user,
         wallet: {
           balance: toNumber(wallet.balance),
+          lockedBalance: toNumber(wallet.lockedBalance || '0'),
           lifetimeCredits: toNumber(wallet.lifetimeCredits),
-          totalWithdrawn: wallet.totalWithdrawn ? toNumber(wallet.totalWithdrawn) : 0,
-          lastWithdrawalAt: wallet.lastWithdrawalAt
+          totalWithdrawn: toNumber(wallet.totalWithdrawn || '0'),
+          lastWithdrawalAt: wallet.lastWithdrawalAt ? wallet.lastWithdrawalAt.toISOString() : null,
+          status: wallet.status,
+          currency: wallet.currency
         },
         recentTransactions: formattedTx
       }
     });
   } catch (err) {
     console.error('getCustomerWallet error:', err);
-    res.status(500).json({ success: false, message: 'Failed to fetch wallet information' });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch wallet information'
+    });
   }
 };
 
-// =============================
-// Admin Adjust Wallet (Credit/Debit with Audit)
-// =============================
+// =============================================
+// Admin Adjust Wallet Balance (Credit/Debit)
+// Fully atomic, reads real balance, audited
+// =============================================
 const adjustWallet = async (req, res) => {
   const { customerId } = req.params;
   const { amount: rawAmount, reason, type } = req.body;
@@ -74,53 +87,72 @@ const adjustWallet = async (req, res) => {
 
   const amount = Number(rawAmount);
   if (isNaN(amount) || amount <= 0) {
-    return res.status(400).json({ success: false, message: 'Positive amount required' });
+    return res.status(400).json({
+      success: false,
+      message: 'Amount must be a positive number'
+    });
   }
 
   if (!reason?.trim()) {
-    return res.status(400).json({ success: false, message: 'Reason is required for audit purposes' });
+    return res.status(400).json({
+      success: false,
+      message: 'Reason is required for audit purposes'
+    });
   }
 
   if (!['credit', 'debit'].includes(type)) {
-    return res.status(400).json({ success: false, message: 'Type must be "credit" or "debit"' });
+    return res.status(400).json({
+      success: false,
+      message: 'Type must be "credit" or "debit"'
+    });
   }
 
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    let wallet = await Wallet.findOne({ user: customerId }).session(session);
+    // Find existing active wallet or fail early
+    let wallet = await Wallet.findOne({ user: customerId, status: 'active' }).session(session);
+
     if (!wallet) {
-      wallet = (await Wallet.create([{ user: customerId }], { session }))[0];
+      return res.status(404).json({
+        success: false,
+        message: 'Active wallet not found for this user'
+      });
     }
 
     const amountDecimal = toDecimal(amount);
     const description = `Admin ${type}: ${reason.trim()} (by ${req.user.name || req.user._id})`;
 
-    let newBalance;
+    let updatedWallet;
 
     if (type === 'credit') {
-      await creditWallet(
-        customerId,
-        amountDecimal,
-        'adjustment',
+      updatedWallet = await creditWallet({
+        userId: customerId,
+        amount: amount, // number - function will convert internally
+        type: 'adjustment',
         description,
-        null,
-        { adjustedBy: req.user._id.toString(), reason, adminAction: true }
-      );
-      newBalance = toNumber(wallet.balance) + amount; // approximate, real value from creditWallet
+        performedBy: req.user._id,
+        metadata: {
+          adjustedBy: req.user._id.toString(),
+          reason,
+          adminAction: true
+        }
+      });
     } else {
-      // Debit
-      await debitWallet(customerId, amountDecimal, null, session);
-
-      newBalance = toNumber(wallet.balance) - amount;
-
-      if (newBalance < 0) {
-        throw new Error('Operation would result in negative balance');
-      }
+      // Debit - atomic balance check inside debitWallet
+      updatedWallet = await debitWallet({
+        userId: customerId,
+        amount: amount,
+        description,
+        session // pass session for atomicity
+      });
     }
 
-    // Audit Log
+    // Get the REAL updated balance
+    const realNewBalance = toNumber(updatedWallet.balance);
+
+    // Audit log with real values
     await AuditLog.create([{
       action: 'wallet_adjustment',
       user: customerId,
@@ -129,34 +161,42 @@ const adjustWallet = async (req, res) => {
       targetId: wallet._id,
       targetModel: 'Wallet',
       amount: amountDecimal,
-      before: { balance: toDecimal(toNumber(wallet.balance)) },
-      after: { balance: toDecimal(newBalance) },
+      before: { balance: wallet.balance },
+      after: { balance: updatedWallet.balance },
       description,
-      metadata: { type, reason }
+      metadata: {
+        type,
+        reason,
+        adminId: req.user._id.toString(),
+        ip: req.ip
+      }
     }], { session });
 
     await session.commitTransaction();
 
-    // Real-time notification
+    // Real-time notification to user
     io?.to(`user:${customerId}`).emit('walletUpdate', {
       event: 'adminAdjustment',
-      balance: newBalance,
-      change: type === 'credit' ? +amount : -amount,
+      balance: realNewBalance,
+      change: type === 'credit' ? amount : -amount,
       type: 'adjustment',
       description,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
       performedBy: req.user.name || 'Admin'
     });
 
     res.json({
       success: true,
-      message: `Wallet successfully ${type === 'credit' ? 'credited' : 'debited'} with PKR ${amount}`,
-      newBalance
+      message: `Wallet successfully ${type === 'credit' ? 'credited' : 'debited'} with PKR ${amount.toFixed(2)}`,
+      newBalance: realNewBalance,
+      currency: updatedWallet.currency
     });
   } catch (err) {
     await session.abortTransaction();
     console.error('adjustWallet error:', err);
-    res.status(400).json({
+
+    const status = err.message?.includes('Insufficient') ? 400 : 500;
+    res.status(status).json({
       success: false,
       message: err.message || 'Failed to adjust wallet balance'
     });
@@ -164,82 +204,72 @@ const adjustWallet = async (req, res) => {
     session.endSession();
   }
 };
-// src/controllers/admin/walletAdminController.js
-// Add this new endpoint
 
+// =============================================
+// Wallet Statistics Dashboard
+// Aggregated overview for admins/finance
+// =============================================
 const getWalletStatsDashboard = async (req, res) => {
   try {
     const period = req.query.period || '30d'; // today, 7d, 30d, 90d, all
 
-    let startDate;
+    let startDate = new Date(0); // all time default
     const now = new Date();
 
     if (period === 'today') {
       startDate = new Date(now.setHours(0, 0, 0, 0));
     } else if (period === '7d') {
-      startDate = new Date(now);
       startDate.setDate(now.getDate() - 7);
     } else if (period === '30d') {
-      startDate = new Date(now);
       startDate.setDate(now.getDate() - 30);
     } else if (period === '90d') {
-      startDate = new Date(now);
       startDate.setDate(now.getDate() - 90);
-    } else {
-      startDate = new Date(0); // all time
     }
 
     const match = { createdAt: { $gte: startDate } };
 
     const [
       totalWallets,
-      totalBalance,
-      totalLifetimeCredits,
-      totalWithdrawn,
+      totalBalanceAgg,
+      lifetimeCreditsAgg,
+      totalWithdrawnAgg,
       topWithdrawers,
       withdrawalStats,
       transactionStats
     ] = await Promise.all([
-      // Total active wallets
       Wallet.countDocuments({ status: 'active' }),
 
-      // Sum of current balances
       Wallet.aggregate([
         { $match: { status: 'active' } },
         { $group: { _id: null, total: { $sum: { $toDouble: "$balance" } } } }
       ]),
 
-      // Lifetime credits
       Wallet.aggregate([
         { $match: { status: 'active' } },
         { $group: { _id: null, total: { $sum: { $toDouble: "$lifetimeCredits" } } } }
       ]),
 
-      // Total withdrawn
       Wallet.aggregate([
         { $match: { status: 'active' } },
         { $group: { _id: null, total: { $sum: { $toDouble: "$totalWithdrawn" } } } }
       ]),
 
-      // Top 5 users by total withdrawn
       WithdrawalRequest.aggregate([
         { $match: { status: { $in: ['approved', 'completed'] }, processedAt: { $gte: startDate } } },
         { $group: { _id: "$user", totalWithdrawn: { $sum: { $toDouble: "$amount" } } } },
         { $sort: { totalWithdrawn: -1 } },
         { $limit: 5 },
         { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
-        { $unwind: '$user' }
+        { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } }
       ]),
 
-      // Withdrawal status breakdown
       WithdrawalRequest.aggregate([
         { $match: { requestedAt: { $gte: startDate } } },
         { $group: { _id: "$status", count: { $sum: 1 } } }
       ]),
 
-      // Transaction volume
       WalletTransaction.aggregate([
-        { $match: { createdAt: { $gte: startDate } } },
+        { $match: match },
         {
           $group: {
             _id: "$type",
@@ -255,13 +285,13 @@ const getWalletStatsDashboard = async (req, res) => {
       period,
       stats: {
         totalActiveWallets: totalWallets,
-        totalSystemBalance: totalBalance[0]?.total || 0,
-        totalLifetimeCredits: totalLifetimeCredits[0]?.total || 0,
-        totalWithdrawnAllTime: totalWithdrawn[0]?.total || 0,
+        totalSystemBalance: totalBalanceAgg[0]?.total || 0,
+        totalLifetimeCredits: lifetimeCreditsAgg[0]?.total || 0,
+        totalWithdrawnAllTime: totalWithdrawnAgg[0]?.total || 0,
         topWithdrawers: topWithdrawers.map(t => ({
-          userId: t._id.toString(),
+          userId: t._id?.toString(),
           name: t.user?.name || 'Unknown',
-          totalWithdrawn: t.totalWithdrawn
+          totalWithdrawn: t.totalWithdrawn || 0
         })),
         withdrawalBreakdown: Object.fromEntries(
           withdrawalStats.map(s => [s._id, s.count])
@@ -271,11 +301,13 @@ const getWalletStatsDashboard = async (req, res) => {
     });
   } catch (err) {
     console.error('getWalletStatsDashboard error:', err);
-    res.status(500).json({ success: false, message: 'Failed to load wallet statistics' });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to load wallet statistics'
+    });
   }
 };
 
-// Add to exports
 module.exports = {
   getCustomerWallet,
   adjustWallet,
