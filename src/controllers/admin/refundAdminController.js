@@ -6,6 +6,8 @@ const Order = require('../../models/order/Order');
 const PaymentTransaction = require('../../models/payment/PaymentTransaction');
 const stripe = require('../../config/stripe');
 const io = global.io;
+const toDecimal = (num) =>
+  mongoose.Types.Decimal128.fromString(Number(num).toFixed(2));
 
 const orderIdShort = (id) => (id ? id.toString().slice(-6).toUpperCase() : 'N/A');
 const toNumber = (decimal) => (decimal ? parseFloat(decimal.toString()) : 0);
