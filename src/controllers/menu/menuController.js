@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const MenuItem = require('../../models/menuItem/MenuItem');
 const Area = require('../../models/area/Area');
-const DeliveryZone = require('../../models/deliveryZone/DeliveryZone'); // ← ADD THIS
+const DeliveryZone = require('../../models/deliveryZone/DeliveryZone');
 const cloudinary = require('../../config/cloudinary');
 const streamifier = require('streamifier');
 
@@ -25,7 +25,6 @@ const uploadToCloudinary = (buffer) => {
     streamifier.createReadStream(buffer).pipe(stream);
   });
 };
-
 // ADD NEW MENU ITEM (unchanged)
 const addMenuItem = async (req, res) => {
   try {
@@ -53,10 +52,14 @@ const addMenuItem = async (req, res) => {
     const isVeg = req.body.isVeg === true || req.body.isVeg === 'true';
     const isSpicy = req.body.isSpicy === true || req.body.isSpicy === 'true';
 
+    // Parse unit safely – defaults to 'pc' via schema
+    const unit = req.body.unit || 'pc';
+
     const item = await MenuItem.create({
       name: req.body.name?.trim(),
       description: req.body.description?.trim() || '',
       price: Number(req.body.price),
+      unit,
       category: req.body.category,
       image: image.secure_url,
       cloudinaryId: image.public_id,
@@ -64,6 +67,8 @@ const addMenuItem = async (req, res) => {
       isVeg,
       isSpicy,
       isAvailable: true,
+      // pricedOptions can be sent in body if needed (advanced)
+      pricedOptions: req.body.pricedOptions || { sides: [], drinks: [], addOns: [] }
     });
 
     return res.status(201).json({
@@ -80,7 +85,6 @@ const addMenuItem = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to add menu item' });
   }
 };
-
 // GET MENU BY USER LOCATION (lat/lng) — NOW DYNAMIC DELIVERY
 const getMenuByLocation = async (req, res) => {
   try {
@@ -200,8 +204,9 @@ const updateMenuItem = async (req, res) => {
     }
 
     if (req.body.name !== undefined) item.name = req.body.name.trim();
-    if (req.body.description !== undefined) item.description = req.body.description?.trim();
+    if (req.body.description !== undefined) item.description = req.body.description?.trim() || '';
     if (req.body.price !== undefined) item.price = Number(req.body.price);
+    if (req.body.unit !== undefined) item.unit = req.body.unit; // Allow updating unit
     if (req.body.category !== undefined) item.category = req.body.category;
     if (req.body.isVeg !== undefined) item.isVeg = req.body.isVeg === true || req.body.isVeg === 'true';
     if (req.body.isSpicy !== undefined) item.isSpicy = req.body.isSpicy === true || req.body.isSpicy === 'true';
@@ -212,6 +217,11 @@ const updateMenuItem = async (req, res) => {
       item.availableInAreas = areas.filter(id => mongoose.Types.ObjectId.isValid(id));
     }
 
+    // Allow updating pricedOptions (e.g., adding sides/drinks)
+    if (req.body.pricedOptions !== undefined) {
+      item.pricedOptions = req.body.pricedOptions;
+    }
+
     await item.save();
 
     res.json({ success: true, message: 'Menu item updated successfully!', item });
@@ -220,7 +230,6 @@ const updateMenuItem = async (req, res) => {
     res.status(500).json({ success: false, message: 'Update failed' });
   }
 };
-
 // DELETE MENU ITEM
 const deleteMenuItem = async (req, res) => {
   try {
@@ -238,7 +247,6 @@ const deleteMenuItem = async (req, res) => {
   }
 };
 
-// ADMIN: GET ALL MENU ITEMS (including unavailable)
 const getAllMenuItems = async (req, res) => {
   try {
     const items = await MenuItem.find()
@@ -355,7 +363,6 @@ const getAllMenuItemsWithFilters = async (req, res) => {
 
 
 // In menuController.js → getSingleMenuItem
-
 const getSingleMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
@@ -364,7 +371,7 @@ const getSingleMenuItem = async (req, res) => {
     }
 
     const item = await MenuItem.findById(id)
-      .select('name price image description isVeg isSpicy pricedOptions isAvailable')
+      .select('name price unit image description isVeg isSpicy pricedOptions isAvailable category')
       .lean();
 
     if (!item || !item.isAvailable) {

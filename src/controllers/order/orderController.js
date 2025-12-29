@@ -94,6 +94,7 @@ const broadcastOrderEvent = (order, event, extra = {}) => {
 };
 
 // ── CREATE ORDER ─────────────────────────────────────────────────────────
+// ── CREATE ORDER ─────────────────────────────────────────────────────────
 const createOrder = async (req, res) => {
   let session = null;
   try {
@@ -162,7 +163,7 @@ const createOrder = async (req, res) => {
     const zone = await DeliveryZone.findOne({ area: areaId, isActive: true }).lean();
     if (!zone) return res.status(400).json({ success: false, message: 'Delivery not available in this area' });
 
-    // Process items
+    // Process items with unit support
     const orderItems = [];
     let subtotal = 0;
 
@@ -173,22 +174,35 @@ const createOrder = async (req, res) => {
       if (priceAtOrder <= 0 || qty < 1) continue;
 
       const menu = await MenuItem.findById(cartItem.menuItem)
-        .select('name image isAvailable')
+        .select('name image unit isAvailable pricedOptions')
         .lean();
 
       if (!menu || !menu.isAvailable) continue;
 
       const itemTotal = priceAtOrder * qty;
 
+      // Enrich selected options with unit fallback
+      const enrichOptions = (names, type) => {
+        return (names || []).map(name => {
+          const opt = menu.pricedOptions?.[type]?.find(o => o.name === name);
+          return {
+            name,
+            price: opt?.price || 0,
+            unit: opt?.unit || menu.unit // fallback to main unit
+          };
+        });
+      };
+
       orderItems.push({
         menuItem: menu._id,
         name: menu.name,
         image: menu.image,
+        unit: menu.unit,
         priceAtOrder,
         quantity: qty,
-        sides: cartItem.sides || [],
-        drinks: cartItem.drinks || [],
-        addOns: cartItem.addOns || [],
+        sides: enrichOptions(cartItem.sides, 'sides'),
+        drinks: enrichOptions(cartItem.drinks, 'drinks'),
+        addOns: enrichOptions(cartItem.addOns, 'addOns'),
         specialInstructions: cartItem.specialInstructions || '',
       });
 
@@ -206,7 +220,7 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Promo
+    // Promo & wallet logic unchanged...
     let discount = 0;
     let appliedDeal = null;
     if (promoCode?.trim()) {
@@ -220,7 +234,6 @@ const createOrder = async (req, res) => {
     let finalAmount = Math.max(0, subtotal + zone.deliveryFee - discount);
     let walletUsed = 0;
 
-    // Wallet usage
     if (!isGuest && (paymentMethod === 'wallet' || useWallet)) {
       const wallet = await Wallet.findOne({ user: customerId }).session(session).lean();
       if (wallet && toNumber(wallet.balance) > 0) {
@@ -354,9 +367,6 @@ const createOrder = async (req, res) => {
 
     await order.populate('area items.menuItem customer rider');
 
-    await sendNotification(order, 'new_order');
-    broadcastOrderEvent(order, finalAmount === 0 ? 'paymentSuccess' : 'orderCreated');
-
     const response = {
       success: true,
       order: {
@@ -392,33 +402,52 @@ const createOrder = async (req, res) => {
 
 const reorderOrder = async (req, res) => {
   try {
-    const orderId = req.params.orderId;
+    const { orderId } = req.params;
 
     if (!mongoose.isValidObjectId(orderId)) {
-      return res.status(400).json({ success: false, message: 'Invalid order ID' });
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order ID',
+      });
     }
 
+    /** -------------------------
+     * Build secure query
+     * ------------------------*/
     const query = { _id: orderId };
+
     if (req.user) {
       query.$or = [
         { customer: req.user._id },
-        { 'guestInfo.phone': req.user.phone, 'guestInfo.isGuest': true }
+        {
+          'guestInfo.phone': req.user.phone,
+          'guestInfo.isGuest': true,
+        },
       ];
     } else {
       query['guestInfo.isGuest'] = true;
     }
 
+    /** -------------------------
+     * Fetch original order
+     * ------------------------*/
     const original = await Order.findOne(query)
-      .populate('items.menuItem', 'name price image isAvailable')
+      .populate({
+        path: 'items.menuItem',
+        select: 'name price image unit isAvailable pricedOptions',
+      })
       .lean();
 
     if (!original) {
       return res.status(404).json({
         success: false,
-        message: 'Order not found or you do not have permission to reorder it',
+        message: 'Order not found or permission denied',
       });
     }
 
+    /** -------------------------
+     * Rebuild cart items
+     * ------------------------*/
     const validItems = [];
     let skippedCount = 0;
 
@@ -430,38 +459,57 @@ const reorderOrder = async (req, res) => {
         continue;
       }
 
+      const enrichOptions = (names, type) =>
+        (names || []).map((name) => {
+          const opt = menuItem.pricedOptions?.[type]?.find(
+            (o) => o.name === name
+          );
+
+          return {
+            name,
+            price: opt?.price || 0,
+            unit: opt?.unit || menuItem.unit,
+          };
+        });
+
       validItems.push({
-        _id: crypto.randomUUID(), // Important: generate client-side ID
+        _id: crypto.randomUUID(),
         menuItem: {
           _id: menuItem._id.toString(),
           name: menuItem.name,
           price: menuItem.price,
+          unit: menuItem.unit,
           image: menuItem.image || null,
           isAvailable: true,
         },
         quantity: item.quantity,
         priceAtAdd: item.priceAtOrder,
-        sides: item.sides || [],
-        drinks: item.drinks || [],
-        addOns: item.addOns || [],
+        sides: enrichOptions(item.sides, 'sides'),
+        drinks: enrichOptions(item.drinks, 'drinks'),
+        addOns: enrichOptions(item.addOns, 'addOns'),
         specialInstructions: item.specialInstructions || '',
         addedAt: new Date().toISOString(),
       });
     }
 
-    if (validItems.length === 0) {
+    if (!validItems.length) {
       return res.status(400).json({
         success: false,
         message: 'No items from this order are currently available',
       });
     }
 
+    /** -------------------------
+     * AUTHENTICATED USER
+     * ------------------------*/
     if (req.user) {
-      // Authenticated: save to MongoDB
       let cart = await Cart.findOne({ user: req.user._id });
-      if (!cart) cart = new Cart({ user: req.user._id, items: [] });
 
-      cart.items = validItems.map(item => ({
+      if (!cart) {
+        cart = new Cart({ user: req.user._id, items: [] });
+      }
+
+      cart.items = validItems.map((item) => ({
         menuItem: item.menuItem._id,
         quantity: item.quantity,
         priceAtAdd: item.priceAtAdd,
@@ -470,24 +518,24 @@ const reorderOrder = async (req, res) => {
         addOns: item.addOns,
         specialInstructions: item.specialInstructions,
       }));
-      await cart.save();
 
+      await cart.save();
       await cart.populate('items.menuItem', 'name price image isAvailable');
 
       return res.json({
         success: true,
         message: `Added ${validItems.length} item(s) to your cart`,
         cart: {
-          items: cart.items,
-          total: calculateTotal(cart.items),
-          orderNote: cart.orderNote || '',
+          items: validItems,
+          isGuest: false,
         },
-        isGuest: false,
         skippedItems: skippedCount || undefined,
       });
     }
 
-    // Guest: return fully populated items for Zustand
+    /** -------------------------
+     * GUEST USER (Zustand)
+     * ------------------------*/
     return res.json({
       success: true,
       message: `Added ${validItems.length} item(s) to your cart`,
@@ -499,9 +547,13 @@ const reorderOrder = async (req, res) => {
     });
   } catch (err) {
     console.error('reorderOrder error:', err);
-    return res.status(500).json({ success: false, message: 'Failed to reorder' });
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to reorder',
+    });
   }
 };
+
 
 
 // ====================== CUSTOMER REFUND REQUEST ======================
@@ -1006,7 +1058,7 @@ const generateReceipt = async (req, res) => {
     const order = await Order.findById(req.params.id)
       .populate('customer', 'name phone')
       .populate('address', 'fullAddress')
-      .populate('items.menuItem', 'name');
+      .lean();
 
     if (!order || (order.customer && order.customer._id.toString() !== req.user.id && req.user.role !== 'admin')) {
       return res.status(404).json({ success: false, message: 'Order not found' });
@@ -1033,15 +1085,27 @@ const generateReceipt = async (req, res) => {
 
     doc.moveDown();
     doc.text('Items:', { underline: true });
+
     order.items.forEach(i => {
-      doc.text(`${i.quantity}x ${i.menuItem?.name || 'Item'} - PKR ${i.priceAtOrder * i.quantity}`);
+      const unit = i.unit || 'pc';
+      const itemName = `${i.quantity}x ${i.name} (${unit})`;
+      doc.text(`${itemName} - PKR ${toNumber(i.priceAtOrder * i.quantity)}`);
+
+      // Show add-ons with units
+      [...i.sides, ...i.drinks, ...i.addOns].forEach(opt => {
+        if (opt.name) {
+          const addonLine = `   + ${opt.name} (${opt.unit || unit}) +PKR ${opt.price}`;
+          doc.fontSize(10).text(addonLine);
+        }
+      });
     });
+
     doc.moveDown();
-    doc.text(`Subtotal: PKR ${order.totalAmount}`);
-    doc.text(`Delivery Fee: PKR ${order.deliveryFee}`);
-    if (order.discountApplied > 0) doc.text(`Discount: -PKR ${order.discountApplied}`);
-    if (order.walletUsed > 0) doc.text(`Wallet Used: -PKR ${order.walletUsed}`);
-    doc.fontSize(16).text(`Total Paid: PKR ${order.finalAmount}`, { bold: true });
+    doc.text(`Subtotal: PKR ${toNumber(order.totalAmount)}`);
+    doc.text(`Delivery Fee: PKR ${toNumber(order.deliveryFee)}`);
+    if (order.discountApplied > 0) doc.text(`Discount: -PKR ${toNumber(order.discountApplied)}`);
+    if (order.walletUsed > 0) doc.text(`Wallet Used: -PKR ${toNumber(order.walletUsed)}`);
+    doc.fontSize(16).text(`Total Paid: PKR ${toNumber(order.finalAmount)}`, { bold: true });
     doc.moveDown(2);
     doc.fontSize(10).text('Thank you for your order!', { align: 'center' });
     doc.end();
@@ -1115,31 +1179,28 @@ const trackOrderById = async (req, res) => {
   const { orderId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(orderId)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Invalid order ID',
-    });
+    return res.status(400).json({ success: false, message: 'Invalid order ID' });
   }
 
   try {
     const order = await Order.findById(orderId)
       .select(
-        '_id status placedAt finalAmount estimatedDelivery paymentMethod paymentStatus ' +
-        'guestInfo addressDetails items totalAmount deliveryFee discountApplied walletUsed ' +
-        'rider instructions shortId' // ← Add shortId if you store it
+        'status placedAt totalAmount deliveryFee discountApplied walletUsed finalAmount estimatedDelivery paymentMethod paymentStatus items addressDetails instructions rider review'
       )
-      .populate('items.menuItem', 'name image')
       .populate('rider', 'name phone')
       .lean();
 
     if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found',
-      });
+      return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
     const shortId = orderIdShort(order._id);
+
+    // Calculate subtotal from items as fallback (in case totalAmount is missing or outdated)
+    const calculatedSubtotal = order.items.reduce(
+      (sum, item) => sum + (item.priceAtOrder * item.quantity),
+      0
+    );
 
     const safeOrder = {
       _id: order._id,
@@ -1147,61 +1208,51 @@ const trackOrderById = async (req, res) => {
       status: order.status,
       placedAt: order.placedAt,
       estimatedDelivery: order.estimatedDelivery,
-
       payment: {
         method: order.paymentMethod,
         status: order.paymentStatus,
-        amount: toNumber(order.finalAmount),
+        amount: toNumber(order.finalAmount ?? 0),
       },
-
-      items: order.items.map(item => ({
-        name: item.menuItem?.name || item.name,
-        image: item.menuItem?.image || item.image || null,
+      items: order.items.map((item) => ({
+        _id: item._id,
+        name: item.name,
+        unit: item.unit || 'pc',
+        image: item.image || null,
         quantity: item.quantity,
         priceAtOrder: item.priceAtOrder,
+        addOns: [...(item.sides || []), ...(item.drinks || []), ...(item.addOns || [])].map((o) => ({
+          name: o.name,
+          unit: o.unit || item.unit || 'pc',
+          price: o.price,
+        })),
       })),
-
+      // ← CRITICAL FIX: Properly populate totals with fallbacks
       totals: {
-        totalAmount: toNumber(order.totalAmount),
-        deliveryFee: toNumber(order.deliveryFee),
-        discountApplied: toNumber(order.discountApplied),
-        walletUsed: toNumber(order.walletUsed),
-        finalAmount: toNumber(order.finalAmount),
+        totalAmount: toNumber(order.totalAmount ?? calculatedSubtotal),
+        deliveryFee: toNumber(order.deliveryFee ?? 0),
+        discountApplied: toNumber(order.discountApplied ?? 0),
+        walletUsed: toNumber(order.walletUsed ?? 0),
+        finalAmount: toNumber(order.finalAmount ?? 0),
       },
-
-      address: {
-        fullAddress: order.addressDetails?.fullAddress || '',
-        label: order.addressDetails?.label || '',
-        floor: order.addressDetails?.floor || '',
-      },
-
+      addressDetails: order.addressDetails || {},
       instructions: order.instructions || null,
-
       rider: order.rider
         ? {
+            _id: order.rider._id,
             name: order.rider.name,
             phone: order.rider.phone,
           }
         : null,
-
+      review: order.review || null,
       trackUrl: `${process.env.APP_URL || 'https://foodapp.pk'}/track/${order._id}`,
     };
 
-    return res.json({
-      success: true,
-      order: safeOrder,
-    });
-
+    return res.json({ success: true, order: safeOrder });
   } catch (err) {
     console.error('trackOrderById error:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Server error',
-    });
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
-
 
 const trackOrdersByPhone = async (req, res) => {
   const { phone } = req.body;

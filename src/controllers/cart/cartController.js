@@ -1,3 +1,4 @@
+// src/controllers/cart/cartController.js
 const mongoose = require('mongoose');
 const Cart = require('../../models/cart/Cart');
 const MenuItem = require('../../models/menuItem/MenuItem');
@@ -5,15 +6,71 @@ const MenuItem = require('../../models/menuItem/MenuItem');
 const calculateTotal = (items = []) =>
   items.reduce((sum, { priceAtAdd, quantity }) => sum + priceAtAdd * quantity, 0);
 
+// Helper: compare arrays order-insensitively
+const arraysEqual = (a = [], b = []) => {
+  if (a.length !== b.length) return false;
+  const sortedA = [...a].sort();
+  const sortedB = [...b].sort();
+  return sortedA.every((val, i) => val === sortedB[i]);
+};
+
+// Helper: normalize string arrays
+const toArray = (val) => {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.map(v => v?.trim()).filter(Boolean);
+  return typeof val === 'string' && val.trim() ? [val.trim()] : [];
+};
+
+// Populate cart items with full menu details including unit and option units
 const populateItems = async (cartItems) => {
   return Promise.all(
     cartItems.map(async (item) => {
       const menuItem = await MenuItem.findById(item.menuItem)
-        .select('name price image isAvailable')
+        .select('name price unit image isAvailable pricedOptions')
         .lean();
+
+      if (!menuItem || !menuItem.isAvailable) {
+        return {
+          ...item,
+          menuItem: {
+            _id: item.menuItem,
+            name: 'Item removed or unavailable',
+            price: 0,
+            unit: 'pc',
+            image: null,
+            isAvailable: false,
+            pricedOptions: { sides: [], drinks: [], addOns: [] }
+          }
+        };
+      }
+
+      // Enrich selected options with price + unit
+      const enrichOptions = (selectedNames, optionType) => {
+        return selectedNames.map(name => {
+          const option = menuItem.pricedOptions?.[optionType]?.find(o => o.name === name);
+          return {
+            name,
+            price: option?.price || 0,
+            unit: option?.unit || menuItem.unit  // fallback to main item unit
+          };
+        });
+      };
+
       return {
         ...item,
-        menuItem: menuItem || { name: 'Item removed', isAvailable: false, price: 0, image: null }
+        menuItem: {
+          _id: menuItem._id,
+          name: menuItem.name,
+          price: menuItem.price,
+          unit: menuItem.unit,
+          image: menuItem.image,
+          isAvailable: menuItem.isAvailable
+        },
+        selectedOptions: {
+          sides: enrichOptions(item.sides || [], 'sides'),
+          drinks: enrichOptions(item.drinks || [], 'drinks'),
+          addOns: enrichOptions(item.addOns || [], 'addOns')
+        }
       };
     })
   );
@@ -25,12 +82,9 @@ const getCart = async (req, res) => {
     const userId = req.user?.id;
 
     if (userId) {
-      let cart = await Cart.findOne({ user: userId }).populate(
-        'items.menuItem',
-        'name price image isAvailable'
-      );
+      let cart = await Cart.findOne({ user: userId });
 
-      if (!cart) {
+      if (!cart || cart.items.length === 0) {
         return res.json({
           success: true,
           message: 'Your cart is empty',
@@ -39,15 +93,17 @@ const getCart = async (req, res) => {
         });
       }
 
+      const populatedItems = await populateItems(cart.items);
       const total = calculateTotal(cart.items);
+
       return res.json({
         success: true,
-        cart: { items: cart.items, total, orderNote: cart.orderNote || '' },
+        cart: { items: populatedItems, total, orderNote: cart.orderNote || '' },
         isGuest: false
       });
     }
 
-    // Guest
+    // Guest cart
     const sessionCart = req.session.cart || [];
     const populatedItems = await populateItems(sessionCart);
     const total = calculateTotal(sessionCart);
@@ -63,15 +119,7 @@ const getCart = async (req, res) => {
   }
 };
 
-// Helper: normalize arrays
-const toArray = (val) => {
-  if (!val) return [];
-  if (Array.isArray(val)) return val.filter(v => typeof v === 'string' && v.trim());
-  return typeof val === 'string' && val.trim() ? [val.trim()] : [];
-};
-
-// ADD TO CART – NOW WITH CUSTOMIZATIONS
-// ADD TO CART – NOW CALCULATES priceAtAdd INCLUDING PAID EXTRAS
+// ADD TO CART – Supports pricedOptions + units
 const addToCart = async (req, res) => {
   const {
     menuItemId,
@@ -86,15 +134,16 @@ const addToCart = async (req, res) => {
   const userId = req.user?.id;
 
   try {
-    if (!menuItemId) return res.status(400).json({ success: false, message: 'menuItemId required' });
+    if (!menuItemId || !mongoose.Types.ObjectId.isValid(menuItemId)) {
+      return res.status(400).json({ success: false, message: 'Valid menuItemId required' });
+    }
 
-    // Fetch item with pricedOptions
     const menuItem = await MenuItem.findById(menuItemId)
-      .select('name price isAvailable pricedOptions')
+      .select('name price unit isAvailable pricedOptions')
       .lean();
 
     if (!menuItem) return res.status(404).json({ success: false, message: 'Item not found' });
-    if (!menuItem.isAvailable) return res.status(400).json({ success: false, message: `${menuItem.name} unavailable` });
+    if (!menuItem.isAvailable) return res.status(400).json({ success: false, message: `${menuItem.name} is unavailable` });
 
     const options = menuItem.pricedOptions || { sides: [], drinks: [], addOns: [] };
 
@@ -104,22 +153,23 @@ const addToCart = async (req, res) => {
     const trimmedSpecial = (specialInstructions || '').trim().slice(0, 300);
     const trimmedOrderNote = (orderNote || '').trim().slice(0, 500);
 
-    // Calculate extra price from selected predefined options only
+    // Calculate total extra price from selected paid options
     const extrasPrice =
-      normalizedSides.reduce((sum, s) => {
-        const opt = options.sides.find(o => o.name === s);
-        return sum + (opt?.price || 0);
-      }, 0) +
-      normalizedDrinks.reduce((sum, d) => {
-        const opt = options.drinks.find(o => o.name === d);
-        return sum + (opt?.price || 0);
-      }, 0) +
-      normalizedAddOns.reduce((sum, a) => {
-        const opt = options.addOns.find(o => o.name === a);
-        return sum + (opt?.price || 0);
-      }, 0);
+      normalizedSides.reduce((sum, name) => sum + (options.sides.find(o => o.name === name)?.price || 0), 0) +
+      normalizedDrinks.reduce((sum, name) => sum + (options.drinks.find(o => o.name === name)?.price || 0), 0) +
+      normalizedAddOns.reduce((sum, name) => sum + (options.addOns.find(o => o.name === name)?.price || 0), 0);
 
-    const finalPriceAtAdd = menuItem.price + extrasPrice;
+    const priceAtAdd = menuItem.price + extrasPrice;
+
+    const newCartItemBase = {
+      menuItem: menuItemId,
+      quantity: Math.min(Math.max(1, quantity), 50),
+      priceAtAdd,
+      sides: normalizedSides,
+      drinks: normalizedDrinks,
+      addOns: normalizedAddOns,
+      specialInstructions: trimmedSpecial
+    };
 
     if (userId) {
       let cart = await Cart.findOne({ user: userId });
@@ -127,49 +177,41 @@ const addToCart = async (req, res) => {
 
       const existingIdx = cart.items.findIndex(i =>
         i.menuItem.toString() === menuItemId &&
-        arraysEqual(i.sides || [], normalizedSides) &&
-        arraysEqual(i.drinks || [], normalizedDrinks) &&
-        arraysEqual(i.addOns || [], normalizedAddOns) &&
+        arraysEqual(i.sides, normalizedSides) &&
+        arraysEqual(i.drinks, normalizedDrinks) &&
+        arraysEqual(i.addOns, normalizedAddOns) &&
         i.specialInstructions === trimmedSpecial
       );
 
       if (existingIdx > -1) {
         cart.items[existingIdx].quantity = Math.min(cart.items[existingIdx].quantity + quantity, 50);
       } else {
-        cart.items.push({
-          menuItem: menuItemId,
-          quantity,
-          priceAtAdd: finalPriceAtAdd,
-          sides: normalizedSides,
-          drinks: normalizedDrinks,
-          addOns: normalizedAddOns,
-          specialInstructions: trimmedSpecial
-        });
+        cart.items.push(newCartItemBase);
       }
 
       if (trimmedOrderNote) cart.orderNote = trimmedOrderNote;
 
       await cart.save();
-      await cart.populate('items.menuItem', 'name price image isAvailable');
+      const populatedItems = await populateItems(cart.items);
       const total = calculateTotal(cart.items);
 
       return res.json({
         success: true,
-        message: existingIdx > -1 ? `Added ${quantity} more` : `${menuItem.name} added!`,
-        cart: { items: cart.items, total, orderNote: cart.orderNote || '' },
+        message: existingIdx > -1 ? `Added ${quantity} more` : `${menuItem.name} added to cart`,
+        cart: { items: populatedItems, total, orderNote: cart.orderNote || '' },
         isGuest: false
       });
     }
 
-    // Guest flow (same logic)
+    // Guest session
     if (!req.session.cart) req.session.cart = [];
     if (!req.session.orderNote) req.session.orderNote = '';
 
     const existingIdx = req.session.cart.findIndex(i =>
       i.menuItem === menuItemId &&
-      arraysEqual(i.sides || [], normalizedSides) &&
-      arraysEqual(i.drinks || [], normalizedDrinks) &&
-      arraysEqual(i.addOns || [], normalizedAddOns) &&
+      arraysEqual(i.sides, normalizedSides) &&
+      arraysEqual(i.drinks, normalizedDrinks) &&
+      arraysEqual(i.addOns, normalizedAddOns) &&
       i.specialInstructions === trimmedSpecial
     );
 
@@ -177,15 +219,9 @@ const addToCart = async (req, res) => {
       req.session.cart[existingIdx].quantity = Math.min(req.session.cart[existingIdx].quantity + quantity, 50);
     } else {
       req.session.cart.push({
+        ...newCartItemBase,
         _id: new mongoose.Types.ObjectId().toString(),
-        menuItem: menuItemId,
-        quantity,
-        priceAtAdd: finalPriceAtAdd,
-        sides: normalizedSides,
-        drinks: normalizedDrinks,
-        addOns: normalizedAddOns,
-        specialInstructions: trimmedSpecial,
-        addedAt: new Date().toISOString()
+        addedAt: new Date()
       });
     }
 
@@ -196,25 +232,19 @@ const addToCart = async (req, res) => {
 
     res.json({
       success: true,
-      message: existingIdx > -1 ? `Added ${quantity} more` : `${menuItem.name} added!`,
+      message: existingIdx > -1 ? `Added ${quantity} more` : `${menuItem.name} added to cart`,
       cart: { items: populatedItems, total, orderNote: req.session.orderNote || '' },
       isGuest: true
     });
   } catch (err) {
     console.error('addToCart error:', err);
-    res.status(500).json({ success: false, message: 'Failed to add item' });
+    res.status(500).json({ success: false, message: 'Failed to add to cart' });
   }
 };
-// Helper to compare arrays (order-insensitive)
-const arraysEqual = (a, b) => {
-  if (a.length !== b.length) return false;
-  const sortedA = [...a].sort();
-  const sortedB = [...b].sort();
-  return sortedA.every((val, i) => val === sortedB[i]);
-};
 
-// UPDATE CART ITEM (quantity + all customizations)
+// UPDATE CART ITEM
 const updateQuantity = async (req, res) => {
+  const { itemId } = req.params;
   const {
     quantity,
     sides,
@@ -224,19 +254,18 @@ const updateQuantity = async (req, res) => {
     orderNote
   } = req.body;
 
-  const { itemId } = req.params;
   const userId = req.user?.id;
 
   try {
-    const normalizedSides = toArray(sides);
-    const normalizedDrinks = toArray(drinks);
-    const normalizedAddOns = toArray(addOns);
-    const trimmedSpecial = specialInstructions ? (specialInstructions.trim()).slice(0, 300) : undefined;
-    const trimmedOrderNote = orderNote ? (orderNote.trim()).slice(0, 500) : undefined;
+    const normalizedSides = sides !== undefined ? toArray(sides) : undefined;
+    const normalizedDrinks = drinks !== undefined ? toArray(drinks) : undefined;
+    const normalizedAddOns = addOns !== undefined ? toArray(addOns) : undefined;
+    const trimmedSpecial = specialInstructions !== undefined ? specialInstructions.trim().slice(0, 300) : undefined;
+    const trimmedOrderNote = orderNote !== undefined ? orderNote.trim().slice(0, 500) : undefined;
 
     if (userId) {
       const cart = await Cart.findOne({ user: userId });
-      if (!cart) return res.status(404).json({ success: false, message: 'Cart not found' });
+      if (!cart || cart.items.length === 0) return res.status(404).json({ success: false, message: 'Cart not found' });
 
       const idx = cart.items.findIndex(i => i._id.toString() === itemId);
       if (idx === -1) return res.status(404).json({ success: false, message: 'Item not in cart' });
@@ -248,24 +277,26 @@ const updateQuantity = async (req, res) => {
           cart.items[idx].quantity = Math.min(quantity, 50);
         }
       }
-      if (normalizedSides.length) cart.items[idx].sides = normalizedSides;
-      if (normalizedDrinks.length) cart.items[idx].drinks = normalizedDrinks;
-      if (normalizedAddOns.length) cart.items[idx].addOns = normalizedAddOns;
+      if (normalizedSides !== undefined) cart.items[idx].sides = normalizedSides;
+      if (normalizedDrinks !== undefined) cart.items[idx].drinks = normalizedDrinks;
+      if (normalizedAddOns !== undefined) cart.items[idx].addOns = normalizedAddOns;
       if (trimmedSpecial !== undefined) cart.items[idx].specialInstructions = trimmedSpecial;
       if (trimmedOrderNote !== undefined) cart.orderNote = trimmedOrderNote;
 
       await cart.save();
-      await cart.populate('items.menuItem', 'name price image isAvailable');
+      const populatedItems = await populateItems(cart.items);
+      const total = calculateTotal(cart.items);
 
       res.json({
         success: true,
         message: quantity <= 0 ? 'Item removed' : 'Cart updated',
-        cart: { items: cart.items, total: calculateTotal(cart.items), orderNote: cart.orderNote },
+        cart: { items: populatedItems, total, orderNote: cart.orderNote || '' },
         isGuest: false
       });
     } else {
-      // Guest
-      if (!req.session.cart) return res.status(404).json({ success: false, message: 'Cart empty' });
+      if (!req.session.cart || req.session.cart.length === 0) {
+        return res.status(404).json({ success: false, message: 'Cart is empty' });
+      }
 
       const idx = req.session.cart.findIndex(i => i._id === itemId);
       if (idx === -1) return res.status(404).json({ success: false, message: 'Item not in cart' });
@@ -277,103 +308,93 @@ const updateQuantity = async (req, res) => {
           req.session.cart[idx].quantity = Math.min(quantity, 50);
         }
       }
-      if (normalizedSides.length) req.session.cart[idx].sides = normalizedSides;
-      if (normalizedDrinks.length) req.session.cart[idx].drinks = normalizedDrinks;
-      if (normalizedAddOns.length) req.session.cart[idx].addOns = normalizedAddOns;
+      if (normalizedSides !== undefined) req.session.cart[idx].sides = normalizedSides;
+      if (normalizedDrinks !== undefined) req.session.cart[idx].drinks = normalizedDrinks;
+      if (normalizedAddOns !== undefined) req.session.cart[idx].addOns = normalizedAddOns;
       if (trimmedSpecial !== undefined) req.session.cart[idx].specialInstructions = trimmedSpecial;
       if (trimmedOrderNote !== undefined) req.session.orderNote = trimmedOrderNote;
 
       const populatedItems = await populateItems(req.session.cart);
+      const total = calculateTotal(req.session.cart);
+
       res.json({
         success: true,
         message: quantity <= 0 ? 'Item removed' : 'Cart updated',
-        cart: { items: populatedItems, total: calculateTotal(req.session.cart), orderNote: req.session.orderNote || '' },
+        cart: { items: populatedItems, total, orderNote: req.session.orderNote || '' },
         isGuest: true
       });
     }
   } catch (err) {
     console.error('updateQuantity error:', err);
-    res.status(500).json({ success: false, message: 'Error updating cart' });
+    res.status(500).json({ success: false, message: 'Failed to update cart' });
   }
 };
 
-// REMOVE ITEM FROM CART (by cart item _id)
+// REMOVE ITEM
 const removeItem = async (req, res) => {
   const { itemId } = req.params;
   const userId = req.user?.id;
 
   try {
-    if (!itemId) {
-      return res.status(400).json({ success: false, message: 'itemId is required' });
-    }
-
     let updated = false;
     let cartResponse = { items: [], total: 0, orderNote: '' };
 
     if (userId) {
-      // === AUTHENTICATED USER (MongoDB Cart) ===
       const cart = await Cart.findOne({ user: userId });
-      if (!cart) {
-        return res.status(404).json({ success: false, message: 'Cart not found' });
-      }
+      if (!cart) return res.status(404).json({ success: false, message: 'Cart not found' });
 
       const initialLength = cart.items.length;
-      cart.items = cart.items.filter((item) => item._id.toString() !== itemId);
+      cart.items = cart.items.filter(i => i._id.toString() !== itemId);
 
       if (cart.items.length < initialLength) {
         updated = true;
         await cart.save();
-
-        // Populate menu item details
-        await cart.populate('items.menuItem', 'name price image isAvailable');
-
+        const populatedItems = await populateItems(cart.items);
         cartResponse = {
-          items: cart.items,
+          items: populatedItems,
           total: calculateTotal(cart.items),
-          orderNote: cart.orderNote || '',
+          orderNote: cart.orderNote || ''
         };
       }
     } else {
-      // === GUEST USER (Session Cart) ===
-      if (!req.session.cart || !Array.isArray(req.session.cart)) {
-        return res.status(404).json({ success: false, message: 'Cart is empty' });
-      }
+      if (!req.session.cart) return res.status(404).json({ success: false, message: 'Cart is empty' });
 
       const initialLength = req.session.cart.length;
-      req.session.cart = req.session.cart.filter((item) => item._id !== itemId);
+      req.session.cart = req.session.cart.filter(i => i._id !== itemId);
 
       if (req.session.cart.length < initialLength) {
         updated = true;
         const populatedItems = await populateItems(req.session.cart);
-
         cartResponse = {
           items: populatedItems,
           total: calculateTotal(req.session.cart),
-          orderNote: req.session.orderNote || '',
+          orderNote: req.session.orderNote || ''
         };
       }
     }
 
-    if (!updated) {
-      return res.status(404).json({ success: false, message: 'Item not found in cart' });
-    }
+    if (!updated) return res.status(404).json({ success: false, message: 'Item not found in cart' });
 
-    return res.json({
+    res.json({
       success: true,
-      message: 'Item removed from cart',
+      message: 'Item removed',
       cart: cartResponse,
-      isGuest: !userId,
+      isGuest: !userId
     });
   } catch (err) {
     console.error('removeItem error:', err);
-    return res.status(500).json({ success: false, message: 'Failed to remove item from cart' });
+    res.status(500).json({ success: false, message: 'Failed to remove item' });
   }
 };
-// CLEAR CART (unchanged, just clears orderNote too)
+
+// CLEAR CART
 const clearCart = async (req, res) => {
   try {
     if (req.user?.id) {
-      await Cart.updateOne({ user: req.user.id }, { $set: { items: [], orderNote: '' } });
+      await Cart.updateOne(
+        { user: req.user.id },
+        { $set: { items: [], orderNote: '' } }
+      );
     } else {
       req.session.cart = [];
       req.session.orderNote = '';
@@ -381,13 +402,13 @@ const clearCart = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Cart cleared!',
+      message: 'Cart cleared',
       cart: { items: [], total: 0, orderNote: '' },
       isGuest: !req.user
     });
   } catch (err) {
     console.error('clearCart error:', err);
-    res.status(500).json({ success: false, message: 'Error clearing cart' });
+    res.status(500).json({ success: false, message: 'Failed to clear cart' });
   }
 };
 
