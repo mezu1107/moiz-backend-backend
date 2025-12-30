@@ -1,35 +1,55 @@
 // src/pages/MenuFiltersPage.tsx
-// PRODUCTION-READY — FULLY RESPONSIVE (320px → 4K)
-// Mobile-first design with fluid layout, touch-friendly controls, infinite scroll
-// Optimized filters, sticky sections, floating cart button
+// ULTIMATE MENU EXPERIENCE — v2.3 • LAUNCHED DEC 30, 2025
+// Filters scroll naturally • Slim side cart • Maximum content visibility
 
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { ShoppingCart, Search, X, Filter as FilterIcon, Loader2 } from "lucide-react";
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  ShoppingCart,
+  Search,
+  X,
+  Filter as FilterIcon,
+  Loader2,
+  ChefHat,
+  RotateCcw,
+  AlertTriangle,
+} from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
 
-import { useMenuFilters } from "@/features/menu/hooks/useMenuApi";
-import { useCartStore } from "@/features/cart/hooks/useCartStore";
-import { MenuItemCard } from "../components/MenuItemCard";
-import { MenuGridSkeleton } from "../components/MenuSkeleton";
+import { useMenuFilters } from '@/features/menu/hooks/useMenuApi';
+import { useCartStore } from '@/features/cart/hooks/useCartStore';
+import { MenuItemCard } from '@/features/menu/components/MenuItemCard';
+import { MenuGridSkeleton } from '@/features/menu/components/MenuSkeleton';
 
-import { CATEGORY_LABELS, type MenuCategory } from "@/features/menu/types/menu.types";
+import {
+  CATEGORY_LABELS,
+  CATEGORY_ICONS,
+  type MenuCategory,
+} from '@/features/menu/types/menu.types';
 
 type SortOption =
-  | "name_asc"
-  | "name_desc"
-  | "price_asc"
-  | "price_desc"
-  | "newest"
-  | "oldest"
-  | "category_asc";
+  | 'name_asc'
+  | 'name_desc'
+  | 'price_asc'
+  | 'price_desc'
+  | 'newest'
+  | 'oldest'
+  | 'category_asc';
+
+const MAX_PRICE = 5000;
 
 export default function MenuFiltersPage() {
   const navigate = useNavigate();
@@ -38,78 +58,80 @@ export default function MenuFiltersPage() {
   const itemCount = getItemCount();
   const subtotal = getTotal();
 
-  const [search, setSearch] = useState<string>("");
-  const [category, setCategory] = useState<MenuCategory | "">("");
-  const [isVeg, setIsVeg] = useState<boolean | undefined>(undefined);
-  const [isSpicy, setIsSpicy] = useState<boolean | undefined>(undefined);
-  const [sort, setSort] = useState<SortOption>("category_asc");
+  // Filter States
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState<MenuCategory | 'all'>('all');
+  const [isVeg, setIsVeg] = useState<'all' | 'true' | 'false'>('all');
+  const [isSpicy, setIsSpicy] = useState<'all' | 'true' | 'false'>('all');
+  const [sort, setSort] = useState<SortOption>('category_asc');
 
-  const [minPriceInput, setMinPriceInput] = useState<string>("");
-  const [maxPriceInput, setMaxPriceInput] = useState<string>("");
-  const [sliderRange, setSliderRange] = useState<number[]>([0, 2000]);
+  const [minPriceInput, setMinPriceInput] = useState('');
+  const [maxPriceInput, setMaxPriceInput] = useState('');
+  const [sliderRange, setSliderRange] = useState<[number, number]>([0, MAX_PRICE]);
+
   const [debouncedMinPrice, setDebouncedMinPrice] = useState<number | undefined>();
   const [debouncedMaxPrice, setDebouncedMaxPrice] = useState<number | undefined>();
 
-  // Debounce price inputs
+  // Price debounce
   useEffect(() => {
     const timer = setTimeout(() => {
-      const min = minPriceInput === "" ? undefined : Number(minPriceInput);
-      const max = maxPriceInput === "" ? undefined : Number(maxPriceInput);
+      const min = minPriceInput.trim() === '' ? undefined : Math.max(0, Number(minPriceInput));
+      const max = maxPriceInput.trim() === '' ? undefined : Number(maxPriceInput);
       setDebouncedMinPrice(min);
       setDebouncedMaxPrice(max);
     }, 600);
     return () => clearTimeout(timer);
   }, [minPriceInput, maxPriceInput]);
 
-  // Sync slider with debounced values
   useEffect(() => {
-    setSliderRange([
-      debouncedMinPrice ?? 0,
-      debouncedMaxPrice ?? 2000,
-    ]);
-  }, [debouncedMinPrice, debouncedMaxPrice]);
+    const [min, max] = sliderRange;
+    setMinPriceInput(min === 0 ? '' : min.toString());
+    setMaxPriceInput(max === MAX_PRICE ? '' : max.toString());
+  }, [sliderRange]);
 
-  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useMenuFilters({
-    search: search.trim() || undefined,
-    category: category || undefined,
-    isVeg,
-    isSpicy,
-    minPrice: debouncedMinPrice,
-    maxPrice: debouncedMaxPrice,
-    sort,
-    availableOnly: true,
-    limit: 20,
-  });
+  // Query
+  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useMenuFilters({
+      search: search.trim() || undefined,
+      category: category === 'all' ? undefined : category,
+      isVeg: isVeg === 'all' ? undefined : isVeg === 'true',
+      isSpicy: isSpicy === 'all' ? undefined : isSpicy === 'true',
+      minPrice: debouncedMinPrice,
+      maxPrice: debouncedMaxPrice,
+      sort,
+      availableOnly: true,
+      limit: 20,
+    });
 
-  const allItems = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data?.pages]);
+  const allItems = useMemo(() => data?.pages.flatMap((p) => p.items) ?? [], [data?.pages]);
   const totalResults = data?.pages[0]?.pagination.total ?? 0;
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (search) count++;
-    if (category) count++;
-    if (isVeg !== undefined) count++;
-    if (isSpicy !== undefined) count++;
+    if (search.trim()) count++;
+    if (category !== 'all') count++;
+    if (isVeg !== 'all') count++;
+    if (isSpicy !== 'all') count++;
     if (debouncedMinPrice !== undefined || debouncedMaxPrice !== undefined) count++;
-    if (sort !== "category_asc") count++;
+    if (sort !== 'category_asc') count++;
     return count;
   }, [search, category, isVeg, isSpicy, debouncedMinPrice, debouncedMaxPrice, sort]);
 
-  const clearAllFilters = () => {
-    setSearch("");
-    setCategory("");
-    setIsVeg(undefined);
-    setIsSpicy(undefined);
-    setSort("category_asc");
-    setMinPriceInput("");
-    setMaxPriceInput("");
-    setSliderRange([0, 2000]);
-  };
+  const clearAllFilters = useCallback(() => {
+    setSearch('');
+    setCategory('all');
+    setIsVeg('all');
+    setIsSpicy('all');
+    setSort('category_asc');
+    setMinPriceInput('');
+    setMaxPriceInput('');
+    setSliderRange([0, MAX_PRICE]);
+  }, []);
 
+  // Infinite scroll
   const handleScroll = useCallback(() => {
     if (
-      window.innerHeight + document.documentElement.scrollTop + 1200 >=
-      document.documentElement.offsetHeight &&
+      window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 600 &&
       hasNextPage &&
       !isFetchingNextPage
     ) {
@@ -118,165 +140,178 @@ export default function MenuFiltersPage() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
+  const handleVegChange = (value: string) => {
+    if (value === 'all' || value === 'true' || value === 'false') setIsVeg(value as any);
+  };
+
+  const handleSpicyChange = (value: string) => {
+    if (value === 'all' || value === 'true' || value === 'false') setIsSpicy(value as any);
+  };
+
+  const resetPriceRange = () => {
+    setSliderRange([0, MAX_PRICE]);
+    setMinPriceInput('');
+    setMaxPriceInput('');
+  };
+
+  const priceRangeActive = debouncedMinPrice !== undefined || debouncedMaxPrice !== undefined;
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Sticky Page Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-        <div className="container mx-auto px-4 py-5 md:py-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold md:text-4xl lg:text-5xl">Menu</h1>
-              <p className="mt-1 text-sm text-muted-foreground md:text-base">
-                {totalResults > 0
-                  ? `${totalResults.toLocaleString()} delicious item${totalResults > 1 ? "s" : ""}`
-                  : "Browse our full selection"}
-              </p>
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background pb-24 md:pb-32 relative">
+      {/* Header - still sticky */}
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-lg shadow-sm">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-primary/10 p-2.5">
+                <ChefHat className="h-7 w-7 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Our Menu</h1>
+                <p className="text-sm text-muted-foreground">
+                  {totalResults > 0
+                    ? `${totalResults.toLocaleString()} items`
+                    : 'Find your favorite dish'}
+                </p>
+              </div>
             </div>
 
             {activeFilterCount > 0 && (
-              <Badge variant="secondary" className="self-start px-4 py-2 text-sm md:text-base">
-                <FilterIcon className="mr-2 h-4 w-4" />
-                {activeFilterCount} active filter{activeFilterCount > 1 ? "s" : ""}
+              <Badge variant="secondary" className="px-3 py-1 text-sm">
+                {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}
               </Badge>
             )}
           </div>
         </div>
       </header>
 
-      {/* Sticky Filters Panel */}
-      <section className="sticky top-16 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-md md:top-20">
-        <div className="container mx-auto px-4 py-5 md:py-6">
-          <div className="space-y-5">
-            {/* Primary Filters – Responsive Grid */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+      {/* Filters - now scroll naturally (no sticky) */}
+      <section className="bg-background border-b">
+        <div className="container mx-auto px-4 py-6 md:py-8">
+          <div className="space-y-6 max-w-5xl mx-auto">
+            {/* Quick filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
               {/* Search */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search dishes..."
+                  placeholder="Search..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="h-11 pl-11 pr-10"
+                  className="h-10 pl-9 pr-8 text-sm"
                 />
                 {search && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                    onClick={() => setSearch("")}
-                    aria-label="Clear search"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    onClick={() => setSearch('')}
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 )}
               </div>
 
-              {/* Category */}
-              <Select value={category} onValueChange={(v) => setCategory(v as MenuCategory | "")}>
-                <SelectTrigger className="h-11">
-                  <SelectValue placeholder="All Categories" />
+              {/* Other selects - more compact */}
+              <Select value={category} onValueChange={(v) => setCategory(v as MenuCategory | 'all')}>
+                <SelectTrigger className="h-10 text-sm">
+                  <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
-                  {(Object.keys(CATEGORY_LABELS) as MenuCategory[]).map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {CATEGORY_LABELS[cat]}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="all">All</SelectItem>
+                  {Object.entries(CATEGORY_LABELS).map(([key, label]) => {
+                    const Icon = CATEGORY_ICONS[key as MenuCategory];
+                    return (
+                      <SelectItem key={key} value={key}>
+                        <div className="flex items-center gap-2">
+                          <Icon className="h-4 w-4" />
+                          {label}
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
 
-              {/* Diet */}
-              <Select
-                value={isVeg === undefined ? "" : String(isVeg)}
-                onValueChange={(v) => setIsVeg(v === "" ? undefined : v === "true")}
-              >
-                <SelectTrigger className="h-11">
-                  <SelectValue placeholder="Any Diet" />
+              <Select value={isVeg} onValueChange={handleVegChange}>
+                <SelectTrigger className="h-10 text-sm">
+                  <SelectValue placeholder="Diet" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any Diet</SelectItem>
-                  <SelectItem value="true">Vegetarian Only</SelectItem>
-                  <SelectItem value="false">Non-Veg Only</SelectItem>
+                  <SelectItem value="all">Any</SelectItem>
+                  <SelectItem value="true">Veg</SelectItem>
+                  <SelectItem value="false">Non-veg</SelectItem>
                 </SelectContent>
               </Select>
 
-              {/* Spice */}
-              <Select
-                value={isSpicy === undefined ? "" : String(isSpicy)}
-                onValueChange={(v) => setIsSpicy(v === "" ? undefined : v === "true")}
-              >
-                <SelectTrigger className="h-11">
-                  <SelectValue placeholder="Any Spice" />
+              <Select value={isSpicy} onValueChange={handleSpicyChange}>
+                <SelectTrigger className="h-10 text-sm">
+                  <SelectValue placeholder="Spice" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any Spice</SelectItem>
-                  <SelectItem value="true">Spicy Only</SelectItem>
-                  <SelectItem value="false">Mild Only</SelectItem>
+                  <SelectItem value="all">Any</SelectItem>
+                  <SelectItem value="true">Spicy</SelectItem>
+                  <SelectItem value="false">Mild</SelectItem>
                 </SelectContent>
               </Select>
 
-              {/* Sort */}
               <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-                <SelectTrigger className="h-11">
-                  <SelectValue placeholder="Sort by" />
+                <SelectTrigger className="h-10 text-sm">
+                  <SelectValue placeholder="Sort" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="category_asc">Category</SelectItem>
-                  <SelectItem value="name_asc">Name A-Z</SelectItem>
-                  <SelectItem value="name_desc">Name Z-A</SelectItem>
-                  <SelectItem value="price_asc">Low to High</SelectItem>
-                  <SelectItem value="price_desc">High to Low</SelectItem>
-                  <SelectItem value="newest">Newest</SelectItem>
-                  <SelectItem value="oldest">Oldest</SelectItem>
+                  <SelectItem value="category_asc">Default</SelectItem>
+                  <SelectItem value="name_asc">A → Z</SelectItem>
+                  <SelectItem value="price_asc">Low → High</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Price Range */}
-            <Card className="p-4 md:p-6">
-              <Label className="mb-4 block text-base font-semibold md:text-lg">Price Range</Label>
+            {/* Price Range - more compact */}
+            <Card className="p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-base font-medium">Price Range</Label>
+                {priceRangeActive && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetPriceRange}
+                    className="h-7 px-2 text-xs"
+                  >
+                    <RotateCcw className="h-3 w-3 mr-1" />
+                    Reset
+                  </Button>
+                )}
+              </div>
+
               <Slider
                 value={sliderRange}
-                onValueChange={setSliderRange}
-                max={2000}
+                onValueChange={(v) => setSliderRange(v as [number, number])}
+                max={MAX_PRICE}
                 step={50}
-                className="mb-5"
+                className="mb-4"
               />
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={minPriceInput}
-                    onChange={(e) => setMinPriceInput(e.target.value)}
-                    className="w-28"
-                  />
-                  <span className="text-muted-foreground">—</span>
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={maxPriceInput}
-                    onChange={(e) => setMaxPriceInput(e.target.value)}
-                    className="w-28"
-                  />
-                </div>
-                <span className="font-medium text-base md:text-lg">
-                  Rs. {sliderRange[0]} - Rs. {sliderRange[1]}
-                </span>
+
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium">Rs. {sliderRange[0].toLocaleString()}</span>
+                <span className="font-medium">Rs. {sliderRange[1].toLocaleString()}</span>
               </div>
             </Card>
 
-            {/* Clear All */}
             {activeFilterCount > 0 && (
               <div className="flex justify-end">
-                <Button variant="outline" onClick={clearAllFilters}>
-                  <X className="mr-2 h-5 w-5" />
-                  Clear All Filters
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Clear all
                 </Button>
               </div>
             )}
@@ -284,77 +319,64 @@ export default function MenuFiltersPage() {
         </div>
       </section>
 
-      {/* Menu Grid Content */}
+      {/* Menu Content */}
       <section className="container mx-auto px-4 py-8 md:py-12">
-        {isLoading ? (
+        {isLoading && allItems.length === 0 ? (
           <MenuGridSkeleton count={12} />
         ) : error ? (
-          <Card className="p-12 text-center md:p-20">
-            <p className="text-xl font-semibold text-destructive md:text-2xl">
-              Failed to load menu
-            </p>
-            <Button size="lg" className="mt-6" onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
+          <Card className="p-12 text-center">
+            <AlertTriangle className="mx-auto h-12 w-12 text-destructive mb-4" />
+            <h3 className="text-xl font-bold mb-2">Connection Error</h3>
+            <p className="text-muted-foreground mb-6">Please try again later</p>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
           </Card>
         ) : allItems.length === 0 ? (
-          <Card className="p-12 text-center md:p-20">
-            <FilterIcon className="mx-auto mb-6 h-16 w-16 text-muted-foreground/40 md:mb-8 md:h-20 md:w-20" />
-            <h3 className="text-2xl font-bold md:text-3xl">No items match your filters</h3>
-            <p className="mx-auto mt-4 max-w-md text-base text-muted-foreground md:text-lg">
-              Try adjusting your search or filters to see more options
-            </p>
-            <Button size="lg" className="mt-8" onClick={clearAllFilters}>
-              Clear All Filters
-            </Button>
+          <Card className="p-12 text-center">
+            <FilterIcon className="mx-auto h-16 w-16 text-muted-foreground/50 mb-6" />
+            <h3 className="text-xl font-semibold mb-3">No results found</h3>
+            <p className="text-muted-foreground mb-6">Try different filters</p>
+            <Button onClick={clearAllFilters}>Clear Filters</Button>
           </Card>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {allItems.map((item, index) => (
                 <div
                   key={item._id}
-                  className="animate-in fade-in slide-in-from-bottom-8 duration-600"
-                  style={{ animationDelay: `${Math.min(index * 50, 400)}ms` }}
+                  className="animate-in fade-in slide-in-from-bottom-6 duration-700"
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <MenuItemCard item={item} />
                 </div>
               ))}
             </div>
 
-            {/* Infinite Scroll Loader */}
             {isFetchingNextPage && (
-              <div className="mt-12 flex flex-col items-center">
+              <div className="flex justify-center py-12">
                 <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                <p className="mt-4 text-muted-foreground">Loading more items...</p>
-              </div>
-            )}
-
-            {/* End of Results */}
-            {!hasNextPage && allItems.length > 0 && (
-              <div className="mt-16 text-center">
-                <Badge variant="secondary" className="px-6 py-3 text-base">
-                  End of menu • {allItems.length} item{allItems.length > 1 ? "s" : ""} shown
-                </Badge>
               </div>
             )}
           </>
         )}
       </section>
 
-      {/* Floating Cart Button – only when cart has items */}
+      {/* Slim fixed cart button on bottom-right side */}
       {itemCount > 0 && (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 px-4">
+        <div className="fixed bottom-6 right-6 z-50 md:bottom-8 md:right-8">
           <Button
-            onClick={() => navigate("/cart")}
-            size="lg"
-            className="h-14 w-full max-w-md rounded-full px-8 text-base font-bold shadow-2xl sm:h-16 sm:text-lg"
+            onClick={() => navigate('/cart')}
+            size="icon"
+            className="h-14 w-14 md:h-16 md:w-16 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center bg-primary text-primary-foreground"
           >
-            <ShoppingCart className="mr-3 h-6 w-6" />
-            View Cart • {itemCount} item{itemCount > 1 ? "s" : ""}
-            <span className="ml-4 font-extrabold">
-              Rs. {Number(subtotal).toLocaleString()}
-            </span>
+            <div className="relative">
+              <ShoppingCart className="h-7 w-7" />
+              <Badge
+                variant="secondary"
+                className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 text-xs flex items-center justify-center bg-destructive text-destructive-foreground border-2 border-background"
+              >
+                {itemCount}
+              </Badge>
+            </div>
           </Button>
         </div>
       )}

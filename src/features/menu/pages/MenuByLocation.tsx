@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ShoppingCart,
@@ -7,6 +7,7 @@ import {
   MapPin,
   Package,
   Truck,
+  AlertTriangle,
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
@@ -29,20 +30,19 @@ import {
 } from "../types/menu.types";
 
 export default function MenuByLocationPage() {
+  // ── ALL HOOKS FIRST (NO RETURNS ABOVE THIS LINE) ────────────────────
   const navigate = useNavigate();
   const { areaId: paramAreaId } = useParams<{ areaId?: string }>();
 
   const queryAreaId = new URLSearchParams(window.location.search).get("area");
-  const urlAreaId = paramAreaId || queryAreaId;
   const storedAreaId = localStorage.getItem("selectedAreaId");
-  const areaId = urlAreaId || storedAreaId;
+  const areaId = paramAreaId || queryAreaId || storedAreaId;
 
   const { data, isLoading, error } = useMenuByArea(areaId || undefined);
-const { getItemCount, getTotal } = useCartStore();
+  const { getItemCount, getTotal } = useCartStore();
 
-const itemCount = getItemCount();
-const subtotal = getTotal();
-;
+  const itemCount = getItemCount();
+  const subtotal = getTotal(); // (kept if you need later)
 
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] =
@@ -52,18 +52,18 @@ const subtotal = getTotal();
 
   useEffect(() => {
     if (!areaId && !isLoading) {
-      toast.error("Please select a delivery location");
+      toast.error("Please select a delivery location first");
       navigate("/", { replace: true });
     } else if (areaId) {
       localStorage.setItem("selectedAreaId", areaId);
     }
   }, [areaId, isLoading, navigate]);
 
+  // ── SAFE DERIVED DATA (ALWAYS EXECUTES) ─────────────────────────────
   const menuItems = data?.menu ?? [];
   const area = data?.area;
   const delivery = data?.delivery;
   const hasDelivery = data?.hasDeliveryZone ?? false;
-  const message = data?.message;
 
   const filteredItems = useMemo(() => {
     return menuItems.filter((item) => {
@@ -73,10 +73,9 @@ const subtotal = getTotal();
         const q = search.toLowerCase();
         if (
           !item.name.toLowerCase().includes(q) &&
-          !(item.description && item.description.toLowerCase().includes(q))
-        ) {
+          !(item.description?.toLowerCase().includes(q) ?? false)
+        )
           return false;
-        }
       }
 
       if (selectedCategory && item.category !== selectedCategory) return false;
@@ -95,20 +94,21 @@ const subtotal = getTotal();
       desserts: [],
       beverages: [],
     };
-
     filteredItems.forEach((item) => {
-      groups[item.category].push(item);
+      groups[item.category]?.push(item);
     });
-
     return groups;
   }, [filteredItems]);
 
-  const hasGlobalItemsInCategory = (cat: MenuCategory) =>
-    groupedItems[cat].some((item) => item.availableInAreas.length === 0);
+  const hasAnyItems = Object.values(groupedItems).some(
+    (items) => items.length > 0
+  );
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
+    if (!area) return;
+
     const url = window.location.href;
-    const title = `Order from ${area?.name} Menu`;
+    const title = `Order from ${area.name}, ${area.city}`;
 
     if (navigator.share) {
       try {
@@ -118,43 +118,42 @@ const subtotal = getTotal();
       } catch {}
     }
 
-    await navigator.clipboard.writeText(url);
-    toast.success("Menu link copied to clipboard!");
-  };
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Menu link copied!");
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  }, [area]);
 
+  // ── EARLY RETURNS (NOW 100% SAFE) ───────────────────────────────────
   if (isLoading) return <MenuPageSkeleton />;
 
   if (error || !data || !area) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="max-w-md w-full p-10 text-center space-y-8">
-          <MapPin className="h-12 w-12 mx-auto text-muted-foreground" />
-          <div>
-            <h2 className="text-3xl font-bold mb-4">
-              Delivery Not Available Here
-            </h2>
-            <p className="text-muted-foreground">
-              {message ||
-                "We're not serving this location yet. More areas coming soon!"}
-            </p>
-          </div>
-          <Button size="lg" onClick={() => navigate("/")}>
-            Change Location
-          </Button>
+      <main className="min-h-screen flex items-center justify-center px-4 py-12">
+        <Card className="w-full max-w-md p-10 text-center">
+          <MapPin className="mx-auto h-16 w-16 mb-6" />
+          <h1 className="text-2xl font-bold mb-4">Not Available Here</h1>
+          <p className="mb-8">
+            {data?.message ||
+              "We're not serving this area yet. More locations coming soon!"}
+          </p>
+          <Button onClick={() => navigate("/")}>Choose Another Location</Button>
         </Card>
-      </div>
+      </main>
     );
   }
 
+ 
   return (
     <>
       <Helmet>
-        <title>
-          {area.name} Menu • Order Food Online in {area.city}
-        </title>
+        <title>{area.name} Menu • Order Food Online in {area.city}</title>
+        <meta name="description" content={`Browse and order delicious food from ${area.name} in ${area.city}. Fast delivery available!`} />
       </Helmet>
 
-      <div className="min-h-screen pb-32">
+      <main className="min-h-screen bg-gradient-to-b from-muted/20 to-background relative pb-24 md:pb-32">
         <MenuHeader
           areaName={area.name}
           city={area.city}
@@ -162,77 +161,137 @@ const subtotal = getTotal();
           minOrder={delivery?.minOrder}
           estimatedTime={delivery?.estimatedTime}
           hasDelivery={hasDelivery}
-          onChangeLocation={() => navigate("/")}
+          onChangeLocation={() => navigate('/')}
         />
 
-        <div className="container mx-auto px-4 py-4 flex justify-between">
-          {hasDelivery ? (
-            <Badge className="gap-2">
-              <Truck className="h-4 w-4" /> Delivery Available
-            </Badge>
-          ) : (
-            <Badge variant="secondary">
-              <Package className="h-4 w-4 mr-1" /> Setup in Progress
-            </Badge>
-          )}
+        {/* Status + Share */}
+        <div className="container mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3 border-b">
+          <div className="flex items-center gap-3 flex-wrap">
+            {hasDelivery ? (
+              <Badge className="gap-1.5 px-3 py-1.5 bg-primary/10 text-primary border-primary/20">
+                <Truck className="h-3.5 w-3.5" />
+                Delivery Available
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="gap-1.5 px-3 py-1.5">
+                <Package className="h-3.5 w-3.5" />
+                Pickup / Coming Soon
+              </Badge>
+            )}
+          </div>
 
-          <Button size="sm" variant="outline" onClick={handleShare}>
-            <Share2 className="h-4 w-4 mr-2" />
-            Share
+          <Button variant="outline" size="sm" onClick={handleShare} className="gap-1.5">
+            <Share2 className="h-4 w-4" />
+            Share Menu
           </Button>
         </div>
 
-        <div className="container mx-auto px-4 py-6">
-          <MenuFilters
-            search={search}
-            onSearchChange={setSearch}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-            isVeg={isVeg}
-            onVegChange={setIsVeg}
-            isSpicy={isSpicy}
-            onSpicyChange={setIsSpicy}
-          />
-        </div>
+        {/* Filters */}
+        <section className="bg-background/95 border-b shadow-sm">
+          <div className="container mx-auto px-4 py-6 md:py-8 max-w-5xl">
+            <MenuFilters
+              search={search}
+              onSearchChange={setSearch}
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+              isVeg={isVeg}
+              onVegChange={setIsVeg}
+              isSpicy={isSpicy}
+              onSpicyChange={setIsSpicy}
+            />
+          </div>
+        </section>
 
-        <div className="container mx-auto px-4 py-12">
-          {(Object.keys(groupedItems) as MenuCategory[]).map((cat) => {
-            const items = groupedItems[cat];
-            if (!items.length) return null;
+        {/* Menu Content */}
+        <section className="container mx-auto px-4 py-8 md:py-12">
+          {!hasAnyItems ? (
+            <Card className="p-12 md:p-16 text-center border-muted shadow-md max-w-2xl mx-auto">
+              <AlertTriangle className="mx-auto h-16 w-16 text-muted-foreground/50 mb-6" />
+              <h2 className="text-2xl md:text-3xl font-bold mb-4">No matching dishes</h2>
+              <p className="text-lg text-muted-foreground mb-8">
+                Try adjusting filters to see available items in {area.name}
+              </p>
+              <Button size="lg" onClick={() => {
+                setSearch('');
+                setSelectedCategory(null);
+                setIsVeg(null);
+                setIsSpicy(null);
+              }}>
+                Show All Available Items
+              </Button>
+            </Card>
+          ) : (
+            <div className="space-y-12 md:space-y-20">
+              {(Object.keys(groupedItems) as MenuCategory[]).map((cat) => {
+                const items = groupedItems[cat];
+                if (!items.length) return null;
 
-            const Icon = CATEGORY_ICONS[cat];
+                const Icon = CATEGORY_ICONS[cat];
+                const hasGlobal = items.some(item => item.availableInAreas.length === 0);
 
-            return (
-              <section key={cat} className="mb-20">
-                <h2 className="text-4xl font-bold mb-8 flex gap-4">
-                  <Icon className="h-10 w-10" />
-                  {CATEGORY_LABELS[cat]}
-                </h2>
+                return (
+                  <section key={cat} id={cat} className="scroll-mt-24">
+                    <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-full bg-primary/10 p-2.5">
+                          <Icon className="h-7 w-7 text-primary" />
+                        </div>
+                        <h2 className="text-2xl md:text-3xl font-bold">
+                          {CATEGORY_LABELS[cat]}
+                        </h2>
+                      </div>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <Badge variant="secondary" className="px-4 py-1.5">
+                          {items.length} {items.length === 1 ? 'item' : 'items'}
+                        </Badge>
+                        {hasGlobal && (
+                          <Badge variant="outline" className="gap-1.5 px-4 py-1.5">
+                            <Globe className="h-4 w-4" />
+                            Available Everywhere
+                          </Badge>
+                        )}
+                      </div>
+                    </header>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                  {items.map((item) => (
-                    <MenuItemCard key={item._id} item={item} />
-                  ))}
-                </div>
-              </section>
-            );
-          })}
-        </div>
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      {items.map((item, index) => (
+                        <div
+                          key={item._id}
+                          className="animate-in fade-in slide-in-from-bottom-6 duration-700"
+                          style={{ animationDelay: `${Math.min(index * 50, 500)}ms` }}
+                        >
+                          <MenuItemCard item={item} />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
+        {/* Slim fixed cart – bottom-right corner */}
         {itemCount > 0 && (
-          <div className="fixed bottom-6 inset-x-0 px-4">
+          <div className="fixed bottom-6 right-6 z-50 md:bottom-8 md:right-8">
             <Button
-              size="lg"
-              className="w-full h-16 text-lg font-bold"
-              onClick={() => navigate("/cart")}
+              onClick={() => navigate('/cart')}
+              size="icon"
+              className="h-14 w-14 md:h-16 md:w-16 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 relative bg-primary text-primary-foreground"
             >
-              <ShoppingCart className="mr-3" />
-              {itemCount} item • Rs.{" "}
-              {Number(subtotal).toLocaleString()}
+              <div className="relative flex items-center justify-center">
+                <ShoppingCart className="h-6 w-6 md:h-7 md:w-7" />
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 text-xs flex items-center justify-center border-2 border-background shadow-md min-w-[24px]"
+                >
+                  {itemCount}
+                </Badge>
+              </div>
             </Button>
           </div>
         )}
-      </div>
+      </main>
     </>
   );
 }

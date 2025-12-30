@@ -496,12 +496,12 @@ export default function CheckoutPage() {
                         <div className="flex items-center gap-3">
                           <span className="font-bold text-lg">{item.quantity}x</span>
                           <div>
-                            <p className="font-medium">
+                            <div  className="font-medium">
                               {item.menuItem.name}
                               <Badge variant="outline" className="ml-2 text-xs">
                                 {UNIT_LABELS[item.menuItem.unit] || item.menuItem.unit}
                               </Badge>
-                            </p>
+                            </div >
                           </div>
                         </div>
                         <p className="font-medium text-right">

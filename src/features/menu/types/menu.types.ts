@@ -129,7 +129,12 @@ export interface AdminMenuResponse {
   success: boolean;
   items: MenuItem[];
 }
-
+// In src/features/menu/types/menu.types.ts
+export interface DeliveryInfo {
+  fee: number;
+  minOrder?: number;
+  estimatedTime: string;
+}
 export interface SingleMenuItemResponse {
   success: boolean;
   item: MenuItem;
