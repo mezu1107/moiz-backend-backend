@@ -215,6 +215,8 @@ const routeRegistry = [
   { path: '/api/upload', file: './src/routes/upload/uploadRoutes' },
   { path: '/api/address', file: './src/routes/address/addressRoutes' },
   { path: '/api/areas', file: './src/routes/area/areaRoutes' },
+ { path: '/api/delivery', file: './src/routes/area/deliveryRoutes' },
+  
   { path: '/api/cart', file: './src/routes/cart/cartRoutes' },
   { path: '/api/menu', file: './src/routes/menu/menuRoutes' },
   { path: '/api/orders', file: './src/routes/order/orderRoutes' },

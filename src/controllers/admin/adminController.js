@@ -21,31 +21,15 @@ const toMongoPoint = (center) => {
 // Helper: Convert Leaflet polygon → MongoDB GeoJSON Polygon (auto-closes rings)
 const toMongoPolygon = (polygon) => {
   if (!polygon || polygon.type !== 'Polygon') {
-    throw new Error('Invalid polygon format: must be GeoJSON Polygon');
+    throw new Error('Invalid GeoJSON Polygon');
   }
 
-  const coordinates = polygon.coordinates.map(ring =>
-    ring.map(([lat, lng]) => {
-      if (typeof lat !== 'number' || typeof lng !== 'number') {
-        throw new Error('Invalid coordinate: must be numbers');
-      }
-      return [lng, lat]; // Leaflet [lat, lng] → MongoDB [lng, lat]
-    })
-  );
-
-  // Auto-close all rings
-  coordinates.forEach(ring => {
-    if (ring.length >= 4) {
-      const first = ring[0];
-      const last = ring[ring.length - 1];
-      if (first[0] !== last[0] || first[1] !== last[1]) {
-        ring.push([...first]);
-      }
-    }
-  });
-
-  return { type: 'Polygon', coordinates };
+  return {
+    type: 'Polygon',
+    coordinates: polygon.coordinates,
+  };
 };
+
 
 // ==================== ADD AREA ====================
 const addArea = async (req, res) => {
@@ -60,7 +44,7 @@ const addArea = async (req, res) => {
     }
 
     const mongoCenter = toMongoPoint(center);
-    const mongoPolygon = toMongoPolygon(polygon);
+const mongoPolygon = req.body.mongoPolygon;
 
     const area = await Area.create({
       name: name.trim(),
@@ -278,7 +262,17 @@ const deleteArea = async (req, res) => {
 const updateDeliveryZone = async (req, res) => {
   try {
     const { areaId } = req.params;
-    const { deliveryFee = 149, minOrderAmount = 0, estimatedTime = '35-50 min', isActive } = req.body;
+    const {
+      deliveryFee,
+      baseFee,
+      distanceFeePerKm,
+      maxDistanceKm,
+      feeStructure = 'flat',
+      minOrderAmount,
+      estimatedTime,
+      isActive,
+      freeDeliveryAbove, // NEW
+    } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(areaId)) {
       return res.status(400).json({ success: false, message: 'Invalid area ID format' });
@@ -289,15 +283,31 @@ const updateDeliveryZone = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Area not found' });
     }
 
+    const updateData = {
+      feeStructure,
+      minOrderAmount: minOrderAmount !== undefined ? Number(minOrderAmount) : undefined,
+      estimatedTime: estimatedTime?.trim(),
+      isActive: isActive !== undefined ? Boolean(isActive) : undefined,
+      freeDeliveryAbove: freeDeliveryAbove !== undefined ? Number(freeDeliveryAbove) : undefined, // NEW
+    };
+
+    // Only set flat fee if structure is flat
+    if (feeStructure === 'flat') {
+      updateData.deliveryFee = deliveryFee !== undefined ? Number(deliveryFee) : undefined;
+    }
+
+    // Only set distance fields if structure is distance
+    if (feeStructure === 'distance') {
+      updateData.baseFee = baseFee !== undefined ? Number(baseFee) : undefined;
+      updateData.distanceFeePerKm = distanceFeePerKm !== undefined ? Number(distanceFeePerKm) : undefined;
+      updateData.maxDistanceKm = maxDistanceKm !== undefined ? Number(maxDistanceKm) : undefined;
+      updateData.deliveryFee = 0; // reset flat fee
+    }
+
     const zone = await DeliveryZone.findOneAndUpdate(
       { area: areaId },
-      {
-        deliveryFee: Number(deliveryFee),
-        minOrderAmount: Number(minOrderAmount),
-        estimatedTime: estimatedTime.trim(),
-        isActive: isActive !== undefined ? Boolean(isActive) : true,
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      updateData,
+      { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true }
     );
 
     // Sync area.isActive with zone.isActive
@@ -305,12 +315,12 @@ const updateDeliveryZone = async (req, res) => {
       await Area.findByIdAndUpdate(areaId, { isActive: zone.isActive });
     }
 
-    clearAreaCache(); // Any delivery change affects checkArea()
+    clearAreaCache();
 
     res.json({
       success: true,
       message: zone.isActive
-        ? `Delivery activated for "${area.name}"`
+        ? `Delivery settings updated for "${area.name}"`
         : `Delivery paused for "${area.name}"`,
       zone,
     });
@@ -318,10 +328,12 @@ const updateDeliveryZone = async (req, res) => {
     console.error('updateDeliveryZone error:', err);
     res.status(500).json({
       success: false,
-      message: 'Failed to update delivery zone',
+      message: err.message || 'Failed to update delivery zone',
     });
   }
 };
+
+
 
 // ==================== DELETE DELIVERY ZONE ====================
 const deleteDeliveryZone = async (req, res) => {
@@ -458,6 +470,148 @@ const toggleDeliveryZone = async (req, res) => {
   }
 };
 
+
+// New: Calculate delivery fee based on user location
+// ==================== TO CALCULATE DELIVERY FEE ====================
+const calculateDeliveryFee = async (req, res) => {
+  try {
+    const { lat, lng, orderAmount } = req.body; // orderAmount added
+
+    if (!lat || !lng) {
+      return res.status(400).json({
+        success: false,
+        message: 'Latitude and longitude are required',
+      });
+    }
+
+    const userLat = parseFloat(lat);
+    const userLng = parseFloat(lng);
+    const orderAmt = parseFloat(orderAmount || 0);
+
+    if (isNaN(userLat) || isNaN(userLng) || isNaN(orderAmt)) {
+      return res.status(400).json({ success: false, message: 'Invalid coordinates or order amount' });
+    }
+
+    // Find area containing user's point
+    const area = await Area.findOne({
+      polygon: {
+        $geoIntersects: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [userLng, userLat],
+          },
+        },
+      },
+      isActive: true,
+    });
+
+    if (!area) {
+      return res.json({
+        success: true,
+        inService: false,
+        message: 'We do not deliver to this location yet',
+      });
+    }
+
+    const zone = await DeliveryZone.findOne({ area: area._id, isActive: true });
+
+    if (!zone) {
+      return res.json({
+        success: true,
+        inService: true,
+        hasDelivery: false,
+        area: area.name,
+        message: 'Area covered, but delivery not active yet',
+      });
+    }
+
+    // Check free delivery
+    if (zone.freeDeliveryAbove && orderAmt >= zone.freeDeliveryAbove) {
+      return res.json({
+        success: true,
+        inService: true,
+        deliverable: true,
+        area: area.name,
+        city: area.city,
+        distanceKm: 0,
+        deliveryFee: 0,
+        reason: `Free delivery for orders ≥ Rs.${zone.freeDeliveryAbove}`,
+        minOrderAmount: zone.minOrderAmount,
+        estimatedTime: zone.estimatedTime,
+      });
+    }
+
+    // Calculate distance from area center
+    const centerLng = area.center.coordinates[0];
+    const centerLat = area.center.coordinates[1];
+
+    const distanceKm = haversineDistance(
+      { lat: userLat, lng: userLng },
+      { lat: centerLat, lng: centerLng }
+    );
+
+    let deliveryFee = 0;
+    let reason = '';
+
+    if (zone.feeStructure === 'distance') {
+      if (distanceKm > zone.maxDistanceKm) {
+        return res.json({
+          success: true,
+          inService: true,
+          deliverable: false,
+          area: area.name,
+          distanceKm: distanceKm.toFixed(1),
+          message: `Too far (${distanceKm.toFixed(1)} km). Max: ${zone.maxDistanceKm} km`,
+        });
+      }
+
+      deliveryFee = zone.baseFee + Math.round(distanceKm * zone.distanceFeePerKm);
+      reason = `Distance-based: ${distanceKm.toFixed(1)} km × Rs.${zone.distanceFeePerKm}/km`;
+    } else {
+      deliveryFee = zone.deliveryFee;
+      reason = 'Flat delivery fee';
+    }
+
+    res.json({
+      success: true,
+      inService: true,
+      deliverable: true,
+      area: area.name,
+      city: area.city,
+      distanceKm: distanceKm.toFixed(1),
+      deliveryFee,
+      reason,
+      minOrderAmount: zone.minOrderAmount,
+      estimatedTime: zone.estimatedTime,
+    });
+  } catch (err) {
+    console.error('calculateDeliveryFee error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+// Haversine formula (accurate for short distances)
+function haversineDistance(coord1, coord2) {
+  const R = 6371; // Earth radius in kilometers
+  const dLat = deg2rad(coord2.lat - coord1.lat);
+  const dLon = deg2rad(coord2.lng - coord1.lng);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(deg2rad(coord1.lat)) *
+      Math.cos(deg2rad(coord2.lat)) *
+      Math.sin(dLon / 2) ** 2;
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI / 180);
+}
+
+
 module.exports = {
   addArea,
   updateArea,
@@ -468,4 +622,5 @@ module.exports = {
   deleteDeliveryZone,
   toggleAreaActive,
   toggleDeliveryZone,
+  calculateDeliveryFee,
 };

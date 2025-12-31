@@ -27,8 +27,13 @@ const validatePakistanPoint = (value, { req }) => {
 };
 
 const convertPolygonToMongo = (polygon, { req }) => {
-  if (!polygon || typeof polygon !== 'object' || polygon.type !== 'Polygon' || !Array.isArray(polygon.coordinates) || polygon.coordinates.length === 0) {
-    throw new Error('Invalid GeoJSON Polygon: must have type "Polygon" and coordinates array');
+  if (
+    !polygon ||
+    polygon.type !== 'Polygon' ||
+    !Array.isArray(polygon.coordinates) ||
+    polygon.coordinates.length === 0
+  ) {
+    throw new Error('Invalid GeoJSON Polygon');
   }
 
   const coordinates = polygon.coordinates.map((ring, ringIndex) => {
@@ -37,15 +42,15 @@ const convertPolygonToMongo = (polygon, { req }) => {
     }
 
     const mongoRing = ring.map((coord, idx) => {
-      if (!Array.isArray(coord) || coord.length < 2) {
+      if (!Array.isArray(coord) || coord.length !== 2) {
         throw new Error(`Invalid coordinate at position ${idx} in ring ${ringIndex}`);
       }
 
-      const lat = toFloat(coord[0]);
-      const lng = toFloat(coord[1]);
+      const lng = toFloat(coord[0]); // GeoJSON: [lng, lat]
+      const lat = toFloat(coord[1]);
 
       if (isNaN(lat) || isNaN(lng)) {
-        throw new Error(`Invalid coordinates at position ${idx} in ring ${ringIndex}`);
+        throw new Error(`Invalid numeric coordinates at ${idx} in ring ${ringIndex}`);
       }
 
       if (lat < 23.5 || lat > 37.5) {
@@ -56,21 +61,24 @@ const convertPolygonToMongo = (polygon, { req }) => {
         throw new Error(`Longitude out of Pakistan range at position ${idx} in ring ${ringIndex}`);
       }
 
-      return [lng, lat]; // MongoDB uses [longitude, latitude]
+      return [lng, lat]; // MongoDB: [lng, lat]
     });
 
-    // Auto-close the ring if not already closed
-    if (
-      mongoRing[0][0] !== mongoRing[mongoRing.length - 1][0] ||
-      mongoRing[0][1] !== mongoRing[mongoRing.length - 1][1]
-    ) {
-      mongoRing.push(mongoRing[0]);
+    // Auto-close ring
+    const first = mongoRing[0];
+    const last = mongoRing[mongoRing.length - 1];
+    if (first[0] !== last[0] || first[1] !== last[1]) {
+      mongoRing.push([...first]);
     }
 
     return mongoRing;
   });
 
-  req.body.mongoPolygon = { type: 'Polygon', coordinates };
+  req.body.mongoPolygon = {
+    type: 'Polygon',
+    coordinates,
+  };
+
   return true;
 };
 
@@ -88,7 +96,7 @@ exports.addArea = [
     .trim()
     .isLength({ min: 2, max: 50 })
     .withMessage('City must be between 2 and 50 characters')
-    .default('Lahore'),
+    .default('RAWALPINDI'),
 
   body('center')
     .exists({ checkNull: true })
