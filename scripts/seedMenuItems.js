@@ -14,11 +14,21 @@ const IMAGES_FOLDER = path.join(__dirname, '../public');
 
 // Area IDs – all menu items will be available here
 const allAreaIds = [
-  "6954ca14105aca32aa02f5c5", "6954ca66105aca32aa02f5df", "6954c9e5105aca32aa02f5b1",
-  "6954c9ee105aca32aa02f5b5", "6954c9d7105aca32aa02f5ad", "6954ca0d105aca32aa02f5c1",
-  "6954ca1b105aca32aa02f5c9", "6954ca22105aca32aa02f5cd", "6954ca06105aca32aa02f5bd",
-  "6954ca29105aca32aa02f5d1", "6954cb1a105aca32aa02f632", "6954ca32105aca32aa02f5d5",
-  "6954c9fe105aca32aa02f5b9", "6954ca72105aca32aa02f5e3", "6954ca7d105aca32aa02f5e7"
+  "6956b3067d12c702db8e020e",  // Pakistan Town
+  "6956b2fb7d12c702db8e020a",  // Soan Garden Extension
+  "6956b2db7d12c702db8e0206",  // Soan Garden
+  "6956b2ce7d12c702db8e0202",  // Bahria Safari Villas
+  "6956b2987d12c702db8e01fc",  // Police Foundation Housing Scheme
+  "6956b28a7d12c702db8e01f8",  // PWD Housing Society
+  "6956b2817d12c702db8e01f4",  // Media Town
+  "6956b2757d12c702db8e01f0",  // Korang Town
+  "6956b26a7d12c702db8e01ec",  // Airport Housing Society
+  "6956b2607d12c702db8e01e8",  // Jinnah Garden
+  "6956b2567d12c702db8e01e4",  // Naval Anchorage
+  "6956b24a7d12c702db8e01e0",  // River Garden
+  "6956b23f7d12c702db8e01dc",  // CBR Town
+  "6956b2337d12c702db8e01d8",  // Bahria Town Phase 4
+  "6956b2277d12c702db8e01d4"   // Gulraiz Housing Scheme
 ];
 
 // Upload single image to Cloudinary
@@ -82,7 +92,7 @@ const menuItemsData = [
   { name: "Surkh Lobia", filename: "Surkh-Lobia.jpg", price: 220, unit: "pc", category: "lunch", isVeg: true, isSpicy: false, description: "Red kidney beans in mild spiced gravy." },
   { name: "Sabit Masoor", filename: "Sabut-Masoor_dal.jpg", price: 200, unit: "pc", category: "lunch", isVeg: true, isSpicy: true, description: "Whole red lentils cooked with spices." },
   { name: "Sada Omelete", filename: "Simple-Omelete.jpg", price: 70, unit: "pc", category: "breakfast", isVeg: false, isSpicy: false, description: "Simple egg omelette." },
-  { name: "Heavy Omelet", filename: "Heavy-Omelet.jpg", price: 100, unit: "pc", category: "breakfast", isVeg: false, isSpicy: true, description: "Loaded omelette with veggies and spices." },
+  { name: "Heavy Omelet", filename: "Heavy-Omelete.jpg", price: 100, unit: "pc", category: "breakfast", isVeg: false, isSpicy: true, description: "Loaded omelette with veggies and spices." },
   { name: "Half/Full Fry Egg", filename: "Half-Fry-Egg.jpg", price: 60, unit: "pc", category: "breakfast", isVeg: false, isSpicy: false, description: "Classic fried egg – half or full." }
 ];
 

@@ -188,6 +188,7 @@ const getAllAreasWithZones = async (req, res) => {
 };
 
 // ==================== GET SINGLE AREA ====================
+// ==================== GET SINGLE AREA ====================
 const getAreaById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -201,6 +202,33 @@ const getAreaById = async (req, res) => {
     }
 
     const zone = await DeliveryZone.findOne({ area: id }).lean();
+
+    // Compute fee if distance-based
+    let computedDeliveryFee = null;
+    if (zone && zone.isActive) {
+      const baseFee = zone.baseFee || 0;
+      const distanceFeePerKm = zone.distanceFeePerKm || 0;
+
+      // Distance from area center
+      const centerLng = area.center.coordinates[0];
+      const centerLat = area.center.coordinates[1];
+
+      const distanceKm = haversineDistance(
+        { lat: centerLat, lng: centerLng }, // default to center itself
+        { lat: centerLat, lng: centerLng }
+      );
+
+      if (zone.feeStructure === 'distance') {
+        computedDeliveryFee = baseFee + Math.round(distanceKm * distanceFeePerKm);
+      } else {
+        computedDeliveryFee = zone.deliveryFee;
+      }
+
+      // Apply free delivery if applicable
+      if (zone.freeDeliveryAbove && computedDeliveryFee >= zone.freeDeliveryAbove) {
+        computedDeliveryFee = 0;
+      }
+    }
 
     const responseArea = {
       ...area,
@@ -217,7 +245,12 @@ const getAreaById = async (req, res) => {
       success: true,
       message: 'Area details fetched successfully',
       area: responseArea,
-      deliveryZone: zone || null,
+      deliveryZone: zone
+        ? {
+            ...zone,
+            deliveryFee: computedDeliveryFee, // override DB fee
+          }
+        : null,
     });
   } catch (err) {
     console.error('getAreaById error:', err);
@@ -227,6 +260,27 @@ const getAreaById = async (req, res) => {
     });
   }
 };
+
+// Haversine formula (short distances)
+function haversineDistance(coord1, coord2) {
+  const R = 6371; // km
+  const dLat = deg2rad(coord2.lat - coord1.lat);
+  const dLon = deg2rad(coord2.lng - coord1.lng);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(deg2rad(coord1.lat)) *
+      Math.cos(deg2rad(coord2.lat)) *
+      Math.sin(dLon / 2) ** 2;
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI / 180);
+}
+
 
 // ==================== DELETE AREA ====================
 const deleteArea = async (req, res) => {
@@ -259,6 +313,9 @@ const deleteArea = async (req, res) => {
 };
 
 // ==================== UPDATE DELIVERY ZONE (UPSERT) ====================
+// Inside src/controllers/admin/adminController.js
+// UPDATE THIS FUNCTION ONLY
+
 const updateDeliveryZone = async (req, res) => {
   try {
     const { areaId } = req.params;
@@ -271,7 +328,11 @@ const updateDeliveryZone = async (req, res) => {
       minOrderAmount,
       estimatedTime,
       isActive,
-      freeDeliveryAbove, // NEW
+      freeDeliveryAbove,
+      // ← ADD THESE NEW TIERED FIELDS
+      tieredBaseDistance,
+      tieredBaseFee,
+      tieredAdditionalFeePerKm,
     } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(areaId)) {
@@ -288,20 +349,25 @@ const updateDeliveryZone = async (req, res) => {
       minOrderAmount: minOrderAmount !== undefined ? Number(minOrderAmount) : undefined,
       estimatedTime: estimatedTime?.trim(),
       isActive: isActive !== undefined ? Boolean(isActive) : undefined,
-      freeDeliveryAbove: freeDeliveryAbove !== undefined ? Number(freeDeliveryAbove) : undefined, // NEW
+      freeDeliveryAbove: freeDeliveryAbove !== undefined ? Number(freeDeliveryAbove) : undefined,
     };
 
-    // Only set flat fee if structure is flat
+    // Flat fee
     if (feeStructure === 'flat') {
       updateData.deliveryFee = deliveryFee !== undefined ? Number(deliveryFee) : undefined;
     }
 
-    // Only set distance fields if structure is distance
+    // Distance-based (classic or tiered)
     if (feeStructure === 'distance') {
       updateData.baseFee = baseFee !== undefined ? Number(baseFee) : undefined;
       updateData.distanceFeePerKm = distanceFeePerKm !== undefined ? Number(distanceFeePerKm) : undefined;
       updateData.maxDistanceKm = maxDistanceKm !== undefined ? Number(maxDistanceKm) : undefined;
-      updateData.deliveryFee = 0; // reset flat fee
+      updateData.deliveryFee = 0;
+
+      // Save tiered pricing fields if provided
+      if (tieredBaseDistance !== undefined) updateData.tieredBaseDistance = Number(tieredBaseDistance);
+      if (tieredBaseFee !== undefined) updateData.tieredBaseFee = Number(tieredBaseFee);
+      if (tieredAdditionalFeePerKm !== undefined) updateData.tieredAdditionalFeePerKm = Number(tieredAdditionalFeePerKm);
     }
 
     const zone = await DeliveryZone.findOneAndUpdate(
@@ -310,7 +376,7 @@ const updateDeliveryZone = async (req, res) => {
       { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true }
     );
 
-    // Sync area.isActive with zone.isActive
+    // Sync area.isActive
     if (area.isActive !== zone.isActive) {
       await Area.findByIdAndUpdate(areaId, { isActive: zone.isActive });
     }
@@ -473,9 +539,10 @@ const toggleDeliveryZone = async (req, res) => {
 
 // New: Calculate delivery fee based on user location
 // ==================== TO CALCULATE DELIVERY FEE ====================
+// New: Calculate delivery fee based on user location
 const calculateDeliveryFee = async (req, res) => {
   try {
-    const { lat, lng, orderAmount } = req.body; // orderAmount added
+    const { lat, lng, orderAmount } = req.body;
 
     if (!lat || !lng) {
       return res.status(400).json({
@@ -565,8 +632,15 @@ const calculateDeliveryFee = async (req, res) => {
         });
       }
 
-      deliveryFee = zone.baseFee + Math.round(distanceKm * zone.distanceFeePerKm);
-      reason = `Distance-based: ${distanceKm.toFixed(1)} km × Rs.${zone.distanceFeePerKm}/km`;
+      // === Your tiered logic: First 6 km fixed 70, then 25/km ===
+      if (distanceKm <= zone.tieredBaseDistance) {
+        deliveryFee = zone.tieredBaseFee; // 70
+        reason = `Fixed fee: Rs.${zone.tieredBaseFee} (up to ${zone.tieredBaseDistance} km)`;
+      } else {
+        const extraKm = distanceKm - zone.tieredBaseDistance;
+        deliveryFee = zone.tieredBaseFee + Math.round(extraKm * zone.tieredAdditionalFeePerKm);
+        reason = `Rs.${zone.tieredBaseFee} (first ${zone.tieredBaseDistance} km) + ${extraKm.toFixed(1)} km × Rs.${zone.tieredAdditionalFeePerKm}/km`;
+      }
     } else {
       deliveryFee = zone.deliveryFee;
       reason = 'Flat delivery fee';
@@ -590,6 +664,25 @@ const calculateDeliveryFee = async (req, res) => {
   }
 };
 
+// Haversine formula (unchanged)
+function haversineDistance(coord1, coord2) {
+  const R = 6371; // km
+  const dLat = deg2rad(coord2.lat - coord1.lat);
+  const dLon = deg2rad(coord2.lng - coord1.lng);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(deg2rad(coord1.lat)) *
+      Math.cos(deg2rad(coord2.lat)) *
+      Math.sin(dLon / 2) ** 2;
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI / 180);
+}
 
 // Haversine formula (accurate for short distances)
 function haversineDistance(coord1, coord2) {

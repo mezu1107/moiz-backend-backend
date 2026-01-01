@@ -19,7 +19,6 @@ const deliveryZoneSchema = new mongoose.Schema(
     // === Flat Fee (used when feeStructure = 'flat') ===
     deliveryFee: {
       type: Number,
-      required: true,
       min: [0, 'Delivery fee cannot be negative'],
       default: 70,
     },
@@ -28,7 +27,7 @@ const deliveryZoneSchema = new mongoose.Schema(
     baseFee: {
       type: Number,
       min: [0, 'Base fee cannot be negative'],
-      default: 0,
+      default: 70,
     },
     distanceFeePerKm: {
       type: Number,
@@ -39,6 +38,23 @@ const deliveryZoneSchema = new mongoose.Schema(
       type: Number,
       min: [1, 'Max distance must be at least 1 km'],
       default: 15, // Max deliverable distance
+    },
+
+    // === New Tiered Pricing Fields (for first 6 km fixed 70, then 25/km) ===
+    tieredBaseDistance: {
+      type: Number,
+      min: 0,
+      default: 6, // First 6 km fixed
+    },
+    tieredBaseFee: {
+      type: Number,
+      min: 0,
+      default: 70, // Rs. 70 for first 6 km
+    },
+    tieredAdditionalFeePerKm: {
+      type: Number,
+      min: 0,
+      default: 25, // Rs. 25 per additional km
     },
 
     minOrderAmount: {
@@ -52,7 +68,7 @@ const deliveryZoneSchema = new mongoose.Schema(
     freeDeliveryAbove: {
       type: Number,
       min: 0,
-      default: 0, // orders ≥ this amount get free delivery
+      default: 1499,
     },
 
     estimatedTime: {
