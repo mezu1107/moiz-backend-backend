@@ -1,8 +1,9 @@
 // src/lib/deliveryStore.ts
+// Dedicated store for delivery check flow & results
+// Updated: January 01, 2026
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-// ==================== CORE TYPES ====================
 
 export interface LatLng {
   lat: number;
@@ -20,10 +21,9 @@ export interface DeliveryInfo {
   deliveryFee: number;
   minOrderAmount: number;
   estimatedTime: string;
-  feeStructure?: 'flat' | 'distance';  // Make optional
-  baseFee?: number;
-  distanceFeePerKm?: number;
-  maxDistanceKm?: number;
+  freeDeliveryAbove?: number;
+  feeStructure?: 'flat' | 'distance';
+  reason?: string; // e.g. "Flat delivery fee" or distance explanation
 }
 
 export interface DeliveryCheckResult {
@@ -36,19 +36,20 @@ export interface DeliveryCheckResult {
   reason: string;
   minOrderAmount: number;
   estimatedTime: string;
-  freeDeliveryAbove?: number; // NEW FIELD
+  freeDeliveryAbove?: number;
 }
 
-
-export interface DeliveryState {
-  // Current delivery status
+interface DeliveryState {
+  // Core delivery data
   selectedArea: DeliveryArea | null;
   deliveryInfo: DeliveryInfo | null;
   checkResult: DeliveryCheckResult | null;
+
+  // Derived flags
   isInService: boolean;
   isDeliverable: boolean;
 
-  // User location
+  // User location (used during check)
   userLocation: LatLng | null;
   locationPermission: 'granted' | 'denied' | 'prompt' | null;
 
@@ -59,8 +60,8 @@ export interface DeliveryState {
   errorMessage: string | null;
 
   // Actions
+  setDeliveryFromCheck: (result: DeliveryCheckResult, areaId: string, center?: LatLng) => void;
   setDeliveryArea: (area: DeliveryArea | null, delivery: DeliveryInfo | null) => void;
-  setCheckResult: (result: DeliveryCheckResult | null) => void;
   setUserLocation: (lat: number, lng: number) => void;
   setLocationPermission: (status: 'granted' | 'denied' | 'prompt') => void;
   setIsChecking: (checking: boolean) => void;
@@ -86,31 +87,36 @@ export const useDeliveryStore = create<DeliveryState>()(
       showModal: false,
       errorMessage: null,
 
-      // Actions
+      // Primary action: when /api/areas/check or /delivery/calculate succeeds
+      setDeliveryFromCheck: (result, areaId, center) =>
+        set({
+          checkResult: result,
+          isInService: result.inService,
+          isDeliverable: result.deliverable,
+          selectedArea: {
+            _id: areaId,
+            name: result.area,
+            city: result.city,
+            centerLatLng: center,
+          },
+          deliveryInfo: {
+            deliveryFee: result.deliveryFee,
+            minOrderAmount: result.minOrderAmount,
+            estimatedTime: result.estimatedTime,
+            freeDeliveryAbove: result.freeDeliveryAbove,
+            feeStructure: result.reason.toLowerCase().includes('distance') ? 'distance' : 'flat',
+            reason: result.reason,
+          },
+          hasChecked: true,
+          errorMessage: null,
+        }),
+
+      // Manual override (rare — e.g. admin preview)
       setDeliveryArea: (area, delivery) =>
         set({
           selectedArea: area,
           deliveryInfo: delivery,
           isInService: !!area,
-          hasChecked: true,
-        }),
-
-      setCheckResult: (result) =>
-        set({
-          checkResult: result,
-          isInService: result ? result.inService : false,
-          isDeliverable: result ? result.deliverable : false,
-          selectedArea: result
-            ? { _id: '', name: result.area, city: result.city }
-            : null,
-          deliveryInfo: result
-            ? {
-                deliveryFee: result.deliveryFee,
-                minOrderAmount: result.minOrderAmount,
-                estimatedTime: result.estimatedTime,
-                feeStructure: result.reason.includes('Distance-based') ? 'distance' : 'flat',
-              }
-            : null,
           hasChecked: true,
         }),
 
@@ -127,7 +133,7 @@ export const useDeliveryStore = create<DeliveryState>()(
         set({ showModal: show }),
 
       setError: (msg) =>
-        set({ errorMessage: msg }),
+        set({ errorMessage: msg, hasChecked: true }),
 
       clearDelivery: () =>
         set({
@@ -156,12 +162,11 @@ export const useDeliveryStore = create<DeliveryState>()(
         }),
     }),
     {
-      name: 'zaika-delivery-storage',
+      name: 'amfood-delivery-storage',
+      version: 2,
       partialize: (state) => ({
         selectedArea: state.selectedArea,
         deliveryInfo: state.deliveryInfo,
-        checkResult: state.checkResult,
-        isInService: state.isInService,
         userLocation: state.userLocation,
         hasChecked: state.hasChecked,
       }),

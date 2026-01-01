@@ -1,6 +1,5 @@
 // src/types/area.ts
-// Consolidated & cleaned version — December 31, 2025
-// Removed duplicates, improved naming clarity, better separation of concerns
+// Consolidated & production-ready — January 01, 2026
 
 // ───────────────────────────────
 //          Geo Types
@@ -11,19 +10,7 @@ export interface LatLng {
   lat: number;
   lng: number;
 }
-// Add near the other response interfaces
-export interface ToggleDeliveryZoneResponse {
-  success: boolean;
-  message: string;
-  deliveryZone: DeliveryZone;
-  hasDeliveryZone: boolean;
-  area: {
-    _id: string;
-    name: string;
-    city: string;
-    isActive: boolean;
-  };
-}
+
 /** MongoDB GeoJSON Point (stored format) */
 export interface GeoJSONPoint {
   type: 'Point';
@@ -48,12 +35,11 @@ export interface AreaInput {
   name: string;
   city?: string;
   center: LatLng;
-  polygon: GeoJSONPolygon;           // usually sent as-is from Leaflet
-  // Optional - rarely needed since backend can convert
-  mongoPolygon?: GeoJSONPolygon;
+  polygon: GeoJSONPolygon;
+  mongoPolygon?: GeoJSONPolygon; // optional: if frontend pre-converts
 }
 
-/** Full area shape returned by admin endpoints (with helpers) */
+/** Full area shape returned by admin endpoints */
 export interface AreaAdmin {
   _id: string;
   name: string;
@@ -64,7 +50,7 @@ export interface AreaAdmin {
   createdAt: string;
   updatedAt?: string;
 
-  // Added by backend controllers for admin convenience
+  // Virtuals added by backend
   centerLatLng: LatLng | null;
   polygonLatLng: LeafletPolygon | null;
 
@@ -72,26 +58,36 @@ export interface AreaAdmin {
   hasDeliveryZone: boolean;
 }
 
-/** Lightweight version for lists, dropdowns, map markers */
+/** Lightweight version used in public lists (GET /api/areas) */
+/** Lightweight version used in admin list */
 export interface AreaListItem {
   _id: string;
   name: string;
   city: string;
+  isActive: boolean; // ← ADD THIS
   centerLatLng: LatLng | null;
-  isActive: boolean;
+  center?: GeoJSONPoint;
+  deliveryZone: {
+    feeStructure: 'flat' | 'distance';
+    deliveryFee?: number;
+    tieredBaseDistance?: number;
+    tieredBaseFee?: number;
+    tieredAdditionalFeePerKm?: number;
+    minOrderAmount: number;
+    estimatedTime: string;
+    isActive: boolean;
+    freeDeliveryAbove?: number;
+  } | null;
   hasDeliveryZone: boolean;
-  deliveryZone?: DeliveryZone | null;
 }
 
-/** Minimal area information used in customer-facing context */
-// src/types/area.ts
-
+/** Minimal public area info used in customer context */
 export interface PublicArea {
   _id: string;
   name: string;
   city: string;
-  centerLatLng: LatLng;                  // required
-  deliveryZone?: DeliveryZone | null;    // ← ADD THIS
+  centerLatLng: LatLng;
+  deliveryZone?: DeliveryZone | null;
 }
 
 // ───────────────────────────────
@@ -103,22 +99,26 @@ export interface DeliveryZone {
   area: string; // Area _id
   feeStructure: 'flat' | 'distance';
 
-  // Flat fee branch
+  // Flat fee
   deliveryFee?: number;
 
-  // Distance-based branch
+  // Classic distance-based
   baseFee?: number;
   distanceFeePerKm?: number;
   maxDistanceKm?: number;
 
+  // Tiered pricing (first X km fixed, then per km)
+  tieredBaseDistance?: number;
+  tieredBaseFee?: number;
+  tieredAdditionalFeePerKm?: number;
+
   minOrderAmount: number;
   estimatedTime: string;
   isActive: boolean;
-  freeDeliveryAbove?: number; // NEW: minimum order for free delivery
+  freeDeliveryAbove?: number;           // ← NEW: threshold for free delivery
   createdAt?: string;
   updatedAt?: string;
 }
-
 
 // ───────────────────────────────
 //         API Responses
@@ -126,14 +126,8 @@ export interface DeliveryZone {
 
 export interface AreaListResponse {
   success: boolean;
-  message: string;
-  areas: AreaAdmin[]; // or AreaListItem[] in list views
-  pagination: {
-    total: number;
-    page: number;
-    pages: number;
-    limit: number;
-  };
+  areas: AreaListItem[];
+  message?: string;
 }
 
 export interface SingleAreaResponse {
@@ -153,27 +147,41 @@ export interface AreaToggleResponse {
   };
 }
 
-/** Response from customer location check / calculateDeliveryFee */
-export interface LocationCheckResponse {
+export interface ToggleDeliveryZoneResponse {
   success: boolean;
-  inService: boolean;
-  deliverable?: boolean;
-  area?: {
+  message: string;
+  deliveryZone: DeliveryZone;
+  hasDeliveryZone: boolean;
+  area: {
     _id: string;
     name: string;
     city: string;
+    isActive: boolean;
+    centerLatLng?: LatLng | null;
   };
-  distanceKm?: string;
-  deliveryFee?: number;
-  minOrderAmount?: number;
-  estimatedTime?: string;
-  reason?: string;
-  message?: string;
 }
 
+/** Unified response from both /api/areas/check and /delivery/calculate */
+export interface LocationCheckResponse {
+  success: boolean;
+  message?: string;
+
+  inService: boolean;
+  deliverable?: boolean;
+
+  // area and city are strings (from backend)
+  area?: string;           // e.g. "Gulraiz"
+  city?: string;           // e.g. "Rawalpindi"
+
+  distanceKm?: string;
+  deliveryFee?: number;
+  reason?: string;
+  minOrderAmount?: number;
+  estimatedTime?: string;
+  freeDeliveryAbove?: number;
+}
 // ───────────────────────────────
-//         Menu Types
-// (kept here for now — consider moving to menu.types.ts later)
+//         Menu Types (kept here for convenience)
 // ───────────────────────────────
 
 export type MenuCategory =
@@ -203,6 +211,7 @@ export interface DeliveryInfo {
   deliveryFee: number;
   estimatedTime: string;
   isActive: boolean;
+  freeDeliveryAbove?: number;
 }
 
 export interface MenuByLocationResponse {

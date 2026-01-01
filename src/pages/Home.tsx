@@ -1,30 +1,63 @@
 // src/pages/Home.tsx
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ArrowRight, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { MenuItemCard } from "@/features/menu/components/MenuItemCard";
-import { mockMenuItems } from "@/lib/mockData";
+// MERGED VERSION — Home 1 structure + Home 2 real data & modern touches
+// December 31, 2025
 
+import { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
+import { ArrowRight, Star, AlertTriangle, Package } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { MenuItemCard } from "@/features/menu/components/MenuItemCard";
+import { useFullMenuCatalog } from "@/features/menu/hooks/useMenuApi";
+import {
+  MenuCategory,
+  CATEGORY_LABELS,
+  CATEGORY_ICONS,
+  type MenuItem,
+} from "@/features/menu/types/menu.types";
 
 type HomeProps = {
   openAreaChecker?: () => void;
 };
 
 export const Home = ({ openAreaChecker }: HomeProps = {}) => {
-  // Filter truly featured items based on your mock data
-  const featuredItems = mockMenuItems.filter((item) => {
-    const featuredNames = [
+  const { data, isLoading, isError } = useFullMenuCatalog();
+
+  const allItems = data?.menu ?? [];
+
+  // Try to keep the same featured feeling as Home 1 — by name priority
+  const featuredNames = useMemo(
+    () => [
       "Lacha Paratha",
       "Aloo Cheese Paratha",
       "Special Masala Biryani",
       "Chicken Pulao",
       "Chai / Karak Chai",
       "Gur Wali chaye",
-    ];
-    return featuredNames.includes(item.name);
-  });
+    ],
+    []
+  );
+
+  const featuredItems = useMemo(() => {
+    const byName = allItems.filter((item) =>
+      featuredNames.some((name) => item.name.toLowerCase().includes(name.toLowerCase()))
+    );
+
+    // If not enough matches → fall back to first items
+    return byName.length >= 6 ? byName : allItems.slice(0, 9);
+  }, [allItems, featuredNames]);
+
+  const categories = useMemo(
+    () =>
+      (Object.keys(CATEGORY_LABELS) as MenuCategory[]).map((cat) => ({
+        name: CATEGORY_LABELS[cat],
+        icon: CATEGORY_ICONS[cat], // React component
+        link: `/menu?category=${cat}`,
+      })),
+    []
+  );
 
   const promotionalTexts = [
     { main: "AUTHENTIC PAKISTANI TASTE", sub: "Handcrafted desi dishes made with love" },
@@ -37,17 +70,9 @@ export const Home = ({ openAreaChecker }: HomeProps = {}) => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentPromoIndex((prev) => (prev + 1) % promotionalTexts.length);
-    }, 8000);
+    }, 7000);
     return () => clearInterval(interval);
   }, []);
-
-  const categories = [
-    { name: "Breakfast", icon: "🍳", link: "/menu?category=breakfast" },
-    { name: "Lunch", icon: "🍛", link: "/menu?category=lunch" },
-    { name: "Dinner", icon: "🍲", link: "/menu?category=dinner" },
-    { name: "Desserts", icon: "🍰", link: "/menu?category=desserts" },
-    { name: "Beverages", icon: "🥤", link: "/menu?category=beverages" },
-  ];
 
   const testimonials = [
     {
@@ -68,39 +93,40 @@ export const Home = ({ openAreaChecker }: HomeProps = {}) => {
   ];
 
   return (
-    <>
-      {/* Hero Section */}
+    <main className="min-h-screen bg-background">
+      {/* ================= HERO ================= */}
       <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-background min-h-[80vh] flex items-center py-12 lg:py-0">
+        {/* Decorative blobs */}
         <div className="absolute inset-0 opacity-30 pointer-events-none">
           <div className="absolute top-10 left-10 w-96 h-96 bg-orange-300 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-80 h-80 bg-amber-400 rounded-full blur-3xl"></div>
         </div>
 
-        {/* Left Side: Chicken Karahi */}
+        {/* Left - Chicken Karahi (Home 1 style) */}
         <motion.div
-          initial={{ opacity: 0, x: -100 }}
+          initial={{ opacity: 0, x: -120 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 1, delay: 0.3 }}
           className="absolute left-0 top-1/2 -translate-y-1/2 hidden lg:block pointer-events-none"
         >
-          <img
+         <img
               src="/Chicken-Karahi.jpg"
             alt="Authentic Chicken Karahi"
             className="w-80 lg:w-96 2xl:w-[500px] rounded-3xl shadow-2xl border-8 border-white/80 rotate-[-12deg] hover:rotate-[-8deg] transition-transform duration-700"
           />
         </motion.div>
 
-        {/* Right Side: Special Masala Biryani */}
+        {/* Right - Special Biryani */}
         <motion.div
-          initial={{ opacity: 0, x: 100 }}
+          initial={{ opacity: 0, x: 120 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          transition={{ duration: 1, delay: 0.5 }}
           className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block pointer-events-none"
         >
           <img
             src="https://www.shutterstock.com/image-photo/hyderabadi-chicken-biryani-aromatic-flavorful-600nw-2497040151.jpg"
             alt="Special Masala Biryani"
-            className="w-80 lg:w-96 2xl:w-[500px] rounded-3xl shadow-2xl border-8 border-white/80 rotate-[12deg] hover:rotate-[8deg] transition-transform duration-700"
+            className="w-72 lg:w-80 xl:w-96 2xl:w-[480px] rounded-3xl shadow-2xl border-8 border-white/70 rotate-12 hover:rotate-[6deg] transition-transform duration-700"
           />
         </motion.div>
 
@@ -108,53 +134,54 @@ export const Home = ({ openAreaChecker }: HomeProps = {}) => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <motion.h1
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
+              transition={{ duration: 0.9 }}
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold mb-6 leading-none"
             >
               <span className="text-foreground">Al</span>
               <span className="text-orange-600">Tawakkal</span>
               <span className="text-foreground">foods</span>
             </motion.h1>
 
-            <motion.div
-              key={currentPromoIndex}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.6 }}
-              className="mb-8"
-            >
-              <p className="text-2xl sm:text-3xl md:text-4xl font-semibold text-orange-700">
-                {promotionalTexts[currentPromoIndex].main}
-              </p>
-              <p className="text-lg sm:text-xl text-muted-foreground mt-3">
-                {promotionalTexts[currentPromoIndex].sub}
-              </p>
-            </motion.div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPromoIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.7 }}
+                className="mb-8"
+              >
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-orange-700">
+                  {promotionalTexts[currentPromoIndex].main}
+                </p>
+                <p className="text-lg sm:text-xl text-muted-foreground mt-3">
+                  {promotionalTexts[currentPromoIndex].sub}
+                </p>
+              </motion.div>
+            </AnimatePresence>
 
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.7 }}
               className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto"
             >
               Bringing authentic Pakistani home-cooked flavors straight to your door.
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              transition={{ delay: 0.9 }}
+              className="flex flex-col sm:flex-row gap-5 justify-center"
             >
-              <Button size="lg" asChild className="px-8 py-6 text-lg">
-                <Link to="/menu">
-                  Order Now <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
+              <Button size="lg" className="px-10 py-6 text-lg rounded-2xl" asChild>
+                <Link to="/menu">Order Now <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="px-8 py-6 text-lg">
+
+              <Button size="lg" variant="outline" className="px-10 py-6 text-lg rounded-2xl" asChild>
                 <Link to="/about">Our Story</Link>
               </Button>
             </motion.div>
@@ -162,135 +189,149 @@ export const Home = ({ openAreaChecker }: HomeProps = {}) => {
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section className="container mx-auto px-4 py-16">
+      {/* ================= CATEGORIES ================= */}
+      <section className="container mx-auto px-4 py-16 lg:py-20">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-            Explore Our Menu
-          </h2>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Explore Our Menu</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             From flaky parathas to aromatic biryanis – all made fresh daily
           </p>
         </motion.div>
 
 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 place-items-center">
-          {categories.map((category, index) => (
-            <motion.div
-              key={category.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Link
-                to={category.link}
-                className="group block bg-card rounded-2xl p-6 text-center hover:shadow-2xl transition-all border hover:border-orange-300"
+          {categories.map((category, index) => {
+            const Icon = category.icon;
+            return (
+              <motion.div
+                key={category.name}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.08 }}
               >
-                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">
-                  {category.icon}
-                </div>
-                <h3 className="font-bold text-lg group-hover:text-orange-600 transition-colors">
-                  {category.name}
-                </h3>
-              </Link>
-            </motion.div>
-          ))}
+                <Link
+                  to={category.link}
+                  className="group block bg-card rounded-2xl p-6 text-center hover:shadow-xl hover:border-orange-300 transition-all border"
+                >
+                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">
+                    <Icon />
+                  </div>
+                  <h3 className="font-bold text-lg group-hover:text-orange-600 transition-colors">
+                    {category.name}
+                  </h3>
+                </Link>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
-      {/* Featured Dishes */}
-      {featuredItems.length > 0 && (
-        <section className="container mx-auto px-4 py-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-              Customer Favorites
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our most loved and ordered dishes
-            </p>
-          </motion.div>
+      {/* ================= FEATURED DISHES ================= */}
+      <section className="container mx-auto px-4 py-16 lg:py-20 bg-muted/30">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">Customer Favorites</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Our most loved and ordered dishes
+          </p>
+        </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {featuredItems.slice(0, 6).map((item, index) => (
-              <motion.div
-                key={item._id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <MenuItemCard item={item} />
-              </motion.div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-96 rounded-2xl" />
             ))}
           </div>
-
-          <div className="text-center mt-12">
-            <Button size="lg" asChild>
-              <Link to="/menu">View Full Menu</Link>
-            </Button>
+        ) : isError ? (
+          <div className="text-center py-16">
+            <AlertTriangle className="h-14 w-14 mx-auto mb-6 text-destructive/60" />
+            <p className="text-xl text-muted-foreground mb-6">Couldn't load our specials...</p>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
           </div>
-        </section>
-      )}
+        ) : featuredItems.length === 0 ? (
+          <div className="text-center py-16">
+            <Package className="h-14 w-14 mx-auto mb-6 text-muted-foreground/60" />
+            <p className="text-xl text-muted-foreground">Menu is being updated...</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {featuredItems.slice(0, 6).map((item, index) => (
+                <motion.div
+                  key={item._id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <MenuItemCard item={item} />
+                </motion.div>
+              ))}
+            </div>
 
-      {/* Testimonials */}
-      <section className="bg-orange-50 py-16">
+            <div className="text-center mt-12">
+              <Button size="lg" asChild className="px-10">
+                <Link to="/menu">View Full Menu <ArrowRight className="ml-2" /></Link>
+              </Button>
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* ================= TESTIMONIALS ================= */}
+      <section className="bg-orange-50 py-16 lg:py-20">
         <div className="container mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-              Happy Customers
-            </h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Happy Customers</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Real feedback from food lovers like you
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {testimonials.map((testimonial, index) => (
+            {testimonials.map((t, i) => (
               <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.15 }}
-                className="bg-white rounded-2xl p-8 shadow-lg text-center"
+                transition={{ delay: i * 0.15 }}
+                className="bg-white rounded-2xl p-8 shadow-lg text-center border"
               >
-                <div className="flex justify-center gap-1 mb-4">
-                  {Array.from({ length: testimonial.rating }, (_, i) => (
-                    <Star key={i} className="h-6 w-6 fill-orange-500 text-orange-500" />
+                <div className="flex justify-center gap-1 mb-5">
+                  {Array.from({ length: t.rating }, (_, k) => (
+                    <Star key={k} className="h-7 w-7 fill-orange-500 text-orange-500" />
                   ))}
                 </div>
-                <p className="text-muted-foreground italic mb-6">
-                  "{testimonial.comment}"
-                </p>
-                <p className="font-bold text-lg">{testimonial.name}</p>
+                <p className="text-muted-foreground italic mb-6 text-lg">"{t.comment}"</p>
+                <p className="font-bold text-xl">{t.name}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* ================= FINAL CTA ================= */}
       <section className="container mx-auto px-4 py-20 text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-r from-orange-500 to-amber-600 rounded-3xl p-12 text-white"
+          className="bg-gradient-to-r from-orange-500 to-amber-600 rounded-3xl p-12 text-white shadow-2xl"
         >
           <h2 className="text-4xl sm:text-5xl font-bold mb-6">
             Ready for Authentic Pakistani Food?
@@ -298,14 +339,12 @@ export const Home = ({ openAreaChecker }: HomeProps = {}) => {
           <p className="text-xl mb-10 opacity-90 max-w-2xl mx-auto">
             Order your favorite dishes now and enjoy the real taste of tradition.
           </p>
-          <Button size="lg" variant="secondary" asChild className="px-10 py-7 text-xl">
-            <Link to="/menu">
-              Browse Menu <ArrowRight className="ml-3 h-6 w-6" />
-            </Link>
+          <Button size="lg" variant="secondary" asChild className="px-12 py-8 text-xl rounded-2xl">
+            <Link to="/menu">Browse Menu <ArrowRight className="ml-3 h-6 w-6" /></Link>
           </Button>
         </motion.div>
       </section>
-    </>
+    </main>
   );
 };
 

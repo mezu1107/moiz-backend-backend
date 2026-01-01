@@ -1,43 +1,65 @@
-export interface LatLng {
-  lat: number;
-  lng: number;
-}
+// src/types/delivery.types.ts
+// Production-ready delivery types — January 01, 2026
 
-// Matches backend DeliveryZone model exactly
+import type { LatLng } from './area';
+
+/**
+ * Exact match with backend DeliveryZone model
+ */
 export interface DeliveryZone {
   _id: string;
   area: string;
   feeStructure: 'flat' | 'distance';
-  deliveryFee: number;        // Used when flat
-  baseFee: number;            // Used when distance
-  distanceFeePerKm: number;   // Used when distance
-  maxDistanceKm: number;      // Used when distance
+
+  deliveryFee?: number;
+  baseFee?: number;
+  distanceFeePerKm?: number;
+  maxDistanceKm?: number;
+
+  tieredBaseDistance?: number;
+  tieredBaseFee?: number;
+  tieredAdditionalFeePerKm?: number;
+
   minOrderAmount: number;
   estimatedTime: string;
   isActive: boolean;
-  freeDeliveryAbove?: number; // NEW FIELD
+  freeDeliveryAbove?: number;           // ← Critical new field
+
   createdAt?: string;
   updatedAt?: string;
 }
 
-// Matches backend Area model (minimal for frontend)
-export interface Area {
-  _id: string;
-  name: string;
-  city: string;
-  center: {
-    type: 'Point';
-    coordinates: [number, number]; // [lng, lat]
+/**
+ * Unified response from both checkArea and calculateDeliveryFee endpoints
+ */
+export interface DeliveryCheckResponse {
+  success: boolean;
+  inService: boolean;
+
+  // Present when inService === true
+  deliverable?: boolean;
+  hasDeliveryZone?: boolean;
+  area?: {
+    _id: string;
+    name: string;
+    city: string;
   };
-  centerLatLng?: LatLng;
-  isActive: boolean;
+  distanceKm?: string;
+  deliveryFee?: number;
+  reason?: string;
+  minOrderAmount?: number;
+  estimatedTime?: string;
+  freeDeliveryAbove?: number;
+
+  message?: string;
 }
 
-// Response from /api/delivery/calculate
-export interface DeliveryCalculateResponse {
-  success: true;
-  inService: boolean;
-  deliverable: boolean;
+/**
+ * Strong type used internally when delivery is confirmed and active
+ */
+export interface DeliverySuccessPayload {
+  inService: true;
+  deliverable: true;
   area: string;
   city: string;
   distanceKm: string;
@@ -45,13 +67,21 @@ export interface DeliveryCalculateResponse {
   reason: string;
   minOrderAmount: number;
   estimatedTime: string;
-  freeDeliveryAbove?: number; // NEW FIELD
-  message?: string;
+  freeDeliveryAbove?: number;
 }
 
-// Fallback response when not in service
-export interface DeliveryNotInServiceResponse {
-  success: true;
-  inService: false;
-  message: string;
+/**
+ * Zustand store types
+ */
+export interface DeliveryStoreState {
+  deliveryCheck: DeliverySuccessPayload | null;
+  error: string | null;
 }
+
+export interface DeliveryStoreActions {
+  setCheckResult: (payload: DeliverySuccessPayload) => void;
+  setError: (message: string) => void;
+  clearDelivery: () => void;
+}
+
+export type DeliveryStore = DeliveryStoreState & DeliveryStoreActions;

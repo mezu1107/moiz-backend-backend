@@ -1,9 +1,8 @@
 // src/features/orders/pages/OrderSuccessPage.tsx
-// PRODUCTION-READY — DECEMBER 29, 2025
-// Full unit support, enriched add-ons, confetti, reorder, real-time updates
-// Identical styling and logic to OrderTrackingPage
+// PRODUCTION-READY — JANUARY 01, 2026
+// Polished success page with confetti, real-time updates, rich add-ons, units, dark mode
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import {
@@ -50,9 +49,9 @@ const STEPS = [
   { status: 'delivered', icon: Package, label: 'Delivered' },
 ] as const;
 
-const formatPrice = (amount: number | undefined): string => {
-  if (typeof amount !== 'number' || isNaN(amount)) return '0.00';
-  return amount.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const formatPrice = (amount?: number): string => {
+  if (amount == null || isNaN(amount)) return '0';
+  return amount.toLocaleString('en-PK');
 };
 
 export default function OrderSuccessPage() {
@@ -70,10 +69,14 @@ export default function OrderSuccessPage() {
   useEffect(() => {
     if (order?.status === 'delivered') {
       confetti({
-        particleCount: 180,
+        particleCount: 200,
         spread: 100,
         origin: { y: 0.6 },
-        colors: ['#ff73b3', '#ff8c00', '#ffd700', '#00ff7f', '#00bfff'],
+        colors: ['#ff73b3', '#ff8c00', '#ffd700', '#00ff7f', '#00bfff', '#ff1493'],
+        ticks: 200,
+        gravity: 0.8,
+        decay: 0.94,
+        startVelocity: 30,
       });
     }
   }, [order?.status]);
@@ -83,10 +86,10 @@ export default function OrderSuccessPage() {
 
     try {
       await reorderMutation.mutateAsync(orderId);
-      toast.success('Items from this order added to your cart!');
+      toast.success('Items added to your cart!');
       setTimeout(() => navigate('/cart'), 800);
     } catch {
-      // Error handled in hook
+      // Handled in hook
     }
   };
 
@@ -94,8 +97,9 @@ export default function OrderSuccessPage() {
     return (
       <main className="min-h-screen flex items-center justify-center px-4 py-12 bg-muted/20">
         <Card className="w-full max-w-md text-center p-8 md:p-10">
-          <XCircle className="h-14 w-14 md:h-16 md:w-16 text-destructive mx-auto mb-6" />
-          <h2 className="text-2xl font-bold md:text-3xl mb-4">Invalid Order</h2>
+          <XCircle className="h-16 w-16 text-destructive mx-auto mb-6" />
+          <h2 className="text-3xl font-bold mb-4">Invalid Order Link</h2>
+          <p className="text-muted-foreground mb-6">The order ID is not valid.</p>
           <Button size="lg" asChild>
             <Link to="/">Go Home</Link>
           </Button>
@@ -120,10 +124,13 @@ export default function OrderSuccessPage() {
     return (
       <main className="min-h-screen flex items-center justify-center px-4 py-12 bg-muted/20">
         <Card className="w-full max-w-md text-center p-8 md:p-10">
-          <XCircle className="h-14 w-14 md:h-16 md:w-16 text-destructive mx-auto mb-6" />
-          <h2 className="text-2xl font-bold md:text-3xl mb-4">Order Not Found</h2>
+          <XCircle className="h-16 w-16 text-destructive mx-auto mb-6" />
+          <h2 className="text-3xl font-bold mb-4">Order Not Found</h2>
+          <p className="text-muted-foreground mb-6">
+            We couldn't find an order with that ID.
+          </p>
           <Button size="lg" asChild>
-            <Link to="/orders">View Orders</Link>
+            <Link to="/orders">View My Orders</Link>
           </Button>
         </Card>
       </main>
@@ -134,7 +141,7 @@ export default function OrderSuccessPage() {
   const isTerminal = ['delivered', 'cancelled', 'rejected'].includes(order.status);
   const isDelivered = order.status === 'delivered';
   const isCancelled = ['cancelled', 'rejected'].includes(order.status);
-  const shortId = order.shortId || `#${order._id.slice(-6).toUpperCase()}`;
+  const shortId = order.shortId ? `#${order.shortId}` : `#${order._id.slice(-6).toUpperCase()}`;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-muted/20 to-background py-8 md:py-12">
@@ -142,77 +149,72 @@ export default function OrderSuccessPage() {
         {/* Header */}
         <header className="text-center">
           <div
-            className={`inline-flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full mb-6 shadow-xl ${
+            className={`inline-flex items-center justify-center w-24 h-24 md:w-28 md:h-28 rounded-full mb-6 shadow-2xl ${
               isCancelled
-                ? 'bg-red-100 dark:bg-red-900/30'
+                ? 'bg-red-100 dark:bg-red-950'
                 : isDelivered
-                ? 'bg-green-100 dark:bg-green-900/30'
-                : 'bg-rose-100 dark:bg-rose-900/30'
+                ? 'bg-green-100 dark:bg-green-950'
+                : 'bg-rose-100 dark:bg-rose-950'
             }`}
           >
             {isCancelled ? (
-              <XCircle className="h-12 w-12 md:h-14 md:w-14 text-red-600 dark:text-red-400" />
+              <XCircle className="h-14 w-14 text-red-600 dark:text-red-400" />
             ) : isDelivered ? (
-              <CheckCircle className="h-12 w-12 md:h-14 md:w-14 text-green-600 dark:text-green-400" />
+              <CheckCircle className="h-14 w-14 text-green-600 dark:text-green-400" />
             ) : (
-              <CheckCircle className="h-12 w-12 md:h-14 md:w-14 text-rose-600 dark:text-rose-400" />
+              <CheckCircle className="h-14 w-14 text-rose-600 dark:text-rose-400" />
             )}
           </div>
 
-          <h1 className="text-3xl font-bold mb-3 md:text-4xl lg:text-5xl">
-            {isCancelled
-              ? 'Order Cancelled'
-              : isDelivered
-              ? 'Order Delivered!'
-              : 'Order Confirmed! 🎉'}
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+            {isCancelled ? 'Order Cancelled' : isDelivered ? 'Order Delivered!' : 'Order Confirmed! 🎉'}
           </h1>
 
-          <p className="text-lg text-muted-foreground mb-4 md:text-xl">
+          <p className="text-xl text-muted-foreground mb-4">
             Order <span className="font-mono font-bold text-primary">{shortId}</span>
           </p>
 
-          <Badge
-            className={`text-base md:text-lg px-6 py-2 ${ORDER_STATUS_COLORS[order.status]} text-white`}
-          >
+          <Badge className={`text-lg px-8 py-3 ${ORDER_STATUS_COLORS[order.status]} text-white`}>
             {ORDER_STATUS_LABELS[order.status]}
           </Badge>
 
           {order.estimatedDelivery && !isTerminal && (
-            <p className="mt-4 text-base text-muted-foreground md:text-lg">
-              Estimated delivery: <strong className="text-primary">{order.estimatedDelivery}</strong>
+            <p className="mt-6 text-lg text-muted-foreground">
+              Estimated delivery:{' '}
+              <span className="font-semibold text-primary">{order.estimatedDelivery}</span>
             </p>
           )}
         </header>
 
         {/* Progress Timeline */}
         {!isTerminal && (
-          <Card className="overflow-hidden shadow-xl">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl md:text-2xl">Order Progress</CardTitle>
+          <Card className="overflow-hidden shadow-2xl">
+            <CardHeader>
+              <CardTitle className="text-2xl">Order Progress</CardTitle>
             </CardHeader>
-            <CardContent className="p-6 md:p-8">
+            <CardContent className="p-8">
               <div className="relative">
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-5 gap-6">
                   {STEPS.map((step, i) => {
                     const Icon = step.icon;
-                    const isActive = i <= currentStepIndex;
                     const isCompleted = i < currentStepIndex;
+                    const isActive = i === currentStepIndex;
 
                     return (
                       <div key={step.status} className="flex flex-col items-center text-center">
                         <div
-                          className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all duration-500 shadow-md ${
+                          className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center transition-all duration-500 shadow-lg ${
                             isCompleted
                               ? 'bg-green-500 text-white'
                               : isActive
-                              ? 'bg-primary text-white scale-110 ring-4 ring-primary/30'
+                              ? 'bg-primary text-white scale-110 ring-8 ring-primary/20'
                               : 'bg-muted text-muted-foreground'
                           }`}
                         >
-                          <Icon className="h-7 w-7 md:h-8 md:w-8" />
+                          <Icon className="h-8 w-8 md:h-10 md:w-10" />
                         </div>
                         <p
-                          className={`mt-3 text-xs md:text-sm font-medium ${
+                          className={`mt-4 text-sm md:text-base font-medium ${
                             isActive || isCompleted ? 'text-foreground' : 'text-muted-foreground'
                           }`}
                         >
@@ -223,10 +225,9 @@ export default function OrderSuccessPage() {
                   })}
                 </div>
 
-                {/* Progress bar */}
-                <div className="absolute top-7 md:top-8 left-0 right-0 h-2 bg-muted rounded-full -z-10">
+                <div className="absolute top-8 md:top-10 left-0 right-0 h-3 bg-muted rounded-full -z-10">
                   <div
-                    className="h-full bg-primary rounded-full transition-all duration-700 ease-out"
+                    className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
                     style={{
                       width: `${((currentStepIndex + 1) / STEPS.length) * 100}%`,
                     }}
@@ -238,85 +239,87 @@ export default function OrderSuccessPage() {
         )}
 
         {/* Order Items */}
-        <Card className="shadow-xl">
+        <Card className="shadow-2xl">
           <CardHeader>
-            <CardTitle className="text-xl md:text-2xl">Order Items</CardTitle>
+            <CardTitle className="text-2xl">Order Items</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-6">
-              {order.items.map((item, index) => (
-                <div key={item._id || index} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-sm md:text-base">
-                        {item.quantity}x
-                      </div>
-                      <div>
-                        <p className="font-semibold text-base md:text-lg flex flex-wrap items-center gap-2">
-                          {item.name}
-                          <Badge variant="outline" className="text-xs py-0 px-2">
+          <CardContent className="space-y-8">
+            {order.items.map((item, index) => (
+              <div key={item._id || index} className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                      {item.quantity}x
+                    </div>
+                    <div>
+                      <p className="font-semibold text-lg flex items-center gap-3 flex-wrap">
+                        {item.name || item.menuItem?.name}
+                        {item.unit && (
+                          <Badge variant="secondary" className="text-xs">
                             {UNIT_LABELS[item.unit] || item.unit}
                           </Badge>
-                        </p>
-                      </div>
+                        )}
+                      </p>
                     </div>
-                    <p className="font-medium text-base md:text-lg">
-                      Rs. {formatPrice(item.priceAtOrder * item.quantity)}
-                    </p>
                   </div>
-
-                  {/* Enriched add-ons with units */}
-                  {item.addOns?.length > 0 && (
-                    <div className="ml-16 space-y-1 text-sm text-muted-foreground">
-                      {item.addOns.map((addon) => (
-                        <p key={addon.name} className="flex justify-between items-center">
-                          <span className="flex items-center gap-2">
-                            • {addon.name}
-                            {addon.unit && (
-                              <Badge variant="outline" className="text-xs py-0 px-1.5">
-                                {UNIT_LABELS[addon.unit] || addon.unit}
-                              </Badge>
-                            )}
-                          </span>
-                          {addon.price > 0 && (
-                            <span className="text-primary font-medium">+Rs. {addon.price}</span>
-                          )}
-                        </p>
-                      ))}
-                    </div>
-                  )}
+                  <p className="font-semibold text-lg">
+                    Rs. {formatPrice(item.priceAtOrder * item.quantity)}
+                  </p>
                 </div>
-              ))}
-            </div>
 
-            <Separator className="my-6" />
+                {/* Add-ons */}
+                {item.addOns?.length > 0 && (
+                  <div className="ml-18 space-y-2 text-sm text-muted-foreground">
+                    {item.addOns.map((addon, i) => (
+                      <div key={i} className="flex justify-between items-center">
+                        <span className="flex items-center gap-2">
+                          • {addon.name}
+                          {addon.unit && (
+                            <Badge variant="outline" className="text-xs py-0">
+                              {UNIT_LABELS[addon.unit] || addon.unit}
+                            </Badge>
+                          )}
+                        </span>
+                        {addon.price > 0 && (
+                          <span className="text-primary font-medium">
+                            +Rs. {formatPrice(addon.price)}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
 
-            <div className="space-y-4 text-base md:text-lg">
+            <Separator className="my-8" />
+
+            <div className="space-y-5 text-lg">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>Rs. {formatPrice(order.totals?.totalAmount ?? 0)}</span>
+                <span>Rs. {formatPrice(order.totals?.totalAmount)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Delivery Fee</span>
-                <span>Rs. {formatPrice(order.totals?.deliveryFee ?? 0)}</span>
+                <span>Rs. {formatPrice(order.totals?.deliveryFee)}</span>
               </div>
               {order.totals?.discountApplied > 0 && (
-                <div className="flex justify-between text-green-600 dark:text-green-400 font-medium">
-                  <span>Discount Applied</span>
+                <div className="flex justify-between text-green-600 dark:text-green-400 font-semibold">
+                  <span>Discount</span>
                   <span>-Rs. {formatPrice(order.totals.discountApplied)}</span>
                 </div>
               )}
               {order.totals?.walletUsed > 0 && (
-                <div className="flex justify-between text-blue-600 dark:text-blue-400 font-medium">
+                <div className="flex justify-between text-blue-600 dark:text-blue-400 font-semibold">
                   <span>Wallet Used</span>
                   <span>-Rs. {formatPrice(order.totals.walletUsed)}</span>
                 </div>
               )}
               <Separator />
-              <div className="flex justify-between text-2xl font-bold md:text-3xl">
+              <div className="flex justify-between text-3xl font-bold">
                 <span>Total Paid</span>
                 <span className="text-primary">
-                  Rs. {formatPrice(order.totals?.finalAmount ?? 0)}
+                  Rs. {formatPrice(order.totals?.finalAmount)}
                 </span>
               </div>
             </div>
@@ -324,47 +327,44 @@ export default function OrderSuccessPage() {
         </Card>
 
         {/* Delivery Address & Rider */}
-        <Card className="shadow-xl">
+        <Card className="shadow-2xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-xl md:text-2xl">
-              <MapPin className="h-6 w-6" />
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              <MapPin className="h-7 w-7" />
               Delivery Address
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-5">
-            <p className="text-base md:text-lg leading-relaxed">
-              {order.addressDetails.fullAddress}
+          <CardContent className="space-y-6">
+            <p className="text-lg leading-relaxed">
+              {order.addressDetails?.fullAddress || order.address?.fullAddress || 'Address not available'}
             </p>
 
-            {order.addressDetails.floor && (
-              <p className="text-sm text-muted-foreground">
+            {order.addressDetails?.floor && (
+              <p className="text-muted-foreground">
                 Floor/Apartment: {order.addressDetails.floor}
               </p>
             )}
 
-            {order.addressDetails.instructions && (
-              <p className="italic text-sm text-muted-foreground border-l-4 border-primary/50 pl-4 py-2">
-                "{order.addressDetails.instructions}"
+            {(order.addressDetails?.instructions || order.instructions) && (
+              <p className="italic text-muted-foreground border-l-4 border-primary/40 pl-4 py-2 bg-primary/5 rounded-r">
+                "{order.addressDetails?.instructions || order.instructions}"
               </p>
             )}
 
             {order.rider && (
               <>
-                <Separator className="my-6" />
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Truck className="h-8 w-8 md:h-10 md:w-10 text-primary" />
+                <Separator className="my-8" />
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                  <div className="flex items-center gap-5">
+                    <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Truck className="h-12 w-12 text-primary" />
                     </div>
                     <div>
-                      <p className="font-bold text-lg md:text-xl">{order.rider.name}</p>
-                      <p className="text-sm text-muted-foreground md:text-base">
-                        Your delivery partner
-                      </p>
+                      <p className="text-xl font-bold">{order.rider.name}</p>
+                      <p className="text-muted-foreground">Your delivery partner</p>
                     </div>
                   </div>
-
-                  <Button size="lg" variant="secondary" asChild className="h-12">
+                  <Button size="lg" variant="secondary" asChild>
                     <a href={`tel:${order.rider.phone}`}>
                       <Phone className="mr-2 h-5 w-5" />
                       Call Rider
@@ -376,9 +376,9 @@ export default function OrderSuccessPage() {
           </CardContent>
         </Card>
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-8">
-          <Button variant="outline" size="lg" asChild className="h-12">
+        {/* Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-12">
+          <Button variant="outline" size="lg" asChild className="h-14 text-lg">
             <Link to="/orders">View All Orders</Link>
           </Button>
 
@@ -386,16 +386,16 @@ export default function OrderSuccessPage() {
             size="lg"
             onClick={handleReorder}
             disabled={reorderMutation.isPending || isCancelled}
-            className="h-12 bg-primary hover:bg-primary/90 text-base md:text-lg"
+            className="h-14 text-lg bg-primary hover:bg-primary/90"
           >
             {reorderMutation.isPending ? (
               <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                <Loader2 className="mr-2 h-6 w-6 animate-spin" />
                 Adding to Cart...
               </>
             ) : (
               <>
-                <RotateCcw className="mr-2 h-5 w-5" />
+                <RotateCcw className="mr-2 h-6 w-6" />
                 Order Again
               </>
             )}

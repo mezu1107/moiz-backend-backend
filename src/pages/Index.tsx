@@ -1,6 +1,6 @@
 // src/pages/Index.tsx
-// Updated: December 31, 2025 — Fully Responsive, Mobile-Optimized, Type-Safe
-// Fixed: Type mismatch on AreaChecker onConfirmed prop
+// PRODUCTION-READY — January 01, 2026
+// Fixed: No infinite loop — stable container for AreaChecker
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,16 +17,25 @@ import { Button } from "@/components/ui/button";
 import { apiClient } from "@/lib/api";
 import { AreaListItem } from "@/types/area";
 
-// Import the exact type that AreaChecker expects
-// (you can also move ConfirmedPayload to a shared types file later)
-import type { ConfirmedPayload } from "@/components/AreaChecker";
+interface ConfirmedPayload {
+  area: {
+    _id: string;
+    name: string;
+    city: string;
+  };
+  delivery: {
+    deliveryFee: number;
+    minOrderAmount: number;
+    estimatedTime: string;
+    freeDeliveryAbove?: number;
+  };
+}
 
 interface SelectedArea {
   id: string;
-  fullAddress: string;
   name: string;
   city: string;
-  centerLatLng: { lat: number; lng: number };
+  centerLatLng?: { lat: number; lng: number };
 }
 
 export default function Index() {
@@ -44,7 +53,6 @@ export default function Index() {
     staleTime: 10 * 60 * 1000,
   });
 
-  // Show area checker only once per session
   useEffect(() => {
     const hasChecked = sessionStorage.getItem("areaChecked") === "true";
     if (!selectedArea && !hasChecked && areas.length > 0) {
@@ -60,29 +68,20 @@ export default function Index() {
   };
 
   const handleAreaConfirmed = (payload: ConfirmedPayload) => {
-    const { area, delivery } = payload;
+    const { area } = payload;
 
-    const selectedAreaData: SelectedArea = {
+    const newSelectedArea: SelectedArea = {
       id: area._id,
-      fullAddress: `${area.name}, ${area.city}`,
       name: area.name,
       city: area.city,
-      centerLatLng: {
-        lat: area.center?.lat ?? 0,
-        lng: area.center?.lng ?? 0,
-      },
     };
 
-    setSelectedArea(selectedAreaData);
+    setSelectedArea(newSelectedArea);
     sessionStorage.setItem("areaChecked", "true");
     setShowChecker(false);
 
-    toast.success(`Delivering to ${area.name}!`);
-
-    // Optional: You could also store delivery info in store here
-    // useDeliveryStore.getState().setDeliveryArea(area, delivery);
-
-    navigate(`/menu/area/${area._id}`);
+    toast.success(`Delivering to ${area.name}, ${area.city}!`);
+    navigate(`/menu`);
   };
 
   const handleNotInService = () => {
@@ -92,7 +91,7 @@ export default function Index() {
 
   return (
     <>
-      {/* Area Checker Modal */}
+      {/* Area Checker Modal — Fixed: Stable inner container */}
       <AnimatePresence>
         {showChecker && (
           <motion.div
@@ -101,61 +100,65 @@ export default function Index() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-4 pb-4 sm:p-0"
           >
-            <motion.div
-              initial={{ y: 100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 100, opacity: 0 }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="relative w-full max-w-lg sm:max-w-xl bg-card rounded-3xl shadow-2xl border border-border overflow-hidden"
-            >
-              <button
-                onClick={() => setShowChecker(false)}
-                className="absolute top-4 right-4 z-10 text-white sm:text-foreground bg-black/20 sm:bg-transparent rounded-full p-2 hover:bg-black/40 sm:hover:bg-muted transition"
-                aria-label="Close Area Checker"
+            {/* Stable container — no animation here */}
+            <div className="relative w-full max-w-lg sm:max-w-xl bg-card rounded-3xl shadow-2xl border border-border overflow-hidden">
+              {/* Slide-in animation only on content */}
+              <motion.div
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className="flex flex-col h-full"
               >
-                <X className="h-7 w-7 sm:h-6 sm:w-6" />
-              </button>
+                <button
+                  onClick={() => setShowChecker(false)}
+                  className="absolute top-4 right-4 z-10 text-white sm:text-foreground bg-black/20 sm:bg-transparent rounded-full p-2 hover:bg-black/40 sm:hover:bg-muted transition"
+                  aria-label="Close"
+                >
+                  <X className="h-7 w-7 sm:h-6 sm:w-6" />
+                </button>
 
-              <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6 sm:p-8 text-white">
-                <div className="flex items-center gap-4">
-                  <MapPin className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0" />
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl font-bold">Where should we deliver?</h2>
-                    <p className="text-green-100 mt-1 text-base sm:text-lg">Let us know your location</p>
+                <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6 sm:p-8 text-white">
+                  <div className="flex items-center gap-4">
+                    <MapPin className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0" />
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-bold">Where should we deliver?</h2>
+                      <p className="text-green-100 mt-1 text-base sm:text-lg">Detect or search your location</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="p-6 sm:p-8 space-y-8">
-                <AreaChecker
-                  onConfirmed={handleAreaConfirmed}
-                  onNotInService={handleNotInService}
-                  onClose={() => setShowChecker(false)}
-                />
+                <div className="p-6 sm:p-8 space-y-8 flex-1 overflow-y-auto">
+                  <AreaChecker
+                    onConfirmed={handleAreaConfirmed}
+                    onNotInService={handleNotInService}
+                    onClose={() => setShowChecker(false)}
+                  />
 
-                <div className="text-center">
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4">
-                    or choose from available areas
-                  </p>
-                  <Button
-                    onClick={() => {
-                      setShowChecker(false);
-                      setShowAreaList(true);
-                    }}
-                    variant="outline"
-                    size="lg"
-                    className="w-full h-12 text-base"
-                  >
-                    View All Delivery Areas
-                  </Button>
+                  <div className="text-center">
+                    <p className="text-sm sm:text-base text-muted-foreground mb-4">
+                      or choose from available areas
+                    </p>
+                    <Button
+                      onClick={() => {
+                        setShowChecker(false);
+                        setShowAreaList(true);
+                      }}
+                      variant="outline"
+                      size="lg"
+                      className="w-full h-12 text-base"
+                    >
+                      View All Delivery Areas
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Service Area List Modal */}
+      {/* Service Area Modal */}
       <ServiceAreaModal
         isOpen={showAreaList}
         onClose={() => {

@@ -1,6 +1,6 @@
 // src/pages/admin/areas/AddDeliveryZone.tsx
-// Enhanced & Production-Ready — January 1, 2026
-// Supports both create & edit modes with pre-fill from URL + existing zone
+// Production-Ready — January 01, 2026
+// Supports tiered distance pricing + flat fee
 
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -33,9 +33,9 @@ interface AreaListItem {
   deliveryZone?: {
     feeStructure: 'flat' | 'distance';
     deliveryFee?: number;
-    baseFee?: number;
-    distanceFeePerKm?: number;
-    maxDistanceKm?: number;
+    tieredBaseDistance?: number;
+    tieredBaseFee?: number;
+    tieredAdditionalFeePerKm?: number;
     minOrderAmount: number;
     estimatedTime: string;
     freeDeliveryAbove?: number;
@@ -47,6 +47,7 @@ interface AreaListResponse {
   success: boolean;
   message: string;
   areas: AreaListItem[];
+  pagination?: any;
 }
 
 // ── Schema ──────────────────────────────────────────────────────────────
@@ -54,23 +55,23 @@ const deliveryZoneSchema = z.object({
   areaId: z.string().min(1, 'Please select an area'),
   feeStructure: z.enum(['flat', 'distance']),
   deliveryFee: z.number().min(0).optional(),
-  baseFee: z.number().min(0).optional(),
-  distanceFeePerKm: z.number().min(0).optional(),
-  maxDistanceKm: z.number().min(1).optional(),
+  tieredBaseDistance: z.number().min(1).optional(),
+  tieredBaseFee: z.number().min(0).optional(),
+  tieredAdditionalFeePerKm: z.number().min(0).optional(),
   minOrderAmount: z.number().min(0),
   estimatedTime: z.string().min(1, 'Estimated time is required'),
   freeDeliveryAbove: z.number().min(0).optional(),
   isActive: z.boolean(),
 })
 .refine((data) => data.feeStructure === 'flat' ? data.deliveryFee !== undefined : true, {
-  message: 'Flat fee is required',
+  message: 'Flat delivery fee is required',
   path: ['deliveryFee'],
 })
 .refine((data) => data.feeStructure === 'distance' 
-  ? data.baseFee !== undefined && data.distanceFeePerKm !== undefined && data.maxDistanceKm !== undefined 
+  ? data.tieredBaseFee !== undefined && data.tieredBaseDistance !== undefined 
   : true, {
-  message: 'All distance fields are required',
-  path: ['baseFee'],
+  message: 'Base fee and distance required for tiered pricing',
+  path: ['tieredBaseFee'],
 });
 
 type DeliveryZoneForm = z.infer<typeof deliveryZoneSchema>;
@@ -93,12 +94,12 @@ export default function AddDeliveryZone() {
       areaId: '',
       feeStructure: 'flat',
       deliveryFee: 70,
-      baseFee: 0,
-      distanceFeePerKm: 20,
-      maxDistanceKm: 15,
+      tieredBaseDistance: 6,
+      tieredBaseFee: 70,
+      tieredAdditionalFeePerKm: 25,
       minOrderAmount: 0,
       estimatedTime: '35-50 min',
-      freeDeliveryAbove: 0,
+      freeDeliveryAbove: 1499,
       isActive: true,
     },
   });
@@ -106,37 +107,37 @@ export default function AddDeliveryZone() {
   const feeStructure = form.watch('feeStructure');
   const selectedAreaId = form.watch('areaId');
 
-  // Find selected area + its current delivery zone
   const selectedArea = areas.find(a => a._id === selectedAreaId);
   const existingZone = selectedArea?.deliveryZone;
   const isEditMode = !!existingZone;
 
-  // Load areas
+  // Load areas and pre-fill form on edit
   useEffect(() => {
     const fetchAreas = async () => {
       try {
         setAreasLoading(true);
-        const res = await apiClient.get<AreaListResponse>('/admin/areas?limit=1000');
+        // ← FIXED: Use response.data instead of response directly
+        const response = await apiClient.get<AreaListResponse>('/admin/areas?limit=1000');
+        const res = response;
+
         if (res.success && Array.isArray(res.areas)) {
           setAreas(res.areas);
 
-          // Pre-select area from URL
           if (preselectedAreaId && res.areas.some(a => a._id === preselectedAreaId)) {
             form.setValue('areaId', preselectedAreaId);
 
             const area = res.areas.find(a => a._id === preselectedAreaId);
             if (area?.deliveryZone) {
-              // Pre-fill form with existing data
               form.reset({
                 areaId: preselectedAreaId,
                 feeStructure: area.deliveryZone.feeStructure,
                 deliveryFee: area.deliveryZone.deliveryFee ?? 70,
-                baseFee: area.deliveryZone.baseFee ?? 0,
-                distanceFeePerKm: area.deliveryZone.distanceFeePerKm ?? 20,
-                maxDistanceKm: area.deliveryZone.maxDistanceKm ?? 15,
+                tieredBaseDistance: area.deliveryZone.tieredBaseDistance ?? 6,
+                tieredBaseFee: area.deliveryZone.tieredBaseFee ?? 70,
+                tieredAdditionalFeePerKm: area.deliveryZone.tieredAdditionalFeePerKm ?? 25,
                 minOrderAmount: area.deliveryZone.minOrderAmount ?? 0,
                 estimatedTime: area.deliveryZone.estimatedTime ?? '35-50 min',
-                freeDeliveryAbove: area.deliveryZone.freeDeliveryAbove ?? 0,
+                freeDeliveryAbove: area.deliveryZone.freeDeliveryAbove ?? 1499,
                 isActive: area.deliveryZone.isActive ?? true,
               });
             }
@@ -162,30 +163,27 @@ export default function AddDeliveryZone() {
         minOrderAmount: data.minOrderAmount,
         estimatedTime: data.estimatedTime.trim(),
         isActive: data.isActive,
+        freeDeliveryAbove: data.freeDeliveryAbove || 0,
       };
 
       if (data.feeStructure === 'flat') {
         payload.deliveryFee = data.deliveryFee;
-      } else {
-        payload.baseFee = data.baseFee;
-        payload.distanceFeePerKm = data.distanceFeePerKm;
-        payload.maxDistanceKm = data.maxDistanceKm;
-        payload.deliveryFee = 0;
-      }
-
-      if (data.freeDeliveryAbove !== undefined && data.freeDeliveryAbove > 0) {
-        payload.freeDeliveryAbove = data.freeDeliveryAbove;
+      } else if (data.feeStructure === 'distance') {
+        payload.tieredBaseDistance = data.tieredBaseDistance;
+        payload.tieredBaseFee = data.tieredBaseFee;
+        payload.tieredAdditionalFeePerKm = data.tieredAdditionalFeePerKm || 0;
       }
 
       await apiClient.put(`/admin/delivery-zone/${data.areaId}`, payload);
 
-      toast.success(isEditMode 
-        ? 'Delivery settings updated successfully!' 
-        : 'Delivery zone created successfully!'
+      toast.success(
+        isEditMode
+          ? 'Delivery settings updated!'
+          : 'Delivery zone created!'
       );
       navigate('/admin/areas');
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to save delivery settings');
+      toast.error(err?.response?.data?.message || 'Failed to save');
     } finally {
       setLoading(false);
     }
@@ -217,13 +215,12 @@ export default function AddDeliveryZone() {
                     {isEditMode ? 'Edit Delivery Settings' : 'Configure Delivery Zone'}
                   </CardTitle>
                   <p className="text-amber-100 mt-2 text-lg">
-                    {isEditMode 
-                      ? `Update pricing and rules for ${selectedArea?.name}` 
-                      : 'Set delivery pricing and rules for a selected area'}
+                    {isEditMode
+                      ? `Update pricing for ${selectedArea?.name}`
+                      : 'Set delivery rules for a selected area'}
                   </p>
                 </div>
               </div>
-
               <Button
                 variant="secondary"
                 size="lg"
@@ -246,14 +243,10 @@ export default function AddDeliveryZone() {
                 <Truck className="h-20 w-20 text-gray-300 mx-auto" />
                 <h3 className="text-2xl font-bold text-gray-800">No Areas Available</h3>
                 <p className="text-lg text-gray-600 max-w-md mx-auto">
-                  You need to create a delivery area first before configuring delivery settings.
+                  Create a delivery area first.
                 </p>
-                <Button
-                  size="lg"
-                  onClick={() => navigate('/admin/areas/add')}
-                  className="bg-amber-700 hover:bg-amber-800"
-                >
-                  Create First Area
+                <Button size="lg" onClick={() => navigate('/admin/areas/add')} className="bg-amber-700 hover:bg-amber-800">
+                  Create Area
                 </Button>
               </div>
             ) : (
@@ -263,10 +256,7 @@ export default function AddDeliveryZone() {
                   <Label className="text-xl font-semibold text-gray-800">
                     Select Area <span className="text-amber-700">*</span>
                   </Label>
-                  <Select
-                    value={form.watch('areaId')}
-                    onValueChange={(value) => form.setValue('areaId', value)}
-                  >
+                  <Select value={form.watch('areaId')} onValueChange={(v) => form.setValue('areaId', v)}>
                     <SelectTrigger className="h-12 text-base">
                       <SelectValue placeholder="Choose an area..." />
                     </SelectTrigger>
@@ -284,14 +274,14 @@ export default function AddDeliveryZone() {
                   )}
                 </div>
 
-                {/* Delivery Settings */}
+                {/* Pricing & Rules */}
                 <div className="rounded-2xl border bg-gray-50/50 p-8 space-y-10">
                   <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
                     <Truck className="h-8 w-8 text-amber-700" />
                     Delivery Pricing & Rules
                   </h2>
 
-                  {/* Pricing Model */}
+                  {/* Model Selection */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                       <Label>Pricing Model</Label>
@@ -304,16 +294,14 @@ export default function AddDeliveryZone() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="flat">Flat Fee</SelectItem>
-                          <SelectItem value="distance">Distance-Based</SelectItem>
+                          <SelectItem value="distance">Tiered Distance Pricing</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     {feeStructure === 'flat' ? (
                       <div>
-                        <Label>
-                          Flat Delivery Fee (Rs.) <span className="text-amber-700">*</span>
-                        </Label>
+                        <Label>Flat Delivery Fee (Rs.) <span className="text-amber-700">*</span></Label>
                         <Input
                           type="number"
                           {...form.register('deliveryFee', { valueAsNumber: true })}
@@ -322,56 +310,55 @@ export default function AddDeliveryZone() {
                           min={0}
                         />
                         {form.formState.errors.deliveryFee && (
-                          <p className="text-sm text-red-600 mt-1">
-                            {form.formState.errors.deliveryFee.message}
-                          </p>
+                          <p className="text-sm text-red-600 mt-1">{form.formState.errors.deliveryFee.message}</p>
                         )}
                       </div>
                     ) : (
-                      <div className="space-y-5">
-                        <Label>Distance-Based Pricing <span className="text-amber-700">*</span></Label>
-                        <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-6">
+                        <Label>Tiered Distance Pricing <span className="text-amber-700">*</span></Label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div>
-                            <Label className="text-sm">Base Fee</Label>
+                            <Label className="text-sm">First (km)</Label>
                             <Input
                               type="number"
-                              {...form.register('baseFee', { valueAsNumber: true })}
+                              {...form.register('tieredBaseDistance', { valueAsNumber: true })}
                               className="mt-1 h-11"
-                              placeholder="0"
+                              placeholder="6"
+                              min={1}
                             />
                           </div>
                           <div>
-                            <Label className="text-sm">Fee / km</Label>
+                            <Label className="text-sm">Fixed Fee (Rs.)</Label>
                             <Input
                               type="number"
-                              {...form.register('distanceFeePerKm', { valueAsNumber: true })}
+                              {...form.register('tieredBaseFee', { valueAsNumber: true })}
                               className="mt-1 h-11"
-                              placeholder="20"
+                              placeholder="70"
+                              min={0}
                             />
                           </div>
                           <div>
-                            <Label className="text-sm">Max Distance (km)</Label>
+                            <Label className="text-sm">Extra per km (Rs.)</Label>
                             <Input
                               type="number"
-                              {...form.register('maxDistanceKm', { valueAsNumber: true })}
+                              {...form.register('tieredAdditionalFeePerKm', { valueAsNumber: true })}
                               className="mt-1 h-11"
-                              placeholder="15"
+                              placeholder="25"
+                              min={0}
                             />
                           </div>
                         </div>
-                        {form.formState.errors.baseFee && (
-                          <p className="text-sm text-red-600">
-                            {form.formState.errors.baseFee.message}
-                          </p>
-                        )}
+                        <p className="text-sm text-amber-700 font-medium">
+                          Example: Rs.70 for first 6 km, then +Rs.25 per extra km
+                        </p>
                       </div>
                     )}
                   </div>
 
-                  {/* Additional Settings */}
+                  {/* Other Settings */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <Label>Minimum Order Amount (Rs.)</Label>
+                      <Label>Min Order Amount (Rs.)</Label>
                       <Input
                         type="number"
                         {...form.register('minOrderAmount', { valueAsNumber: true })}
@@ -380,16 +367,14 @@ export default function AddDeliveryZone() {
                       />
                     </div>
                     <div>
-                      <Label>Estimated Delivery Time <span className="text-amber-700">*</span></Label>
+                      <Label>Estimated Time <span className="text-amber-700">*</span></Label>
                       <Input
                         {...form.register('estimatedTime')}
                         className="mt-2 h-11"
                         placeholder="35-50 min"
                       />
                       {form.formState.errors.estimatedTime && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {form.formState.errors.estimatedTime.message}
-                        </p>
+                        <p className="text-sm text-red-600 mt-1">{form.formState.errors.estimatedTime.message}</p>
                       )}
                     </div>
                     <div>
@@ -400,16 +385,16 @@ export default function AddDeliveryZone() {
                         className="mt-2 h-11"
                         placeholder="1499"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Leave 0 to disable free delivery</p>
+                      <p className="text-xs text-gray-500 mt-1">0 = disabled</p>
                     </div>
                   </div>
 
-                  {/* Delivery Active */}
+                  {/* Status */}
                   <div className="flex items-center justify-between bg-white p-6 rounded-xl border">
                     <div>
                       <Label className="text-lg font-medium">Delivery Status</Label>
                       <p className="text-sm text-gray-600 mt-1">
-                        {form.watch('isActive') ? 'Delivery is currently active' : 'Delivery is paused'}
+                        {form.watch('isActive') ? 'Active' : 'Paused'}
                       </p>
                     </div>
                     <Switch
@@ -421,12 +406,7 @@ export default function AddDeliveryZone() {
 
                 {/* Submit */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-end pt-8">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="lg"
-                    onClick={() => navigate('/admin/areas')}
-                  >
+                  <Button type="button" variant="outline" size="lg" onClick={() => navigate('/admin/areas')}>
                     Cancel
                   </Button>
                   <Button
@@ -440,8 +420,10 @@ export default function AddDeliveryZone() {
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Saving...
                       </>
+                    ) : isEditMode ? (
+                      'Update Settings'
                     ) : (
-                      isEditMode ? 'Update Delivery Settings' : 'Create Delivery Zone'
+                      'Create Zone'
                     )}
                   </Button>
                 </div>

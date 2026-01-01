@@ -1,6 +1,6 @@
 // src/pages/admin/areas/AreasList.tsx
-// PRODUCTION-READY – December 31, 2025
-// Added "Configure Delivery" link/button in the list
+// PRODUCTION-READY — January 01, 2026
+// Fully type-safe with tiered pricing preview
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -35,11 +35,7 @@ import {
 } from 'lucide-react';
 
 import { apiClient } from '@/lib/api';
-import type { 
-  AreaListItem, 
-  AreaListResponse, 
-  ToggleDeliveryZoneResponse 
-} from '@/types/area';
+import type { AreaListItem, AreaListResponse, ToggleDeliveryZoneResponse } from '@/types/area';
 
 export default function AreasList() {
   const [areas, setAreas] = useState<AreaListItem[]>([]);
@@ -53,9 +49,16 @@ export default function AreasList() {
     try {
       setLoading(true);
       const res = await apiClient.get<AreaListResponse>('/admin/areas?limit=1000');
-      setAreas(res.areas ?? []);
+
+      if (res.success && Array.isArray(res.areas)) {
+        setAreas(res.areas);
+      } else {
+        toast.error(res.message || 'Failed to load areas');
+        setAreas([]);
+      }
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? 'Failed to load delivery areas');
+      setAreas([]);
     } finally {
       setLoading(false);
     }
@@ -71,18 +74,15 @@ export default function AreasList() {
   const handleToggleVisibility = async (area: AreaListItem) => {
     const areaId = area._id;
     setActionLoading(areaId);
-
     try {
       await apiClient.patch(`/admin/area/${areaId}/toggle-active`);
-
       const newActive = !area.isActive;
       toast.success(newActive ? `${area.name} is now visible` : `${area.name} is now hidden`);
-
       setAreas((prev) =>
         prev.map((a) => (a._id === areaId ? { ...a, isActive: newActive } : a))
       );
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? 'Failed to update area visibility');
+      toast.error(err?.response?.data?.message ?? 'Failed to update visibility');
     } finally {
       setActionLoading(null);
     }
@@ -94,34 +94,35 @@ export default function AreasList() {
   const handleToggleDelivery = async (area: AreaListItem) => {
     const areaId = area._id;
     setActionLoading(areaId);
-
     try {
+      // Explicitly type the response
       const res = await apiClient.patch<ToggleDeliveryZoneResponse>(
         `/admin/delivery-zone/${areaId}/toggle`
       );
 
-      const newDeliveryActive = res.deliveryZone.isActive;
+      if (res.success) {
+        const newDeliveryActive = res.deliveryZone.isActive;
+        toast.success(
+          newDeliveryActive
+            ? `Delivery activated for ${area.name}`
+            : `Delivery paused for ${area.name}`
+        );
 
-      toast.success(
-        newDeliveryActive
-          ? `Delivery activated for ${area.name}`
-          : `Delivery paused for ${area.name}`
-      );
-
-      setAreas((prev) =>
-        prev.map((a) =>
-          a._id === areaId
-            ? {
-                ...a,
-                deliveryZone: res.deliveryZone,
-                hasDeliveryZone: true,
-                isActive: a.isActive || newDeliveryActive,
-              }
-            : a
-        )
-      );
+        setAreas((prev) =>
+          prev.map((a) =>
+            a._id === areaId
+              ? {
+                  ...a,
+                  deliveryZone: res.deliveryZone,
+                  hasDeliveryZone: true,
+                  isActive: a.isActive || newDeliveryActive,
+                }
+              : a
+          )
+        );
+      }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? 'Failed to toggle delivery status');
+      toast.error(err?.response?.data?.message ?? 'Failed to toggle delivery');
     } finally {
       setActionLoading(null);
     }
@@ -134,8 +135,7 @@ export default function AreasList() {
     setActionLoading(areaId);
     try {
       await apiClient.delete(`/admin/area/${areaId}`);
-
-      toast.success('Area and its delivery zone deleted permanently');
+      toast.success('Area and delivery zone deleted permanently');
       setAreas((prev) => prev.filter((a) => a._id !== areaId));
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? 'Failed to delete area');
@@ -145,7 +145,7 @@ export default function AreasList() {
   };
 
   /* ------------------------------------------------------------------
-     RENDER LOADING
+     LOADING STATE
   ------------------------------------------------------------------- */
   if (loading) {
     return (
@@ -159,7 +159,7 @@ export default function AreasList() {
   }
 
   /* ------------------------------------------------------------------
-     STAT COUNTERS
+     STATS
   ------------------------------------------------------------------- */
   const liveCount = areas.filter((a) => a.deliveryZone?.isActive).length;
   const pausedCount = areas.filter((a) => a.deliveryZone && !a.deliveryZone.isActive).length;
@@ -177,7 +177,6 @@ export default function AreasList() {
               </div>
               Delivery Areas
             </h1>
-
             <div className="flex flex-wrap gap-x-8 gap-y-3 text-base md:text-lg">
               <span className="font-medium text-gray-700">{areas.length} Total</span>
               <span className="flex items-center gap-2 font-semibold text-green-700">
@@ -190,11 +189,10 @@ export default function AreasList() {
               </span>
               <span className="flex items-center gap-2 text-gray-500">
                 <XCircle className="h-5 w-5" />
-                {noZoneCount} No Zone Yet
+                {noZoneCount} No Zone
               </span>
             </div>
           </div>
-
           <Button asChild size="lg" className="h-12 md:h-14 px-8 bg-amber-700 hover:bg-amber-800">
             <Link to="/admin/areas/add">
               <Plus className="mr-2 h-6 w-6" />
@@ -226,6 +224,20 @@ export default function AreasList() {
               const isAreaActive = area.isActive;
               const isActionLoading = actionLoading === area._id;
 
+              // Tiered pricing preview
+              let pricingText = 'Not configured';
+              if (hasZone && area.deliveryZone) {
+                const zone = area.deliveryZone;
+                if (zone.tieredBaseFee && zone.tieredBaseDistance) {
+                  pricingText = `Rs.${zone.tieredBaseFee} (first ${zone.tieredBaseDistance} km)`;
+                  if (zone.tieredAdditionalFeePerKm) {
+                    pricingText += ` + Rs.${zone.tieredAdditionalFeePerKm}/km`;
+                  }
+                } else if (zone.deliveryFee) {
+                  pricingText = `Rs.${zone.deliveryFee} flat`;
+                }
+              }
+
               return (
                 <Card
                   key={area._id}
@@ -234,8 +246,8 @@ export default function AreasList() {
                     ${isDeliveryActive
                       ? 'border-green-400/70 bg-green-50/50'
                       : hasZone
-                        ? 'border-amber-400/60 bg-amber-50/40'
-                        : 'border-gray-200 bg-white'}
+                      ? 'border-amber-400/60 bg-amber-50/40'
+                      : 'border-gray-200 bg-white'}
                   `}
                 >
                   <CardContent className="p-6 md:p-8">
@@ -274,12 +286,15 @@ export default function AreasList() {
                                 {isDeliveryActive ? 'Delivery LIVE' : 'Delivery Paused'}
                               </Badge>
 
-                              {area.deliveryZone?.freeDeliveryAbove != null &&
-                                area.deliveryZone.freeDeliveryAbove > 0 && (
-                                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                                    Free ≥ Rs.{area.deliveryZone.freeDeliveryAbove.toLocaleString()}
-                                  </Badge>
-                                )}
+                              {area.deliveryZone.freeDeliveryAbove && area.deliveryZone.freeDeliveryAbove > 0 && (
+                                <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                                  Free ≥ Rs.{area.deliveryZone.freeDeliveryAbove.toLocaleString()}
+                                </Badge>
+                              )}
+
+                              <Badge variant="secondary" className="bg-gray-100 text-gray-700">
+                                {pricingText}
+                              </Badge>
                             </>
                           ) : (
                             <Badge variant="outline" className="border-red-400 text-red-700">
@@ -310,7 +325,7 @@ export default function AreasList() {
 
                         <Separator />
 
-                        {/* Delivery Toggle Button */}
+                        {/* Delivery Toggle */}
                         <Button
                           size="lg"
                           variant={isDeliveryActive ? 'destructive' : 'default'}
@@ -340,7 +355,7 @@ export default function AreasList() {
                           )}
                         </Button>
 
-                        {/* Action Buttons: Edit Area, Configure Delivery, Delete */}
+                        {/* Action Buttons */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <Button
                             asChild
@@ -362,7 +377,7 @@ export default function AreasList() {
                           >
                             <Link to={`/admin/delivery-zones?areaId=${area._id}`}>
                               <Settings className="mr-2 h-5 w-5" />
-                              {hasZone ? 'Edit Delivery' : 'Configure Delivery'}
+                              {hasZone ? 'Edit Delivery' : 'Configure'}
                             </Link>
                           </Button>
 
