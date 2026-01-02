@@ -77,12 +77,23 @@ app.use(cors({
     if (!origin) return callback(null, true);
 
     // In production, restrict to your frontend domains
-    const allowedOrigins = [
-      'https://amfood.pk',
-      'https://www.amfood.pk',
-      'http://localhost:3000',
+  const io = new Server(server, {
+  cors: {
+    origin: [
+      'https://altawakkalfoods.com',
+      'https://www.altawakkalfoods.com',
       'http://localhost:5173',
-    ];
+      'http://localhost:8080',
+      'http://api.altawakkalfoods.com/api',
+      'http://api.altawakkalfoods.com:5000',
+    ],
+    credentials: true,
+  },
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  transports: ['websocket', 'polling'], // allow fallback
+});
+
 
     if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
       callback(null, true);
@@ -107,20 +118,21 @@ app.use(compression());
 ========================================================= */
 app.use(session({
   secret: process.env.SESSION_SECRET || 'amfood-secure-session-2025-fallback',
-  resave: false,
-  saveUninitialized: false,
+  resave: true,                  // ← changed (helps force save)
+  saveUninitialized: true,       // ← very important for guests!
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
     collectionName: 'sessions',
-    ttl: 24 * 60 * 60, // 1 day
+    ttl: 24 * 60 * 60,
     autoRemove: 'native',
   }),
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    maxAge: 24 * 60 * 60 * 1000,
   },
+  name: 'amfood.sid',            // optional: custom name to debug
 }));
 
 /* =========================================================

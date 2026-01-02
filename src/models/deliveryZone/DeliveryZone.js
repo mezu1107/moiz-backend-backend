@@ -19,14 +19,14 @@ const deliveryZoneSchema = new mongoose.Schema(
     // === Flat Fee (used when feeStructure = 'flat') ===
     deliveryFee: {
       type: Number,
-      min: [0, 'Delivery fee cannot be negative'],
+      min: [70, 'Delivery fee cannot be negative'],
       default: 70,
     },
 
     // === Distance-Based Fields (used when feeStructure = 'distance') ===
     baseFee: {
       type: Number,
-      min: [0, 'Base fee cannot be negative'],
+      min: [70, 'Base fee cannot be negative'],
       default: 70,
     },
     distanceFeePerKm: {

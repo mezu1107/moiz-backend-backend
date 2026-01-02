@@ -1,8 +1,8 @@
-// src/controllers/cart/cartController.js
 const mongoose = require('mongoose');
 const Cart = require('../../models/cart/Cart');
 const MenuItem = require('../../models/menuItem/MenuItem');
 
+// Helper: calculate total from frozen priceAtAdd
 const calculateTotal = (items = []) =>
   items.reduce((sum, { priceAtAdd, quantity }) => sum + priceAtAdd * quantity, 0);
 
@@ -21,59 +21,80 @@ const toArray = (val) => {
   return typeof val === 'string' && val.trim() ? [val.trim()] : [];
 };
 
-// Populate cart items with full menu details including unit and option units
+// CORE FIX: Recalculate priceAtAdd based on current menu item + selected options
+const calculatePriceAtAdd = async (menuItemId, sides = [], drinks = [], addOns = []) => {
+  const menuItem = await MenuItem.findById(menuItemId)
+    .select('price pricedOptions')
+    .lean();
+
+  if (!menuItem) return { priceAtAdd: 0, menuItem: null };
+
+  const options = menuItem.pricedOptions || { sides: [], drinks: [], addOns: [] };
+
+  const extrasPrice =
+    sides.reduce((sum, name) => sum + (options.sides.find(o => o.name === name)?.price || 0), 0) +
+    drinks.reduce((sum, name) => sum + (options.drinks.find(o => o.name === name)?.price || 0), 0) +
+    addOns.reduce((sum, name) => sum + (options.addOns.find(o => o.name === name)?.price || 0), 0);
+
+  return {
+    priceAtAdd: menuItem.price + extrasPrice,
+    menuItem
+  };
+};
+
+// OPTIMIZED: Populate all cart items in a single query (eliminates N+1)
 const populateItems = async (cartItems) => {
-  return Promise.all(
-    cartItems.map(async (item) => {
-      const menuItem = await MenuItem.findById(item.menuItem)
-        .select('name price unit image isAvailable pricedOptions')
-        .lean();
+  if (cartItems.length === 0) return [];
 
-      if (!menuItem || !menuItem.isAvailable) {
-        return {
-          ...item,
-          menuItem: {
-            _id: item.menuItem,
-            name: 'Item removed or unavailable',
-            price: 0,
-            unit: 'pc',
-            image: null,
-            isAvailable: false,
-            pricedOptions: { sides: [], drinks: [], addOns: [] }
-          }
-        };
-      }
+  const menuItemIds = [...new Set(cartItems.map(i => i.menuItem))];
+  
+  const menuItems = await MenuItem.find({ _id: { $in: menuItemIds } })
+    .select('name price unit image isAvailable pricedOptions')
+    .lean();
 
-      // Enrich selected options with price + unit
-      const enrichOptions = (selectedNames, optionType) => {
-        return selectedNames.map(name => {
-          const option = menuItem.pricedOptions?.[optionType]?.find(o => o.name === name);
-          return {
-            name,
-            price: option?.price || 0,
-            unit: option?.unit || menuItem.unit  // fallback to main item unit
-          };
-        });
-      };
-
-      return {
-        ...item,
-        menuItem: {
-          _id: menuItem._id,
-          name: menuItem.name,
-          price: menuItem.price,
-          unit: menuItem.unit,
-          image: menuItem.image,
-          isAvailable: menuItem.isAvailable
-        },
-        selectedOptions: {
-          sides: enrichOptions(item.sides || [], 'sides'),
-          drinks: enrichOptions(item.drinks || [], 'drinks'),
-          addOns: enrichOptions(item.addOns || [], 'addOns')
-        }
-      };
-    })
+  const menuMap = Object.fromEntries(
+    menuItems.map(item => [item._id.toString(), item])
   );
+
+  return cartItems.map((item) => {
+    const menuItem = menuMap[item.menuItem?.toString()] || {
+      _id: item.menuItem,
+      name: 'Item removed or unavailable',
+      price: 0,
+      unit: 'pc',
+      image: null,
+      isAvailable: false,
+      pricedOptions: { sides: [], drinks: [], addOns: [] }
+    };
+
+    const enrichOptions = (selectedNames, optionType) => {
+      return selectedNames.map(name => {
+        const option = menuItem.pricedOptions?.[optionType]?.find(o => o.name === name);
+        return {
+          name,
+          price: option?.price || 0,
+          unit: option?.unit || menuItem.unit
+        };
+      });
+    };
+
+    return {
+      ...item,
+      menuItem: {
+        _id: menuItem._id,
+        name: menuItem.name,
+        price: menuItem.price,
+        unit: menuItem.unit,
+        image: menuItem.image,
+        isAvailable: menuItem.isAvailable
+      },
+      selectedOptions: {
+        sides: enrichOptions(item.sides || [], 'sides'),
+        drinks: enrichOptions(item.drinks || [], 'drinks'),
+        addOns: enrichOptions(item.addOns || [], 'addOns')
+      }
+    };
+  });
 };
 
 // GET CART
@@ -83,7 +104,6 @@ const getCart = async (req, res) => {
 
     if (userId) {
       let cart = await Cart.findOne({ user: userId });
-
       if (!cart || cart.items.length === 0) {
         return res.json({
           success: true,
@@ -119,7 +139,7 @@ const getCart = async (req, res) => {
   }
 };
 
-// ADD TO CART – Supports pricedOptions + units
+// ADD TO CART
 const addToCart = async (req, res) => {
   const {
     menuItemId,
@@ -138,28 +158,21 @@ const addToCart = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Valid menuItemId required' });
     }
 
-    const menuItem = await MenuItem.findById(menuItemId)
-      .select('name price unit isAvailable pricedOptions')
-      .lean();
-
-    if (!menuItem) return res.status(404).json({ success: false, message: 'Item not found' });
-    if (!menuItem.isAvailable) return res.status(400).json({ success: false, message: `${menuItem.name} is unavailable` });
-
-    const options = menuItem.pricedOptions || { sides: [], drinks: [], addOns: [] };
-
     const normalizedSides = toArray(sides);
     const normalizedDrinks = toArray(drinks);
     const normalizedAddOns = toArray(addOns);
     const trimmedSpecial = (specialInstructions || '').trim().slice(0, 300);
     const trimmedOrderNote = (orderNote || '').trim().slice(0, 500);
 
-    // Calculate total extra price from selected paid options
-    const extrasPrice =
-      normalizedSides.reduce((sum, name) => sum + (options.sides.find(o => o.name === name)?.price || 0), 0) +
-      normalizedDrinks.reduce((sum, name) => sum + (options.drinks.find(o => o.name === name)?.price || 0), 0) +
-      normalizedAddOns.reduce((sum, name) => sum + (options.addOns.find(o => o.name === name)?.price || 0), 0);
+    const { priceAtAdd, menuItem } = await calculatePriceAtAdd(
+      menuItemId,
+      normalizedSides,
+      normalizedDrinks,
+      normalizedAddOns
+    );
 
-    const priceAtAdd = menuItem.price + extrasPrice;
+    if (!menuItem) return res.status(404).json({ success: false, message: 'Item not found' });
+    if (!menuItem.isAvailable) return res.status(400).json({ success: false, message: `${menuItem.name} is unavailable` });
 
     const newCartItemBase = {
       menuItem: menuItemId,
@@ -192,6 +205,7 @@ const addToCart = async (req, res) => {
       if (trimmedOrderNote) cart.orderNote = trimmedOrderNote;
 
       await cart.save();
+
       const populatedItems = await populateItems(cart.items);
       const total = calculateTotal(cart.items);
 
@@ -242,7 +256,7 @@ const addToCart = async (req, res) => {
   }
 };
 
-// UPDATE CART ITEM
+// UPDATE CART ITEM — NOW CORRECTLY RECALCULATES priceAtAdd WHEN OPTIONS CHANGE
 const updateQuantity = async (req, res) => {
   const { itemId } = req.params;
   const {
@@ -263,12 +277,28 @@ const updateQuantity = async (req, res) => {
     const trimmedSpecial = specialInstructions !== undefined ? specialInstructions.trim().slice(0, 300) : undefined;
     const trimmedOrderNote = orderNote !== undefined ? orderNote.trim().slice(0, 500) : undefined;
 
+    let cartItems;
+    let orderNoteCurrent = '';
+
     if (userId) {
       const cart = await Cart.findOne({ user: userId });
       if (!cart || cart.items.length === 0) return res.status(404).json({ success: false, message: 'Cart not found' });
 
       const idx = cart.items.findIndex(i => i._id.toString() === itemId);
       if (idx === -1) return res.status(404).json({ success: false, message: 'Item not in cart' });
+
+      const currentItem = cart.items[idx];
+
+      // Recalculate priceAtAdd if any option is being changed
+      if (normalizedSides !== undefined || normalizedDrinks !== undefined || normalizedAddOns !== undefined) {
+        const { priceAtAdd: newPriceAtAdd } = await calculatePriceAtAdd(
+          currentItem.menuItem,
+          normalizedSides ?? currentItem.sides,
+          normalizedDrinks ?? currentItem.drinks,
+          normalizedAddOns ?? currentItem.addOns
+        );
+        cart.items[idx].priceAtAdd = newPriceAtAdd;
+      }
 
       if (quantity !== undefined) {
         if (quantity <= 0) {
@@ -277,6 +307,7 @@ const updateQuantity = async (req, res) => {
           cart.items[idx].quantity = Math.min(quantity, 50);
         }
       }
+
       if (normalizedSides !== undefined) cart.items[idx].sides = normalizedSides;
       if (normalizedDrinks !== undefined) cart.items[idx].drinks = normalizedDrinks;
       if (normalizedAddOns !== undefined) cart.items[idx].addOns = normalizedAddOns;
@@ -284,22 +315,28 @@ const updateQuantity = async (req, res) => {
       if (trimmedOrderNote !== undefined) cart.orderNote = trimmedOrderNote;
 
       await cart.save();
-      const populatedItems = await populateItems(cart.items);
-      const total = calculateTotal(cart.items);
-
-      res.json({
-        success: true,
-        message: quantity <= 0 ? 'Item removed' : 'Cart updated',
-        cart: { items: populatedItems, total, orderNote: cart.orderNote || '' },
-        isGuest: false
-      });
+      cartItems = cart.items;
+      orderNoteCurrent = cart.orderNote || '';
     } else {
+      // Guest
       if (!req.session.cart || req.session.cart.length === 0) {
         return res.status(404).json({ success: false, message: 'Cart is empty' });
       }
 
       const idx = req.session.cart.findIndex(i => i._id === itemId);
       if (idx === -1) return res.status(404).json({ success: false, message: 'Item not in cart' });
+
+      const currentItem = req.session.cart[idx];
+
+      if (normalizedSides !== undefined || normalizedDrinks !== undefined || normalizedAddOns !== undefined) {
+        const { priceAtAdd: newPriceAtAdd } = await calculatePriceAtAdd(
+          currentItem.menuItem,
+          normalizedSides ?? currentItem.sides,
+          normalizedDrinks ?? currentItem.drinks,
+          normalizedAddOns ?? currentItem.addOns
+        );
+        req.session.cart[idx].priceAtAdd = newPriceAtAdd;
+      }
 
       if (quantity !== undefined) {
         if (quantity <= 0) {
@@ -308,29 +345,33 @@ const updateQuantity = async (req, res) => {
           req.session.cart[idx].quantity = Math.min(quantity, 50);
         }
       }
+
       if (normalizedSides !== undefined) req.session.cart[idx].sides = normalizedSides;
       if (normalizedDrinks !== undefined) req.session.cart[idx].drinks = normalizedDrinks;
       if (normalizedAddOns !== undefined) req.session.cart[idx].addOns = normalizedAddOns;
       if (trimmedSpecial !== undefined) req.session.cart[idx].specialInstructions = trimmedSpecial;
       if (trimmedOrderNote !== undefined) req.session.orderNote = trimmedOrderNote;
 
-      const populatedItems = await populateItems(req.session.cart);
-      const total = calculateTotal(req.session.cart);
-
-      res.json({
-        success: true,
-        message: quantity <= 0 ? 'Item removed' : 'Cart updated',
-        cart: { items: populatedItems, total, orderNote: req.session.orderNote || '' },
-        isGuest: true
-      });
+      cartItems = req.session.cart;
+      orderNoteCurrent = req.session.orderNote || '';
     }
+
+    const populatedItems = await populateItems(cartItems);
+    const total = calculateTotal(cartItems);
+
+    res.json({
+      success: true,
+      message: quantity <= 0 ? 'Item removed' : 'Cart updated',
+      cart: { items: populatedItems, total, orderNote: orderNoteCurrent },
+      isGuest: !userId
+    });
   } catch (err) {
     console.error('updateQuantity error:', err);
     res.status(500).json({ success: false, message: 'Failed to update cart' });
   }
 };
 
-// REMOVE ITEM
+// REMOVE ITEM (unchanged – already safe)
 const removeItem = async (req, res) => {
   const { itemId } = req.params;
   const userId = req.user?.id;
@@ -387,7 +428,7 @@ const removeItem = async (req, res) => {
   }
 };
 
-// CLEAR CART
+// CLEAR CART (unchanged)
 const clearCart = async (req, res) => {
   try {
     if (req.user?.id) {
