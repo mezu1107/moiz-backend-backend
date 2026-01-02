@@ -1,6 +1,6 @@
 // src/features/orders/pages/CheckoutPage.tsx
-// PRODUCTION-READY — January 01, 2026
-// Fixed: Shows correct tiered base fee (Rs. 70+) + free delivery
+// PRODUCTION-READY — January 02, 2026
+// FINAL: Fixed delivery fee bugs, improved UX, robust edge cases
 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -44,6 +44,7 @@ import {
   Package,
   CheckCircle2,
   Truck,
+  AlertTriangle,
 } from 'lucide-react';
 
 import { toast } from 'sonner';
@@ -53,7 +54,7 @@ import { useCartStore } from '@/features/cart/hooks/useCartStore';
 import { useAddresses } from '@/features/address/hooks/useAddresses';
 import { useAreas, SimpleArea } from '@/hooks/useCheckArea';
 import { useCreateOrder, useCreateGuestOrder } from '@/features/orders/hooks/useOrders';
-import { UNIT_LABELS } from '@/types/order.types';
+import { UNIT_LABELS } from '@/features/menu/types/menu.types';
 
 const baseSchema = z.object({
   paymentMethod: z.enum(['cash', 'card', 'easypaisa', 'jazzcash', 'bank', 'wallet'], {
@@ -93,10 +94,12 @@ export default function CheckoutPage() {
   const createGuestOrder = useCreateGuestOrder();
 
   const [deliveryFee, setDeliveryFee] = useState<number>(0);
+  const [originalFee, setOriginalFee] = useState<number | null>(null); // null = no fee defined
   const [minOrderAmount, setMinOrderAmount] = useState<number>(0);
   const [estimatedTime, setEstimatedTime] = useState<string>('—');
   const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState<number | null>(null);
   const [deliveryActive, setDeliveryActive] = useState<boolean>(true);
+  const [feeMisconfigured, setFeeMisconfigured] = useState<boolean>(false);
 
   const schema = isAuthenticated ? authenticatedSchema : guestSchema;
 
@@ -131,30 +134,44 @@ export default function CheckoutPage() {
   }, [items.length, navigate]);
 
   const updateDeliveryInfo = (area: SimpleArea | undefined) => {
+    // Reset all
+    setDeliveryFee(0);
+    setOriginalFee(null);
+    setMinOrderAmount(0);
+    setEstimatedTime('—');
+    setFreeDeliveryThreshold(null);
+    setDeliveryActive(false);
+    setFeeMisconfigured(false);
+
     if (!area?.deliveryZone || !area.deliveryZone.isActive) {
-      setDeliveryFee(0);
-      setMinOrderAmount(0);
-      setEstimatedTime('—');
-      setFreeDeliveryThreshold(null);
-      setDeliveryActive(false);
       return;
     }
 
     const zone = area.deliveryZone;
     const threshold = zone.freeDeliveryAbove ?? null;
+    const rawBaseFee = zone.tieredBaseFee ?? zone.deliveryFee;
+
+    setFreeDeliveryThreshold(threshold);
+    setMinOrderAmount(zone.minOrderAmount ?? 0);
+    setEstimatedTime(zone.estimatedTime || '35–50 min');
+
+    // Case 1: No base fee configured at all → misconfigured
+    if (rawBaseFee === undefined || rawBaseFee === null || rawBaseFee < 0) {
+      setFeeMisconfigured(true);
+      setDeliveryActive(false);
+      return;
+    }
+
+    // Case 2: Valid base fee
     const isFree = threshold !== null && threshold > 0 && subtotal >= threshold;
 
-    // Priority: tiered base fee → flat fee → fallback 0
-    const baseFee = zone.tieredBaseFee ?? zone.deliveryFee ?? 0;
-
-    setDeliveryFee(isFree ? 0 : baseFee);
-    setMinOrderAmount(zone.minOrderAmount);
-    setEstimatedTime(zone.estimatedTime || '35–50 min');
-    setFreeDeliveryThreshold(threshold);
+    setOriginalFee(rawBaseFee);
+    setDeliveryFee(isFree ? 0 : rawBaseFee);
     setDeliveryActive(true);
+    setFeeMisconfigured(false);
   };
 
-  // Authenticated: from saved address
+  // Authenticated user: use saved address → area
   useEffect(() => {
     if (!isAuthenticated || addressesLoading || areasLoading) return;
 
@@ -164,7 +181,7 @@ export default function CheckoutPage() {
     updateDeliveryInfo(area);
   }, [selectedAddressId, addresses, areas, isAuthenticated, addressesLoading, areasLoading, subtotal]);
 
-  // Guest: direct area selection
+  // Guest user: direct area selection
   useEffect(() => {
     if (isAuthenticated || areasLoading) return;
 
@@ -173,13 +190,15 @@ export default function CheckoutPage() {
   }, [guestAreaId, areas, isAuthenticated, areasLoading, subtotal]);
 
   const isMinOrderMet = minOrderAmount === 0 || subtotal >= minOrderAmount;
-  const hasValidAddress = isAuthenticated ? !!selectedAddressId : !!(guestAreaId && guestFullAddress?.trim().length >= 15);
+  const hasValidAddress = isAuthenticated
+    ? !!selectedAddressId
+    : !!(guestAreaId && guestFullAddress?.trim().length >= 15);
 
-  const canPlaceOrder = isMinOrderMet && hasValidAddress && deliveryActive;
+  const canPlaceOrder = isMinOrderMet && hasValidAddress && deliveryActive && !feeMisconfigured;
 
   const onSubmit = async (data: CheckoutForm) => {
     if (!canPlaceOrder) {
-      toast.error('Please complete all required fields and meet minimum order');
+      toast.error('Please complete all required fields and ensure delivery is available');
       return;
     }
 
@@ -242,6 +261,17 @@ export default function CheckoutPage() {
     }
   };
 
+  // Helper to get current selected area for preview in dropdown
+  const currentArea = isAuthenticated
+    ? areas.find(a => a._id === addresses.find(addr => addr._id === selectedAddressId || addr.isDefault)?.area?._id)
+    : areas.find(a => a._id === guestAreaId);
+
+  const currentBaseFee = currentArea?.deliveryZone
+    ? (currentArea.deliveryZone.tieredBaseFee ?? currentArea.deliveryZone.deliveryFee)
+    : null;
+
+  const currentIsFree = freeDeliveryThreshold !== null && subtotal >= freeDeliveryThreshold;
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-muted/20 to-background py-8 md:py-12">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -281,7 +311,7 @@ export default function CheckoutPage() {
                   <MapPin className="h-7 w-7" />
                   Delivery Address
                 </CardTitle>
-                {estimatedTime !== '—' && deliveryActive && (
+                {estimatedTime !== '—' && deliveryActive && !feeMisconfigured && (
                   <CardDescription className="text-lg mt-3 flex items-center gap-2">
                     <Truck className="h-5 w-5" />
                     Estimated delivery: <strong className="text-primary">{estimatedTime}</strong>
@@ -345,13 +375,22 @@ export default function CheckoutPage() {
                                 {areas
                                   .filter((a) => a.deliveryZone?.isActive)
                                   .map((area) => {
-                                    const baseFee = area.deliveryZone?.tieredBaseFee ?? area.deliveryZone?.deliveryFee ?? 0;
+                                    const baseFee = area.deliveryZone?.tieredBaseFee ?? area.deliveryZone?.deliveryFee;
+                                    const threshold = area.deliveryZone?.freeDeliveryAbove;
+                                    const isFreeNow = threshold && subtotal >= threshold;
+
                                     return (
                                       <SelectItem key={area._id} value={area._id}>
                                         <div className="py-2">
                                           <p className="font-medium">{area.name}</p>
                                           <p className="text-sm text-muted-foreground">
-                                            Base Fee: Rs. {baseFee}
+                                            {baseFee === undefined || baseFee === null ? (
+                                              <span className="text-orange-600">Fee not set</span>
+                                            ) : isFreeNow ? (
+                                              <span className="text-green-600 font-medium">Free Delivery!</span>
+                                            ) : (
+                                              `Delivery: Rs. ${baseFee}${threshold ? ` → Free above Rs. ${threshold}` : ''}`
+                                            )}
                                           </p>
                                         </div>
                                       </SelectItem>
@@ -510,11 +549,33 @@ export default function CheckoutPage() {
                         </p>
                       </div>
 
-                      {[...(item.sides || []), ...(item.drinks || []), ...(item.addOns || [])].length > 0 && (
+                      {item.selectedOptions && Object.values(item.selectedOptions).flat().length > 0 && (
                         <div className="ml-16 space-y-1 text-sm text-muted-foreground">
-                          {[...(item.sides || []), ...(item.drinks || []), ...(item.addOns || [])].map((addon, i) => (
-                            <p key={i}>• {addon}</p>
-                          ))}
+                          {(['sides', 'drinks', 'addOns'] as const).flatMap((section) =>
+                            item.selectedOptions![section].map((opt) => (
+                              <p key={opt.name} className="flex justify-between">
+                                <span className="flex items-center gap-2">
+                                  • {opt.name}
+                                  {opt.unit && (
+                                    <Badge variant="outline" className="text-xs py-0 px-1.5">
+                                      {UNIT_LABELS[opt.unit] || opt.unit}
+                                    </Badge>
+                                  )}
+                                </span>
+                                {opt.price > 0 && (
+                                  <span className="text-primary font-medium">+Rs. {opt.price}</span>
+                                )}
+                              </p>
+                            ))
+                          )}
+                        </div>
+                      )}
+
+                      {(!item.selectedOptions && (item.sides?.length || item.drinks?.length || item.addOns?.length)) && (
+                        <div className="ml-16 space-y-1 text-sm text-muted-foreground">
+                          {item.sides?.map((s) => <p key={s}>• {s}</p>)}
+                          {item.drinks?.map((d) => <p key={d}>• {d}</p>)}
+                          {item.addOns?.map((a) => <p key={a}>• {a}</p>)}
                         </div>
                       )}
                     </div>
@@ -531,22 +592,29 @@ export default function CheckoutPage() {
 
                   <div className="flex justify-between items-center">
                     <span>Delivery Fee</span>
-                    {freeDeliveryThreshold !== null && subtotal >= freeDeliveryThreshold ? (
-                      <div className="flex items-center gap-3 text-green-600 font-semibold">
-                        <CheckCircle2 className="h-6 w-6" />
-                        <span>Free!</span>
-                        <span className="line-through text-muted-foreground text-sm">
-                          Rs. {deliveryFee.toLocaleString('en-PK')}
+                    <div className="text-right">
+                      {feeMisconfigured ? (
+                        <span className="text-orange-600 font-medium flex items-center gap-2">
+                          <AlertTriangle className="h-5 w-5" />
+                          Fee not configured
                         </span>
-                      </div>
-                    ) : (
-                      <span className="font-medium">Rs. {deliveryFee.toLocaleString('en-PK')}</span>
-                    )}
+                      ) : deliveryFee === 0 && originalFee !== null && originalFee > 0 ? (
+                        <div className="flex items-center gap-3 text-green-600 font-bold">
+                          <CheckCircle2 className="h-6 w-6" />
+                          <span>Free Delivery!</span>
+                          <span className="line-through text-muted-foreground text-base">
+                            Rs. {originalFee}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="font-medium">Rs. {deliveryFee}</span>
+                      )}
+                    </div>
                   </div>
 
-                  {freeDeliveryThreshold !== null && subtotal < freeDeliveryThreshold && (
-                    <p className="text-sm text-right text-muted-foreground">
-                      Add Rs. {(freeDeliveryThreshold - subtotal).toLocaleString('en-PK')} more for free delivery!
+                  {freeDeliveryThreshold !== null && subtotal < freeDeliveryThreshold && !feeMisconfigured && (
+                    <p className="text-sm text-right text-muted-foreground -mt-2">
+                      Add Rs. {(freeDeliveryThreshold - subtotal).toLocaleString('en-PK')} more for free delivery
                     </p>
                   )}
                 </div>
@@ -558,24 +626,34 @@ export default function CheckoutPage() {
                   <span className="text-primary">Rs. {total.toLocaleString('en-PK')}</span>
                 </div>
 
-                {/* Minimum Order Alert */}
+                {/* Alerts */}
                 {!isMinOrderMet && minOrderAmount > 0 && (
                   <Alert variant="destructive" className="mt-6">
                     <AlertCircle className="h-6 w-6" />
-                    <AlertTitle>Minimum Order Required</AlertTitle>
+                    <AlertTitle>Minimum Order Not Met</AlertTitle>
                     <AlertDescription>
-                      This area requires Rs. {minOrderAmount.toLocaleString('en-PK')} minimum.<br />
-                      Add Rs. {(minOrderAmount - subtotal).toLocaleString('en-PK')} more.
+                      This area requires a minimum order of Rs. {minOrderAmount.toLocaleString('en-PK')}.<br />
+                      You need Rs. {(minOrderAmount - subtotal).toLocaleString('en-PK')} more.
                     </AlertDescription>
                   </Alert>
                 )}
 
-                {/* Delivery Inactive Alert */}
-                {!deliveryActive && (selectedAddressId || guestAreaId) && (
+                {feeMisconfigured && (selectedAddressId || guestAreaId) && (
+                  <Alert variant="destructive" className="mt-6">
+                    <AlertTriangle className="h-5 w-5" />
+                    <AlertTitle>Delivery Fee Not Configured</AlertTitle>
+                    <AlertDescription>
+                      Delivery charges are not set for this area. Please select another area or contact support.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {!deliveryActive && !feeMisconfigured && (selectedAddressId || guestAreaId) && (
                   <Alert className="mt-6">
                     <AlertCircle className="h-5 w-5" />
+                    <AlertTitle>Delivery Unavailable</AlertTitle>
                     <AlertDescription>
-                      Delivery is paused in this area.
+                      Delivery is currently paused in your selected area.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -595,7 +673,7 @@ export default function CheckoutPage() {
                   {createOrder.isPending || createGuestOrder.isPending ? (
                     <>
                       <Loader2 className="mr-3 h-7 w-7 animate-spin" />
-                      Processing...
+                      Processing Order...
                     </>
                   ) : (
                     `Place Order — Rs. ${total.toLocaleString('en-PK')}`

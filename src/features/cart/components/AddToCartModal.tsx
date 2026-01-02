@@ -1,11 +1,10 @@
 // src/features/cart/components/AddToCartModal.tsx
-// PRODUCTION-READY — JANUARY 02, 2026
-// FINAL FIX: Cart empty bug completely resolved
+// PRODUCTION-READY — JANUARY 03, 2026
+// Fully persistent cart (guest + auth), accurate pricing, custom options
 
 import { useEffect, useMemo, useState, useRef } from 'react';
-import { Plus, Minus, X } from 'lucide-react';
+import { Plus, Minus, X, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -25,6 +24,8 @@ import { Badge } from '@/components/ui/badge';
 
 import { useMenuItem } from '@/features/menu/hooks/useMenuApi';
 import { useAddToCart } from '@/features/cart/hooks/useServerCart';
+import { useCartStore } from '@/features/cart/hooks/useCartStore';
+import { useAuthStore } from '@/features/auth/store/authStore';
 import { PricedOptions, UNIT_LABELS } from '@/features/menu/types/menu.types';
 import { toast } from 'sonner';
 
@@ -48,18 +49,13 @@ const EMPTY_CUSTOM_INPUTS: Record<CustomizationSection, string> = {
   addOns: '',
 };
 
-const CART_QUERY_KEY = ['cart'] as const;
-
-export const AddToCartModal = ({
-  menuItemId,
-  open,
-  onOpenChange,
-}: AddToCartModalProps) => {
+export const AddToCartModal = ({ menuItemId, open, onOpenChange }: AddToCartModalProps) => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
   const { data: menuItem, isLoading } = useMenuItem(menuItemId);
   const addToCart = useAddToCart();
+  const localCart = useCartStore();
+  const { user } = useAuthStore();
+  const isGuest = !user;
 
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<Record<CustomizationSection, string[]>>(EMPTY_OPTIONS);
@@ -69,7 +65,7 @@ export const AddToCartModal = ({
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Reset on open
+  // Reset form when modal opens
   useEffect(() => {
     if (open) {
       setQuantity(1);
@@ -79,7 +75,7 @@ export const AddToCartModal = ({
     }
   }, [open]);
 
-  // Scroll shadow effect
+  // Scroll shadow effect for footer
   useEffect(() => {
     const handleScroll = () => {
       if (!scrollRef.current) return;
@@ -90,7 +86,6 @@ export const AddToCartModal = ({
     return () => current?.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Real-time extras total (matches backend logic exactly)
   const extrasTotal = useMemo(() => {
     if (!menuItem?.pricedOptions) return 0;
     let total = 0;
@@ -126,34 +121,49 @@ export const AddToCartModal = ({
     toast.success('Custom option added');
   };
 
-const handleAddToCart = async () => {
-  if (quantity < 1) {
-    toast.error('Quantity must be at least 1');
-    return;
-  }
+  const handleAddToCart = async () => {
+    if (quantity < 1) {
+      toast.error('Quantity must be at least 1');
+      return;
+    }
 
-  try {
-    await addToCart.mutateAsync({
-      menuItemId,
-      quantity,
+    const customizations = {
       sides: selectedOptions.sides,
       drinks: selectedOptions.drinks,
       addOns: selectedOptions.addOns,
       specialInstructions: specialInstructions.trim() || undefined,
-    });
+    };
 
-    toast.success(`${menuItem?.name} added to cart`);
-    
-    // Do NOT manually setQueryData here
-    // Let the mutation's onSuccess invalidate + refetch
+    try {
+      if (isGuest) {
+        // Guest → local store immediately
+        localCart.addItem(menuItem!, quantity, customizations, menuItem!.price);
+      } else {
+        // Authenticated → server
+        await addToCart.mutateAsync({
+          menuItemId,
+          quantity,
+          ...customizations,
+        });
+      }
 
-    onOpenChange(false);
-    navigate('/cart');
-  } catch (error) {
-    toast.error('Failed to add item. Please try again.');
-    console.error('Add to cart error:', error);
-  }
-};
+      onOpenChange(false);
+
+      toast.success(`${quantity} × ${menuItem?.name} added to cart!`, {
+        description: 'You can continue shopping or check your cart',
+        duration: 5000,
+        icon: <ShoppingCart className="h-5 w-5" />,
+        action: {
+          label: 'View Cart',
+          onClick: () => navigate('/cart'),
+        },
+      });
+    } catch (error) {
+      toast.error('Failed to add item. Please try again.');
+      console.error('Add to cart error:', error);
+    }
+  };
+
   if (isLoading) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
@@ -173,11 +183,7 @@ const handleAddToCart = async () => {
 
   if (!menuItem) return null;
 
-  const pricedOptions: PricedOptions = menuItem.pricedOptions ?? {
-    sides: [],
-    drinks: [],
-    addOns: [],
-  };
+  const pricedOptions: PricedOptions = menuItem.pricedOptions ?? { sides: [], drinks: [], addOns: [] };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -253,14 +259,11 @@ const handleAddToCart = async () => {
                       </div>
                     </div>
                     {opt.price > 0 && (
-                      <span className="text-sm font-medium text-primary">
-                        +Rs. {opt.price}
-                      </span>
+                      <span className="text-sm font-medium text-primary">+Rs. {opt.price}</span>
                     )}
                   </div>
                 ))}
 
-                {/* Display selected custom options */}
                 {selectedOptions[section]
                   .filter((name) => name.startsWith('Custom:'))
                   .map((custom) => (
@@ -277,9 +280,7 @@ const handleAddToCart = async () => {
                 <Input
                   placeholder="Type your own (free)"
                   value={customInputs[section]}
-                  onChange={(e) =>
-                    setCustomInputs((p) => ({ ...p, [section]: e.target.value }))
-                  }
+                  onChange={(e) => setCustomInputs((p) => ({ ...p, [section]: e.target.value }))}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), addCustom(section))
                   }
@@ -315,16 +316,9 @@ const handleAddToCart = async () => {
         >
           <div className="flex justify-between items-center">
             <span className="text-xl font-bold">Total</span>
-            <span className="text-2xl font-bold text-primary">
-              Rs. {itemTotal.toFixed(2)}
-            </span>
+            <span className="text-2xl font-bold text-primary">Rs. {itemTotal.toFixed(2)}</span>
           </div>
-          <Button
-            size="lg"
-            onClick={handleAddToCart}
-            disabled={addToCart.isPending}
-            className="w-full"
-          >
+          <Button size="lg" onClick={handleAddToCart} disabled={addToCart.isPending} className="w-full">
             {addToCart.isPending ? 'Adding to cart...' : 'Add to Cart'}
           </Button>
         </div>

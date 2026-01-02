@@ -1,6 +1,6 @@
 // src/features/cart/pages/CartPage.tsx
-// PRODUCTION-READY — JANUARY 02, 2026
-// Fully accurate pricing, enriched options display, proper order note saving
+// UPDATED — JANUARY 2026
+// Improvements: skeletons, better empty state, real-time item count feel, accessibility
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useCartStore } from '@/features/cart/hooks/useCartStore';
@@ -43,7 +44,6 @@ export default function CartPage() {
   const localCart = useCartStore();
   const hasSyncedRef = useRef(false);
 
-  // Sync server → local once after login
   useEffect(() => {
     if (!isGuest && serverCart && !hasSyncedRef.current) {
       hasSyncedRef.current = true;
@@ -70,12 +70,10 @@ export default function CartPage() {
 
   const [orderNoteInput, setOrderNoteInput] = useState(currentOrderNote);
 
-  // Keep input in sync
   useEffect(() => {
     setOrderNoteInput(currentOrderNote);
   }, [currentOrderNote]);
 
-  // Guest: debounced local save
   useEffect(() => {
     if (isGuest && orderNoteInput !== currentOrderNote) {
       const timeout = setTimeout(() => {
@@ -85,12 +83,11 @@ export default function CartPage() {
     }
   }, [orderNoteInput, isGuest, currentOrderNote, localCart]);
 
-  // Authenticated: save on blur
   const saveOrderNote = () => {
     const trimmed = orderNoteInput.trim().slice(0, 500);
     if (!isGuest && trimmed !== currentOrderNote) {
       updateMutation.mutate({
-        itemId: 'order-note', // special ID — backend supports orderNote in any item update
+        itemId: 'order-note',
         updates: { orderNote: trimmed || undefined },
       });
     }
@@ -99,7 +96,8 @@ export default function CartPage() {
   const handleQuantityChange = (id: string, delta: number) => {
     const item = items.find((i) => i._id === id);
     if (!item) return;
-    const newQty = Math.max(1, Math.min(50, item.quantity + delta));
+
+    const newQty = Math.max(1, Math.min(50, item.quantity + delta)); // already safe
 
     if (isGuest) {
       localCart.updateItem(id, { quantity: newQty });
@@ -109,26 +107,32 @@ export default function CartPage() {
   };
 
   const handleRemove = (id: string) => {
-    if (isGuest) {
-      localCart.removeItem(id);
-    } else {
-      removeMutation.mutate(id);
-    }
+    if (isGuest) localCart.removeItem(id);
+    else removeMutation.mutate(id);
   };
 
   const handleClear = () => {
-    if (isGuest) {
-      localCart.clearCart();
-    } else {
-      clearMutation.mutate();
-    }
+    if (isGuest) localCart.clearCart();
+    else clearMutation.mutate();
   };
 
-  if (serverLoading && !isGuest) {
+  // Loading state with skeleton
+  if ((serverLoading && !isGuest) || isMutating) {
     return (
-      <main className="container mx-auto px-4 py-16 text-center">
-        <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
-        <p className="text-lg text-muted-foreground">Loading your cart...</p>
+      <main className="container mx-auto px-4 py-8">
+        <div className="mb-8 h-10 w-48 animate-pulse rounded bg-muted" />
+        <div className="space-y-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex gap-4 rounded-xl border bg-card p-6">
+              <Skeleton className="h-32 w-32 rounded-xl" />
+              <div className="flex-1 space-y-4">
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-10 w-40" />
+              </div>
+            </div>
+          ))}
+        </div>
       </main>
     );
   }
@@ -136,12 +140,14 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <main className="container mx-auto px-4 py-16 md:py-24 text-center">
-        <Package className="mx-auto mb-8 h-24 w-24 text-muted-foreground/30 md:h-32 md:w-32" />
+        <div className="mx-auto mb-10 flex h-32 w-32 items-center justify-center rounded-full bg-muted/40">
+          <ShoppingBag className="h-16 w-16 text-muted-foreground/50" />
+        </div>
         <h1 className="mb-4 text-3xl font-bold md:text-4xl lg:text-5xl">
           Your cart is empty
         </h1>
-        <p className="mx-auto mb-10 max-w-md text-base text-muted-foreground md:text-lg">
-          Explore our menu and add delicious items to get started!
+        <p className="mx-auto mb-12 max-w-md text-lg text-muted-foreground">
+          Looks like you haven't added anything yet. Let's change that!
         </p>
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
           <Button size="lg" onClick={() => navigate('/menu/all')}>
@@ -157,23 +163,25 @@ export default function CartPage() {
 
   return (
     <main className="container mx-auto px-4 py-6 md:py-8 lg:py-10">
-      <header className="mb-6 flex items-center gap-3 md:mb-8">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-bold md:text-3xl lg:text-4xl">Your Cart</h1>
-        <Badge variant="secondary" className="ml-auto px-3 py-1 text-base md:text-lg">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-4 md:mb-8">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-bold md:text-3xl lg:text-4xl">Your Cart</h1>
+        </div>
+        <Badge variant="secondary" className="px-4 py-1.5 text-base md:text-lg">
           {itemCount} {itemCount === 1 ? 'item' : 'items'}
         </Badge>
       </header>
 
       <div className="grid gap-8 lg:grid-cols-3">
         <section className="space-y-6 lg:col-span-2">
-          <div className="rounded-2xl border bg-card p-4 md:p-6">
-            <div className="mb-5 flex items-center justify-between md:mb-6">
+          <div className="rounded-2xl border bg-card p-4 md:p-6 shadow-sm">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-4 md:mb-6">
               <h2 className="flex items-center gap-3 text-xl font-bold md:text-2xl">
                 <ShoppingBag className="h-6 w-6 md:h-7 md:w-7" />
-                Your Items
+                Your Items ({itemCount})
               </h2>
               <Button
                 variant="destructive"
@@ -190,7 +198,7 @@ export default function CartPage() {
                 {items.map((item) => (
                   <article
                     key={item._id}
-                    className="flex flex-col gap-4 rounded-xl border bg-background p-4 shadow-sm transition-shadow hover:shadow-md sm:flex-row"
+                    className="flex flex-col gap-4 rounded-xl border bg-background p-4 shadow-sm transition-all hover:shadow-md sm:flex-row"
                   >
                     {item.menuItem.image ? (
                       <img
@@ -200,7 +208,7 @@ export default function CartPage() {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="flex aspect-square w-full max-w-32 items-center justify-center rounded-xl bg-muted sm:w-32">
+                      <div className="flex aspect-square w-32 items-center justify-center rounded-xl bg-muted">
                         <Package className="h-10 w-10 text-muted-foreground/40" />
                       </div>
                     )}
@@ -209,21 +217,21 @@ export default function CartPage() {
                       <div>
                         <h3 className="text-lg font-semibold md:text-xl flex flex-wrap items-center gap-2">
                           {item.menuItem.name}
-                          <Badge variant="outline" className="text-xs py-0 px-2">
+                          <Badge variant="outline" className="text-xs">
                             {UNIT_LABELS[item.menuItem.unit] || item.menuItem.unit}
                           </Badge>
                         </h3>
 
-                        {/* Enriched selectedOptions (preferred) */}
+                        {/* Preferred: selectedOptions display */}
                         {item.selectedOptions && Object.values(item.selectedOptions).flat().length > 0 && (
                           <div className="mt-3 space-y-1 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
                             {(['sides', 'drinks', 'addOns'] as const).flatMap((section) =>
-                              item.selectedOptions![section].map((opt) => (
+                              item.selectedOptions![section]?.map((opt) => (
                                 <p key={opt.name} className="flex items-center justify-between">
                                   <span className="flex items-center gap-2">
                                     • {opt.name}
                                     {opt.unit && (
-                                      <Badge variant="outline" className="text-xs py-0 px-1.5">
+                                      <Badge variant="outline" className="text-xs">
                                         {UNIT_LABELS[opt.unit] || opt.unit}
                                       </Badge>
                                     )}
@@ -239,7 +247,7 @@ export default function CartPage() {
                           </div>
                         )}
 
-                        {/* Fallback for old carts */}
+                        {/* Fallback */}
                         {!item.selectedOptions && (item.sides?.length || item.drinks?.length || item.addOns?.length) && (
                           <div className="mt-3 space-y-1 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
                             {item.sides?.length > 0 && <p>• Sides: {item.sides.join(', ')}</p>}
@@ -260,12 +268,13 @@ export default function CartPage() {
                       </div>
 
                       <div className="mt-4 flex items-center justify-between sm:mt-6">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
                           <Button
                             size="icon"
                             variant="outline"
                             onClick={() => handleQuantityChange(item._id, -1)}
                             disabled={item.quantity <= 1 || isMutating}
+                            aria-label="Decrease quantity"
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
@@ -275,6 +284,7 @@ export default function CartPage() {
                             variant="outline"
                             onClick={() => handleQuantityChange(item._id, +1)}
                             disabled={item.quantity >= 50 || isMutating}
+                            aria-label="Increase quantity"
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
@@ -283,9 +293,10 @@ export default function CartPage() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="text-destructive"
+                          className="text-destructive hover:text-destructive/90"
                           onClick={() => handleRemove(item._id)}
                           disabled={isMutating}
+                          aria-label="Remove item"
                         >
                           <Trash2 className="h-5 w-5" />
                         </Button>
@@ -307,13 +318,11 @@ export default function CartPage() {
           <div className="rounded-2xl border bg-card p-4 md:p-6">
             <div className="mb-4 flex items-center gap-3">
               <MessageSquare className="h-5 w-5 text-primary md:h-6 md:w-6" />
-              <h2 className="text-lg font-semibold md:text-xl">Add a note to your order</h2>
+              <h2 className="text-lg font-semibold md:text-xl">Order Note</h2>
             </div>
-
             <Label htmlFor="order-note" className="text-sm text-muted-foreground">
-              Any special requests? (e.g., less spicy, extra sauce, no onions)
+              Any special requests? (less spicy, no onions, etc.)
             </Label>
-
             <Textarea
               id="order-note"
               placeholder="Type your note here..."
@@ -324,13 +333,12 @@ export default function CartPage() {
               maxLength={500}
               disabled={isMutating}
             />
-
-            <div className="mt-3 flex items-center justify-between">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs text-muted-foreground">
                 {orderNoteInput.length}/500 characters
               </p>
               {updateMutation.isPending && !isGuest && (
-                <span className="flex items-center gap-1 text-xs text-primary">
+                <span className="flex items-center gap-1.5 text-xs text-primary">
                   <Loader2 className="h-3 w-3 animate-spin" />
                   Saving...
                 </span>
@@ -341,7 +349,7 @@ export default function CartPage() {
 
         {/* Summary Sidebar */}
         <aside className="lg:col-span-1">
-          <div className="rounded-2xl border bg-card p-5 md:p-6 lg:sticky lg:top-6">
+          <div className="rounded-2xl border bg-card p-5 md:p-6 lg:sticky lg:top-8">
             <h2 className="mb-6 text-xl font-bold md:text-2xl">Order Summary</h2>
 
             <div className="space-y-5">
@@ -353,7 +361,7 @@ export default function CartPage() {
               {currentOrderNote && (
                 <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
                   <p className="mb-1 font-medium text-primary">Your Note</p>
-                  <p>{currentOrderNote}</p>
+                  <p className="whitespace-pre-wrap">{currentOrderNote}</p>
                 </div>
               )}
 
@@ -384,7 +392,7 @@ export default function CartPage() {
                   size="lg"
                   className="w-full py-7 text-lg font-semibold"
                   onClick={() => navigate('/checkout')}
-                  disabled={isMutating}
+                  disabled={isMutating || itemCount === 0}
                 >
                   Proceed to Checkout
                 </Button>
