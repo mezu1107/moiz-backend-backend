@@ -10,6 +10,7 @@ const {
   replyReview,
   deleteReview,
   getReviewAnalytics,
+  getTopReviews,
 } = require('../../controllers/review/reviewController');
 
 const {
@@ -25,7 +26,7 @@ router.get('/approved', optionalAuth, (req, res, next) => {
   req.query.approved = 'true';
   getReviews(req, res, next);
 });
-
+router.get('/top', optionalAuth, getTopReviews);
 // Customer Route
 router.post('/submit', auth, submitSchema, validate, submitReview);
 

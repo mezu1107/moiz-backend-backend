@@ -301,6 +301,37 @@ const getReviewAnalytics = async (req, res) => {
   }
 };
 
+// PUBLIC: Get Top Reviews for Homepage (highest rated, approved only)
+const getTopReviews = async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+
+    const filter = { isApproved: true };
+
+    // Public users & non-admin/support automatically get only approved reviews
+    // (already enforced by model hooks and soft delete)
+
+    const reviews = await Review.find(filter)
+      .populate('customer', 'name')
+      .sort({ rating: -1, createdAt: -1 }) // 5-star first, then most recent
+      .limit(Number(limit))
+      .lean();
+
+    return res.json({
+      success: true,
+      data: {
+        reviews,
+        count: reviews.length,
+      },
+    });
+  } catch (err) {
+    console.error('getTopReviews error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch top reviews',
+    });
+  }
+};
 module.exports = {
   submitReview,
   getReviews,
@@ -308,4 +339,5 @@ module.exports = {
   replyReview,
   deleteReview,
   getReviewAnalytics,
+  getTopReviews,
 };

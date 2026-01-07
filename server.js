@@ -1,7 +1,7 @@
 /**
  * AMFood Backend Server
- * FINAL PRODUCTION VERSION — December 26, 2025
- * Secure, scalable, and fully featured
+ * FINAL PRODUCTION VERSION — January 06, 2026
+ * Secure, scalable, and CORS-fixed
  */
 
 require('dotenv').config(); // MUST be first!
@@ -20,9 +20,28 @@ const helmet = require('helmet');
 const compression = require('compression');
 const MongoStore = require('connect-mongo').default;
 const admin = require('firebase-admin');
+const { Server } = require('socket.io'); // Import here for later use
 
 const app = express();
 const server = http.createServer(app);
+
+/* =========================================================
+   🔥 ALLOWED ORIGINS — DEFINED ONCE AT THE TOP
+========================================================= */
+const allowedOrigins =
+  process.env.NODE_ENV === 'development' 
+    ? [
+        'https://altawakkalfoods.com',
+        'https://www.altawakkalfoods.com',
+        'https://api.altawakkalfoods.com',
+        'http://localhost:8080',
+      ]
+    : [
+        'http://localhost:5173',
+        'http://localhost:8080',
+        'http://localhost:3000',
+      ];
+
 
 /* =========================================================
    🔥 FIREBASE ADMIN SDK — SAFE & RESILIENT INITIALIZATION
@@ -70,43 +89,32 @@ if (!admin.apps.length && process.env.FIREBASE_PROJECT_ID) {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// CORS — Allow dynamic origins with credentials
+// ✅ FIXED CORS — Clean, safe, and handles preflight correctly
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman)
+    // Allow non-browser clients (Postman, mobile apps, curl)
     if (!origin) return callback(null, true);
 
-    // In production, restrict to your frontend domains
-  const io = new Server(server, {
-  cors: {
-    origin: [
-      'https://altawakkalfoods.com',
-      'https://www.altawakkalfoods.com',
-      'http://localhost:5173',
-      'http://localhost:8080',
-      'http://api.altawakkalfoods.com/api',
-      'http://api.altawakkalfoods.com:5000',
-    ],
-    credentials: true,
-  },
-  pingTimeout: 60000,
-  pingInterval: 25000,
-  transports: ['websocket', 'polling'], // allow fallback
-});
+    // Development: allow everything
+    if (process.env.NODE_ENV !== 'production') return callback(null, true);
 
-
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Production: strict check
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Security headers (modern defaults)
+
+
+// Security headers
 app.use(helmet({
-  contentSecurityPolicy: false, // Disabled — common for SPAs + APIs
+  contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
@@ -118,8 +126,8 @@ app.use(compression());
 ========================================================= */
 app.use(session({
   secret: process.env.SESSION_SECRET || 'amfood-secure-session-2025-fallback',
-  resave: true,                  // ← changed (helps force save)
-  saveUninitialized: true,       // ← very important for guests!
+  resave: true,
+  saveUninitialized: true,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
     collectionName: 'sessions',
@@ -128,11 +136,11 @@ app.use(session({
   }),
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production', // true only on HTTPS
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 24 * 60 * 60 * 1000,
   },
-  name: 'amfood.sid',            // optional: custom name to debug
+  name: 'amfood.sid',
 }));
 
 /* =========================================================
@@ -141,24 +149,22 @@ app.use(session({
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// Favicon handling (silent 204 or real file)
 app.get('/favicon.ico', (_, res) => res.status(204).end());
 app.get('/favicon.png', (_, res) =>
   res.sendFile(path.join(__dirname, 'public', 'favicon.png'))
 );
 
 /* =========================================================
-   🔌 SOCKET.IO — Real-time Features
+   🔌 SOCKET.IO — Correctly initialized (OUTSIDE CORS callback)
 ========================================================= */
-const { Server } = require('socket.io');
-
 const io = new Server(server, {
   cors: {
-    origin: true, // same as app cors
+    origin: allowedOrigins,
     credentials: true,
   },
   pingTimeout: 60000,
   pingInterval: 25000,
+  transports: ['websocket', 'polling'],
 });
 
 global.io = io;
@@ -173,7 +179,6 @@ require('./src/sockets/contact/contactSocket')(io);
 const stripeWebhookRoutes = require('./src/routes/webhook/stripeWebhookRoutes');
 
 if (process.env.TESTING_MODE === 'true') {
-  // Test mode: bypass signature verification
   app.use(
     '/api/webhook/stripe',
     express.raw({ type: 'application/json' }),
@@ -214,7 +219,7 @@ app.get('/health', async (req, res) => {
     firebase: firebaseInitialized ? 'Initialized' : 'Disabled',
     pushNotifications: firebaseInitialized ? 'ENABLED' : 'DISABLED',
     timestamp: new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' }),
-    version: 'v3.0 — December 2025',
+    version: 'v3.1 — January 2026',
     environment: process.env.NODE_ENV || 'development',
   });
 });
@@ -227,8 +232,7 @@ const routeRegistry = [
   { path: '/api/upload', file: './src/routes/upload/uploadRoutes' },
   { path: '/api/address', file: './src/routes/address/addressRoutes' },
   { path: '/api/areas', file: './src/routes/area/areaRoutes' },
- { path: '/api/delivery', file: './src/routes/area/deliveryRoutes' },
-  
+  { path: '/api/delivery', file: './src/routes/area/deliveryRoutes' },
   { path: '/api/cart', file: './src/routes/cart/cartRoutes' },
   { path: '/api/menu', file: './src/routes/menu/menuRoutes' },
   { path: '/api/orders', file: './src/routes/order/orderRoutes' },
@@ -246,8 +250,7 @@ const routeRegistry = [
   { path: '/api/kitchen', file: './src/routes/kitchen/kitchenRoutes' },
   { path: '/api/payment', file: './src/routes/payment/paymentRoutes' },
   { path: '/api/admin/payment', file: './src/routes/admin/paymentAdminRoutes' },
-    { path: '/api/admin/wallet', file: './src/routes/admin/walletAdminRoutes' },
-
+  { path: '/api/admin/wallet', file: './src/routes/admin/walletAdminRoutes' },
   { path: '/api/admin/refunds', file: './src/routes/admin/refundAdminRoutes' },
   { path: '/api/reviews', file: './src/routes/review/reviewRoutes' },
   { path: '/api/inventory', file: './src/routes/inventory/inventoryRoutes' },
@@ -306,7 +309,7 @@ const startServer = async () => {
   } catch (err) {
     logger.error('Server startup failed', { error: err.message });
     console.error('Server startup failed:', err.message);
-    setTimeout(startServer, 5000); // Auto-retry after 5 seconds
+    setTimeout(startServer, 5000);
   }
 };
 
