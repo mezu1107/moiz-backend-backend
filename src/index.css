@@ -2,102 +2,100 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Al Tawakkal Foods — Authentic Pakistani Warm Design System */
+/* Production-ready as of January 07, 2026 */
+/* All colors defined in HSL for full dynamic light/dark support */
 
 @layer base {
   :root {
-    /* Black & Golden Theme */
-    --background: 0 0% 5%;
-    --foreground: 0 0% 98%;
+    /* Warm Light Mode — Inspired by fresh paratha, ghee, saffron & Pakistani sunrise */
+    --background: 38 100% 98%;      /* Very light warm cream (like amber-50) */
+    --foreground: 20 35% 16%;       /* Deep warm charcoal gray for excellent readability */
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;              /* Crisp white cards */
+    --card-foreground: 20 35% 16%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 35% 16%;
 
-    --primary: 45 100% 50%;
-    --primary-foreground: 0 0% 0%;
+    /* Primary: Rich Saffron Orange (masala-inspired) */
+    --primary: 28 100% 60%;         /* ≈ orange-600 */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
 
-    --secondary: 45 100% 50%;
-    --secondary-foreground: 0 0% 0%;
+    /* Secondary: Golden Amber (ghee & zarda sweetness) */
+    --secondary: 45 100% 58%;       /* ≈ amber-600 */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 40 60% 93%;            /* Soft warm muted background */
+    --muted-foreground: 20 25% 40%;
 
-    --accent: 45 100% 50%;
-    --accent-foreground: 0 0% 0%;
+    --accent: 45 100% 58%;          /* Same as secondary for harmony */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;       /* Classic red */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 45 100% 50%;
+    --border: 40 50% 89%;           /* Very soft warm border */
+    --input: 40 50% 89%;
+    --ring: 28 100% 60%;            /* Focus ring matches primary */
 
-    --radius: 0.75rem;
-    
-    /* Custom restaurant tokens */
-    --golden: 45 100% 50%;
-    --cream: 45 100% 95%;
-    --terracotta: 0 84% 60%;
-    --warm-shadow: 45 100% 50% / 0.25;
+    --radius: 1rem;                 /* Generous, friendly rounded corners */
 
-    --sidebar-background: 0 0% 98%;
+    /* Custom Brand Tokens */
+    --golden: 45 100% 55%;          /* Bright golden yellow (for highlights) */
+    --cream: 38 100% 96%;           /* Extra light cream */
+    --terracotta: 15 80% 55%;       /* Warm earthy accent (optional use) */
+    --warm-shadow: 28 100% 60% / 0.18; /* Soft orange shadow */
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar (for future admin/kitchen panels) */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 20 35% 16%;
+    --sidebar-primary: 28 100% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 40 60% 95%;
+    --sidebar-accent-foreground: 20 35% 16%;
+    --sidebar-border: 40 50% 89%;
+    --sidebar-ring: 28 100% 60%;
   }
 
   .dark {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 98%;
+    /* Warm Dark Mode — Deep charcoal with glowing golden/orange accents */
+    --background: 20 25% 8%;        /* Deep warm near-black */
+    --foreground: 38 70% 92%;       /* Light warm off-white */
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 98%;
+    --card: 20 30% 12%;
+    --card-foreground: 38 70% 92%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 20 30% 12%;
+    --popover-foreground: 38 70% 92%;
 
-    --primary: 45 100% 50%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 28 100% 60%;         /* Keep vibrant orange in dark mode */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 100% 50%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 45 100% 58%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 20 25% 15%;
+    --muted-foreground: 38 50% 75%;
 
-    --accent: 45 100% 50%;
-    --accent-foreground: 0 0% 0%;
+    --accent: 45 100% 58%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 45 100% 50%;
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 45 100% 50%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 45 100% 50%;
+    --border: 20 25% 20%;
+    --input: 20 25% 20%;
+    --ring: 28 100% 60%;
+
+    --sidebar-background: 20 30% 10%;
+    --sidebar-foreground: 38 70% 92%;
+    --sidebar-primary: 28 100% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 20 25% 18%;
+    --sidebar-accent-foreground: 38 70% 92%;
+    --sidebar-border: 20 25% 25%;
+    --sidebar-ring: 28 100% 60%;
   }
 }
 
@@ -109,44 +107,60 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
 }
 
 @layer utilities {
+  /* Warm elevated shadow */
   .shadow-warm {
-    box-shadow: 0 4px 20px hsl(var(--warm-shadow));
+    box-shadow: 0 10px 30px -5px hsl(var(--warm-shadow));
   }
-  
+
+  /* Primary gradient: Orange → Amber */
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
   }
-  
+
+  /* Golden cream gradient */
   .gradient-golden {
     background: linear-gradient(135deg, hsl(var(--golden)), hsl(var(--cream)));
   }
-  
+
+  /* Subtle warm backdrop (used in headers, modals, etc.) */
+  .backdrop-warm {
+    @apply backdrop-blur-md bg-white/90 dark:bg-background/80;
+  }
+
+  /* Hover lift effect for cards & buttons */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-2xl;
+  }
+
+  /* Slow rotating animation — perfect for decorative food plates */
   @keyframes rotate-plate {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
-  
-  @keyframes rotate-text {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-  
+
   .animate-rotate-slow {
-    animation: rotate-plate 20s linear infinite;
+    animation: rotate-plate 35s linear infinite;
   }
-  
+
+  /* Faster text rotation (for circular brand text if needed) */
+  @keyframes rotate-text {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
   .animate-rotate-text {
-    animation: rotate-text 10s linear infinite;
+    animation: rotate-text 20s linear infinite;
   }
 }

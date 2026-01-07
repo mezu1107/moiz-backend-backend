@@ -1,8 +1,6 @@
 // src/components/Header.tsx
 // FINAL PRODUCTION HEADER — FULLY RESPONSIVE (320px → 4K)
-// Foodpanda-inspired, mobile-first design with real logo
-// Cart badge only → redirects to /cart (no drawer editing)
-// Optimized for touch, accessibility, and fluid layout
+// Warm Pakistani-inspired design with saffron-orange accents, matching Home & Footer
 
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -56,14 +54,14 @@ export const Header = () => {
   return (
     <>
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b border-orange-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between gap-4">
 
             {/* Logo & Brand */}
             <Link to="/" className="flex items-center gap-3">
               {/* Real logo image */}
-              <div className="relative h-10 w-10 overflow-hidden rounded-full bg-white shadow-md ring-1 ring-gray-200">
+              <div className="relative h-11 w-11 overflow-hidden rounded-full bg-white shadow-lg ring-2 ring-orange-300">
                 <img
                   src="/logo.jpeg"
                   alt="AlTawakkalfoods Logo"
@@ -73,15 +71,15 @@ export const Header = () => {
 
               {/* Brand text: hidden on mobile, visible from sm+ */}
               <div className="hidden sm:block">
-                <h1 className="font-bold text-lg leading-tight">
+                <h1 className="font-bold text-xl leading-tight text-orange-700">
                   AlTawakkalfoods
                 </h1>
-                <p className="text-xs text-muted-foreground">Pakistani Cuisine</p>
+                <p className="text-xs text-amber-800">Authentic Pakistani Cuisine</p>
               </div>
             </Link>
 
             {/* Desktop Navigation – visible only on lg+ */}
-            <nav className="hidden lg:flex items-center gap-8">
+            <nav className="hidden lg:flex items-center gap-10">
               {[
                 { to: "/", label: "Home" },
                 { to: "/menu/all", label: "Menu" },
@@ -91,7 +89,7 @@ export const Header = () => {
                 <Link
                   key={to}
                   to={to}
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-base font-medium text-gray-700 transition-colors hover:text-orange-600"
                 >
                   {label}
                 </Link>
@@ -99,12 +97,12 @@ export const Header = () => {
             </nav>
 
             {/* Right-side Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
 
-              {/* Select Area Button – hidden on small screens, compact on md+, full on xl+ */}
+              {/* Select Area Button – hidden on small screens */}
               <Button
                 variant="outline"
-                className="hidden md:flex items-center gap-2 rounded-full text-sm"
+                className="hidden md:flex items-center gap-2 rounded-full text-sm border-orange-300 text-orange-700 hover:bg-orange-50"
                 onClick={() => setAreaModalOpen(true)}
                 aria-label="Select delivery area"
               >
@@ -116,15 +114,14 @@ export const Header = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative h-10 w-10"
+                className="relative h-11 w-11 rounded-full hover:bg-orange-50"
                 onClick={() => navigate("/cart")}
                 aria-label={`Cart with ${cartCount} items`}
               >
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="h-5 w-5 text-gray-800" />
                 {cartCount > 0 && (
                   <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs font-medium"
+                    className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full p-0 text-xs font-bold bg-orange-600 text-white border-2 border-white"
                   >
                     {cartCount}
                   </Badge>
@@ -137,26 +134,28 @@ export const Header = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="hidden sm:flex items-center gap-2"
+                    className="hidden sm:flex items-center gap-2 hover:bg-orange-50"
                     onClick={() => navigate("/dashboard")}
                   >
-                    <User className="h-4 w-4" />
-                    <span className="hidden md:inline">{user?.name.split(" ")[0]}</span>
+                    <User className="h-5 w-5 text-gray-800" />
+                    <span className="hidden md:inline text-gray-800 font-medium">
+                      {user?.name.split(" ")[0]}
+                    </span>
                   </Button>
 
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="hidden sm:block"
+                    className="hidden sm:block hover:bg-orange-50"
                     onClick={handleLogout}
                     aria-label="Logout"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut className="h-5 w-5 text-gray-800" />
                   </Button>
                 </>
               ) : (
                 <Button
-                  className="hidden sm:flex text-sm"
+                  className="hidden sm:flex text-sm bg-orange-600 hover:bg-orange-700 text-white rounded-full px-6"
                   onClick={() => navigate("/login")}
                 >
                   Login
@@ -167,11 +166,11 @@ export const Header = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                className="lg:hidden h-11 w-11 rounded-full hover:bg-orange-50"
                 onClick={() => setMobileMenuOpen(true)}
                 aria-label="Open menu"
               >
-                <Menu className="h-5 w-5" />
+                <Menu className="h-6 w-6 text-gray-800" />
               </Button>
             </div>
           </div>
@@ -180,26 +179,26 @@ export const Header = () => {
 
       {/* Mobile Slide-out Menu */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="right" className="w-full sm:w-80">
+        <SheetContent side="right" className="w-full sm:w-96 bg-white/95 backdrop-blur">
           <SheetHeader>
-            <SheetTitle className="text-xl">Menu</SheetTitle>
+            <SheetTitle className="text-2xl font-bold text-orange-700">Menu</SheetTitle>
           </SheetHeader>
 
-          <nav className="mt-8 space-y-4">
-            {/* Area Selection in Mobile Menu */}
+          <nav className="mt-10 space-y-4">
+            {/* Area Selection */}
             <Button
               variant="ghost"
-              className="w-full justify-start text-base"
+              className="w-full justify-start text-lg hover:bg-orange-50"
               onClick={() => {
                 setMobileMenuOpen(false);
                 setAreaModalOpen(true);
               }}
             >
-              <MapPin className="mr-3 h-5 w-5" />
+              <MapPin className="mr-4 h-6 w-6 text-orange-600" />
               Select Delivery Area
             </Button>
 
-            <Separator />
+            <Separator className="bg-orange-200" />
 
             {/* Main Navigation Links */}
             {[
@@ -214,41 +213,41 @@ export const Header = () => {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block"
               >
-                <Button variant="ghost" className="w-full justify-start text-base">
+                <Button variant="ghost" className="w-full justify-start text-lg hover:bg-orange-50">
                   {label}
                 </Button>
               </Link>
             ))}
 
-            <Separator />
+            <Separator className="bg-orange-200" />
 
             {/* Auth Section */}
             {isLoggedIn ? (
               <>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-base"
+                  className="w-full justify-start text-lg hover:bg-orange-50"
                   onClick={() => {
                     setMobileMenuOpen(false);
                     navigate("/dashboard");
                   }}
                 >
-                  <User className="mr-3 h-5 w-5" />
+                  <User className="mr-4 h-6 w-6 text-orange-600" />
                   Dashboard
                 </Button>
 
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-base text-destructive"
+                  className="w-full justify-start text-lg text-red-600 hover:bg-red-50"
                   onClick={handleLogout}
                 >
-                  <LogOut className="mr-3 h-5 w-5" />
+                  <LogOut className="mr-4 h-6 w-6" />
                   Logout
                 </Button>
               </>
             ) : (
               <Button
-                className="w-full text-base"
+                className="w-full text-lg bg-orange-600 hover:bg-orange-700 text-white rounded-xl py-6"
                 onClick={() => {
                   setMobileMenuOpen(false);
                   navigate("/login");
