@@ -186,7 +186,7 @@ export const Footer: React.FC = () => {
               <li className="flex items-start gap-3 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <a href="mailto:Altawakkalfoods@gmail.com" className="hover:text-primary transition-colors">
-                  Altawakkalfoods@gmail.com
+                  altawakkalfoods112@gmail.com
                 </a>
               </li>
 
@@ -204,9 +204,9 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div className="mt-10 border-t pt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            &copy; 2025 Al Tawakkalfoods. All rights reserved.
-          </p>
+          <p className="text-center text-sm text-muted-foreground mt-8">
+    © {new Date().getFullYear()} AM Enterprises Pakistan • Authentic Pakistani Cuisine Delivered
+  </p>
         </div>
       </div>
     </footer>

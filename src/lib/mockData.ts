@@ -1,4 +1,4 @@
-// Mock data for AM Foods Restaurant
+// Mock data for Al Tawakkalfoods Restaurant
 
 
 
@@ -927,9 +927,9 @@ const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 //   {
 //     id: "admin1",
 //     name: "Admin User",
-//     email: "admin@amfoods.com",
+//     email: "admin@altawakkalfoodss.com",
 //     phone: "+92 300 0000000",
-//     address: "AM Foods HQ, Lahore",
+//     address: "Al Tawakkalfoods HQ, Lahore",
 //     role: "admin",
 //   },
 //   {
@@ -946,7 +946,7 @@ export const mockRiders: Rider[] = [
   {
     id: "rider1",
     name: "Hassan Raza",
-    email: "hassan@amfoods.com",
+    email: "hassan@altawakkalfoodss.com",
     phone: "+92 310 9876543",
     status: "on-delivery",
     currentOrders: ["ORD-001"],
@@ -962,7 +962,7 @@ export const mockRiders: Rider[] = [
   {
     id: "rider2",
     name: "Usman Malik",
-    email: "usman@amfoods.com",
+    email: "usman@altawakkalfoodss.com",
     phone: "+92 315 5554444",
     status: "online",
     currentOrders: [],
@@ -978,7 +978,7 @@ export const mockRiders: Rider[] = [
   {
     id: "rider3",
     name: "Kamran Ali",
-    email: "kamran@amfoods.com",
+    email: "kamran@altawakkalfoodss.com",
     phone: "+92 316 6667788",
     status: "offline",
     currentOrders: [],
@@ -991,7 +991,7 @@ export const mockRiders: Rider[] = [
   {
     id: "rider4",
     name: "Faisal Ahmed",
-    email: "faisal@amfoods.com",
+    email: "faisal@altawakkalfoodss.com",
     phone: "+92 317 9998888",
     status: "online",
     currentOrders: [],

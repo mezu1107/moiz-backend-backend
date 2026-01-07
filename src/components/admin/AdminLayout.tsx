@@ -80,7 +80,7 @@ const AdminLayout = () => {
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex h-16 items-center justify-between border-b px-6">
-            <h1 className="text-xl font-bold text-primary">AM Foods Admin</h1>
+            <h1 className="text-xl font-bold text-primary">Al Tawakkalfoods Admin</h1>
             <Button
               variant="ghost"
               size="icon"

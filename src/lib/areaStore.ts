@@ -80,7 +80,7 @@ export const useAreaStore = create<AreaStore>()(
       },
     }),
     {
-      name: 'amfood-area-storage',
+      name: 'altawakkalfoods-area-storage',
       version: 2,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({

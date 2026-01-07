@@ -74,7 +74,7 @@
 //                   id="rider-email"
 //                   name="email"
 //                   type="email"
-//                   placeholder="rider@amfoods.com"
+//                   placeholder="rider@altawakkalfoodss.com"
 //                   className="pl-10"
 //                   required
 //                   defaultValue="ali@example.com"

@@ -54,7 +54,7 @@ export default function AddressListPage() {
   return (
     <>
       <Helmet>
-        <title>My Addresses • AM Foods</title>
+        <title>My Addresses • Al Tawakkalfoods</title>
         <meta name="description" content="Manage your saved delivery addresses" />
       </Helmet>
 

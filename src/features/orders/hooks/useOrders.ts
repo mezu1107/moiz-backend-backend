@@ -127,7 +127,7 @@ export const useTrackOrdersByPhone = () => {
 // ORDER CREATION — RELIABLE CART CLEARING
 // ============================================================
 
-const CART_STORAGE_KEY = 'amfood-cart-v5';
+const CART_STORAGE_KEY = 'altawakkalfoods-cart-v5';
 
 const clearCartCompletely = () => {
   const { clearCart } = useCartStore.getState();
@@ -272,7 +272,7 @@ export const downloadReceipt = async (orderId: string) => {
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = `AMFoods-Receipt-#${orderId.slice(-6).toUpperCase()}.pdf`;
+    link.download = `altawakkalfoodss-Receipt-#${orderId.slice(-6).toUpperCase()}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

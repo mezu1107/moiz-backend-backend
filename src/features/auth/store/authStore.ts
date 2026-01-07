@@ -113,7 +113,7 @@ export const useAuthStore = create<AuthStore>()(
       setLoading: (loading) => set({ isLoading: loading }),
     }),
     {
-      name: 'amfood-auth-storage', // storage key
+      name: 'altawakkalfoods-auth-storage', // storage key
       version: 1,
       partialize: (state) => ({
         token: state.token,

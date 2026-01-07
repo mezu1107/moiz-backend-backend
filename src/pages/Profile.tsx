@@ -181,9 +181,9 @@ export default function Profile() {
         </Card>
 
         {/* Footer Note */}
-        <p className="text-center text-sm text-muted-foreground mt-10">
-          © 2025 AM Foods Pakistan • Authentic Pakistani Cuisine Delivered
-        </p>
+         <p className="text-center text-sm text-muted-foreground mt-8">
+    © {new Date().getFullYear()} AM Enterprises Pakistan • Authentic Pakistani Cuisine Delivered
+  </p>
       </div>
     </main>
   );

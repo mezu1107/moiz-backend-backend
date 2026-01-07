@@ -71,7 +71,7 @@ export default function Login() {
             Welcome Back
           </h1>
           <p className="mt-3 text-base md:text-lg text-muted-foreground">
-            Login to your AM Foods account
+            Login to your Al Tawakkalfoods account
           </p>
         </header>
 
@@ -178,7 +178,7 @@ export default function Login() {
 
         {/* Footer Note */}
         <p className="text-center text-sm text-muted-foreground mt-8">
-          © 2025 AM Foods Pakistan • Authentic Pakistani Cuisine Delivered
+          © {new Date().getFullYear()} AM Enterprises Pakistan • Authentic Pakistani Cuisine Delivered
         </p>
       </motion.div>
     </main>

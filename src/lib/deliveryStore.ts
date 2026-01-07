@@ -162,7 +162,7 @@ export const useDeliveryStore = create<DeliveryState>()(
         }),
     }),
     {
-      name: 'amfood-delivery-storage',
+      name: 'altawakkalfoods-delivery-storage',
       version: 2,
       partialize: (state) => ({
         selectedArea: state.selectedArea,

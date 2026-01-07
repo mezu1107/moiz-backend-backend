@@ -73,3 +73,8 @@ export interface SubmitReviewResponse {
   message: string;
   data: { review: Review };
 }
+
+export interface TopReviewsResponse {
+  reviews: Review[];
+  count: number;
+}

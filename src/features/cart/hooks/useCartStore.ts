@@ -61,7 +61,7 @@ export const useCartStore = create<CartState>()(
         set(partial);
         // Force immediate flush to localStorage
         localStorage.setItem(
-          'amfood-cart-v6',
+          'altawakkalfoods-cart-v6',
           JSON.stringify({ ...get(), version: 6 })
         );
       };
@@ -181,7 +181,7 @@ export const useCartStore = create<CartState>()(
       };
     },
     {
-      name: 'amfood-cart-v6',
+      name: 'altawakkalfoods-cart-v6',
       version: 6,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items, orderNote: state.orderNote }),

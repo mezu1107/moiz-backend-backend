@@ -13,6 +13,14 @@ export default {
       },
     },
     extend: {
+      screens: {
+        // Custom breakpoints to precisely match your required device ranges
+        // Mobile-first: base styles apply to 320px–480px (no prefix needed for mobile-specific tweaks)
+        tablet: "481px",   // Tablet: 481px – 768px → @media (min-width: 481px)
+        laptop: "769px",   // Laptop: 769px – 1024px → @media (min-width: 769px)
+        desktop: "1025px", // Desktop: 1025px – 1440px → @media (min-width: 1025px)
+        large: "1441px",   // Large screens: 1441px+ → @media (min-width: 1441px)
+      },
       fontFamily: {
         sans: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
       },
@@ -61,20 +69,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
         "fade-in": {
           "0%": { opacity: "0", transform: "translateY(10px)" },

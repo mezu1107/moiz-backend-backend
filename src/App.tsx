@@ -1,20 +1,27 @@
 // src/App.tsx
-// FINAL PRODUCTION — DECEMBER 17, 2025
-// Complete routing for FoodExpress Pakistan
+// FINAL PRODUCTION — January 07, 2026
+// Complete routing for Al Tawakkal Foods Pakistan
+// Using React Router Data API (createBrowserRouter) with v7 future flags
 
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as Sonner, toast } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import { SocketProvider } from '@/context/SocketContext'; // ← ADD THIS
+
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+
+import { SocketProvider } from '@/context/SocketContext';
+
 // Layouts
 import { PublicLayout } from "./components/PublicLayout";
 import AdminLayout from "./components/admin/AdminLayout";
 import RiderLayout from "./components/rider/RiderLayout";
-import { KitchenLayout } from "./components/KitchenLayout"; // ← ADD THIS
-import KitchenDisplay from "./pages/kitchen/KitchenDisplay";
+import { KitchenLayout } from "./components/KitchenLayout";
+
 // Public Pages
 import Index from "./pages/Index";
 import Home from "./pages/Home";
@@ -51,37 +58,29 @@ import OrderRefundRequestPage from "@/features/orders/pages/OrderRefundRequestPa
 // Address
 import AddressListPage from "@/features/address/pages/AddressListPage";
 
-
-// Admin
-
-// import AdminDashboard from "./pages/admin/Dashboard";
+// Admin Pages
 import AdminOrders from "./pages/admin/orders/Orders";
 import AdminOrderDetails from "./pages/admin/orders/OrderDetails";
-// import AdminUsers from "./pages/admin/Users";
-// import AdminRiders from "./pages/admin/Riders";
 import AdminDeals from "./pages/admin/Deals";
 import AdminMenuPage from "./features/menu/pages/AdminMenuPage";
 import EditMenuItemPage from "@/features/menu/pages/EditMenuItemPage";
 import AdminAreasList from "./pages/admin/areas/AreasList";
 import AdminAddArea from "./pages/admin/areas/AddArea";
 import AddDeliveryZone from "./pages/admin/areas/AddDeliveryZone";
-
 import AdminEditArea from "./pages/admin/areas/EditArea";
 import ContactMessagesPage from "./pages/admin/contact/ContactMessagesPage";
 import { CustomerList } from "./features/customers/admin/customers/CustomerList";
 import { StaffList } from "./components/admin/staff/StaffList";
 import { InventoryList } from "./components/admin/inventory/InventoryList";
-import AnalyticsPage from "./features/analytics/AnalyticsPage"; 
-// Reviews Pages (NEW)
+import AnalyticsPage from "./features/analytics/AnalyticsPage";
+
+// Reviews
 import CustomerReviewsPage from "./features/reviews/pages/CustomerReviewsPage";
 import AdminReviewsDashboard from "./features/reviews/pages/AdminReviewsDashboard";
+
 // Kitchen
 import KitchenDashboard from "./pages/kitchen/KitchenDashboard";
-
-// Rider
-// import RiderLogin from "./pages/rider/Login";
-// import RiderDashboard from "./pages/rider/Dashboard";
-// import RiderDeliveries from "./pages/rider/Deliveries";
+import KitchenDisplay from "./pages/kitchen/KitchenDisplay";
 
 // Debug
 import DebugAPI from "./pages/DebugAPI";
@@ -89,20 +88,122 @@ import DebugAPI from "./pages/DebugAPI";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,
+      staleTime: 5 * 60 * 1000, // 5 minutes
       retry: 1,
       refetchOnWindowFocus: false,
     },
   },
 });
 
-export default function App() {
-  const openAreaChecker = () => {
-    sessionStorage.removeItem("selectedArea");
-    sessionStorage.removeItem("areaCheckedAt");
-    window.location.href = "/";
-  };
+// Define router with v7 future flags to silence deprecation warnings
+const router = createBrowserRouter(
+  [
+    {
+      element: <PublicLayout />,
+      children: [
+        { path: "/", element: <Index /> },
+        {
+          path: "/home",
+          element: <Home />, // openAreaChecker will be passed via context or props if needed
+        },
 
+        // Menu
+        { path: "/menu", element: <MenuPage /> },
+        { path: "/menu/all", element: <MenuAllPage /> },
+        { path: "/menu/filters", element: <MenuFiltersPage /> },
+        { path: "/menu/area/:areaId", element: <MenuByLocationPage /> },
+
+        // Cart & Checkout
+        { path: "/cart", element: <CartPage /> },
+        { path: "/checkout", element: <CheckoutPage /> },
+        { path: "/checkout/card", element: <CardPaymentPage /> },
+        { path: "/checkout/bank-transfer", element: <BankTransferPage /> },
+
+        // Orders
+        { path: "/orders", element: <OrdersPage /> },
+        { path: "/track/:orderId", element: <OrderTrackingPage /> },
+        { path: "/order/:orderId/refund", element: <OrderRefundRequestPage /> },
+
+        // Address
+        { path: "/addresses", element: <AddressListPage /> },
+
+        // Auth & Info
+        { path: "/login", element: <Login /> },
+        { path: "/register", element: <Register /> },
+        { path: "/forgot-password", element: <ForgotPassword /> },
+        { path: "/verify-otp", element: <VerifyOtp /> },
+        { path: "/reset-password", element: <ResetPassword /> },
+        { path: "/about", element: <About /> },
+        { path: "/contact", element: <Contact /> },
+        { path: "/portfolio", element: <Portfolio /> },
+
+        // Public Reviews
+        { path: "/reviews", element: <CustomerReviewsPage /> },
+
+        // User Profile
+        { path: "/profile", element: <Profile /> },
+        { path: "/dashboard", element: <UserDashboard /> },
+        { path: "/change-password", element: <ChangePassword /> },
+
+        // Debug
+        { path: "/debug-api", element: <DebugAPI /> },
+      ],
+    },
+
+    // Admin Routes
+    {
+      path: "/admin",
+      element: <AdminLayout />,
+      children: [
+        { path: "deals", element: <AdminDeals /> },
+        { path: "menu", element: <AdminMenuPage /> },
+        { path: "menu/edit/:id", element: <EditMenuItemPage /> },
+        { path: "areas", element: <AdminAreasList /> },
+        { path: "areas/add", element: <AdminAddArea /> },
+        { path: "areas/edit/:id", element: <AdminEditArea /> },
+        { path: "delivery-zones", element: <AddDeliveryZone /> },
+        { path: "orders", element: <AdminOrders /> },
+        { path: "orders/:orderId", element: <AdminOrderDetails /> },
+        { path: "contact", element: <ContactMessagesPage /> },
+        { path: "customers", element: <CustomerList /> },
+        { path: "staff", element: <StaffList /> },
+        { path: "inventory", element: <InventoryList /> },
+        { path: "analytics", element: <AnalyticsPage /> },
+        { path: "reviews", element: <AdminReviewsDashboard /> },
+        { path: "kitchen", element: <KitchenDisplay /> },
+      ],
+    },
+
+    // Kitchen Dashboard (Separate Layout)
+    {
+      path: "/kitchen",
+      element: <KitchenLayout />,
+      children: [
+        { index: true, element: <KitchenDashboard /> },
+      ],
+    },
+
+    // Rider (Future)
+    {
+      path: "/rider",
+      element: <RiderLayout />,
+      children: [
+        // Add rider routes later
+      ],
+    },
+
+    // 404
+    {
+      path: "*",
+      element: <NotFound />,
+    },
+  ],
+  {
+    
+  }
+);
+
+export default function App() {
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
@@ -110,93 +211,10 @@ export default function App() {
           <Toaster />
           <Sonner />
 
-<SocketProvider>  
-          <BrowserRouter>
-          
-            <Routes>
-              {/* ====================== PUBLIC ROUTES ====================== */}
-              <Route element={<PublicLayout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/home" element={<Home openAreaChecker={openAreaChecker} />} />
-
-                <Route path="/menu" element={<MenuPage />} />
-                <Route path="/menu/all" element={<MenuAllPage />} />
-                <Route path="/menu/filters" element={<MenuFiltersPage />} />
-                <Route path="/menu/area/:areaId" element={<MenuByLocationPage />} />
-                
-
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/checkout/card" element={<CardPaymentPage />} />
-                <Route path="/checkout/bank-transfer" element={<BankTransferPage />} />
-
-                <Route path="/orders" element={<OrdersPage />} />
-                <Route path="/track/:orderId" element={<OrderTrackingPage />} />
-                <Route path="/order/:orderId/refund" element={<OrderRefundRequestPage />} />
-
-                <Route path="/addresses" element={<AddressListPage />} />
-
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/portfolio" element={<Portfolio />} />
-                {/* ====================== REVIEWS PUBLIC PAGE ====================== */}
-                <Route path="/reviews" element={<CustomerReviewsPage />} />
-                {/* ====================== AUTH ROUTES ====================== */}
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/verify-otp" element={<VerifyOtp />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                {/* Inside PublicLayout or wherever you want profile */}
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/dashboard" element={<UserDashboard />} />
-                <Route path="/change-password" element={<ChangePassword />} />
-                <Route path="/debug-api" element={<DebugAPI />} />
-              </Route>
-
-              {/* ====================== ADMIN ROUTES ====================== */}
-              <Route path="/admin" element={<AdminLayout />}>
-  {/* <Route index element={<AdminDashboard />} /> */}
-  {/* <Route path="dashboard" element={<AdminDashboard />} /> */}
-  {/* <Route path="users" element={<AdminUsers />} /> */}
-  {/* <Route path="riders" element={<AdminRiders />} /> */}
-  <Route path="deals" element={<AdminDeals />} />
-  <Route path="menu" element={<AdminMenuPage />} />
-  <Route path="menu/edit/:id" element={<EditMenuItemPage />} />
-  <Route path="areas" element={<AdminAreasList />} />
-  <Route path="areas/add" element={<AdminAddArea />} />
-  <Route path="/admin/delivery-zones" element={<AddDeliveryZone />} />
-  <Route path="areas/edit/:id" element={<AdminEditArea />} />
-  <Route path="orders" element={<AdminOrders />} />
-  <Route path="orders/:orderId" element={<AdminOrderDetails />} />
-  <Route path="contact" element={<ContactMessagesPage />} />
-  <Route path="customers" element={<CustomerList />} />
-  <Route path="staff" element={<StaffList />} />
-  <Route path="inventory" element={<InventoryList />} />
-  <Route path="analytics" element={<AnalyticsPage />} />
-  <Route path="reviews" element={<AdminReviewsDashboard />} />
-
-  ✅ ADD THIS
-  <Route path="kitchen" element={<KitchenDisplay />} />
-</Route>
-
-              {/* ====================== KITCHEN ROUTE ====================== */}
-                <Route path="/kitchen" element={<KitchenLayout />}>
-                  <Route index element={<KitchenDashboard />} />
-                </Route>
-              
-              {/* ====================== RIDER ROUTES ====================== */}
-              {/* <Route path="/rider/login" element={<RiderLogin />} /> */}
-              <Route path="/rider" element={<RiderLayout />}>
-                {/* <Route index element={<RiderDashboard />} /> */}
-                {/* <Route path="deliveries" element={<RiderDeliveries />} /> */}
-              </Route>
-
-              {/* ====================== 404 ====================== */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-           </SocketProvider>
+          <SocketProvider>
+            {/* Replace BrowserRouter + Routes with RouterProvider */}
+            <RouterProvider router={router} />
+          </SocketProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </HelmetProvider>

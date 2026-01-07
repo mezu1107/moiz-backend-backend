@@ -1,5 +1,5 @@
 // src/pages/Contact.tsx
-// PRODUCTION-READY — Modern, responsive contact page matching AM Foods branding
+// PRODUCTION-READY — Modern, responsive contact page matching Al Tawakkalfoods branding
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -18,9 +18,9 @@ const API_URL = import.meta.env.VITE_API_URL;
 const contactInfo = [
   {
     title: "Email Us",
-    content: "support@amfoods.pk",
+    content: "altawakkalfoods112@gmail.com",
     icon: Mail,
-    link: "mailto:support@amfoods.pk",
+    link: "mailto:altawakkalfoods112@gmail.com",
   },
   {
     title: "Call Us",
@@ -183,7 +183,7 @@ export default function Contact() {
                   type="email"
                   value={formData.email}
                   onChange={handleChange("email")}
-                  placeholder="your@email.com"
+                  placeholder="altawakkalfoods112@gmail.com"
                   disabled={loading}
                   className="h-11 md:h-12"
                 />

@@ -325,7 +325,7 @@ export default function UserDashboard() {
                       <Package className="h-20 w-20 md:h-24 md:w-24 mx-auto text-muted-foreground mb-6 opacity-50" />
                       <h3 className="text-2xl md:text-3xl font-bold mb-4">No orders yet!</h3>
                       <p className="text-base md:text-lg text-muted-foreground mb-8">
-                        Start your delicious journey with AM Foods
+                        Start your delicious journey with Al Tawakkalfoods
                       </p>
                       <Button
                         size="lg"
