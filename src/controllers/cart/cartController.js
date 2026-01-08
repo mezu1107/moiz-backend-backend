@@ -1,3 +1,8 @@
+// src/controllers/cart/cartController.js
+// PRODUCTION-READY — JANUARY 09, 2026
+// FINAL FIXED: No more "undefined is unavailable" error
+// Clear 404 for missing items, proper messages
+
 const mongoose = require('mongoose');
 const Cart = require('../../models/cart/Cart');
 const MenuItem = require('../../models/menuItem/MenuItem');
@@ -21,13 +26,15 @@ const toArray = (val) => {
   return typeof val === 'string' && val.trim() ? [val.trim()] : [];
 };
 
-// CORE FIX: Recalculate priceAtAdd based on current menu item + selected options
+// CORE: Recalculate priceAtAdd based on current menu item + selected options
 const calculatePriceAtAdd = async (menuItemId, sides = [], drinks = [], addOns = []) => {
   const menuItem = await MenuItem.findById(menuItemId)
-    .select('price pricedOptions')
+    .select('price pricedOptions name isAvailable')
     .lean();
 
-  if (!menuItem) return { priceAtAdd: 0, menuItem: null };
+  if (!menuItem) {
+    return { priceAtAdd: 0, menuItem: null };
+  }
 
   const options = menuItem.pricedOptions || { sides: [], drinks: [], addOns: [] };
 
@@ -42,7 +49,7 @@ const calculatePriceAtAdd = async (menuItemId, sides = [], drinks = [], addOns =
   };
 };
 
-// OPTIMIZED: Populate all cart items in a single query (eliminates N+1)
+// OPTIMIZED: Populate cart items efficiently
 const populateItems = async (cartItems) => {
   if (cartItems.length === 0) return [];
 
@@ -139,7 +146,7 @@ const getCart = async (req, res) => {
   }
 };
 
-// ADD TO CART
+// ADD TO CART — FIXED
 const addToCart = async (req, res) => {
   const {
     menuItemId,
@@ -154,8 +161,12 @@ const addToCart = async (req, res) => {
   const userId = req.user?.id;
 
   try {
+    // Validate ObjectId early
     if (!menuItemId || !mongoose.Types.ObjectId.isValid(menuItemId)) {
-      return res.status(400).json({ success: false, message: 'Valid menuItemId required' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Valid menuItemId required' 
+      });
     }
 
     const normalizedSides = toArray(sides);
@@ -171,8 +182,21 @@ const addToCart = async (req, res) => {
       normalizedAddOns
     );
 
-    if (!menuItem) return res.status(404).json({ success: false, message: 'Item not found' });
-    if (!menuItem.isAvailable) return res.status(400).json({ success: false, message: `${menuItem.name} is unavailable` });
+    // FIXED: Proper 404 when item doesn't exist
+    if (!menuItem) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Menu item not found' 
+      });
+    }
+
+    // Proper message when unavailable
+    if (!menuItem.isAvailable) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `${menuItem.name} is currently unavailable` 
+      });
+    }
 
     const newCartItemBase = {
       menuItem: menuItemId,
@@ -197,7 +221,10 @@ const addToCart = async (req, res) => {
       );
 
       if (existingIdx > -1) {
-        cart.items[existingIdx].quantity = Math.min(cart.items[existingIdx].quantity + quantity, 50);
+        cart.items[existingIdx].quantity = Math.min(
+          cart.items[existingIdx].quantity + quantity,
+          50
+        );
       } else {
         cart.items.push(newCartItemBase);
       }
@@ -211,7 +238,9 @@ const addToCart = async (req, res) => {
 
       return res.json({
         success: true,
-        message: existingIdx > -1 ? `Added ${quantity} more` : `${menuItem.name} added to cart`,
+        message: existingIdx > -1 
+          ? `Added ${quantity} more` 
+          : `${menuItem.name} added to cart`,
         cart: { items: populatedItems, total, orderNote: cart.orderNote || '' },
         isGuest: false
       });
@@ -230,7 +259,10 @@ const addToCart = async (req, res) => {
     );
 
     if (existingIdx > -1) {
-      req.session.cart[existingIdx].quantity = Math.min(req.session.cart[existingIdx].quantity + quantity, 50);
+      req.session.cart[existingIdx].quantity = Math.min(
+        req.session.cart[existingIdx].quantity + quantity,
+        50
+      );
     } else {
       req.session.cart.push({
         ...newCartItemBase,
@@ -246,7 +278,9 @@ const addToCart = async (req, res) => {
 
     res.json({
       success: true,
-      message: existingIdx > -1 ? `Added ${quantity} more` : `${menuItem.name} added to cart`,
+      message: existingIdx > -1 
+        ? `Added ${quantity} more` 
+        : `${menuItem.name} added to cart`,
       cart: { items: populatedItems, total, orderNote: req.session.orderNote || '' },
       isGuest: true
     });

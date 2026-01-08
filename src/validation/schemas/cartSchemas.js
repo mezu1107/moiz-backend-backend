@@ -1,13 +1,21 @@
 // src/validation/schemas/cartSchemas.js
-// FIXED: Now correctly validates when only quantity is sent
+// PRODUCTION-READY — JANUARY 09, 2026
+// FIXED: Uses real mongoose ObjectId validation (accepts uppercase hex)
+// No more false 400 errors on valid IDs
 
 const { body, param } = require('express-validator');
+const mongoose = require('mongoose'); // ← Critical import
 
 const addToCartSchema = [
   body('menuItemId')
     .trim()
     .notEmpty().withMessage('menuItemId is required')
-    .isMongoId().withMessage('Invalid menu item ID'),
+    .custom((value) => {
+      if (!mongoose.Types.ObjectId.isValid(value)) {
+        throw new Error('Invalid menu item ID');
+      }
+      return true;
+    }),
 
   body('quantity')
     .optional()
@@ -24,14 +32,14 @@ const addToCartSchema = [
     .isString()
     .trim()
     .isLength({ max: 300 })
-    .withMessage('Special instructions too long'),
+    .withMessage('Special instructions too long (max 300 characters)'),
 
   body('orderNote')
     .optional()
     .isString()
     .trim()
     .isLength({ max: 500 })
-    .withMessage('Order note too long'),
+    .withMessage('Order note too long (max 500 characters)'),
 ];
 
 const updateCartItemSchema = [
@@ -59,20 +67,27 @@ const updateCartItemSchema = [
     .optional()
     .isString()
     .trim()
-    .isLength({ max: 300 }),
+    .isLength({ max: 300 })
+    .withMessage('Special instructions too long'),
 
   body('orderNote')
     .optional()
     .isString()
     .trim()
-    .isLength({ max: 500 }),
+    .isLength({ max: 500 })
+    .withMessage('Order note too long'),
 ];
 
 const cartItemParamSchema = [
   param('itemId')
     .trim()
     .notEmpty().withMessage('itemId is required')
-    .isMongoId().withMessage('Invalid cart item ID'),
+    .custom((value) => {
+      if (!mongoose.Types.ObjectId.isValid(value)) {
+        throw new Error('Invalid cart item ID');
+      }
+      return true;
+    }),
 ];
 
 module.exports = {
