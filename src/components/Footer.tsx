@@ -47,7 +47,7 @@ export const Footer: React.FC = () => {
             {/* Social Links */}
             <div className="flex items-center gap-4">
               <a
-                href="https://www.facebook.com/profile.php?id=61585268507343"
+                href="https://www.facebook.com/share/1Ds3XXteB8/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
@@ -57,7 +57,7 @@ export const Footer: React.FC = () => {
               </a>
 
               <a
-                href="https://www.instagram.com/altawakkalfoods112"
+                href="https://www.instagram.com/altawakkalfoods112?igsh=ZDdpZ3d2Znk0anFy"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -77,7 +77,7 @@ export const Footer: React.FC = () => {
               </a>
 
               <a
-                href="https://youtu.be/MGq37TZvMXI?si=WJ0JqUQsLl5DWrsp"
+                href="https://youtube.com/@altawakkalfoods?si=QyHyE_y3GzNZf87S"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube"
@@ -172,8 +172,19 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-orange-200 text-center">
           <p className="text-sm text-gray-700">
-            © {new Date().getFullYear()} AM Enterprises Pakistan • Authentic Pakistani Cuisine Delivered with Love
-          </p>
+  © {new Date().getFullYear()} AM Enterprises Pakistan • Authentic Pakistani Cuisine Delivered with Love
+  <br />
+  Designed & Developed by{" "}
+  <a
+    href="https://www.amenterprises.tech/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-gray-700 no-underline hover:underline"
+  >
+    AM Enterprises
+  </a>
+</p>
+
         </div>
       </div>
     </footer>

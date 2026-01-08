@@ -1,11 +1,11 @@
 // src/pages/Home.tsx
-// PRODUCTION VERSION — January 07, 2026
-// Fully responsive, high-contrast, accessible, modern homepage with authentic Pakistani color harmony
+// PRODUCTION VERSION — January 08, 2026
+// Fully responsive, high-contrast, accessible, modern homepage with authentic Pakistani color harmony + floating WhatsApp chat
 
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Star, AlertTriangle, Package } from "lucide-react";
+import { ArrowRight, Star, AlertTriangle, Package, MessageCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -58,20 +58,20 @@ export const Home = ({ openAreaChecker }: HomeProps = {}) => {
   );
 
   const promotionalTexts = [
-    { 
-      main: "AUTHENTIC PAKISTANI TASTE", 
+    {
+      main: "AUTHENTIC PAKISTANI TASTE",
       sub: "Handcrafted desi dishes made with love",
       mainColor: "text-orange-700 dark:text-orange-300",
       subColor: "text-gray-800 dark:text-gray-200"
     },
-    { 
-      main: "FRESH & HALAL", 
+    {
+      main: "FRESH & HALAL",
       sub: "100% fresh ingredients, always halal-certified",
       mainColor: "text-amber-700 dark:text-amber-300",
       subColor: "text-gray-800 dark:text-gray-200"
     },
-    { 
-      main: "GHAR KA KHANA", 
+    {
+      main: "GHAR KA KHANA",
       sub: "Comforting home-style cooking, just like ammi makes",
       mainColor: "text-orange-700 dark:text-orange-300",
       subColor: "text-gray-800 dark:text-gray-200"
@@ -95,8 +95,23 @@ export const Home = ({ openAreaChecker }: HomeProps = {}) => {
 
   const reviews = reviewsData?.reviews ?? [];
 
+  // WhatsApp floating chat state
+  const [chatOpen, setChatOpen] = useState(false);
+
+  const whatsappMessages = [
+    { text: "How may I help you?" },
+    { text: "Talk with our agent" },
+    { text: "Track my order" },
+    { text: "Need assistance?" }
+  ];
+
+  const openWhatsApp = (msg: string) => {
+    const url = `https://wa.me/03320123459?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
+  };
+
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background relative">
       {/* ================= HERO ================= */}
       <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100/50 min-h-[80vh] flex items-center py-12 lg:py-0">
         <div className="absolute inset-0 opacity-30 pointer-events-none">
@@ -138,11 +153,18 @@ export const Home = ({ openAreaChecker }: HomeProps = {}) => {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9 }}
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold mb-6 leading-tight tracking-tight"
+              className="mb-6 text-center"
             >
-              <span className="text-amber-500">Al</span>
-              <span className="text-orange-600 drop-shadow-lg">Tawakkal</span>
-              <span className="text-amber-500">foods</span>
+              <span className="inline-flex whitespace-nowrap text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight">
+                <span className="text-amber-500">Al</span>
+                <span className="text-orange-600 mx-2">Tawakkal</span>
+                <span className="text-amber-500">Foods</span>
+              </span>
+
+              {/* Slogan */}
+              <p className="mt-3 text-sm sm:text-base md:text-lg text-gray-600 tracking-wide">
+                Eat • Enjoy • Repeat
+              </p>
             </motion.h1>
 
             <AnimatePresence mode="wait">
@@ -247,36 +269,31 @@ export const Home = ({ openAreaChecker }: HomeProps = {}) => {
           </p>
         </motion.div>
 
-        {/* ... (menu loading states unchanged for brevity) ... */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+          {featuredItems.map((item, index) => (
+            <motion.div
+              key={item._id}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.12 }}
+            >
+              <MenuItemCard item={item} />
+            </motion.div>
+          ))}
+        </div>
 
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {featuredItems.map((item, index) => (
-              <motion.div
-                key={item._id}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.12 }}
-              >
-                <MenuItemCard item={item} />
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="text-center mt-16">
-            <Button size="lg" asChild className="px-14 py-8 text-lg rounded-2xl shadow-xl bg-amber-600 hover:bg-amber-700">
-              <Link to="/menu">
-                View Full Menu <ArrowRight className="ml-4 h-6 w-6" />
-              </Link>
-            </Button>
-          </div>
-        </>
+        <div className="text-center mt-16">
+          <Button size="lg" asChild className="px-14 py-8 text-lg rounded-2xl shadow-xl bg-amber-600 hover:bg-amber-700">
+            <Link to="/menu">
+              View Full Menu <ArrowRight className="ml-4 h-6 w-6" />
+            </Link>
+          </Button>
+        </div>
       </section>
 
       {/* ================= REAL CUSTOMER REVIEWS ================= */}
       <section className="bg-gradient-to-b from-orange-50 to-amber-50 py-20 lg:py-32">
-        {/* ... (reviews section unchanged except subtle text color improvements) ... */}
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -291,8 +308,6 @@ export const Home = ({ openAreaChecker }: HomeProps = {}) => {
               Real reviews from happy foodies who’ve tasted our authentic Pakistani dishes
             </p>
           </motion.div>
-
-          {/* Reviews grid unchanged — your ReviewCard will inherit the warm background nicely */}
         </div>
       </section>
 
@@ -323,6 +338,63 @@ export const Home = ({ openAreaChecker }: HomeProps = {}) => {
           </Button>
         </motion.div>
       </section>
+
+      {/* ================= FLOATING WHATSAPP BUTTON ================= */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {/* WhatsApp Icon */}
+        <button
+          onClick={() => setChatOpen((prev) => !prev)}
+          className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-xl transition-all"
+        >
+          <MessageCircle className="w-6 h-6" />
+        </button>
+
+        {/* Mini WhatsApp Popup */}
+        <AnimatePresence>
+          {chatOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ duration: 0.3 }}
+              className="absolute bottom-16 right-0 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
+            >
+              {/* Header */}
+              <div className="bg-green-500 p-3 text-white font-bold text-center">
+                AlTawakkal Foods
+              </div>
+
+              {/* Messages */}
+              <div className="flex flex-col p-2 space-y-2">
+                {whatsappMessages.map((msg, i) => (
+                  <motion.button
+                    key={i}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => openWhatsApp(msg.text)}
+                    className="text-gray-800 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg p-2 text-left transition-all"
+                  >
+                    {msg.text}
+                  </motion.button>
+                ))}
+              </div>
+
+              {/* Bottom Typing area (UI only) */}
+              <div className="border-t border-gray-200 p-2 flex items-center space-x-2">
+                <input
+                  type="text"
+                  placeholder="Type a message..."
+                  className="flex-1 border rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+                  disabled
+                />
+                <button className="bg-green-500 text-white p-2 rounded-lg text-sm" disabled>
+                  Send
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </main>
   );
 };

@@ -72,7 +72,7 @@ export const Header = () => {
               {/* Brand text: hidden on mobile, visible from sm+ */}
               <div className="hidden sm:block">
                 <h1 className="font-bold text-xl leading-tight text-orange-700">
-                  AlTawakkalfoods
+                  Al Tawakkal foods
                 </h1>
                 <p className="text-xs text-amber-800">Authentic Pakistani Cuisine</p>
               </div>

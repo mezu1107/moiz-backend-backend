@@ -177,9 +177,7 @@ export default function Login() {
         </Card>
 
         {/* Footer Note */}
-        <p className="text-center text-sm text-muted-foreground mt-8">
-          © {new Date().getFullYear()} AM Enterprises Pakistan • Authentic Pakistani Cuisine Delivered
-        </p>
+        
       </motion.div>
     </main>
   );
