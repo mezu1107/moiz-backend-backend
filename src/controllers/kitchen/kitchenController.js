@@ -92,11 +92,16 @@ const startPreparingItem = async (req, res) => {
   }
 };
 
+// src/controllers/kitchen/kitchenController.js → completeItem
+
 const completeItem = async (req, res) => {
   const { kitchenOrderId, itemId } = req.body;
 
   try {
-    const kitchenOrder = await KitchenOrder.findById(kitchenOrderId);
+    // ایڈریس اور فائنل اماؤنٹ کے لیے order کو بھی populate کریں
+    const kitchenOrder = await KitchenOrder.findById(kitchenOrderId)
+      .populate('order', 'addressDetails fullAddress finalAmount paymentMethod');
+
     if (!kitchenOrder) return res.status(404).json({ success: false, message: 'Kitchen order not found' });
 
     const item = kitchenOrder.items.id(itemId);
@@ -117,7 +122,6 @@ const completeItem = async (req, res) => {
 
     await kitchenOrder.save();
 
-    // === REAL-TIME KITCHEN EVENTS ===
     const io = global.io;
     if (io) {
       global.emitKitchenOrderUpdate?.(kitchenOrder);
@@ -132,20 +136,26 @@ const completeItem = async (req, res) => {
       });
 
       if (allReady) {
-        io.to('kitchen').emit('orderReadyForDelivery', {
-          kitchenOrderId: kitchenOrder._id,
+        const readyPayload = {
+          orderId: kitchenOrder.order?._id?.toString(),
+          kitchenOrderId: kitchenOrder._id.toString(),
           shortId: kitchenOrder.shortId,
           customerName: kitchenOrder.customerName,
+          address: kitchenOrder.order?.addressDetails?.fullAddress || 'Pickup from kitchen',
           itemsCount: kitchenOrder.items.length,
+          totalAmount: kitchenOrder.order?.finalAmount || 0,
+          paymentMethod: kitchenOrder.order?.paymentMethod || 'cash',
           timestamp: new Date()
-        });
+        };
 
-        io.to('admin').emit('order-ready-for-delivery', {
-          orderId: kitchenOrder.order,
-          shortId: kitchenOrder.shortId,
-          customerName: kitchenOrder.customerName,
-          timestamp: new Date()
-        });
+        // کچن کو بھی بتائیں
+        io.to('kitchen').emit('orderReadyForDelivery', readyPayload);
+
+        // ایڈمن کو فوراً بتائیں
+        io.to('admin').emit('order-ready-for-delivery', readyPayload);
+
+        // رائڈر کو بھی بتائیں (اگر آپ رائڈر ایپ بنا رہے ہیں)
+        io.to('rider').emit('orderReadyForPickup', readyPayload);
       }
 
       io.to('admin').emit('kitchen-update', kitchenOrder);

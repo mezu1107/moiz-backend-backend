@@ -1,15 +1,29 @@
 // src/controllers/review/reviewController.js
+const mongoose = require('mongoose');
+
 const Review = require('../../models/review/Review');
 const Order = require('../../models/order/Order');
 const orderIdShort = require('../../utils/orderIdShort');
 const admin = require('firebase-admin');
 
+
 // SUBMIT REVIEW
 const submitReview = async (req, res) => {
-  const { orderId, rating, comment, images } = req.body;
+  const { orderId: orderIdStr, rating, comment, images } = req.body;
   const customerId = req.user._id;
 
+  // CRITICAL: Convert to ObjectId early
+  if (!mongoose.Types.ObjectId.isValid(orderIdStr)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid order ID',
+    });
+  }
+
+  const orderId = new mongoose.Types.ObjectId(orderIdStr);
+
   try {
+    // Find the order using converted ObjectId
     const order = await Order.findOne({
       _id: orderId,
       customer: customerId,
@@ -23,6 +37,7 @@ const submitReview = async (req, res) => {
       });
     }
 
+    // Prevent duplicate reviews
     const existingReview = await Review.findOne({ order: orderId });
     if (existingReview) {
       return res.status(400).json({
@@ -31,6 +46,7 @@ const submitReview = async (req, res) => {
       });
     }
 
+    // Create the new review
     const review = await Review.create({
       order: orderId,
       customer: customerId,
@@ -41,6 +57,23 @@ const submitReview = async (req, res) => {
 
     await review.populate('customer', 'name');
 
+    // NOW SAFE: Use the proper ObjectId
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        review: true,
+        reviewedAt: new Date(),
+      },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      console.warn('Failed to update review flag for order:', orderId);
+    } else {
+      console.log('Successfully set review: true for order:', orderId);
+    }
+
+    // Notify admin
     global.io?.to('admin').emit('new-review', {
       reviewId: review._id,
       orderId: orderIdShort(orderId),
