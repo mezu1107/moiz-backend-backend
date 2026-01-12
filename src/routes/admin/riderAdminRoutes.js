@@ -21,7 +21,8 @@ const {
   permanentlyBanRider,
   getBlockedRiders,
   getPermanentlyBannedRiders,
-  assignOrderToRider
+  assignOrderToRider,
+  getAvailableRiders,
 } = require('../../controllers/admin/riderAdminController');
 
 const schema = require('../../validation/schemas/riderSchemas');
@@ -33,7 +34,8 @@ router.use(auth, role('admin'));
 router.get('/stats', getRiderStats);
 router.get('/blocked', getBlockedRiders);
 router.get('/permanently-banned', getPermanentlyBannedRiders);
-
+// Available Riders (for order assignment)
+router.get('/available', getAvailableRiders);
 // List & Details
 router.get('/', getAllRiders);
 router.get('/:id', schema.validateRiderId, validate, getRiderById);

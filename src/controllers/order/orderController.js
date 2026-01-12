@@ -530,6 +530,7 @@ const createOrder = async (req, res) => {
 };
 
 // ── STATUS UPDATE WITH GUEST EMAIL ───────────────────────────────────────
+
 const updateOrderStatus = async (req, res) => {
   const { status } = req.body;
   const userRole = req.user.role;
@@ -555,19 +556,19 @@ const updateOrderStatus = async (req, res) => {
     session = await mongoose.startSession();
     session.startTransaction();
 
+    // ================= FIND ORDER =================
     const order = await Order.findById(req.params.id).session(session);
     if (!order) {
       await session.abortTransaction();
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    // Role permissions check
+
+    // ── Role Permissions ─────────────
     if (userRole !== 'admin') {
-      if (userRole === 'kitchen') {
-        if (!['confirmed', 'preparing'].includes(status)) {
-          await session.abortTransaction();
-          return res.status(403).json({ success: false, message: 'Kitchen cannot set this status' });
-        }
+      if (userRole === 'kitchen' && !['confirmed', 'preparing'].includes(status)) {
+        await session.abortTransaction();
+        return res.status(403).json({ success: false, message: 'Kitchen cannot set this status' });
       }
       if (userRole === 'rider') {
         if (!['out_for_delivery', 'delivered'].includes(status)) {
@@ -581,18 +582,17 @@ const updateOrderStatus = async (req, res) => {
       }
     }
 
-    // Invalid transition guard
+    // ── Invalid Transitions ─────────────
     const INVALID_TRANSITIONS = {
       delivered: ['confirmed', 'preparing', 'out_for_delivery'],
       rejected: ['delivered'],
-      cancelled: ['delivered']
+      cancelled: ['delivered'],
     };
-
-    if (INVALID_TRANSITIONS[order.status] && INVALID_TRANSITIONS[order.status].includes(status)) {
+    if (INVALID_TRANSITIONS[order.status]?.includes(status)) {
       await session.abortTransaction();
       return res.status(400).json({
         success: false,
-        message: `Cannot move from ${order.status} to ${status}`
+        message: `Cannot move from ${order.status} to ${status}`,
       });
     }
 
@@ -613,15 +613,12 @@ const updateOrderStatus = async (req, res) => {
 
     await order.save({ session });
 
-    // Kitchen order sync
+    // ── KitchenOrder Sync ─────────────
     const kitchenOrder = await KitchenOrder.findOne({ order: order._id }).session(session);
     if (kitchenOrder) {
       if (status === 'confirmed') {
         kitchenOrder.status = 'new';
-        // Also trigger strong kitchen alert when order is confirmed
-        if (global.emitNewOrderAlert) {
-          await global.emitNewOrderAlert(order._id);
-        }
+        if (global.emitNewOrderAlert) await global.emitNewOrderAlert(order._id);
       }
       if (status === 'preparing') {
         kitchenOrder.status = 'preparing';
@@ -653,7 +650,7 @@ const updateOrderStatus = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    // Guest status email
+    // ── Guest Email Notification ─────────────
     const guestNotifyStatuses = ['confirmed', 'out_for_delivery', 'delivered', 'cancelled', 'rejected'];
     if (guestNotifyStatuses.includes(status)) {
       const shortId = orderIdShort(order._id);
@@ -661,10 +658,10 @@ const updateOrderStatus = async (req, res) => {
 
       const messages = {
         confirmed: "Your order has been confirmed! Our kitchen is now preparing your food 🍳",
-        out_for_delivery: "Your order is on the way! 🚀 Our rider is heading to your location",
+        out_for_delivery: "Your order is on the way! 🚀",
         delivered: "Your order has been delivered! Enjoy your meal 🎉",
         cancelled: "Your order has been cancelled.",
-        rejected: "Sorry, we couldn't process your order at this time."
+        rejected: "Sorry, we couldn't process your order at this time.",
       };
 
       const html = `
@@ -676,49 +673,30 @@ const updateOrderStatus = async (req, res) => {
               Track Your Order
             </a>
           </p>
-          <p style="color: #666; font-size: 14px;">
-            Thank you for choosing us!
-          </p>
+          <p style="color: #666; font-size: 14px;">Thank you for choosing us!</p>
         </div>
       `;
-
       sendGuestEmail(order, `Order #${shortId} - ${status.replace('_', ' ').toUpperCase()}`, html);
     }
 
+    // ── Push Notifications ─────────────
     await sendNotification(order, 'status_updated');
+    if (global.emitOrderUpdate) await global.emitOrderUpdate(order._id);
+    if (global.emitKitchenOrderUpdate && kitchenOrder) await global.emitKitchenOrderUpdate(kitchenOrder);
+    if (global.emitKitchenStats) await global.emitKitchenStats();
 
-    if (global.emitOrderUpdate) {
-      await global.emitOrderUpdate(order._id);
-    }
-
-    if (global.emitKitchenOrderUpdate && kitchenOrder) {
-      await global.emitKitchenOrderUpdate(kitchenOrder);
-    }
-
-    if (global.emitKitchenStats) {
-      await global.emitKitchenStats();
-    }
-
-    return res.json({
-      success: true,
-      message: 'Order status updated successfully',
-      order,
-      kitchenOrder
-    });
+    return res.json({ success: true, message: 'Order status updated successfully', order, kitchenOrder });
 
   } catch (err) {
     if (session) {
       await session.abortTransaction();
       session.endSession();
     }
-
     console.error('updateOrderStatus error:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to update order status'
-    });
+    return res.status(500).json({ success: false, message: 'Failed to update order status' });
   }
 };
+
 
 
 const reorderOrder = async (req, res) => {
@@ -1298,7 +1276,6 @@ const customerRejectOrder = async (req, res) => {
 
 
 // ====================== PUBLIC TRACKING (NO RESTRICTIONS) ======================
-// ====================== PUBLIC TRACKING (NO RESTRICTIONS) ======================
 const trackOrderById = async (req, res) => {
   const { orderId } = req.params;
 
@@ -1369,6 +1346,7 @@ const trackOrderById = async (req, res) => {
         : null,
       review: order.review || null,
       trackUrl: `${process.env.APP_URL || 'https://foodapp.pk'}/track/${order._id}`,
+
     };
 
     return res.json({ success: true, order: safeOrder });

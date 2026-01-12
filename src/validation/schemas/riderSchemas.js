@@ -7,7 +7,7 @@ const Order = require('../../models/order/Order');
 const validateRiderId = [
   param('id').trim().isMongoId().withMessage('Invalid rider ID')
 ];
-
+const getAvailableRidersSchema = {}; // Empty - query params only
 const validateOrderIdParam = [
   param('id').trim().isMongoId().withMessage('Invalid order ID')
 ];
@@ -116,5 +116,6 @@ module.exports = {
   rejectRider,
   blockRider,
   permanentlyBanRider,
-  promoteUserToRider
+  promoteUserToRider,
+  getAvailableRidersSchema
 };

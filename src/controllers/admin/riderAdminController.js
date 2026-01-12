@@ -657,7 +657,74 @@ const assignOrderToRider = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to assign order' });
   }
 };
+// =============================
+// 16. Get Available Riders (For Admin Order Assignment)
+// =============================
+const getAvailableRiders = async (req, res) => {
+  try {
+    const { area, page = 1, limit = 50 } = req.query; // area filter optional for future
 
+    const activeStatuses = ['confirmed', 'preparing', 'out_for_delivery'];
+
+    // Find riders WITHOUT active orders
+    const busyRiderIds = await Order.distinct('rider', {
+      rider: { $ne: null },
+      status: { $in: activeStatuses },
+    });
+
+    const query = {
+      role: 'rider',
+      riderStatus: 'approved',
+      isActive: true,
+      isBlocked: { $ne: true },
+      isDeleted: { $ne: true },
+      isOnline: true,
+      isAvailable: true,
+      _id: { $nin: busyRiderIds }, // Exclude busy riders
+    };
+
+    // Optional: area-based filtering (future: use rider.currentArea)
+    if (area) {
+      // query['currentArea'] = area; // Uncomment when area field added to User model
+    }
+
+    const [riders, total] = await Promise.all([
+      User.find(query)
+        .select('name phone rating totalDeliveries earnings isOnline isAvailable currentLocation riderDocuments.vehicleType createdAt')
+        .sort({ 
+          rating: -1, 
+          totalDeliveries: -1,
+          isOnline: -1,
+          createdAt: -1 
+        })
+        .skip((page - 1) * limit)
+        .limit(+limit)
+        .lean(),
+      User.countDocuments(query),
+    ]);
+
+    // Real-time hint: emit to admin room (optional)
+    if (io && total > 0) {
+      io.to('admin').emit('availableRidersCount', { count: total });
+    }
+
+    res.json({
+      success: true,
+      riders,
+      pagination: {
+        total,
+        page: +page,
+        limit: +limit,
+        pages: Math.ceil(total / limit),
+        availableCount: total,
+      },
+      message: `${total} available riders found`,
+    });
+  } catch (err) {
+    console.error('getAvailableRiders Error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch available riders' });
+  }
+};
 module.exports = {
   getAllRiders,
   getRiderById,
@@ -674,4 +741,5 @@ module.exports = {
   getBlockedRiders,
   getPermanentlyBannedRiders,
   assignOrderToRider,
+  getAvailableRiders,
 };
