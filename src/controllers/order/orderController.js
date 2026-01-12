@@ -1,7 +1,7 @@
 // src/controllers/order/orderController.js
-// PRODUCTION-READY — DECEMBER 27, 2025
-// Fixed: reorderOrder crash on missing menu items
-// Fixed: Cart automatically cleared after successful order
+// PRODUCTION-READY — DECEMBER 27, 2025 → UPDATED JANUARY 12, 2026
+// Enhanced: Strong kitchen new order alerts via emitNewOrderAlert
+// Added support for urgent order detection based on instructions
 
 const mongoose = require('mongoose');
 const Order = require('../../models/order/Order');
@@ -18,6 +18,9 @@ const stripe = require('../../config/stripe');
 const admin = require('firebase-admin');
 const PDFDocument = require('pdfkit');
 const io = global.io;
+
+// Import EmailRotator singleton
+const emailRotator = require('../../utils/emailRotator');
 
 const { debitWallet, creditWallet, toNumber, toDecimal } = require('../wallet/walletController');
 const { applyAndTrackDeal } = require('../deal/dealController');
@@ -76,6 +79,73 @@ const sendNotification = async (order, type, extraData = {}) => {
   }
 };
 
+// Reusable guest email sender (safe, non-blocking)
+const sendGuestEmail = async (order, subject, htmlContent) => {
+  if (!order.guestInfo?.email || order.customer) return; // only guests
+
+  const mailOptions = {
+    to: order.guestInfo.email,
+    subject,
+    html: htmlContent,
+  };
+
+  try {
+    await emailRotator.sendMail(mailOptions);
+    console.log(`Guest email sent: ${subject} → ${order.guestInfo.email}`);
+  } catch (err) {
+    console.error(`Guest email failed (${subject}):`, err.message);
+  }
+};
+
+// Send email notification to admin(s) on new order
+const sendAdminNewOrderEmail = async (order) => {
+  const adminEmail = process.env.ADMIN_EMAIL;
+
+  if (!adminEmail) {
+    console.warn('ADMIN_EMAIL not set in .env — skipping admin notification email');
+    return;
+  }
+
+  try {
+    const shortId = orderIdShort(order._id);
+    const customerName = order.guestInfo?.name || order.customer?.name || 'Guest';
+    const total = order.finalAmount.toLocaleString('en-PK');
+    const payment = order.paymentMethod.toUpperCase();
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h2 style="color: #e94e77;">New Order Alert! #${shortId}</h2>
+        <p><strong>Customer:</strong> ${customerName}</p>
+        <p><strong>Total:</strong> Rs. ${total}</p>
+        <p><strong>Payment Method:</strong> ${payment}</p>
+        <p><strong>Status:</strong> ${order.status.replace('_', ' ').toUpperCase()}</p>
+        <p><strong>Placed:</strong> ${new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' })}</p>
+        
+        <p style="margin: 20px 0;">
+          <a href="${process.env.ADMIN_URL || 'https://admin.altawakkalfoods.com'}/orders/${order._id}" 
+             style="background: #e94e77; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            View Order Details
+          </a>
+        </p>
+        
+        <p style="color: #666; font-size: 14px;">
+          This is an automated notification — do not reply directly.
+        </p>
+      </div>
+    `;
+
+    await emailRotator.sendMail({
+      to: adminEmail,
+      subject: `New Order #${shortId} - Rs. ${total} - ${customerName}`,
+      html,
+    });
+
+    console.log(`Admin email sent for new order #${shortId}`);
+  } catch (err) {
+    console.error('Failed to send admin new order email:', err.message);
+  }
+};
+
 const broadcastOrderEvent = (order, event, extra = {}) => {
   if (!io) return;
 
@@ -94,7 +164,6 @@ const broadcastOrderEvent = (order, event, extra = {}) => {
 };
 
 // ── CREATE ORDER ─────────────────────────────────────────────────────────
-// ── CREATE ORDER ─────────────────────────────────────────────────────────
 const createOrder = async (req, res) => {
   let session = null;
   try {
@@ -111,6 +180,7 @@ const createOrder = async (req, res) => {
       guestAddress = {},
       name = '',
       phone = '',
+      email = '',
       paymentMethod: rawMethod = 'cash',
       promoCode,
       useWallet = false,
@@ -163,7 +233,7 @@ const createOrder = async (req, res) => {
     const zone = await DeliveryZone.findOne({ area: areaId, isActive: true }).lean();
     if (!zone) return res.status(400).json({ success: false, message: 'Delivery not available in this area' });
 
-    // Process items with unit support
+    // Process items
     const orderItems = [];
     let subtotal = 0;
 
@@ -181,14 +251,13 @@ const createOrder = async (req, res) => {
 
       const itemTotal = priceAtOrder * qty;
 
-      // Enrich selected options with unit fallback
       const enrichOptions = (names, type) => {
         return (names || []).map(name => {
           const opt = menu.pricedOptions?.[type]?.find(o => o.name === name);
           return {
             name,
             price: opt?.price || 0,
-            unit: opt?.unit || menu.unit // fallback to main unit
+            unit: opt?.unit || menu.unit
           };
         });
       };
@@ -220,7 +289,6 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Promo & wallet logic unchanged...
     let discount = 0;
     let appliedDeal = null;
     if (promoCode?.trim()) {
@@ -257,7 +325,14 @@ const createOrder = async (req, res) => {
       addressDetails,
       instructions: instructions.trim().slice(0, 300),
       ...(isGuest
-        ? { guestInfo: { name: name.trim(), phone: phone.trim(), isGuest: true } }
+        ? {
+            guestInfo: {
+              name: name.trim(),
+              phone: phone.trim(),
+              email: email?.trim() || null,
+              isGuest: true
+            }
+          }
         : { customer: customerId, address: addressId }),
     };
 
@@ -322,7 +397,6 @@ const createOrder = async (req, res) => {
       await order.save({ session });
     }
 
-    // ✅ Correct debitWallet call using object syntax
     if (!isGuest && walletUsed > 0) {
       await debitWallet({
         userId: customerId,
@@ -367,6 +441,63 @@ const createOrder = async (req, res) => {
 
     await order.populate('area items.menuItem customer rider');
 
+    // ── Guest confirmation email ─────────────────────────────
+    if (isGuest && order.guestInfo?.email) {
+      const shortId = orderIdShort(order._id);
+      const trackingUrl = `${process.env.CLIENT_URL || 'https://altawakkalfoods.com'}/track/${order._id}`;
+
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+          <h2 style="color: #e94e77;">Order Received! 🎉</h2>
+          <p>Dear ${order.guestInfo.name || 'Customer'},</p>
+          <p>Thank you for ordering from <strong>Altawakkal Foods</strong>!</p>
+          
+          <h3>Order #${shortId}</h3>
+          <p><strong>Placed on:</strong> ${new Date().toLocaleString('en-PK')}</p>
+          <p><strong>Estimated Delivery:</strong> ${order.estimatedDelivery}</p>
+          
+          <p style="margin: 30px 0;">
+            <a href="${trackingUrl}" style="background: #e94e77; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+              Track Your Order Live
+            </a>
+          </p>
+          
+          <p style="color: #555; font-size: 14px;">
+            Questions? Reply to this email or call us.
+          </p>
+          <p style="color: #888; font-size: 12px; margin-top: 30px;">
+            This is an automated message — please do not reply.
+          </p>
+        </div>
+      `;
+
+      sendGuestEmail(order, `Order Received #${shortId} - Altawakkal Foods`, html);
+    }
+
+    // ── Admin & Kitchen notifications ────────────────────────────────
+    await sendAdminNewOrderEmail(order);
+
+    if (global.io) {
+      // Classic new order event (admin panel list)
+      global.io.to('admin').emit('newOrder', {
+        orderId: order._id.toString(),
+        shortId: orderIdShort(order._id),
+        customerName,
+        totalAmount: order.finalAmount,
+        paymentMethod: order.paymentMethod,
+        status: order.status,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Strong kitchen-focused new order alert (main improvement)
+      await global.emitNewOrderAlert(order._id);
+
+      // Normal order update to all relevant parties
+      if (global.emitOrderUpdate) {
+        await global.emitOrderUpdate(order._id);
+      }
+    }
+
     const response = {
       success: true,
       order: {
@@ -398,6 +529,196 @@ const createOrder = async (req, res) => {
   }
 };
 
+// ── STATUS UPDATE WITH GUEST EMAIL ───────────────────────────────────────
+const updateOrderStatus = async (req, res) => {
+  const { status } = req.body;
+  const userRole = req.user.role;
+
+  const ALLOWED_STATUSES = [
+    'confirmed',
+    'preparing',
+    'out_for_delivery',
+    'delivered',
+    'rejected'
+  ];
+
+  if (!ALLOWED_STATUSES.includes(status)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid order status'
+    });
+  }
+
+  let session;
+
+  try {
+    session = await mongoose.startSession();
+    session.startTransaction();
+
+    const order = await Order.findById(req.params.id).session(session);
+    if (!order) {
+      await session.abortTransaction();
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Role permissions check
+    if (userRole !== 'admin') {
+      if (userRole === 'kitchen') {
+        if (!['confirmed', 'preparing'].includes(status)) {
+          await session.abortTransaction();
+          return res.status(403).json({ success: false, message: 'Kitchen cannot set this status' });
+        }
+      }
+      if (userRole === 'rider') {
+        if (!['out_for_delivery', 'delivered'].includes(status)) {
+          await session.abortTransaction();
+          return res.status(403).json({ success: false, message: 'Rider cannot set this status' });
+        }
+        if (!order.rider || order.rider.toString() !== req.user.id) {
+          await session.abortTransaction();
+          return res.status(403).json({ success: false, message: 'You are not assigned to this order' });
+        }
+      }
+    }
+
+    // Invalid transition guard
+    const INVALID_TRANSITIONS = {
+      delivered: ['confirmed', 'preparing', 'out_for_delivery'],
+      rejected: ['delivered'],
+      cancelled: ['delivered']
+    };
+
+    if (INVALID_TRANSITIONS[order.status] && INVALID_TRANSITIONS[order.status].includes(status)) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: `Cannot move from ${order.status} to ${status}`
+      });
+    }
+
+    const now = new Date();
+    order.status = status;
+
+    if (status === 'confirmed') order.confirmedAt = now;
+    if (status === 'preparing') order.preparingAt = now;
+    if (status === 'out_for_delivery') order.outForDeliveryAt = now;
+    if (status === 'delivered') {
+      order.deliveredAt = now;
+      order.paymentStatus = order.paymentStatus || 'paid';
+    }
+    if (status === 'rejected') {
+      order.rejectedBy = req.user.id;
+      order.rejectionReason = 'Operational decision';
+    }
+
+    await order.save({ session });
+
+    // Kitchen order sync
+    const kitchenOrder = await KitchenOrder.findOne({ order: order._id }).session(session);
+    if (kitchenOrder) {
+      if (status === 'confirmed') {
+        kitchenOrder.status = 'new';
+        // Also trigger strong kitchen alert when order is confirmed
+        if (global.emitNewOrderAlert) {
+          await global.emitNewOrderAlert(order._id);
+        }
+      }
+      if (status === 'preparing') {
+        kitchenOrder.status = 'preparing';
+        kitchenOrder.startedAt = now;
+        kitchenOrder.items.forEach(item => {
+          if (item.status === 'pending') {
+            item.status = 'preparing';
+            item.startedAt = now;
+          }
+        });
+      }
+      if (status === 'out_for_delivery') {
+        kitchenOrder.status = 'ready';
+        kitchenOrder.readyAt = now;
+        kitchenOrder.items.forEach(item => {
+          if (item.status !== 'ready') {
+            item.status = 'ready';
+            item.readyAt = now;
+          }
+        });
+      }
+      if (status === 'delivered') {
+        kitchenOrder.status = 'completed';
+        kitchenOrder.completedAt = now;
+      }
+      await kitchenOrder.save({ session });
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // Guest status email
+    const guestNotifyStatuses = ['confirmed', 'out_for_delivery', 'delivered', 'cancelled', 'rejected'];
+    if (guestNotifyStatuses.includes(status)) {
+      const shortId = orderIdShort(order._id);
+      const trackingUrl = `${process.env.APP_URL || 'https://yourapp.com'}/track/${order._id}`;
+
+      const messages = {
+        confirmed: "Your order has been confirmed! Our kitchen is now preparing your food 🍳",
+        out_for_delivery: "Your order is on the way! 🚀 Our rider is heading to your location",
+        delivered: "Your order has been delivered! Enjoy your meal 🎉",
+        cancelled: "Your order has been cancelled.",
+        rejected: "Sorry, we couldn't process your order at this time."
+      };
+
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; color: #333;">
+          <h2 style="color: #e94e77;">Order Update #${shortId}</h2>
+          <p>${messages[status]}</p>
+          <p style="margin: 25px 0;">
+            <a href="${trackingUrl}" style="background: #e94e77; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              Track Your Order
+            </a>
+          </p>
+          <p style="color: #666; font-size: 14px;">
+            Thank you for choosing us!
+          </p>
+        </div>
+      `;
+
+      sendGuestEmail(order, `Order #${shortId} - ${status.replace('_', ' ').toUpperCase()}`, html);
+    }
+
+    await sendNotification(order, 'status_updated');
+
+    if (global.emitOrderUpdate) {
+      await global.emitOrderUpdate(order._id);
+    }
+
+    if (global.emitKitchenOrderUpdate && kitchenOrder) {
+      await global.emitKitchenOrderUpdate(kitchenOrder);
+    }
+
+    if (global.emitKitchenStats) {
+      await global.emitKitchenStats();
+    }
+
+    return res.json({
+      success: true,
+      message: 'Order status updated successfully',
+      order,
+      kitchenOrder
+    });
+
+  } catch (err) {
+    if (session) {
+      await session.abortTransaction();
+      session.endSession();
+    }
+
+    console.error('updateOrderStatus error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update order status'
+    });
+  }
+};
 
 
 const reorderOrder = async (req, res) => {
@@ -745,203 +1066,6 @@ const cancelOrder = async (req, res) => {
 
 
 
-// ====================== UPDATE ORDER STATUS ======================
-const updateOrderStatus = async (req, res) => {
-  const { status } = req.body;
-  const userRole = req.user.role;
-
-  const ALLOWED_STATUSES = [
-    'confirmed',
-    'preparing',
-    'out_for_delivery',
-    'delivered',
-    'rejected'
-  ];
-
-  if (!ALLOWED_STATUSES.includes(status)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Invalid order status'
-    });
-  }
-
-  let session;
-
-  try {
-    session = await mongoose.startSession();
-    session.startTransaction();
-
-    // ================= FIND ORDER =================
-    const order = await Order.findById(req.params.id).session(session);
-    if (!order) {
-      await session.abortTransaction();
-      return res.status(404).json({ success: false, message: 'Order not found' });
-    }
-
-    // ================= ROLE PERMISSIONS =================
-    if (userRole !== 'admin') {
-
-      // 🍳 Kitchen
-      if (userRole === 'kitchen') {
-        if (!['confirmed', 'preparing'].includes(status)) {
-          await session.abortTransaction();
-          return res.status(403).json({
-            success: false,
-            message: 'Kitchen cannot set this status'
-          });
-        }
-      }
-
-      // 🛵 Rider
-      if (userRole === 'rider') {
-        if (!['out_for_delivery', 'delivered'].includes(status)) {
-          await session.abortTransaction();
-          return res.status(403).json({
-            success: false,
-            message: 'Rider cannot set this status'
-          });
-        }
-
-        if (!order.rider || order.rider.toString() !== req.user.id) {
-          await session.abortTransaction();
-          return res.status(403).json({
-            success: false,
-            message: 'You are not assigned to this order'
-          });
-        }
-      }
-
-      // 🚚 Delivery Manager
-      if (userRole === 'delivery_manager' && status !== 'out_for_delivery') {
-        await session.abortTransaction();
-        return res.status(403).json({
-          success: false,
-          message: 'Delivery manager can only dispatch orders'
-        });
-      }
-    }
-
-    // ================= INVALID FLOW GUARD =================
-    const INVALID_TRANSITIONS = {
-      delivered: ['confirmed', 'preparing', 'out_for_delivery'],
-      rejected: ['delivered'],
-      cancelled: ['delivered']
-    };
-
-    if (
-      INVALID_TRANSITIONS[order.status] &&
-      INVALID_TRANSITIONS[order.status].includes(status)
-    ) {
-      await session.abortTransaction();
-      return res.status(400).json({
-        success: false,
-        message: `Cannot move from ${order.status} to ${status}`
-      });
-    }
-
-    // ================= UPDATE ORDER =================
-    const now = new Date();
-    order.status = status;
-
-    if (status === 'confirmed') order.confirmedAt = now;
-    if (status === 'preparing') order.preparingAt = now;
-    if (status === 'out_for_delivery') order.outForDeliveryAt = now;
-
-    if (status === 'delivered') {
-      order.deliveredAt = now;
-      order.paymentStatus = order.paymentStatus || 'paid';
-    }
-
-    if (status === 'rejected') {
-      order.rejectedBy = req.user.id;
-      order.rejectionReason = 'Operational decision';
-    }
-
-    await order.save({ session });
-
-    // ================= SYNC KITCHEN ORDER =================
-    const kitchenOrder = await KitchenOrder
-      .findOne({ order: order._id })
-      .session(session);
-
-    if (kitchenOrder) {
-
-      if (status === 'confirmed') {
-        kitchenOrder.status = 'new';
-      }
-
-      if (status === 'preparing') {
-        kitchenOrder.status = 'preparing';
-        kitchenOrder.startedAt = now;
-
-        kitchenOrder.items.forEach(item => {
-          if (item.status === 'pending') {
-            item.status = 'preparing';
-            item.startedAt = now;
-          }
-        });
-      }
-
-      if (status === 'out_for_delivery') {
-        kitchenOrder.status = 'ready';
-        kitchenOrder.readyAt = now;
-
-        kitchenOrder.items.forEach(item => {
-          if (item.status !== 'ready') {
-            item.status = 'ready';
-            item.readyAt = now;
-          }
-        });
-      }
-
-      if (status === 'delivered') {
-        kitchenOrder.status = 'completed';
-        kitchenOrder.completedAt = now;
-      }
-
-      await kitchenOrder.save({ session });
-    }
-
-    // ================= COMMIT =================
-    await session.commitTransaction();
-    session.endSession();
-
-    // ================= REAL-TIME + NOTIFICATIONS =================
-    await sendNotification(order, 'status_updated');
-
-    if (global.emitOrderUpdate) {
-      await global.emitOrderUpdate(order._id);
-    }
-
-    if (global.emitKitchenOrderUpdate && kitchenOrder) {
-      await global.emitKitchenOrderUpdate(kitchenOrder);
-    }
-
-    if (global.emitKitchenStats) {
-      await global.emitKitchenStats();
-    }
-
-    return res.json({
-      success: true,
-      message: 'Order status updated successfully',
-      order,
-      kitchenOrder
-    });
-
-  } catch (err) {
-    if (session) {
-      await session.abortTransaction();
-      session.endSession();
-    }
-
-    console.error('updateOrderStatus error:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to update order status'
-    });
-  }
-};
-
 
 const assignRider = async (req, res) => {
   if (!req.body || typeof req.body !== 'object') {
@@ -1238,10 +1362,10 @@ const trackOrderById = async (req, res) => {
       instructions: order.instructions || null,
       rider: order.rider
         ? {
-            _id: order.rider._id,
-            name: order.rider.name,
-            phone: order.rider.phone,
-          }
+          _id: order.rider._id,
+          name: order.rider.name,
+          phone: order.rider.phone,
+        }
         : null,
       review: order.review || null,
       trackUrl: `${process.env.APP_URL || 'https://foodapp.pk'}/track/${order._id}`,
@@ -1486,7 +1610,6 @@ module.exports = {
   paymentSuccess,
   requestRefund,
   reorderOrder,
-  getOrderTimeline,        
+  getOrderTimeline,
   sendNotification,
 };
-

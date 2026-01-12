@@ -14,7 +14,22 @@ const generateToken = (id) => {
 
 // ==================== INPUT VALIDATION PLACEHOLDERS ====================
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const isValidPhone = (phone) => /^\d{10,15}$/.test(phone);
+const isValidPhone = (phone) => {
+  if (!phone) return false;
+  // Remove spaces and convert 0092 → +92
+  phone = phone.replace(/\s+/g, '').replace(/^0092/, '+92');
+  // Match +92, 92, or 0 prefixes
+  return /^(?:\+92|92|0)3[0-9]{9}$/.test(phone);
+};
+
+// Optional: normalize phone before saving or querying
+const normalizePhone = (phone) => {
+  if (!phone) return phone;
+  phone = phone.replace(/\s+/g, '');       // remove spaces
+  phone = phone.replace(/^0092/, '+92');   // 0092 → +92
+  phone = phone.replace(/^0/, '+92');      // 0XXXXXXXXX → +92XXXXXXXXX
+  return phone;
+};
 
 // ==================== OTP HELPERS ====================
 const generateOTP = () => String(Math.floor(100000 + Math.random() * 900000));

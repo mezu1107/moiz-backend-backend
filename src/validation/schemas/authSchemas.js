@@ -2,6 +2,29 @@
 const { body } = require('express-validator');
 
 // ======================
+// SHARED CONSTANTS
+// ======================
+const PAK_PHONE_REGEX = /^(?:\+92|92|0)3[0-9]{9}$/;
+
+// ======================
+// SHARED PHONE VALIDATORS
+// ======================
+const phoneValidatorOptional = body('phone')
+  .optional({ nullable: true })
+  .customSanitizer(value => {
+    if (!value) return value;
+    return value.replace(/\s+/g, '').replace(/^0092/, '+92');
+  })
+  .matches(PAK_PHONE_REGEX)
+  .withMessage('Valid Pakistani phone number required');
+
+const phoneValidatorRequired = body('phone')
+  .notEmpty().withMessage('Phone number is required')
+  .customSanitizer(value => value.replace(/\s+/g, '').replace(/^0092/, '+92'))
+  .matches(PAK_PHONE_REGEX)
+  .withMessage('Valid Pakistani phone number required');
+
+// ======================
 // REGISTER
 // ======================
 exports.register = [
@@ -11,10 +34,7 @@ exports.register = [
     .matches(/^[\p{L}\s]+$/u).withMessage('Name can only contain letters and spaces')
     .trim(),
 
-  body('phone')
-    .notEmpty().withMessage('Phone number is required')
-    .matches(/^03[0-9]{9}$/).withMessage('Valid Pakistani phone number required')
-    .trim(),
+  phoneValidatorRequired,
 
   body('email')
     .optional({ nullable: true, checkFalsy: true })
@@ -35,19 +55,29 @@ exports.register = [
 // ======================
 exports.login = [
   body('password').notEmpty().withMessage('Password is required'),
-  body().custom((value, { req }) => {
-    if (!req.body.email && !req.body.phone) throw new Error('Email or phone number is required');
+
+  body().custom((_, { req }) => {
+    if (!req.body.email && !req.body.phone) {
+      throw new Error('Email or phone number is required');
+    }
     return true;
   }),
-  body('email').optional({ nullable: true }).isEmail().withMessage('Invalid email').normalizeEmail(),
-  body('phone').optional({ nullable: true }).matches(/^03[0-9]{9}$/).withMessage('Valid Pakistani phone number required')
+
+  body('email')
+    .optional({ nullable: true })
+    .isEmail().withMessage('Invalid email')
+    .normalizeEmail(),
+
+  phoneValidatorOptional
 ];
 
 // ======================
 // CHANGE PASSWORD
 // ======================
 exports.changePassword = [
-  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('currentPassword')
+    .notEmpty().withMessage('Current password is required'),
+
   body('newPassword')
     .notEmpty().withMessage('New password is required')
     .isLength({ min: 8 }).withMessage('New password must be 8+ characters')
@@ -56,7 +86,9 @@ exports.changePassword = [
     .matches(/[0-9]/).withMessage('Must contain number')
     .matches(/[!@#$%^&*]/).withMessage('Must contain special char (!@#$%^&*)')
     .custom((value, { req }) => {
-      if (value === req.body.currentPassword) throw new Error('New password must be different from current password');
+      if (value === req.body.currentPassword) {
+        throw new Error('New password must be different from current password');
+      }
       return true;
     })
 ];
@@ -65,28 +97,43 @@ exports.changePassword = [
 // FORGOT PASSWORD
 // ======================
 exports.forgotPassword = [
-  body().custom((value, { req }) => {
-    if (!req.body.email && !req.body.phone) throw new Error('Email or phone number is required');
+  body().custom((_, { req }) => {
+    if (!req.body.email && !req.body.phone) {
+      throw new Error('Email or phone number is required');
+    }
     return true;
   }),
-  body('email').optional({ nullable: true }).isEmail().withMessage('Invalid email').normalizeEmail(),
-  body('phone').optional({ nullable: true }).matches(/^03[0-9]{9}$/).withMessage('Valid Pakistani phone number required')
+
+  body('email')
+    .optional({ nullable: true })
+    .isEmail().withMessage('Invalid email')
+    .normalizeEmail(),
+
+  phoneValidatorOptional
 ];
 
 // ======================
 // VERIFY OTP
 // ======================
 exports.verifyOtp = [
-  body().custom((value, { req }) => {
-    if (!req.body.email && !req.body.phone) throw new Error('Email or phone number is required');
+  body().custom((_, { req }) => {
+    if (!req.body.email && !req.body.phone) {
+      throw new Error('Email or phone number is required');
+    }
     return true;
   }),
-  body('email').optional({ nullable: true }).isEmail().withMessage('Invalid email').normalizeEmail(),
-  body('phone').optional({ nullable: true }).matches(/^03[0-9]{9}$/).withMessage('Valid Pakistani phone number required'),
-  body('otp').notEmpty().withMessage('OTP is required')
+
+  body('email')
+    .optional({ nullable: true })
+    .isEmail().withMessage('Invalid email')
+    .normalizeEmail(),
+
+  phoneValidatorOptional,
+
+  body('otp')
+    .notEmpty().withMessage('OTP is required')
     .isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits')
     .isNumeric().withMessage('OTP must contain only numbers')
-    .trim()
 ];
 
 // ======================
@@ -111,12 +158,16 @@ exports.updateProfile = [
     .isLength({ min: 2, max: 50 }).withMessage('Name must be 2-50 characters')
     .matches(/^[\p{L}\s]+$/u).withMessage('Name can only contain letters and spaces')
     .trim(),
+
   body('email')
     .optional({ nullable: true })
     .isEmail().withMessage('Invalid email address')
     .normalizeEmail()
 ];
 
+// ======================
+// EXPORTS
+// ======================
 module.exports = {
   register: exports.register,
   login: exports.login,

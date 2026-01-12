@@ -157,6 +157,11 @@ app.get('/favicon.png', (_, res) =>
 /* =========================================================
    🔌 SOCKET.IO — Correctly initialized (OUTSIDE CORS callback)
 ========================================================= */
+// ... existing imports and code unchanged ...
+
+/* =========================================================
+   🔌 SOCKET.IO — Enhanced with order room broadcasting
+========================================================= */
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
@@ -169,9 +174,42 @@ const io = new Server(server, {
 
 global.io = io;
 
-// Load socket handlers
+// NEW: Global helper to broadcast order updates to both user & order rooms
+global.emitOrderUpdate = async (orderId) => {
+  try {
+    const Order = require('./src/models/order/Order');
+    const order = await Order.findById(orderId)
+      .select('status shortId _id customer guestInfo')
+      .lean();
+
+    if (!order) return;
+
+    const payload = {
+      order,
+      shortId: order.shortId || order._id.toString().slice(-6).toUpperCase(),
+      status: order.status,
+      timestamp: new Date(),
+    };
+
+    // Broadcast to authenticated user (if exists)
+    if (order.customer) {
+      io.to(`user:${order.customer}`).emit('orderUpdate', payload);
+    }
+
+    // ALWAYS broadcast to the order room (for guests tracking)
+    io.to(`order:${order._id}`).emit('orderUpdate', payload);
+
+    logger.info(`Order update broadcasted: #${payload.shortId} → ${order.status}`);
+  } catch (err) {
+    logger.error('Failed to broadcast order update', { error: err.message });
+  }
+};
+
+// Load socket handlers (unchanged)
 require('./src/sockets/order/orderSocket')(io);
 require('./src/sockets/contact/contactSocket')(io);
+
+
 
 /* =========================================================
    💳 STRIPE WEBHOOK — RAW BODY REQUIRED!
