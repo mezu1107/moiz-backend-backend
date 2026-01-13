@@ -1,4 +1,3 @@
-
 /**
 
  * AMFood Backend Server
@@ -58,6 +57,7 @@ const allowedOrigins =
         'https://www.altawakkalfoods.com',
 
         'https://api.altawakkalfoods.com',
+        'http://localhost:8080',
 
       ]
 
@@ -171,7 +171,7 @@ app.use(cors({
 
   credentials: true,
 
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS','PATCH'],
 
   allowedHeaders: ['Content-Type', 'Authorization'],
 
