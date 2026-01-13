@@ -113,9 +113,14 @@ const toggleAvailability = async (req, res) => {
   try {
     const rider = await User.findById(req.user._id);
 
-    rider.isAvailable = !rider.isAvailable;
-    if (!rider.isAvailable) rider.isOnline = false;
+    if (!rider.isOnline) {
+      return res.status(400).json({
+        success: false,
+        message: 'You must be online to change availability',
+      });
+    }
 
+    rider.isAvailable = !rider.isAvailable;
     await rider.save();
 
     if (io) {
@@ -129,7 +134,9 @@ const toggleAvailability = async (req, res) => {
 
     res.json({
       success: true,
-      message: rider.isAvailable ? 'You are now online and available' : 'You are now offline',
+      message: rider.isAvailable
+        ? 'You are now available for orders'
+        : 'You are temporarily unavailable',
       isAvailable: rider.isAvailable,
       isOnline: rider.isOnline,
     });
@@ -138,6 +145,7 @@ const toggleAvailability = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to update availability' });
   }
 };
+
 
 // 3. Update Live Location During Active Delivery
 const updateOrderLocation = async (req, res) => {
