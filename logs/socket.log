@@ -26479,3 +26479,145 @@
 {"context":"socket","level":"info","message":"Order update broadcast: #BC409B → preparing","timestamp":"2026-01-13T16:36:18.417Z"}
 {"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-13T16:36:53.739Z"}
 {"context":"socket","level":"info","message":"RIDER disconnected → 6966520f59247ede1b68c6b6 (Moiz Rider) [transport close]","timestamp":"2026-01-13T16:36:53.793Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2026-01-13T18:21:31.405Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2026-01-13T18:21:32.448Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2026-01-13T18:21:32.823Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2026-01-13T18:21:32.827Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2026-01-13T18:21:32.839Z"}
+{"level":"info","message":"ROUTE LOADED: /api/delivery","timestamp":"2026-01-13T18:21:32.842Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2026-01-13T18:21:32.849Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2026-01-13T18:21:32.860Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2026-01-13T18:21:32.872Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2026-01-13T18:21:32.893Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2026-01-13T18:21:32.901Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2026-01-13T18:21:32.917Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2026-01-13T18:21:32.925Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2026-01-13T18:21:32.929Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2026-01-13T18:21:32.934Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2026-01-13T18:21:32.937Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2026-01-13T18:21:32.946Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2026-01-13T18:21:32.950Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2026-01-13T18:21:32.960Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2026-01-13T18:21:32.969Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2026-01-13T18:21:32.980Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2026-01-13T18:21:32.988Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2026-01-13T18:21:33.109Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/wallet","timestamp":"2026-01-13T18:21:33.115Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2026-01-13T18:21:33.123Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2026-01-13T18:21:33.131Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2026-01-13T18:21:33.141Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2026-01-13T18:21:33.145Z"}
+{"level":"info","message":"Database connection established","timestamp":"2026-01-13T18:21:34.628Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-01-13T18:21:34.636Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-13T18:22:09.579Z"}
+{"context":"socket","level":"info","message":"Order update broadcast: #BC409B → out_for_delivery","timestamp":"2026-01-13T18:24:10.292Z"}
+{"context":"socket","level":"info","message":"Order update broadcast: #BC409B → delivered","timestamp":"2026-01-13T18:24:16.201Z"}
+{"context":"socket","level":"info","message":"Order update broadcast: #6D804B → confirmed","timestamp":"2026-01-13T18:25:55.241Z"}
+{"context":"socket","level":"info","message":"Order update broadcast: #6D804B → preparing","timestamp":"2026-01-13T18:26:04.271Z"}
+{"context":"socket","level":"info","message":"RIDER connected → 6966520f59247ede1b68c6b6 (Moiz Rider)","timestamp":"2026-01-13T18:29:27.125Z"}
+{"context":"socket","level":"info","message":"RIDER disconnected → 6966520f59247ede1b68c6b6 (Moiz Rider) [transport close]","timestamp":"2026-01-13T18:29:41.871Z"}
+{"context":"socket","level":"info","message":"RIDER connected → 6966520f59247ede1b68c6b6 (Moiz Rider)","timestamp":"2026-01-13T18:29:42.701Z"}
+{"context":"socket","level":"info","message":"Order update broadcast: #C87CEB → delivered","timestamp":"2026-01-13T18:40:53.063Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-13T18:42:12.305Z"}
+{"context":"socket","level":"info","message":"RIDER disconnected → 6966520f59247ede1b68c6b6 (Moiz Rider) [transport close]","timestamp":"2026-01-13T18:48:06.519Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2026-01-13T18:51:03.457Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2026-01-13T18:51:04.116Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2026-01-13T18:51:04.320Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2026-01-13T18:51:04.325Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2026-01-13T18:51:04.331Z"}
+{"level":"info","message":"ROUTE LOADED: /api/delivery","timestamp":"2026-01-13T18:51:04.335Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2026-01-13T18:51:04.340Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2026-01-13T18:51:04.352Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2026-01-13T18:51:04.358Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2026-01-13T18:51:04.377Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2026-01-13T18:51:04.381Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2026-01-13T18:51:04.396Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2026-01-13T18:51:04.402Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2026-01-13T18:51:04.407Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2026-01-13T18:51:04.410Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2026-01-13T18:51:04.412Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2026-01-13T18:51:04.421Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2026-01-13T18:51:04.423Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2026-01-13T18:51:04.428Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2026-01-13T18:51:04.433Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2026-01-13T18:51:04.436Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2026-01-13T18:51:04.440Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2026-01-13T18:51:04.560Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/wallet","timestamp":"2026-01-13T18:51:04.565Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2026-01-13T18:51:04.570Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2026-01-13T18:51:04.577Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2026-01-13T18:51:04.585Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2026-01-13T18:51:04.587Z"}
+{"level":"info","message":"Database connection established","timestamp":"2026-01-13T18:51:05.907Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-01-13T18:51:05.912Z"}
+{"level":"info","message":"Firebase Admin SDK initialized successfully","timestamp":"2026-01-14T12:24:26.401Z"}
+{"level":"info","message":"ROUTE LOADED: /api/auth","timestamp":"2026-01-14T12:24:26.844Z"}
+{"level":"info","message":"ROUTE LOADED: /api/upload","timestamp":"2026-01-14T12:24:26.961Z"}
+{"level":"info","message":"ROUTE LOADED: /api/address","timestamp":"2026-01-14T12:24:26.968Z"}
+{"level":"info","message":"ROUTE LOADED: /api/areas","timestamp":"2026-01-14T12:24:26.976Z"}
+{"level":"info","message":"ROUTE LOADED: /api/delivery","timestamp":"2026-01-14T12:24:26.979Z"}
+{"level":"info","message":"ROUTE LOADED: /api/cart","timestamp":"2026-01-14T12:24:26.987Z"}
+{"level":"info","message":"ROUTE LOADED: /api/menu","timestamp":"2026-01-14T12:24:26.994Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders","timestamp":"2026-01-14T12:24:27.001Z"}
+{"level":"info","message":"ROUTE LOADED: /api/deal","timestamp":"2026-01-14T12:24:27.017Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider","timestamp":"2026-01-14T12:24:27.024Z"}
+{"level":"info","message":"ROUTE LOADED: /api/rider/dashboard","timestamp":"2026-01-14T12:24:27.044Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/customers","timestamp":"2026-01-14T12:24:27.049Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/rider","timestamp":"2026-01-14T12:24:27.054Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/staff","timestamp":"2026-01-14T12:24:27.056Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin","timestamp":"2026-01-14T12:24:27.058Z"}
+{"level":"info","message":"ROUTE LOADED: /api/contact","timestamp":"2026-01-14T12:24:27.063Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/contact","timestamp":"2026-01-14T12:24:27.066Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet","timestamp":"2026-01-14T12:24:27.072Z"}
+{"level":"info","message":"ROUTE LOADED: /api/wallet/withdrawals","timestamp":"2026-01-14T12:24:27.078Z"}
+{"level":"info","message":"ROUTE LOADED: /api/kitchen","timestamp":"2026-01-14T12:24:27.081Z"}
+{"level":"info","message":"ROUTE LOADED: /api/payment","timestamp":"2026-01-14T12:24:27.087Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/payment","timestamp":"2026-01-14T12:24:27.231Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/wallet","timestamp":"2026-01-14T12:24:27.235Z"}
+{"level":"info","message":"ROUTE LOADED: /api/admin/refunds","timestamp":"2026-01-14T12:24:27.240Z"}
+{"level":"info","message":"ROUTE LOADED: /api/reviews","timestamp":"2026-01-14T12:24:27.247Z"}
+{"level":"info","message":"ROUTE LOADED: /api/inventory","timestamp":"2026-01-14T12:24:27.258Z"}
+{"level":"info","message":"ROUTE LOADED: /api/orders/analytics","timestamp":"2026-01-14T12:24:27.261Z"}
+{"level":"info","message":"Database connection established","timestamp":"2026-01-14T12:24:29.521Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-01-14T12:24:29.534Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T12:24:55.302Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T12:24:57.070Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T12:24:58.041Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T12:25:04.657Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T12:25:05.467Z"}
+{"context":"socket","level":"info","message":"NEW ORDER ALERT → #ACF520 (urgent: false)","timestamp":"2026-01-14T12:25:23.353Z"}
+{"context":"socket","level":"info","message":"Order update broadcast: #ACF520 → confirmed","timestamp":"2026-01-14T12:25:24.335Z"}
+{"context":"socket","level":"info","message":"Order update broadcast: #ACF520 → confirmed","timestamp":"2026-01-14T12:25:29.908Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [ping timeout]","timestamp":"2026-01-14T12:31:55.462Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T12:42:48.263Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T12:49:51.780Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T12:49:52.660Z"}
+{"context":"socket","level":"info","message":"Order update broadcast: #ACF520 → preparing","timestamp":"2026-01-14T12:50:15.827Z"}
+{"context":"socket","level":"info","message":"Order update broadcast: #ACF520 → delivered","timestamp":"2026-01-14T12:50:21.885Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T12:51:09.948Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T12:51:12.473Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T12:57:04.517Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T12:57:05.423Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T12:59:46.685Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T12:59:47.879Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T13:01:09.698Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T13:01:11.156Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T13:02:03.695Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T13:02:05.100Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [ping timeout]","timestamp":"2026-01-14T13:15:03.246Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T13:18:16.852Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T13:30:10.723Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T13:30:12.915Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T13:37:33.001Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T13:37:33.960Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T13:39:27.211Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T13:39:28.130Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T13:44:57.740Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T13:48:43.578Z"}
+{"context":"socket","level":"info","message":"RIDER connected → 6966520f59247ede1b68c6b6 (Moiz Rider)","timestamp":"2026-01-14T13:53:02.493Z"}
+{"context":"socket","level":"info","message":"RIDER disconnected → 6966520f59247ede1b68c6b6 (Moiz Rider) [transport close]","timestamp":"2026-01-14T13:53:08.882Z"}
+{"context":"socket","level":"info","message":"RIDER connected → 6966520f59247ede1b68c6b6 (Moiz Rider)","timestamp":"2026-01-14T13:53:09.793Z"}
+{"context":"socket","level":"info","message":"RIDER disconnected → 6966520f59247ede1b68c6b6 (Moiz Rider) [transport close]","timestamp":"2026-01-14T13:55:31.650Z"}
+{"context":"socket","level":"info","message":"ADMIN disconnected → 6954c980105aca32aa02f5a6 (Moiz Malik) [transport close]","timestamp":"2026-01-14T13:55:32.015Z"}
+{"context":"socket","level":"info","message":"RIDER connected → 6966520f59247ede1b68c6b6 (Moiz Rider)","timestamp":"2026-01-14T13:55:34.221Z"}
+{"context":"socket","level":"info","message":"ADMIN connected → 6954c980105aca32aa02f5a6 (Moiz Malik)","timestamp":"2026-01-14T13:55:34.566Z"}
